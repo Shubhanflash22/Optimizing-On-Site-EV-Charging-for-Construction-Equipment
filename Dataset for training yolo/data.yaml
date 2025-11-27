@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['Exacavator']
+
+roboflow:
+  workspace: excavatar-research-project
+  project: object-detection-jct8v
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/excavatar-research-project/object-detection-jct8v/dataset/2
