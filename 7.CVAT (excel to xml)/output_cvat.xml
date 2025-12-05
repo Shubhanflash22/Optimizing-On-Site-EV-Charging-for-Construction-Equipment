@@ -1,0 +1,1522 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<annotations>
+  <version>1.1</version>
+  <meta>
+    <job>
+      <labels>
+        <label>
+          <name>Digging</name>
+          <color>#1a6ff6</color>
+          <type>any</type>
+          <attributes/>
+        </label>
+        <label>
+          <name>Dumping</name>
+          <color>#22b8de</color>
+          <type>any</type>
+          <attributes/>
+        </label>
+        <label>
+          <name>Idling</name>
+          <color>#f41ab4</color>
+          <type>any</type>
+          <attributes/>
+        </label>
+        <label>
+          <name>Loading</name>
+          <color>#af2568</color>
+          <type>any</type>
+          <attributes/>
+        </label>
+        <label>
+          <name>Swinging</name>
+          <color>#4b5920</color>
+          <type>any</type>
+          <attributes/>
+        </label>
+        <label>
+          <name>Travelling</name>
+          <color>#0ea2c3</color>
+          <type>any</type>
+          <attributes/>
+        </label>
+      </labels>
+    </job>
+  </meta>
+  <track id="0" label="Idling" source="manual">
+    <box frame="0" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="1198" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="1" label="Travelling" source="manual">
+    <box frame="1199" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="2997" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="2" label="Idling" source="manual">
+    <box frame="2998" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="4315" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="3" label="Travelling" source="manual">
+    <box frame="4316" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="5274" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="4" label="Idling" source="manual">
+    <box frame="5275" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="5754" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="5" label="Travelling" source="manual">
+    <box frame="5755" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="5934" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="6" label="Idling" source="manual">
+    <box frame="5935" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="6893" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="7" label="Swinging" source="manual">
+    <box frame="6894" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="7252" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="8" label="Idling" source="manual">
+    <box frame="7253" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="8091" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="9" label="Swinging" source="manual">
+    <box frame="8092" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="8271" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="10" label="Idling" source="manual">
+    <box frame="8272" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="9290" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="11" label="Swinging" source="manual">
+    <box frame="9291" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="9410" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="12" label="Loading" source="manual">
+    <box frame="9411" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="9650" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="13" label="Swinging" source="manual">
+    <box frame="9651" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="9710" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="14" label="Dumping" source="manual">
+    <box frame="9711" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="9770" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="15" label="Swinging" source="manual">
+    <box frame="9771" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="9830" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="16" label="Loading" source="manual">
+    <box frame="9831" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="10069" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="17" label="Swinging" source="manual">
+    <box frame="10070" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="10309" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="18" label="Loading" source="manual">
+    <box frame="10310" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="10789" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="19" label="Swinging" source="manual">
+    <box frame="10790" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="11088" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="20" label="Loading" source="manual">
+    <box frame="11089" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="11208" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="21" label="Swinging" source="manual">
+    <box frame="11209" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="11508" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="22" label="Loading" source="manual">
+    <box frame="11509" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="11748" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="23" label="Swinging" source="manual">
+    <box frame="11749" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="11988" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="24" label="Loading" source="manual">
+    <box frame="11989" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="12107" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="25" label="Swinging" source="manual">
+    <box frame="12108" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="12467" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="26" label="Loading" source="manual">
+    <box frame="12468" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="12707" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="27" label="Swinging" source="manual">
+    <box frame="12708" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="12887" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="28" label="Loading" source="manual">
+    <box frame="12888" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="13066" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="29" label="Swinging" source="manual">
+    <box frame="13067" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="13306" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="30" label="Loading" source="manual">
+    <box frame="13307" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="13426" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="31" label="Swinging" source="manual">
+    <box frame="13427" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="13666" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="32" label="Idling" source="manual">
+    <box frame="13667" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="13786" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="33" label="Swinging" source="manual">
+    <box frame="13787" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="13966" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="34" label="Loading" source="manual">
+    <box frame="13967" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="14145" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="35" label="Swinging" source="manual">
+    <box frame="14146" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="14385" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="36" label="Travelling" source="manual">
+    <box frame="14386" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="15104" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="37" label="Swinging" source="manual">
+    <box frame="15105" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="15284" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="38" label="Digging" source="manual">
+    <box frame="15285" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="17562" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="39" label="Loading" source="manual">
+    <box frame="17563" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="17682" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="40" label="Swinging" source="manual">
+    <box frame="17683" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="18041" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="41" label="Idling" source="manual">
+    <box frame="18042" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="18401" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="42" label="Digging" source="manual">
+    <box frame="18402" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="19240" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="43" label="Loading" source="manual">
+    <box frame="19241" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="19360" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="44" label="Swinging" source="manual">
+    <box frame="19361" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="19600" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="45" label="Loading" source="manual">
+    <box frame="19601" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="19720" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="46" label="Swinging" source="manual">
+    <box frame="19721" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="19960" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="47" label="Loading" source="manual">
+    <box frame="19961" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="20079" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="48" label="Swinging" source="manual">
+    <box frame="20080" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="20319" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="49" label="Digging" source="manual">
+    <box frame="20320" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="20679" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="50" label="Loading" source="manual">
+    <box frame="20680" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="20799" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="51" label="Swinging" source="manual">
+    <box frame="20800" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="21038" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="52" label="Travelling" source="manual">
+    <box frame="21039" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="22957" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="53" label="Idling" source="manual">
+    <box frame="22958" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="23016" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="54" label="Loading" source="manual">
+    <box frame="23017" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="23136" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="55" label="Swinging" source="manual">
+    <box frame="23137" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="23496" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="56" label="Loading" source="manual">
+    <box frame="23497" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="23736" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="57" label="Swinging" source="manual">
+    <box frame="23737" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="24095" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="58" label="Loading" source="manual">
+    <box frame="24096" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="24395" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="59" label="Swinging" source="manual">
+    <box frame="24396" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="24695" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="60" label="Loading" source="manual">
+    <box frame="24696" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="24875" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="61" label="Swinging" source="manual">
+    <box frame="24876" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="25234" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="62" label="Digging" source="manual">
+    <box frame="25235" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="25654" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="63" label="Loading" source="manual">
+    <box frame="25655" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="25714" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="64" label="Swinging" source="manual">
+    <box frame="25715" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="26013" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="65" label="Loading" source="manual">
+    <box frame="26014" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="26133" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="66" label="Swinging" source="manual">
+    <box frame="26134" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="26553" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="67" label="Loading" source="manual">
+    <box frame="26554" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="26913" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="68" label="Swinging" source="manual">
+    <box frame="26914" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="27272" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="69" label="Loading" source="manual">
+    <box frame="27273" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="27392" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="70" label="Swinging" source="manual">
+    <box frame="27393" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="27692" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="71" label="Loading" source="manual">
+    <box frame="27693" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="27872" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="72" label="Swinging" source="manual">
+    <box frame="27873" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="28231" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="73" label="Loading" source="manual">
+    <box frame="28232" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="28351" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="74" label="Swinging" source="manual">
+    <box frame="28352" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="28711" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="75" label="Loading" source="manual">
+    <box frame="28712" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="28891" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="76" label="Swinging" source="manual">
+    <box frame="28892" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="29250" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="77" label="Digging" source="manual">
+    <box frame="29251" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="30089" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="78" label="Loading" source="manual">
+    <box frame="30090" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="30209" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="79" label="Swinging" source="manual">
+    <box frame="30210" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="30509" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="80" label="Digging" source="manual">
+    <box frame="30510" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="30749" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="81" label="Loading" source="manual">
+    <box frame="30750" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="30869" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="82" label="Swinging" source="manual">
+    <box frame="30870" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="31168" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="83" label="Travelling" source="manual">
+    <box frame="31169" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="31408" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="84" label="Swinging" source="manual">
+    <box frame="31409" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="31528" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="85" label="Loading" source="manual">
+    <box frame="31529" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="31648" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="86" label="Swinging" source="manual">
+    <box frame="31649" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="32007" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="87" label="Loading" source="manual">
+    <box frame="32008" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="32307" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="88" label="Swinging" source="manual">
+    <box frame="32308" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="32727" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="89" label="Loading" source="manual">
+    <box frame="32728" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="32847" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="90" label="Swinging" source="manual">
+    <box frame="32848" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="33326" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="91" label="Loading" source="manual">
+    <box frame="33327" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="33446" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="92" label="Swinging" source="manual">
+    <box frame="33447" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="33926" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="93" label="Loading" source="manual">
+    <box frame="33927" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="34105" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="94" label="Swinging" source="manual">
+    <box frame="34106" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="34585" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="95" label="Loading" source="manual">
+    <box frame="34586" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="34705" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="96" label="Swinging" source="manual">
+    <box frame="34706" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="35064" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="97" label="Loading" source="manual">
+    <box frame="35065" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="35124" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="98" label="Swinging" source="manual">
+    <box frame="35125" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="35424" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="99" label="Travelling" source="manual">
+    <box frame="35425" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="35544" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="100" label="Swinging" source="manual">
+    <box frame="35545" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="35784" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="101" label="Loading" source="manual">
+    <box frame="35785" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="35904" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="102" label="Swinging" source="manual">
+    <box frame="35905" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="36263" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="103" label="Loading" source="manual">
+    <box frame="36264" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="36383" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="104" label="Swinging" source="manual">
+    <box frame="36384" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="36743" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="105" label="Digging" source="manual">
+    <box frame="36744" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="37042" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="106" label="Loading" source="manual">
+    <box frame="37043" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="37162" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="107" label="Swinging" source="manual">
+    <box frame="37163" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="37702" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="108" label="Travelling" source="manual">
+    <box frame="37703" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="37822" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="109" label="Swinging" source="manual">
+    <box frame="37823" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="37942" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="110" label="Loading" source="manual">
+    <box frame="37943" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="38181" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="111" label="Swinging" source="manual">
+    <box frame="38182" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="38481" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="112" label="Loading" source="manual">
+    <box frame="38482" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="38601" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="113" label="Swinging" source="manual">
+    <box frame="38602" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="39020" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="114" label="Loading" source="manual">
+    <box frame="39021" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="39140" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="115" label="Swinging" source="manual">
+    <box frame="39141" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="39500" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="116" label="Travelling" source="manual">
+    <box frame="39501" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="44415" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="117" label="Swinging" source="manual">
+    <box frame="44416" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="44715" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="118" label="Digging" source="manual">
+    <box frame="44716" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="45374" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="119" label="Loading" source="manual">
+    <box frame="45375" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="45554" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="120" label="Swinging" source="manual">
+    <box frame="45555" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="45973" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="121" label="Digging" source="manual">
+    <box frame="45974" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="46273" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="122" label="Loading" source="manual">
+    <box frame="46274" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="46393" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="123" label="Swinging" source="manual">
+    <box frame="46394" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="46633" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="124" label="Digging" source="manual">
+    <box frame="46634" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="46753" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="125" label="Loading" source="manual">
+    <box frame="46754" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="46873" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="126" label="Swinging" source="manual">
+    <box frame="46874" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="47232" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="127" label="Digging" source="manual">
+    <box frame="47233" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="47412" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="128" label="Loading" source="manual">
+    <box frame="47413" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="47532" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="129" label="Swinging" source="manual">
+    <box frame="47533" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="47832" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="130" label="Digging" source="manual">
+    <box frame="47833" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="48071" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="131" label="Loading" source="manual">
+    <box frame="48072" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="48191" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="132" label="Swinging" source="manual">
+    <box frame="48192" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="48671" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="133" label="Loading" source="manual">
+    <box frame="48672" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="48911" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="134" label="Swinging" source="manual">
+    <box frame="48912" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="49270" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="135" label="Loading" source="manual">
+    <box frame="49271" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="49390" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="136" label="Swinging" source="manual">
+    <box frame="49391" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="49630" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="137" label="Loading" source="manual">
+    <box frame="49631" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="49750" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="138" label="Swinging" source="manual">
+    <box frame="49751" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="50169" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="139" label="Loading" source="manual">
+    <box frame="50170" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="50349" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="140" label="Swinging" source="manual">
+    <box frame="50350" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="50709" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="141" label="Loading" source="manual">
+    <box frame="50710" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="51008" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="142" label="Swinging" source="manual">
+    <box frame="51009" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="51188" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="143" label="Travelling" source="manual">
+    <box frame="51189" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="51308" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="144" label="Swinging" source="manual">
+    <box frame="51309" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="51548" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="145" label="Loading" source="manual">
+    <box frame="51549" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="51668" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="146" label="Swinging" source="manual">
+    <box frame="51669" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="51967" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="147" label="Loading" source="manual">
+    <box frame="51968" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="52087" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="148" label="Swinging" source="manual">
+    <box frame="52088" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="52327" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="149" label="Loading" source="manual">
+    <box frame="52328" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="52507" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="150" label="Swinging" source="manual">
+    <box frame="52508" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="53346" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="151" label="Travelling" source="manual">
+    <box frame="53347" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="53946" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="152" label="Swinging" source="manual">
+    <box frame="53947" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="54305" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="153" label="Loading" source="manual">
+    <box frame="54306" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="54605" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="154" label="Swinging" source="manual">
+    <box frame="54606" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="55084" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="155" label="Digging" source="manual">
+    <box frame="55085" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="62817" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="156" label="Loading" source="manual">
+    <box frame="62818" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="62937" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="157" label="Swinging" source="manual">
+    <box frame="62938" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="63296" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="158" label="Travelling" source="manual">
+    <box frame="63297" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="63476" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="159" label="Swinging" source="manual">
+    <box frame="63477" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="63656" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="160" label="Loading" source="manual">
+    <box frame="63657" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="63836" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="161" label="Swinging" source="manual">
+    <box frame="63837" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="64315" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="162" label="Digging" source="manual">
+    <box frame="64316" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="64555" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="163" label="Idling" source="manual">
+    <box frame="64556" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="68271" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="164" label="Swinging" source="manual">
+    <box frame="68272" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="68511" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="165" label="Digging" source="manual">
+    <box frame="68512" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="68871" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="166" label="Loading" source="manual">
+    <box frame="68872" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="68990" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="167" label="Swinging" source="manual">
+    <box frame="68991" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="69290" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="168" label="Loading" source="manual">
+    <box frame="69291" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="69410" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="169" label="Swinging" source="manual">
+    <box frame="69411" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="69710" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="170" label="Loading" source="manual">
+    <box frame="69711" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="69830" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="171" label="Swinging" source="manual">
+    <box frame="69831" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="70189" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="172" label="Loading" source="manual">
+    <box frame="70190" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="70309" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="173" label="Swinging" source="manual">
+    <box frame="70310" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="71028" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="174" label="Loading" source="manual">
+    <box frame="71029" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="71148" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="175" label="Swinging" source="manual">
+    <box frame="71149" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="71328" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="176" label="Travelling" source="manual">
+    <box frame="71329" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="71688" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="177" label="Idling" source="manual">
+    <box frame="71689" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="71868" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="178" label="Travelling" source="manual">
+    <box frame="71869" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="72167" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="179" label="Idling" source="manual">
+    <box frame="72168" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="72347" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="180" label="Travelling" source="manual">
+    <box frame="72348" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="72946" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="181" label="Idling" source="manual">
+    <box frame="72947" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="73486" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="182" label="Travelling" source="manual">
+    <box frame="73487" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="73726" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="183" label="Swinging" source="manual">
+    <box frame="73727" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="74445" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="184" label="Digging" source="manual">
+    <box frame="74446" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="75104" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="185" label="Loading" source="manual">
+    <box frame="75105" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="75224" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="186" label="Swinging" source="manual">
+    <box frame="75225" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="75584" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="187" label="Travelling" source="manual">
+    <box frame="75585" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="75824" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="188" label="Digging" source="manual">
+    <box frame="75825" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="76003" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="189" label="Loading" source="manual">
+    <box frame="76004" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="76123" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="190" label="Swinging" source="manual">
+    <box frame="76124" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="76603" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="191" label="Digging" source="manual">
+    <box frame="76604" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="77202" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="192" label="Loading" source="manual">
+    <box frame="77203" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="77322" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="193" label="Swinging" source="manual">
+    <box frame="77323" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="77562" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="194" label="Digging" source="manual">
+    <box frame="77563" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="78461" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="195" label="Swinging" source="manual">
+    <box frame="78462" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="78641" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="196" label="Digging" source="manual">
+    <box frame="78642" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="78761" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="197" label="Travelling" source="manual">
+    <box frame="78762" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="78881" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="198" label="Swinging" source="manual">
+    <box frame="78882" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="79120" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="199" label="Loading" source="manual">
+    <box frame="79121" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="79300" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="200" label="Swinging" source="manual">
+    <box frame="79301" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="79840" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="201" label="Loading" source="manual">
+    <box frame="79841" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="80019" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="202" label="Swinging" source="manual">
+    <box frame="80020" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="80439" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="203" label="Digging" source="manual">
+    <box frame="80440" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="80559" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="204" label="Loading" source="manual">
+    <box frame="80560" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="80679" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="205" label="Swinging" source="manual">
+    <box frame="80680" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="81098" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="206" label="Digging" source="manual">
+    <box frame="81099" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="81158" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="207" label="Swinging" source="manual">
+    <box frame="81159" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="81218" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="208" label="Digging" source="manual">
+    <box frame="81219" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="81398" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="209" label="Swinging" source="manual">
+    <box frame="81399" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="81518" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="210" label="Digging" source="manual">
+    <box frame="81519" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="81578" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="211" label="Swinging" source="manual">
+    <box frame="81579" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="81758" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="212" label="Digging" source="manual">
+    <box frame="81759" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="81818" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="213" label="Swinging" source="manual">
+    <box frame="81819" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="82057" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="214" label="Digging" source="manual">
+    <box frame="82058" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="82117" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="215" label="Swinging" source="manual">
+    <box frame="82118" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="82417" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="216" label="Idling" source="manual">
+    <box frame="82418" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="83196" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="217" label="Loading" source="manual">
+    <box frame="83197" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="83256" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="218" label="Swinging" source="manual">
+    <box frame="83257" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="83736" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="219" label="Idling" source="manual">
+    <box frame="83737" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="84095" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="220" label="Loading" source="manual">
+    <box frame="84096" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="84215" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="221" label="Swinging" source="manual">
+    <box frame="84216" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="85174" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="222" label="Travelling" source="manual">
+    <box frame="85175" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="85474" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="223" label="Swinging" source="manual">
+    <box frame="85475" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="85594" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="224" label="Travelling" source="manual">
+    <box frame="85595" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="85894" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="225" label="Idling" source="manual">
+    <box frame="85895" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="86133" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="226" label="Travelling" source="manual">
+    <box frame="86134" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="86733" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="227" label="Swinging" source="manual">
+    <box frame="86734" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="87572" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="228" label="Digging" source="manual">
+    <box frame="87573" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="87872" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="229" label="Swinging" source="manual">
+    <box frame="87873" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="88291" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="230" label="Idling" source="manual">
+    <box frame="88292" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="89490" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="231" label="Digging" source="manual">
+    <box frame="89491" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="89969" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="232" label="Swinging" source="manual">
+    <box frame="89970" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="90389" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="233" label="Digging" source="manual">
+    <box frame="90390" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="90689" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="234" label="Swinging" source="manual">
+    <box frame="90690" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="90928" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="235" label="Digging" source="manual">
+    <box frame="90929" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="91168" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="236" label="Swinging" source="manual">
+    <box frame="91169" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="91348" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="237" label="Digging" source="manual">
+    <box frame="91349" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="91648" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="238" label="Loading" source="manual">
+    <box frame="91649" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="91708" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="239" label="Swinging" source="manual">
+    <box frame="91709" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="92367" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="240" label="Digging" source="manual">
+    <box frame="92368" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="92607" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="241" label="Loading" source="manual">
+    <box frame="92608" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="92727" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="242" label="Swinging" source="manual">
+    <box frame="92728" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="93206" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="243" label="Idling" source="manual">
+    <box frame="93207" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="93386" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="244" label="Swinging" source="manual">
+    <box frame="93387" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="93626" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="245" label="Digging" source="manual">
+    <box frame="93627" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="94045" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="246" label="Loading" source="manual">
+    <box frame="94046" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="94225" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="247" label="Swinging" source="manual">
+    <box frame="94226" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="95064" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="248" label="Digging" source="manual">
+    <box frame="95065" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="95304" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="249" label="Loading" source="manual">
+    <box frame="95305" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="95424" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="250" label="Digging" source="manual">
+    <box frame="95425" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="95544" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="251" label="Loading" source="manual">
+    <box frame="95545" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="95664" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="252" label="Digging" source="manual">
+    <box frame="95665" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="95844" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="253" label="Loading" source="manual">
+    <box frame="95845" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="95963" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="254" label="Swinging" source="manual">
+    <box frame="95964" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="96803" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="255" label="Idling" source="manual">
+    <box frame="96804" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="97102" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="256" label="Digging" source="manual">
+    <box frame="97103" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="97882" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="257" label="Swinging" source="manual">
+    <box frame="97883" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="98061" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="258" label="Digging" source="manual">
+    <box frame="98062" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="98901" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="259" label="Idling" source="manual">
+    <box frame="98902" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="99440" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="260" label="Swinging" source="manual">
+    <box frame="99441" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="99860" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="261" label="Digging" source="manual">
+    <box frame="99861" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="100639" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="262" label="Loading" source="manual">
+    <box frame="100640" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="100819" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="263" label="Swinging" source="manual">
+    <box frame="100820" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="101418" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="264" label="Digging" source="manual">
+    <box frame="101419" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="101718" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="265" label="Loading" source="manual">
+    <box frame="101719" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="101778" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="266" label="Swinging" source="manual">
+    <box frame="101779" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="102497" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="267" label="Digging" source="manual">
+    <box frame="102498" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="102737" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="268" label="Loading" source="manual">
+    <box frame="102738" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="102797" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="269" label="Swinging" source="manual">
+    <box frame="102798" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="103576" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="270" label="Digging" source="manual">
+    <box frame="103577" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="104175" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="271" label="Idling" source="manual">
+    <box frame="104176" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="104295" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="272" label="Swinging" source="manual">
+    <box frame="104296" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="104415" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="273" label="Idling" source="manual">
+    <box frame="104416" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="113226" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="274" label="Swinging" source="manual">
+    <box frame="113227" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="113646" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="275" label="Digging" source="manual">
+    <box frame="113647" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="113886" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="276" label="Loading" source="manual">
+    <box frame="113887" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="114005" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="277" label="Idling" source="manual">
+    <box frame="114006" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="114365" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="278" label="Swinging" source="manual">
+    <box frame="114366" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="114964" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="279" label="Idling" source="manual">
+    <box frame="114965" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="115204" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="280" label="Swinging" source="manual">
+    <box frame="115205" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="115504" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="281" label="Digging" source="manual">
+    <box frame="115505" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="116283" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="282" label="Idling" source="manual">
+    <box frame="116284" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="116403" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="283" label="Digging" source="manual">
+    <box frame="116404" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="118381" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="284" label="Loading" source="manual">
+    <box frame="118382" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="118501" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="285" label="Swinging" source="manual">
+    <box frame="118502" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="119220" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="286" label="Digging" source="manual">
+    <box frame="119221" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="119400" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="287" label="Loading" source="manual">
+    <box frame="119401" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="119460" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="288" label="Swinging" source="manual">
+    <box frame="119461" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="120299" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="289" label="Digging" source="manual">
+    <box frame="120300" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="122996" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="290" label="Loading" source="manual">
+    <box frame="122997" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="123056" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="291" label="Swinging" source="manual">
+    <box frame="123057" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="123776" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="292" label="Loading" source="manual">
+    <box frame="123777" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="124015" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="293" label="Swinging" source="manual">
+    <box frame="124016" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="124855" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="294" label="Idling" source="manual">
+    <box frame="124856" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="126952" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="295" label="Travelling" source="manual">
+    <box frame="126953" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="127312" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="296" label="Swinging" source="manual">
+    <box frame="127313" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="127432" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="297" label="Digging" source="manual">
+    <box frame="127433" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="129110" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="298" label="Idling" source="manual">
+    <box frame="129111" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="132107" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="299" label="Digging" source="manual">
+    <box frame="132108" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="132467" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="300" label="Idling" source="manual">
+    <box frame="132468" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="133666" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="301" label="Swinging" source="manual">
+    <box frame="133667" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="133786" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="302" label="Digging" source="manual">
+    <box frame="133787" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="134325" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="303" label="Loading" source="manual">
+    <box frame="134326" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="134505" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="304" label="Swinging" source="manual">
+    <box frame="134506" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="134565" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="305" label="Idling" source="manual">
+    <box frame="134566" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="134625" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="306" label="Travelling" source="manual">
+    <box frame="134626" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="134685" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="307" label="Swinging" source="manual">
+    <box frame="134686" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="135344" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="308" label="Digging" source="manual">
+    <box frame="135345" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="135524" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="309" label="Loading" source="manual">
+    <box frame="135525" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="135584" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="310" label="Swinging" source="manual">
+    <box frame="135585" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="136243" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="311" label="Travelling" source="manual">
+    <box frame="136244" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="137082" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="312" label="Swinging" source="manual">
+    <box frame="137083" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="137442" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="313" label="Digging" source="manual">
+    <box frame="137443" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="139000" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="314" label="Idling" source="manual">
+    <box frame="139001" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="140139" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="315" label="Digging" source="manual">
+    <box frame="140140" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="143256" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="316" label="Loading" source="manual">
+    <box frame="143257" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="143316" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="317" label="Swinging" source="manual">
+    <box frame="143317" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="144455" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="318" label="Idling" source="manual">
+    <box frame="144456" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="144815" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="319" label="Digging" source="manual">
+    <box frame="144816" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="148291" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="320" label="Travelling" source="manual">
+    <box frame="148292" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="148471" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="321" label="Digging" source="manual">
+    <box frame="148472" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="151588" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="322" label="Idling" source="manual">
+    <box frame="151589" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="151828" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="323" label="Digging" source="manual">
+    <box frame="151829" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="152307" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="324" label="Idling" source="manual">
+    <box frame="152308" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="152847" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="325" label="Digging" source="manual">
+    <box frame="152848" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="154825" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="326" label="Idling" source="manual">
+    <box frame="154826" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="155604" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="327" label="Swinging" source="manual">
+    <box frame="155605" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="156203" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="328" label="Digging" source="manual">
+    <box frame="156204" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="160579" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="329" label="Loading" source="manual">
+    <box frame="160580" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="160699" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="330" label="Swinging" source="manual">
+    <box frame="160700" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="161658" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="331" label="Digging" source="manual">
+    <box frame="161659" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="165134" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="332" label="Loading" source="manual">
+    <box frame="165135" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="165194" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="333" label="Swinging" source="manual">
+    <box frame="165195" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="166153" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="334" label="Digging" source="manual">
+    <box frame="166154" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="169090" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="335" label="Loading" source="manual">
+    <box frame="169091" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="169270" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="336" label="Swinging" source="manual">
+    <box frame="169271" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="170589" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="337" label="Digging" source="manual">
+    <box frame="170590" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="171608" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="338" label="Loading" source="manual">
+    <box frame="171609" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="171788" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="339" label="Travelling" source="manual">
+    <box frame="171789" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="172027" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="340" label="Swinging" source="manual">
+    <box frame="172028" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="172687" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="341" label="Idling" source="manual">
+    <box frame="172688" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="173046" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="342" label="Travelling" source="manual">
+    <box frame="173047" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="174245" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="343" label="Idling" source="manual">
+    <box frame="174246" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="174605" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="344" label="Swinging" source="manual">
+    <box frame="174606" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="174665" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="345" label="Travelling" source="manual">
+    <box frame="174666" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="177782" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="346" label="Swinging" source="manual">
+    <box frame="177783" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="178021" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="347" label="Travelling" source="manual">
+    <box frame="178022" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="178860" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="348" label="Swinging" source="manual">
+    <box frame="178861" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="179220" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="349" label="Travelling" source="manual">
+    <box frame="179221" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="179400" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="350" label="Swinging" source="manual">
+    <box frame="179401" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="179520" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="351" label="Travelling" source="manual">
+    <box frame="179521" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="180119" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="352" label="Idling" source="manual">
+    <box frame="180120" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="181318" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="353" label="Swinging" source="manual">
+    <box frame="181319" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="181618" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="354" label="Travelling" source="manual">
+    <box frame="181619" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="182217" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="355" label="Swinging" source="manual">
+    <box frame="182218" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="182337" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="356" label="Travelling" source="manual">
+    <box frame="182338" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="182577" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="357" label="Swinging" source="manual">
+    <box frame="182578" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="183116" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="358" label="Travelling" source="manual">
+    <box frame="183117" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="183656" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="359" label="Swinging" source="manual">
+    <box frame="183657" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="184795" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="360" label="Travelling" source="manual">
+    <box frame="184796" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="186353" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="361" label="Swinging" source="manual">
+    <box frame="186354" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="186832" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="362" label="Travelling" source="manual">
+    <box frame="186833" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="187672" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="363" label="Idling" source="manual">
+    <box frame="187673" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="188151" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="364" label="Travelling" source="manual">
+    <box frame="188152" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="189050" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="365" label="Idling" source="manual">
+    <box frame="189051" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="194085" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="366" label="Travelling" source="manual">
+    <box frame="194086" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="196902" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="367" label="Idling" source="manual">
+    <box frame="196903" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="199060" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+  <track id="368" label="Idling" source="manual">
+    <box frame="199061" keyframe="1" outside="0" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+    <box frame="199063" keyframe="1" outside="1" occluded="0" xtl="0" ytl="0" xbr="1280" ybr="720" z_order="0"> </box>
+  </track>
+</annotations>
