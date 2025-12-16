@@ -2,7 +2,7 @@
 
 A comprehensive computer vision pipeline for detecting excavators in construction site videos and recognizing their activities using deep learning models.
 
-## 📋 Overview
+## Overview
 
 This system processes construction site video footage to:
 1. Detect excavators using custom-trained YOLOv8
@@ -11,7 +11,7 @@ This system processes construction site video footage to:
 4. Recognize activities (Digging, Loading, Swinging, Dumping, Travelling, Idling) using 3D ResNet
 5. Generate annotated videos and comprehensive activity reports
 
-## 🎯 Key Features
+## Key Features
 
 - **Custom Excavator Detection**: Fine-tuned YOLOv8 model for accurate excavator detection
 - **Multi-Object Tracking**: DeepSORT-based tracking for consistent excavator identification
@@ -20,7 +20,7 @@ This system processes construction site video footage to:
 - **CVAT Integration**: Export/import annotations for manual labeling and validation
 - **Comprehensive Reports**: CSV outputs with frame-level and segment-level activity data
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 Video Input
@@ -29,9 +29,9 @@ Video Input
     ↓
 [2] DeepSORT Tracking → Track IDs + Cropped frames
     ↓
-[3] Idling Detection → Idling segments (optional)
+[3] Idling Detection → Idling segments
     ↓
-[4] Manual Labeling via CVAT (optional)
+[4] Manual Labeling via CVAT
     ↓
 [5] Dataset Generation → Frame clips organized by activity
     ↓
@@ -42,22 +42,7 @@ Video Input
 Output: Annotated Videos + Activity Reports
 ```
 
-## 📁 Project Structure
-
-```
-excavator-activity-recognition/
-├── 1_train_yolo.py              # Train custom YOLOv8 model
-├── 2_detect_yolo.py             # Run detection and save to CSV
-├── 3_track_deepsort.py          # Track excavators and extract crops
-├── 4_detect_idling.py           # Detect idling behavior
-├── 5_cvat_excel_to_xml.py       # Convert manual labels to CVAT format
-├── 6_generate_dataset.py        # Create training dataset from annotations
-├── 7_train_resnet.py            # Train 3D ResNet activity classifier
-├── 8_recognize_activities.py    # Run activity recognition on tracks
-└── README.md
-```
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -80,7 +65,7 @@ cd excavator-activity-recognition
 pip install -r requirements.txt
 ```
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### Step 1: Train Custom YOLOv8 Model
 
@@ -271,7 +256,7 @@ VOTING_SECONDS = 2.0  # temporal smoothing
 
 ---
 
-## 📊 Output Files
+## Output Files
 
 ### Detection CSV (`detections.csv`)
 ```csv
@@ -307,7 +292,7 @@ track_id,activity,start_frame,end_frame,duration_sec,start_time_sec,end_time_sec
 1,swinging,151,300,2.54,2.56,5.10
 ```
 
-## ⚙️ Configuration Parameters
+## Configuration Parameters
 
 ### Detection & Tracking
 - `FPS`: Video frame rate (default: 59)
@@ -326,10 +311,10 @@ track_id,activity,start_frame,end_frame,duration_sec,start_time_sec,end_time_sec
 - `CROP_SIZE`: Spatial input size (default: 112×112)
 - `VOTING_SECONDS`: Temporal smoothing window (default: 2.0s)
 
-## 🎓 Model Architecture
+## Model Architecture
 
 ### YOLOv8n
-- Pretrained on COCO, fine-tuned for excavators
+- Pretrained on yolo, fine-tuned for excavators
 - Input: 480×480
 - Output: Bounding boxes + confidence scores
 
@@ -347,7 +332,7 @@ track_id,activity,start_frame,end_frame,duration_sec,start_time_sec,end_time_sec
 4. **Clip Overlap**: Use smaller stride (e.g., 4-8) for better temporal coverage
 5. **Temporal Smoothing**: Adjust `VOTING_SECONDS` to reduce prediction jitter
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Low Detection Accuracy
 - Train YOLOv8 with more diverse excavator images
@@ -365,44 +350,19 @@ track_id,activity,start_frame,end_frame,duration_sec,start_time_sec,end_time_sec
 - Add data augmentation during training
 - Use deeper model (ResNet-101, ResNet-152)
 
-## 📝 Citation
+## Citation
 
 If you use this work, please cite:
 
 ```bibtex
 @software{excavator_activity_recognition,
-  author = {Your Name},
+  author = {Shubhan Mital},
   title = {Excavator Activity Recognition System},
   year = {2025},
-  url = {https://github.com/yourusername/excavator-activity-recognition}
+  url = {https://github.com/shubhanflash22/excavator-activity-recognition}
 }
 ```
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📧 Contact
-
-For questions or support, please open an issue or contact [your-email@example.com](mailto:your-email@example.com)
-
-## 🙏 Acknowledgments
-
-- YOLOv8 by Ultralytics
-- DeepSORT implementation by nwojke
-- 3D ResNet architecture inspired by "Learning Spatiotemporal Features with 3D Convolutional Networks"
-- CVAT annotation tool
-
----
-
-**Note**: Update all file paths in the scripts to match your directory structure before running.
