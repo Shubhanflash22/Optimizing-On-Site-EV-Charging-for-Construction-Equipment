@@ -11,11 +11,11 @@ from itertools import groupby
 # ============================
 # Configuration (edit paths)
 # ============================
-SAVE_DIR = r"C:\Users\shubh\Desktop\Test\Tubes"
+SAVE_DIR = r"C:\Users\shubh\Desktop\Research_work_with_AVIK\Workflow\5.Step 2 - Deep Sort\Tubes"
 METADATA_PATH = os.path.join(SAVE_DIR, "track_metadata.csv")
-ACTIVITY_OUTPUT_CSV = r"C:\Users\shubh\Desktop\Test\Activity_Output.csv"
-ACTIVITY_VISUAL_CSV = r"C:\Users\shubh\Desktop\Test\Activity_Visual.csv"
-MODEL_PATH = r"C:\Users\shubh\Desktop\Test\best_activity_model.pth"
+ACTIVITY_OUTPUT_CSV = r"C:\Users\shubh\Desktop\Research_work_with_AVIK\Workflow\10.Step 4 - Resnet\Activity_Output.csv"
+ACTIVITY_VISUAL_CSV = r"C:\Users\shubh\Desktop\Research_work_with_AVIK\Workflow\10.Step 4 - Resnet\Activity_Visual.csv"
+MODEL_PATH = r"C:\Users\shubh\Desktop\Research_work_with_AVIK\Workflow\9.Custom resnet model training\resnet3d_best.pth"
 
 FPS = 59           # frames per second of video
 CLIP_LENGTH = 16   # frames per clip for the 3D model
@@ -27,7 +27,10 @@ VOTING_WINDOW = int(VOTING_SECONDS * FPS)
 ACTIVITY_NAMES = {
     0: 'digging',
     1: 'loading',
-    2: 'swinging'
+    2: 'swinging',
+    3: 'dumping',
+    4: 'idling',
+    5: 'travelling'
 }
 
 # ============================
@@ -135,7 +138,14 @@ print("[INFO] Model instantiated.")
 if os.path.exists(MODEL_PATH):
     try:
         print(f"[INFO] Loading model weights from: {MODEL_PATH}")
-        model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+        # model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+        checkpoint = torch.load(MODEL_PATH, map_location=device)
+        if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+            model.load_state_dict(checkpoint['model_state_dict'])
+            print("[INFO] Loaded model_state_dict from checkpoint.")
+        else:
+            model.load_state_dict(checkpoint)
+            print("[INFO] Loaded raw state_dict.")
         print("[INFO] Model weights loaded successfully.")
     except Exception as e:
         print(f"[ERROR] Failed to load model weights: {e}")

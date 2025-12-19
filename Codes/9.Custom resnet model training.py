@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import random_split
 import numpy as np
 from collections import Counter
 from pathlib import Path
@@ -13,8 +14,8 @@ from tqdm import tqdm
 # Configuration
 # ============================
 
-DATASET_DIR = r"C:\Users\shubh\Desktop\Research work with AVIK\Test\dataset"
-MODEL_SAVE_PATH = r"C:\Users\shubh\Desktop\Research work with AVIK\Test\best_activity_model.pth"
+DATASET_DIR = r"C:\Users\shubh\Desktop\Research_work_with_AVIK\Workflow\8.Creating clips from CVAT Annotations\Dataset_Resnet_2"
+MODEL_SAVE_PATH = r"C:\Users\shubh\Desktop\Research_work_with_AVIK\Workflow\9.Custom resnet model training\resnet3d_best.pth"
 
 # Updated for all 6 activities
 NUM_CLASSES = 6
@@ -214,14 +215,49 @@ print("="*60)
 
 dataset = VideoClipDataset(DATASET_DIR, CLIP_LENGTH, CROP_SIZE)
 
+# ============================
+# Train / Validation Split
+# ============================
+
+train_size = int(0.8 * len(dataset))
+val_size = len(dataset) - train_size
+
+train_dataset, val_dataset = random_split(
+    dataset,
+    [train_size, val_size],
+    generator=torch.Generator().manual_seed(42)  # reproducibility
+)
+
+print(f"Train samples: {len(train_dataset)}")
+print(f"Validation samples: {len(val_dataset)}")
+
+
 if len(dataset) == 0:
     print("\n❌ ERROR: Dataset is empty!")
     print("Make sure you ran yolo_cvat_to_resnet.py first")
     exit(1)
 
-dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0, pin_memory=True)
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=BATCH_SIZE,
+    shuffle=True,
+    num_workers=0,
+    pin_memory=True
+)
 
-print(f"\n✓ DataLoader created with {len(dataloader)} batches")
+val_loader = DataLoader(
+    val_dataset,
+    batch_size=BATCH_SIZE,
+    shuffle=False,
+    num_workers=0,
+    pin_memory=True
+)
+
+print(f"\n✓ Train batches: {len(train_loader)}")
+print(f"✓ Validation batches: {len(val_loader)}")
+
+
+print(f"\n✓ DataLoader created with {len(train_loader)} batches")
 
 # ============================
 # Model, Loss, Optimizer
@@ -263,7 +299,7 @@ for epoch in range(NUM_EPOCHS):
     correct = 0
     total = 0
     
-    for clips, labels in tqdm(dataloader, desc=f"Epoch {epoch+1}"):
+    for clips, labels in tqdm(train_loader, desc=f"Epoch {epoch+1}"):
         clips = clips.to(DEVICE)
         labels = labels.to(DEVICE)
         
@@ -280,25 +316,56 @@ for epoch in range(NUM_EPOCHS):
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
     
-    epoch_loss = running_loss / len(dataset)
+    epoch_loss = running_loss / len(train_dataset)
     epoch_acc = 100 * correct / total
     
     print(f"\nEpoch {epoch+1} Results:")
     print(f"  Loss: {epoch_loss:.4f}")
     print(f"  Accuracy: {epoch_acc:.2f}%")
+    # ============================
+    # Validation
+    # ============================
+    
+    model.eval()
+    val_loss = 0.0
+    val_correct = 0
+    val_total = 0
+    
+    with torch.no_grad():
+        for clips, labels in val_loader:
+            clips = clips.to(DEVICE)
+            labels = labels.to(DEVICE)
+    
+            outputs = model(clips)
+            loss = criterion(outputs, labels)
+    
+            val_loss += loss.item() * clips.size(0)
+    
+            _, predicted = torch.max(outputs, 1)
+            val_total += labels.size(0)
+            val_correct += (predicted == labels).sum().item()
+    
+    val_loss /= len(val_dataset)
+    val_acc = 100 * val_correct / val_total
+    
+    print(f"  Val Loss: {val_loss:.4f}")
+    print(f"  Val Accuracy: {val_acc:.2f}%")
 
-    # Save best model
-    if epoch_loss < best_loss:
-        best_loss = epoch_loss
+
+    # if epoch_loss < best_loss:
+    #     best_loss = epoch_loss
+    if val_loss < best_loss:
+        best_loss = val_loss
         torch.save({
             'epoch': epoch,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            'loss': epoch_loss,
+            # 'loss': epoch_loss,
+            'loss':val_loss,
             'accuracy': epoch_acc,
             'activity_names': ACTIVITY_NAMES,
         }, MODEL_SAVE_PATH)
-        print(f"  ✓ Saved new best model (loss: {epoch_loss:.4f})")
+        print(f"  ✓ Saved new best model (loss: {val_loss:.4f})")
 
 print("\n" + "="*60)
 print("Training Complete!")
