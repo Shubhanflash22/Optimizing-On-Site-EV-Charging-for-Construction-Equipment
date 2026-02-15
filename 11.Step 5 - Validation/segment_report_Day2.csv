@@ -1,0 +1,363 @@
+Start,End,GT_Label,Dominant_Pred,Accuracy_%,Correct,Total_Frames,Pred_Breakdown
+00:20.00,00:50.00,travelling,travelling,100.0,750,750,{'travelling': 750}
+01:12.00,01:28.00,travelling,travelling,97.2,389,400,"{'travelling': 389, 'idling': 11}"
+01:28.00,01:36.00,idling,idling,100.0,200,200,{'idling': 200}
+01:36.00,01:39.00,travelling,travelling,66.7,50,75,"{'idling': 25, 'travelling': 50}"
+01:39.00,01:55.00,idling,idling,100.0,400,400,{'idling': 400}
+01:55.00,02:01.00,swinging,swinging,89.3,134,150,"{'idling': 16, 'swinging': 134}"
+02:01.00,02:15.00,idling,idling,100.0,350,350,{'idling': 350}
+02:15.00,02:18.00,swinging,swinging,92.0,69,75,"{'swinging': 69, 'idling': 6}"
+02:18.00,02:35.00,idling,idling,100.0,425,425,{'idling': 425}
+02:35.00,02:37.00,swinging,idling,0.0,0,50,"{'idling': 47, 'loading': 3}"
+02:37.00,02:41.00,loading,loading,97.0,97,100,"{'loading': 97, 'swinging': 3}"
+02:41.00,02:44.00,swinging,swinging,82.7,62,75,"{'swinging': 62, 'loading': 13}"
+02:44.00,02:48.00,loading,loading,98.0,98,100,"{'loading': 98, 'swinging': 2}"
+02:48.00,02:52.00,swinging,swinging,100.0,100,100,{'swinging': 100}
+02:52.00,03:00.00,loading,loading,98.5,197,200,"{'swinging': 3, 'loading': 197}"
+03:00.00,03:05.00,swinging,swinging,92.8,116,125,"{'swinging': 116, 'loading': 9}"
+03:05.00,03:07.00,loading,loading,100.0,50,50,{'loading': 50}
+03:07.00,03:12.00,swinging,swinging,76.0,95,125,"{'loading': 30, 'swinging': 95}"
+03:12.00,03:16.00,loading,loading,89.0,89,100,"{'loading': 89, 'swinging': 11}"
+03:16.00,03:20.00,swinging,swinging,93.0,93,100,"{'swinging': 93, 'loading': 7}"
+03:20.00,03:22.00,loading,loading,96.0,48,50,"{'loading': 48, 'swinging': 2}"
+03:22.00,03:28.00,swinging,swinging,92.0,138,150,"{'swinging': 138, 'loading': 12}"
+03:28.00,03:32.00,loading,loading,90.0,90,100,"{'loading': 90, 'swinging': 10}"
+03:32.00,03:35.00,swinging,swinging,100.0,75,75,{'swinging': 75}
+03:35.00,03:38.00,loading,loading,78.7,59,75,"{'loading': 59, 'swinging': 16}"
+03:38.00,03:42.00,swinging,swinging,87.0,87,100,"{'swinging': 87, 'loading': 13}"
+03:42.00,03:44.00,loading,loading,98.0,49,50,"{'loading': 49, 'swinging': 1}"
+03:44.00,03:48.00,swinging,swinging,100.0,100,100,{'swinging': 100}
+03:48.00,03:50.00,idling,idling,96.0,48,50,"{'swinging': 2, 'idling': 48}"
+03:50.00,03:53.00,swinging,swinging,66.7,50,75,"{'idling': 20, 'swinging': 50, 'loading': 5}"
+03:52.00,03:56.00,loading,loading,78.0,78,100,"{'swinging': 22, 'loading': 78}"
+03:56.00,04:00.00,swinging,swinging,100.0,100,100,{'swinging': 100}
+04:00.00,04:12.00,travelling,travelling,93.3,280,300,"{'swinging': 20, 'travelling': 280}"
+04:12.00,04:15.00,swinging,swinging,96.0,72,75,"{'swinging': 72, 'digging': 3}"
+04:15.00,04:53.00,digging,digging,97.9,930,950,"{'digging': 930, 'loading': 20}"
+04:53.00,04:55.00,loading,loading,78.0,39,50,"{'loading': 39, 'swinging': 11}"
+04:55.00,05:01.00,swinging,swinging,92.7,139,150,"{'swinging': 139, 'idling': 11}"
+05:01.00,05:07.00,idling,idling,96.7,145,150,"{'idling': 145, 'digging': 5}"
+05:07.00,05:21.00,digging,digging,100.0,350,350,{'digging': 350}
+05:21.00,05:23.00,loading,loading,82.0,41,50,"{'digging': 1, 'loading': 41, 'swinging': 8}"
+05:23.00,05:27.00,swinging,swinging,100.0,100,100,{'swinging': 100}
+05:27.00,05:29.00,loading,loading,78.0,39,50,"{'swinging': 11, 'loading': 39}"
+05:29.00,05:33.00,swinging,swinging,95.0,95,100,"{'swinging': 95, 'digging': 5}"
+05:33.00,05:35.00,loading,loading,60.0,30,50,"{'digging': 7, 'loading': 30, 'swinging': 13}"
+05:35.00,05:39.00,swinging,swinging,92.0,92,100,"{'swinging': 92, 'digging': 8}"
+05:39.00,05:45.00,digging,digging,70.0,105,150,"{'digging': 105, 'loading': 45}"
+05:45.00,05:47.00,loading,loading,100.0,50,50,{'loading': 50}
+05:47.00,05:51.00,swinging,swinging,95.0,95,100,"{'loading': 1, 'swinging': 95, 'travelling': 4}"
+05:51.00,06:23.00,travelling,travelling,99.0,792,800,"{'travelling': 792, 'swinging': 8}"
+06:24.00,06:26.00,loading,loading,100.0,50,50,{'loading': 50}
+06:26.00,06:32.00,swinging,swinging,89.3,134,150,"{'loading': 16, 'swinging': 134}"
+06:32.00,06:36.00,loading,loading,100.0,100,100,{'loading': 100}
+06:36.00,06:42.00,swinging,swinging,81.3,122,150,"{'loading': 28, 'swinging': 122}"
+06:42.00,06:47.00,loading,loading,84.0,105,125,"{'loading': 105, 'swinging': 20}"
+06:47.00,06:52.00,swinging,swinging,95.2,119,125,"{'swinging': 119, 'loading': 6}"
+06:52.00,06:55.00,loading,loading,94.7,71,75,"{'loading': 71, 'swinging': 4}"
+06:55.00,07:01.00,swinging,swinging,93.3,140,150,"{'swinging': 140, 'digging': 10}"
+07:01.00,07:08.00,digging,digging,90.9,159,175,"{'digging': 159, 'loading': 16}"
+07:08.00,07:09.00,loading,loading,100.0,25,25,{'loading': 25}
+07:09.00,07:14.00,swinging,swinging,91.2,114,125,"{'loading': 11, 'swinging': 114}"
+07:14.00,07:16.00,loading,loading,100.0,50,50,{'loading': 50}
+07:16.00,07:23.00,swinging,swinging,91.4,160,175,"{'loading': 15, 'swinging': 160}"
+07:23.00,07:29.00,loading,loading,100.0,150,150,{'loading': 150}
+07:29.00,07:35.00,swinging,swinging,92.0,138,150,"{'loading': 12, 'swinging': 138}"
+07:35.00,07:37.00,loading,loading,96.0,48,50,"{'loading': 48, 'swinging': 2}"
+07:37.00,07:42.00,swinging,swinging,100.0,125,125,{'swinging': 125}
+07:42.00,07:45.00,loading,loading,77.3,58,75,"{'loading': 58, 'digging': 17}"
+07:45.00,07:51.00,swinging,swinging,93.3,140,150,"{'digging': 10, 'swinging': 140}"
+07:51.00,07:53.00,loading,digging,0.0,0,50,{'digging': 50}
+07:53.00,07:59.00,swinging,swinging,85.3,128,150,"{'digging': 9, 'swinging': 128, 'loading': 13}"
+07:59.00,08:02.00,loading,loading,57.3,43,75,"{'loading': 43, 'swinging': 32}"
+08:02.00,08:08.00,swinging,swinging,94.7,142,150,"{'swinging': 142, 'digging': 8}"
+08:08.00,08:22.00,digging,digging,77.4,271,350,"{'digging': 271, 'loading': 79}"
+08:22.00,08:24.00,loading,loading,94.0,47,50,"{'loading': 47, 'swinging': 3}"
+08:24.00,08:29.00,swinging,swinging,100.0,125,125,{'swinging': 125}
+08:29.00,08:33.00,digging,digging,81.0,81,100,"{'swinging': 4, 'digging': 81, 'loading': 15}"
+08:33.00,08:35.00,loading,loading,92.0,46,50,"{'loading': 46, 'swinging': 4}"
+08:35.00,08:40.00,swinging,swinging,98.4,123,125,"{'swinging': 123, 'travelling': 2}"
+08:40.00,08:44.00,travelling,travelling,82.0,82,100,"{'travelling': 82, 'swinging': 18}"
+08:44.00,08:46.00,swinging,swinging,84.0,42,50,"{'swinging': 42, 'loading': 8}"
+08:46.00,08:48.00,loading,loading,100.0,50,50,{'loading': 50}
+08:48.00,08:54.00,swinging,swinging,90.7,136,150,"{'loading': 14, 'swinging': 136}"
+08:54.00,08:59.00,loading,loading,100.0,125,125,{'loading': 125}
+08:59.00,09:06.00,swinging,swinging,98.9,173,175,"{'loading': 2, 'swinging': 173}"
+09:06.00,09:08.00,loading,loading,70.0,35,50,"{'loading': 35, 'digging': 7, 'swinging': 8}"
+09:08.00,09:16.00,swinging,swinging,95.0,190,200,"{'swinging': 190, 'loading': 10}"
+09:16.00,09:18.00,loading,loading,86.0,43,50,"{'loading': 43, 'swinging': 7}"
+09:18.00,09:26.00,swinging,swinging,94.5,189,200,"{'swinging': 189, 'loading': 11}"
+09:26.00,09:29.00,loading,loading,82.7,62,75,"{'loading': 62, 'swinging': 13}"
+09:29.00,09:37.00,swinging,swinging,100.0,200,200,{'swinging': 200}
+09:37.00,09:39.00,loading,loading,80.0,40,50,"{'swinging': 10, 'loading': 40}"
+09:39.00,09:45.00,swinging,swinging,100.0,150,150,{'swinging': 150}
+09:45.00,09:46.00,loading,swinging,0.0,0,25,{'swinging': 25}
+09:46.00,09:51.00,swinging,swinging,100.0,125,125,{'swinging': 125}
+09:51.00,09:53.00,travelling,travelling,70.0,35,50,"{'swinging': 15, 'travelling': 35}"
+09:53.00,09:57.00,swinging,swinging,100.0,100,100,{'swinging': 100}
+09:57.00,09:59.00,loading,loading,80.0,40,50,"{'swinging': 10, 'loading': 40}"
+09:59.00,10:05.00,swinging,swinging,98.0,147,150,"{'swinging': 147, 'loading': 3}"
+10:05.00,10:07.00,loading,loading,100.0,50,50,{'loading': 50}
+10:07.00,10:13.00,swinging,swinging,96.0,144,150,"{'loading': 2, 'swinging': 144, 'digging': 4}"
+10:13.00,10:18.00,digging,digging,84.0,105,125,"{'digging': 105, 'swinging': 5, 'loading': 15}"
+10:18.00,10:20.00,loading,loading,100.0,50,50,{'loading': 50}
+10:20.00,10:29.00,swinging,swinging,98.7,222,225,"{'loading': 3, 'swinging': 222}"
+10:29.00,10:31.00,travelling,travelling,54.0,27,50,"{'swinging': 23, 'travelling': 27}"
+10:31.00,10:33.00,swinging,swinging,96.0,48,50,"{'swinging': 48, 'loading': 2}"
+10:33.00,10:37.00,loading,loading,100.0,100,100,{'loading': 100}
+10:37.00,10:42.00,swinging,swinging,89.6,112,125,"{'loading': 13, 'swinging': 112}"
+10:42.00,10:44.00,loading,loading,80.0,40,50,"{'loading': 40, 'swinging': 10}"
+10:44.00,10:51.00,swinging,swinging,85.1,149,175,"{'swinging': 149, 'loading': 26}"
+10:51.00,10:53.00,loading,loading,100.0,50,50,{'loading': 50}
+10:53.00,10:59.00,swinging,swinging,100.0,150,150,{'swinging': 150}
+10:59.00,12:21.00,travelling,travelling,98.6,2022,2050,"{'travelling': 2022, 'swinging': 28}"
+12:21.00,12:26.00,swinging,swinging,88.8,111,125,"{'swinging': 111, 'digging': 14}"
+12:26.00,12:37.00,digging,digging,96.0,264,275,"{'digging': 264, 'loading': 11}"
+12:37.00,12:40.00,loading,loading,100.0,75,75,{'loading': 75}
+12:40.00,12:47.00,swinging,swinging,90.9,159,175,"{'loading': 3, 'swinging': 159, 'digging': 13}"
+12:47.00,12:52.00,digging,digging,76.0,95,125,"{'digging': 95, 'loading': 30}"
+12:52.00,12:54.00,loading,loading,72.0,36,50,"{'loading': 36, 'swinging': 14}"
+12:54.00,12:58.00,swinging,swinging,89.0,89,100,"{'swinging': 89, 'digging': 11}"
+12:58.00,13:00.00,digging,digging,64.0,32,50,"{'digging': 32, 'loading': 18}"
+13:00.00,13:02.00,loading,loading,78.0,39,50,"{'loading': 39, 'swinging': 11}"
+13:02.00,13:08.00,swinging,swinging,92.0,138,150,"{'swinging': 138, 'digging': 12}"
+13:08.00,13:11.00,digging,digging,92.0,69,75,"{'digging': 69, 'loading': 6}"
+13:11.00,13:13.00,loading,loading,76.0,38,50,"{'loading': 38, 'swinging': 12}"
+13:13.00,13:18.00,swinging,swinging,98.4,123,125,"{'swinging': 123, 'digging': 2}"
+13:18.00,13:22.00,digging,digging,86.0,86,100,"{'digging': 86, 'loading': 14}"
+13:22.00,13:24.00,loading,loading,92.0,46,50,"{'loading': 46, 'swinging': 4}"
+13:24.00,13:32.00,swinging,swinging,94.0,188,200,"{'swinging': 188, 'loading': 12}"
+13:32.00,13:36.00,loading,loading,96.0,96,100,"{'loading': 96, 'swinging': 4}"
+13:36.00,13:42.00,swinging,swinging,92.7,139,150,"{'swinging': 139, 'loading': 11}"
+13:42.00,13:44.00,loading,loading,100.0,50,50,{'loading': 50}
+13:44.00,13:48.00,swinging,swinging,91.0,91,100,"{'loading': 9, 'swinging': 91}"
+13:48.00,13:50.00,loading,loading,100.0,50,50,{'loading': 50}
+13:50.00,13:57.00,swinging,swinging,82.3,144,175,"{'loading': 31, 'swinging': 144}"
+13:57.00,14:00.00,loading,loading,98.7,74,75,"{'loading': 74, 'swinging': 1}"
+14:00.00,14:06.00,swinging,swinging,90.7,136,150,"{'swinging': 136, 'loading': 14}"
+14:06.00,14:11.00,loading,loading,98.4,123,125,"{'loading': 123, 'swinging': 2}"
+14:11.00,14:14.00,swinging,swinging,94.7,71,75,"{'swinging': 71, 'travelling': 4}"
+14:14.00,14:16.00,travelling,travelling,76.0,38,50,"{'travelling': 38, 'swinging': 12}"
+14:16.00,14:20.00,swinging,swinging,84.0,84,100,"{'swinging': 84, 'loading': 16}"
+14:20.00,14:22.00,loading,loading,100.0,50,50,{'loading': 50}
+14:22.00,14:27.00,swinging,swinging,91.2,114,125,"{'swinging': 114, 'loading': 11}"
+14:27.00,14:29.00,loading,loading,88.0,44,50,"{'loading': 44, 'swinging': 6}"
+14:29.00,14:33.00,swinging,swinging,97.0,97,100,"{'swinging': 97, 'loading': 3}"
+14:33.00,14:36.00,loading,loading,100.0,75,75,{'loading': 75}
+14:36.00,14:50.00,swinging,swinging,100.0,350,350,{'swinging': 350}
+14:40.00,15:00.00,travelling,swinging,44.0,220,500,"{'swinging': 280, 'travelling': 220}"
+15:00.00,15:06.00,swinging,swinging,94.7,142,150,"{'swinging': 142, 'loading': 7, 'digging': 1}"
+15:06.00,15:11.00,loading,loading,96.8,121,125,"{'loading': 121, 'swinging': 4}"
+15:11.00,15:19.00,swinging,swinging,93.5,187,200,"{'swinging': 187, 'digging': 13}"
+15:19.00,17:28.00,digging,digging,100.0,3225,3225,{'digging': 3225}
+17:28.00,17:30.00,loading,loading,100.0,50,50,{'loading': 50}
+17:30.00,17:36.00,swinging,swinging,92.7,139,150,"{'loading': 1, 'swinging': 139, 'travelling': 10}"
+17:36.00,17:39.00,travelling,travelling,57.3,43,75,"{'travelling': 43, 'swinging': 32}"
+17:39.00,17:42.00,swinging,swinging,81.3,61,75,"{'swinging': 61, 'loading': 14}"
+17:42.00,17:45.00,loading,loading,69.3,52,75,"{'loading': 52, 'digging': 23}"
+17:45.00,17:53.00,swinging,swinging,82.0,164,200,"{'digging': 36, 'swinging': 164}"
+17:53.00,17:57.00,digging,digging,100.0,100,100,{'digging': 100}
+17:57.00,18:59.00,idling,idling,98.8,1532,1550,"{'digging': 3, 'idling': 1532, 'swinging': 15}"
+18:59.00,19:03.00,swinging,swinging,100.0,100,100,{'swinging': 100}
+19:03.00,19:09.00,digging,digging,65.3,98,150,"{'swinging': 19, 'loading': 33, 'digging': 98}"
+19:09.00,19:11.00,loading,loading,92.0,46,50,"{'loading': 46, 'swinging': 4}"
+19:11.00,19:16.00,swinging,swinging,100.0,125,125,{'swinging': 125}
+19:16.00,19:18.00,loading,loading,66.0,33,50,"{'swinging': 17, 'loading': 33}"
+19:18.00,19:23.00,swinging,swinging,86.4,108,125,"{'swinging': 108, 'loading': 17}"
+19:23.00,19:25.00,loading,loading,70.0,35,50,"{'loading': 35, 'swinging': 15}"
+19:25.00,19:31.00,swinging,swinging,100.0,150,150,{'swinging': 150}
+19:31.00,19:33.00,loading,swinging,0.0,0,50,{'swinging': 50}
+19:33.00,19:45.00,swinging,swinging,96.3,289,300,"{'swinging': 289, 'loading': 11}"
+19:45.00,19:47.00,loading,loading,72.0,36,50,"{'loading': 36, 'swinging': 14}"
+19:47.00,19:50.00,swinging,swinging,100.0,75,75,{'swinging': 75}
+19:50.00,19:56.00,travelling,travelling,78.0,117,150,"{'swinging': 5, 'travelling': 117, 'idling': 28}"
+19:56.00,19:59.00,idling,idling,82.7,62,75,"{'idling': 62, 'travelling': 13}"
+19:59.00,20:04.00,travelling,travelling,100.0,125,125,{'travelling': 125}
+20:04.00,20:07.00,idling,idling,69.3,52,75,"{'travelling': 23, 'idling': 52}"
+20:07.00,20:17.00,travelling,travelling,94.4,236,250,"{'travelling': 236, 'idling': 14}"
+20:17.00,20:26.00,idling,idling,100.0,225,225,{'idling': 225}
+20:26.00,20:30.00,travelling,travelling,80.0,80,100,"{'idling': 10, 'travelling': 80, 'swinging': 10}"
+20:30.00,20:42.00,swinging,swinging,94.7,284,300,"{'swinging': 284, 'digging': 16}"
+20:42.00,20:53.00,digging,digging,98.5,271,275,"{'digging': 271, 'loading': 4}"
+20:53.00,20:55.00,loading,loading,98.0,49,50,"{'loading': 49, 'digging': 1}"
+20:55.00,21:01.00,swinging,swinging,96.0,144,150,"{'digging': 6, 'swinging': 144}"
+21:01.00,21:05.00,travelling,travelling,78.0,78,100,"{'swinging': 12, 'travelling': 78, 'digging': 10}"
+21:05.00,21:08.00,digging,digging,86.7,65,75,"{'digging': 65, 'loading': 10}"
+21:08.00,21:10.00,loading,loading,100.0,50,50,{'loading': 50}
+21:10.00,21:18.00,swinging,swinging,76.5,153,200,"{'loading': 13, 'swinging': 153, 'digging': 34}"
+21:18.00,21:28.00,digging,digging,96.4,241,250,"{'digging': 241, 'loading': 9}"
+21:28.00,21:30.00,loading,loading,82.0,41,50,"{'loading': 41, 'swinging': 9}"
+21:30.00,21:34.00,swinging,swinging,83.0,83,100,"{'swinging': 83, 'digging': 17}"
+21:34.00,21:49.00,digging,digging,98.7,370,375,"{'digging': 370, 'swinging': 5}"
+21:49.00,21:52.00,swinging,swinging,86.7,65,75,"{'swinging': 65, 'digging': 10}"
+21:52.00,21:54.00,digging,digging,66.0,33,50,"{'digging': 33, 'travelling': 17}"
+21:54.00,21:56.00,travelling,travelling,78.0,39,50,"{'travelling': 39, 'swinging': 11}"
+21:56.00,22:00.00,swinging,swinging,76.0,76,100,"{'swinging': 76, 'loading': 24}"
+22:00.00,22:03.00,loading,loading,89.3,67,75,"{'loading': 67, 'swinging': 8}"
+22:03.00,22:12.00,swinging,swinging,96.9,218,225,"{'swinging': 218, 'loading': 7}"
+22:12.00,22:15.00,loading,loading,97.3,73,75,"{'loading': 73, 'swinging': 2}"
+22:15.00,22:22.00,swinging,swinging,100.0,175,175,{'swinging': 175}
+22:22.00,22:24.00,digging,digging,62.0,31,50,"{'swinging': 5, 'digging': 31, 'loading': 14}"
+22:24.00,22:26.00,loading,loading,100.0,50,50,{'loading': 50}
+22:26.00,22:33.00,swinging,swinging,96.6,169,175,"{'loading': 6, 'swinging': 169}"
+22:33.00,22:34.00,digging,swinging,0.0,0,25,{'swinging': 25}
+22:34.00,22:35.00,swinging,swinging,100.0,25,25,{'swinging': 25}
+22:35.00,22:38.00,digging,digging,54.7,41,75,"{'swinging': 34, 'digging': 41}"
+22:38.00,22:40.00,swinging,swinging,78.0,39,50,"{'swinging': 39, 'digging': 11}"
+22:40.00,22:41.00,digging,digging,96.0,24,25,"{'digging': 24, 'swinging': 1}"
+22:41.00,22:44.00,swinging,swinging,100.0,75,75,{'swinging': 75}
+22:44.00,22:45.00,digging,swinging,0.0,0,25,{'swinging': 25}
+22:45.00,22:49.00,swinging,swinging,100.0,100,100,{'swinging': 100}
+22:49.00,22:50.00,digging,swinging,0.0,0,25,{'swinging': 25}
+22:50.00,22:55.00,swinging,swinging,87.2,109,125,"{'swinging': 109, 'idling': 16}"
+22:55.00,23:08.00,idling,idling,97.2,316,325,"{'idling': 316, 'loading': 9}"
+23:08.00,23:09.00,loading,loading,92.0,23,25,"{'loading': 23, 'swinging': 2}"
+23:09.00,23:17.00,swinging,swinging,90.5,181,200,"{'swinging': 181, 'idling': 19}"
+23:17.00,23:23.00,idling,idling,92.7,139,150,"{'idling': 139, 'loading': 11}"
+23:23.00,23:25.00,loading,loading,96.0,48,50,"{'loading': 48, 'swinging': 2}"
+23:25.00,23:41.00,swinging,swinging,96.8,387,400,"{'swinging': 387, 'travelling': 13}"
+23:41.00,23:46.00,travelling,travelling,96.8,121,125,"{'travelling': 121, 'swinging': 4}"
+23:46.00,23:48.00,swinging,swinging,92.0,46,50,"{'swinging': 46, 'travelling': 4}"
+23:48.00,23:53.00,travelling,travelling,96.8,121,125,"{'travelling': 121, 'idling': 4}"
+23:53.00,23:57.00,idling,idling,88.0,88,100,"{'idling': 88, 'travelling': 12}"
+23:57.00,24:07.00,travelling,travelling,95.6,239,250,"{'travelling': 239, 'swinging': 11}"
+24:07.00,24:21.00,swinging,swinging,99.1,347,350,"{'swinging': 347, 'digging': 3}"
+24:21.00,24:26.00,digging,digging,92.0,115,125,"{'digging': 115, 'swinging': 10}"
+24:26.00,24:33.00,swinging,swinging,94.9,166,175,"{'swinging': 166, 'idling': 9}"
+24:33.00,24:53.00,idling,idling,100.0,500,500,{'idling': 500}
+24:53.00,25:01.00,digging,digging,97.0,194,200,"{'idling': 6, 'digging': 194}"
+25:01.00,25:08.00,swinging,swinging,57.7,101,175,"{'digging': 17, 'swinging': 101, 'idling': 57}"
+25:08.00,25:13.00,digging,digging,86.4,108,125,"{'idling': 17, 'digging': 108}"
+25:13.00,25:17.00,swinging,swinging,67.0,67,100,"{'swinging': 67, 'idling': 33}"
+25:17.00,25:21.00,digging,digging,89.0,89,100,"{'idling': 7, 'digging': 89, 'swinging': 4}"
+25:21.00,25:24.00,swinging,swinging,92.0,69,75,"{'swinging': 69, 'digging': 6}"
+25:24.00,25:29.00,digging,digging,100.0,125,125,{'digging': 125}
+25:29.00,25:30.00,loading,swinging,0.0,0,25,"{'digging': 5, 'swinging': 20}"
+25:30.00,25:41.00,swinging,swinging,100.0,275,275,{'swinging': 275}
+25:41.00,25:45.00,digging,digging,74.0,74,100,"{'swinging': 14, 'digging': 74, 'loading': 12}"
+25:45.00,25:47.00,loading,loading,94.0,47,50,"{'loading': 47, 'swinging': 3}"
+25:47.00,25:55.00,swinging,swinging,100.0,200,200,{'swinging': 200}
+25:55.00,25:58.00,idling,idling,93.3,70,75,"{'swinging': 5, 'idling': 70}"
+25:58.00,26:02.00,swinging,swinging,76.0,76,100,"{'idling': 17, 'swinging': 76, 'digging': 7}"
+26:02.00,26:09.00,digging,digging,95.4,167,175,"{'digging': 167, 'loading': 8}"
+26:09.00,26:12.00,loading,loading,90.7,68,75,"{'loading': 68, 'swinging': 7}"
+26:12.00,26:26.00,swinging,swinging,92.3,323,350,"{'swinging': 323, 'digging': 27}"
+26:26.00,26:30.00,digging,digging,91.0,91,100,"{'digging': 91, 'loading': 9}"
+26:30.00,26:32.00,loading,loading,76.0,38,50,"{'loading': 38, 'digging': 12}"
+26:32.00,26:34.00,digging,digging,78.0,39,50,"{'digging': 39, 'loading': 11}"
+26:34.00,26:36.00,loading,loading,100.0,50,50,{'loading': 50}
+26:36.00,26:39.00,digging,digging,77.3,58,75,"{'loading': 17, 'digging': 58}"
+26:39.00,26:41.00,loading,loading,90.0,45,50,"{'loading': 45, 'swinging': 5}"
+26:41.00,26:55.00,swinging,swinging,90.9,318,350,"{'swinging': 318, 'idling': 32}"
+26:55.00,27:00.00,idling,idling,97.6,122,125,"{'idling': 122, 'digging': 3}"
+27:00.00,27:13.00,digging,digging,100.0,325,325,{'digging': 325}
+27:13.00,27:16.00,swinging,swinging,72.0,54,75,"{'digging': 10, 'swinging': 54, 'idling': 11}"
+27:16.00,27:30.00,digging,digging,94.9,332,350,"{'idling': 18, 'digging': 332}"
+27:30.00,27:39.00,idling,idling,100.0,225,225,{'idling': 225}
+27:39.00,27:46.00,swinging,swinging,55.4,97,175,"{'swinging': 97, 'idling': 64, 'digging': 14}"
+27:46.00,27:59.00,digging,digging,97.8,318,325,"{'digging': 318, 'loading': 7}"
+27:59.00,28:02.00,loading,loading,74.7,56,75,"{'loading': 56, 'swinging': 19}"
+28:02.00,28:12.00,swinging,swinging,99.2,248,250,"{'swinging': 248, 'digging': 2}"
+28:12.00,28:17.00,digging,digging,100.0,125,125,{'digging': 125}
+28:17.00,28:18.00,loading,swinging,0.0,0,25,"{'digging': 5, 'swinging': 20}"
+28:18.00,28:30.00,swinging,swinging,94.3,283,300,"{'swinging': 283, 'digging': 17}"
+28:30.00,28:34.00,digging,digging,86.0,86,100,"{'digging': 86, 'loading': 14}"
+28:34.00,28:35.00,loading,loading,76.0,19,25,"{'loading': 19, 'swinging': 6}"
+28:35.00,28:48.00,swinging,swinging,98.2,319,325,"{'swinging': 319, 'digging': 6}"
+28:48.00,28:58.00,digging,digging,95.6,239,250,"{'digging': 239, 'idling': 11}"
+28:58.00,29:00.00,idling,idling,90.0,45,50,"{'idling': 45, 'swinging': 5}"
+29:00.00,29:02.00,swinging,swinging,74.0,37,50,"{'swinging': 37, 'idling': 13}"
+29:02.00,31:29.00,idling,idling,99.1,3643,3675,"{'idling': 3643, 'swinging': 32}"
+31:29.00,31:36.00,swinging,swinging,90.9,159,175,"{'swinging': 159, 'digging': 16}"
+31:36.00,31:40.00,digging,digging,92.0,92,100,"{'digging': 92, 'loading': 8}"
+31:40.00,31:42.00,loading,loading,100.0,50,50,{'loading': 50}
+31:42.00,31:48.00,idling,idling,100.0,150,150,{'idling': 150}
+31:48.00,31:58.00,swinging,swinging,95.6,239,250,"{'idling': 11, 'swinging': 239}"
+31:58.00,32:02.00,idling,idling,92.0,92,100,"{'idling': 92, 'swinging': 8}"
+32:02.00,32:07.00,swinging,swinging,86.4,108,125,"{'swinging': 108, 'digging': 17}"
+32:07.00,32:20.00,digging,digging,100.0,325,325,{'digging': 325}
+32:20.00,32:22.00,idling,idling,100.0,50,50,{'idling': 50}
+32:22.00,32:55.00,digging,digging,99.8,823,825,"{'idling': 1, 'digging': 823, 'loading': 1}"
+32:55.00,32:57.00,loading,loading,86.0,43,50,"{'loading': 43, 'swinging': 7}"
+32:57.00,33:09.00,swinging,swinging,95.7,287,300,"{'swinging': 287, 'digging': 13}"
+33:09.00,33:12.00,digging,digging,89.3,67,75,"{'digging': 67, 'loading': 8}"
+33:12.00,33:13.00,loading,loading,88.0,22,25,"{'loading': 22, 'swinging': 3}"
+33:13.00,33:27.00,swinging,swinging,97.1,340,350,"{'swinging': 340, 'digging': 10}"
+33:27.00,34:12.00,digging,digging,100.0,1125,1125,{'digging': 1125}
+34:12.00,34:13.00,loading,swinging,0.0,0,25,"{'digging': 5, 'swinging': 20}"
+34:13.00,34:25.00,swinging,swinging,91.3,274,300,"{'swinging': 274, 'digging': 25, 'loading': 1}"
+34:25.00,34:29.00,loading,loading,100.0,100,100,{'loading': 100}
+34:29.00,34:43.00,swinging,swinging,94.6,331,350,"{'swinging': 331, 'idling': 19}"
+34:43.00,35:18.00,idling,idling,98.5,862,875,"{'idling': 862, 'travelling': 13}"
+35:18.00,35:24.00,travelling,travelling,91.3,137,150,"{'travelling': 137, 'swinging': 13}"
+35:24.00,35:26.00,swinging,swinging,96.0,48,50,"{'swinging': 48, 'digging': 2}"
+35:26.00,35:54.00,digging,digging,97.4,682,700,"{'digging': 682, 'idling': 18}"
+35:54.00,36:44.00,idling,idling,99.7,1246,1250,"{'idling': 1246, 'digging': 4}"
+36:44.00,36:50.00,digging,digging,88.7,133,150,"{'digging': 133, 'idling': 17}"
+36:50.00,37:10.00,idling,idling,100.0,500,500,{'idling': 500}
+37:10.00,37:12.00,swinging,idling,0.0,0,50,"{'idling': 28, 'digging': 22}"
+37:12.00,37:21.00,digging,digging,82.7,186,225,"{'digging': 186, 'idling': 30, 'loading': 9}"
+37:21.00,37:24.00,loading,loading,84.0,63,75,"{'loading': 63, 'swinging': 12}"
+37:24.00,37:25.00,swinging,swinging,100.0,25,25,{'swinging': 25}
+37:25.00,37:26.00,idling,idling,100.0,25,25,{'idling': 25}
+37:26.00,37:27.00,travelling,swinging,44.0,11,25,"{'travelling': 11, 'swinging': 14}"
+37:27.00,37:38.00,swinging,swinging,97.8,269,275,"{'swinging': 269, 'digging': 6}"
+37:38.00,37:41.00,digging,digging,100.0,75,75,{'digging': 75}
+37:41.00,37:42.00,loading,loading,56.0,14,25,"{'digging': 5, 'loading': 14, 'swinging': 6}"
+37:42.00,37:53.00,swinging,swinging,97.8,269,275,"{'swinging': 269, 'travelling': 6}"
+37:53.00,38:07.00,travelling,travelling,100.0,350,350,{'travelling': 350}
+38:07.00,38:13.00,swinging,swinging,94.0,141,150,"{'swinging': 141, 'idling': 9}"
+38:13.00,38:39.00,digging,digging,92.9,604,650,"{'idling': 46, 'digging': 604}"
+38:39.00,38:58.00,idling,idling,98.1,466,475,"{'idling': 466, 'digging': 9}"
+38:58.00,39:50.00,digging,digging,90.9,1182,1300,"{'digging': 1182, 'idling': 118}"
+39:50.00,39:51.00,loading,digging,0.0,0,25,"{'digging': 18, 'swinging': 7}"
+39:51.00,40:10.00,swinging,swinging,85.9,408,475,"{'swinging': 408, 'digging': 25, 'idling': 42}"
+40:10.00,40:16.00,idling,idling,100.0,150,150,{'idling': 150}
+40:16.00,41:14.00,digging,digging,97.2,1409,1450,"{'idling': 30, 'digging': 1409, 'travelling': 11}"
+41:14.00,41:17.00,travelling,travelling,77.3,58,75,"{'travelling': 58, 'digging': 17}"
+41:17.00,42:09.00,digging,digging,99.2,1289,1300,"{'digging': 1289, 'idling': 11}"
+42:09.00,42:13.00,idling,idling,89.0,89,100,"{'idling': 89, 'digging': 11}"
+42:13.00,42:21.00,digging,digging,100.0,200,200,{'digging': 200}
+42:21.00,42:30.00,idling,idling,99.1,223,225,"{'digging': 2, 'idling': 223}"
+42:30.00,43:03.00,digging,digging,90.9,750,825,"{'idling': 75, 'digging': 750}"
+43:03.00,43:16.00,idling,idling,100.0,325,325,{'idling': 325}
+43:16.00,43:26.00,swinging,swinging,54.8,137,250,"{'idling': 78, 'swinging': 137, 'digging': 35}"
+43:26.00,44:39.00,digging,digging,91.9,1677,1825,"{'digging': 1677, 'idling': 87, 'swinging': 61}"
+44:39.00,44:41.00,loading,idling,0.0,0,50,"{'swinging': 20, 'idling': 30}"
+44:41.00,44:57.00,swinging,swinging,91.2,365,400,"{'idling': 7, 'swinging': 365, 'digging': 28}"
+44:57.00,45:55.00,digging,digging,99.0,1436,1450,"{'digging': 1436, 'loading': 14}"
+45:55.00,45:56.00,loading,swinging,16.0,4,25,"{'loading': 4, 'swinging': 21}"
+45:56.00,46:12.00,swinging,swinging,100.0,400,400,{'swinging': 400}
+46:12.00,47:01.00,digging,digging,99.9,1224,1225,"{'swinging': 1, 'digging': 1224}"
+47:01.00,47:04.00,loading,loading,93.3,70,75,"{'loading': 70, 'swinging': 5}"
+47:04.00,47:26.00,swinging,swinging,95.3,524,550,"{'swinging': 524, 'idling': 9, 'digging': 17}"
+47:26.00,47:43.00,digging,digging,98.8,420,425,"{'digging': 420, 'loading': 5}"
+47:43.00,47:46.00,loading,loading,89.3,67,75,"{'loading': 67, 'travelling': 8}"
+47:46.00,47:50.00,travelling,travelling,96.0,96,100,"{'travelling': 96, 'swinging': 4}"
+47:50.00,48:01.00,swinging,swinging,100.0,275,275,{'swinging': 275}
+48:01.00,48:07.00,idling,idling,92.0,138,150,"{'swinging': 5, 'idling': 138, 'travelling': 7}"
+48:07.00,48:27.00,travelling,travelling,91.6,458,500,"{'travelling': 458, 'swinging': 38, 'idling': 4}"
+48:27.00,48:33.00,idling,idling,95.3,143,150,"{'idling': 143, 'swinging': 7}"
+48:33.00,48:34.00,swinging,swinging,84.0,21,25,"{'swinging': 21, 'travelling': 4}"
+48:34.00,49:26.00,travelling,travelling,99.2,1290,1300,"{'travelling': 1290, 'swinging': 10}"
+49:26.00,49:30.00,swinging,swinging,94.0,94,100,"{'swinging': 94, 'travelling': 6}"
+49:30.00,49:44.00,travelling,travelling,100.0,350,350,{'travelling': 350}
+49:44.00,49:50.00,swinging,swinging,85.3,128,150,"{'travelling': 22, 'swinging': 128}"
+49:50.00,49:53.00,travelling,travelling,92.0,69,75,"{'travelling': 69, 'swinging': 6}"
+49:53.00,49:55.00,swinging,swinging,62.0,31,50,"{'swinging': 31, 'travelling': 19}"
+49:55.00,50:05.00,travelling,travelling,100.0,250,250,{'travelling': 250}
+50:05.00,50:25.00,idling,idling,98.6,493,500,"{'travelling': 2, 'idling': 493, 'swinging': 5}"
+50:25.00,50:30.00,swinging,swinging,92.8,116,125,"{'swinging': 116, 'travelling': 9}"
+50:30.00,50:40.00,travelling,travelling,94.0,235,250,"{'travelling': 235, 'swinging': 15}"
+50:40.00,50:42.00,swinging,swinging,68.0,34,50,"{'swinging': 34, 'travelling': 16}"
+50:42.00,50:46.00,travelling,travelling,98.0,98,100,"{'travelling': 98, 'swinging': 2}"
+50:46.00,50:55.00,swinging,swinging,89.8,202,225,"{'swinging': 202, 'travelling': 23}"
+50:55.00,51:04.00,travelling,travelling,99.1,223,225,"{'travelling': 223, 'swinging': 2}"
+51:04.00,51:23.00,swinging,swinging,94.1,447,475,"{'swinging': 447, 'travelling': 28}"
+51:23.00,51:49.00,travelling,travelling,94.2,612,650,"{'travelling': 612, 'swinging': 38}"
+51:49.00,51:57.00,swinging,swinging,93.0,186,200,"{'swinging': 186, 'travelling': 14}"
+51:57.00,52:11.00,travelling,travelling,99.4,348,350,"{'travelling': 348, 'idling': 2}"
+52:11.00,52:19.00,idling,idling,100.0,200,200,{'idling': 200}
+52:19.00,52:34.00,travelling,travelling,99.2,372,375,"{'idling': 3, 'travelling': 372}"
+53:58.00,54:45.00,travelling,travelling,76.3,897,1175,"{'travelling': 897, 'swinging': 141, 'idling': 137}"
+54:45.00,55:20.44,idling,travelling,46.3,410,886,"{'travelling': 442, 'idling': 410, 'digging': 34}"
