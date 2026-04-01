@@ -1,0 +1,79 @@
+🟩 STEP 1 — Open PowerShell
+After restart, open PowerShell.
+
+🟩 STEP 2 — Set Kubernetes context
+kubectl config use-context nautilus
+Verify: kubectl get pods -n shi-group-ece-advanced
+
+🟩 STEP 3 — Start your GPU pod
+
+Go to the folder where your YAML lives:cd C:\Users\shubh\desktop\Research_work_with_AVIK
+Create the pod:kubectl apply -f shubhan-any-gpu.yaml
+Wait until it is running: kubectl get pod shubhan-v1 -n shi-group-ece-advanced -w
+Continue only when STATUS = Running
+
+🟩 STEP 4 — Attach VS Code to the pod
+Open VS Code
+Press Ctrl + Shift + P
+Select: Dev Containers: Attach to Running Container...
+Choose: Kubernetes → shubhan-v1 → gpu-container
+Wait until VS Code finishes connecting.
+OR
+Go to clusters -> Workloads -> Pods -> Attach to VS Code
+
+🟩 STEP 5 — Open the persistent folder
+In VS Code:
+Open Explorer
+Open folder:  /home/mambauser
+⚠️ Anything outside /mydata will be lost
+
+🟩 STEP 6 — Copy your local code & data (ONCE)
+Drag from your laptop → into VS Code:
+/home/mambauser/project/
+ ├── train.py
+ ├── data/
+ └── outputs/
+You do this only once unless your code changes.
+
+🟩 STEP 7 — Run your code on the GPU
+Open VS Code Terminal (inside the pod):
+cd /home/mambauser/project
+python train.py
+
+🟩 STEP 8 — Confirm GPU is being used
+In the new terminal:
+nvidia-smi
+You should see your Python process using GPU memory.
+
+🟩 STEP 9 — Wait for completion
+Let the program finish.
+Laptop can sleep
+VS Code can close
+Pod keeps running
+
+🟩 STEP 10 — Copy results back to your laptop
+After training:
+Drag from VS Code:
+/home/mambauser/project/outputs
+→ your local machine
+
+🟩 STEP 11 — Delete the pod (IMPORTANT)
+When done:
+kubectl delete pod shubhan-v1 -n shi-group-ece-advanced
+✔ Data remains safe in /mydata
+
+🧠 Mental model (remember this)
+Laptop = editor + storage
+/mydata = shared disk
+Pod = GPU compute
+
+To monitor 
+1. kubectl exec -n shi-group-ece-advanced -it resnet3d-train -- /bin/bash -> nvidia-smi -> tail -f /data/models/train.log
+2. kubectl exec -n shi-group-ece-advanced -it resnet3d-train -- tail -f /data/models/train.log
+3. kubectl exec -n shi-group-ece-advanced resnet3d-train -- grep Epoch /data/models/train.log
+4. kubectl exec -n shi-group-ece-advanced resnet3d-train -- tail -n 100 /data/models/train.log | grep Epoch
+
+To Copy file
+C:\Users\shubh\Desktop\Research_work_with_AVIK\Workflow\Codes>kubectl cp Custom_resnet_model_training_DELETE_1.py shi-group-ece-advanced/resnet3d-train:/data/scripts/train_resnet3d_slow.py
+
+pip install -r requirements.txt

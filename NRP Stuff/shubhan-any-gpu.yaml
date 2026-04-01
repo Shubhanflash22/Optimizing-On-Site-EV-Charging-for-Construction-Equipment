@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shubhan-v1
+  namespace: shi-group-ece-advanced
+spec:
+  restartPolicy: Never
+  securityContext:
+      fsGroup: 1000
+  containers:
+  - name: gpu-container
+    image: stablebaselines/rl-baselines3-zoo:latest
+    command: ["/bin/bash", "-c"]
+    args: ["sleep infinity"]
+    resources:
+      requests:
+        cpu: "4"
+        memory: 8Gi
+        ephemeral-storage: "50Gi"
+        nvidia.com/gpu: "1"
+      limits:
+        cpu: "8"
+        memory: 16Gi
+        ephemeral-storage: "80Gi"
+        nvidia.com/gpu: "1"
+    volumeMounts:
+    - name: bian-data-pwm
+      mountPath: /mydata
+  volumes:
+  - name: bian-data-pwm
+    persistentVolumeClaim:
+      claimName: bian-data-pwm
