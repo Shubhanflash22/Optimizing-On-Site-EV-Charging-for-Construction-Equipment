@@ -1,0 +1,432 @@
+[
+  {
+    "params": {
+      "min_activity_duration_s": 2.0,
+      "dist_threshold": 0.05,
+      "idle_window": 36,
+      "fsm_min_dwell_seconds": 1.0,
+      "enable_fsm": false,
+      "override_travelling_only": true
+    },
+    "run_id": "PARAM_SET_9063",
+    "macro_acc": 0.8958725240738761,
+    "net_weighted_accuracy": 0.8858951746540622,
+    "avg_prod": 101.9241127961539,
+    "stopped_early": false,
+    "stop_reason": null,
+    "videos_evaluated": 11,
+    "total_videos": 11,
+    "video_details": [
+      {
+        "video": "Day_2",
+        "acc": 0.8390106449592987,
+        "prod": 225.2641987516223,
+        "len": 83027
+      },
+      {
+        "video": "Day_3",
+        "acc": 0.8719991918375594,
+        "prod": 69.43567731347052,
+        "len": 247510
+      },
+      {
+        "video": "Day_4_1",
+        "acc": 0.8631161473087818,
+        "prod": 221.75073574703987,
+        "len": 17670
+      },
+      {
+        "video": "TC_00011",
+        "acc": 0.8190140845070423,
+        "prod": 352.17391304347825,
+        "len": 32758
+      },
+      {
+        "video": "TC_00012",
+        "acc": 0.8713294797687862,
+        "prod": 164.60261729971273,
+        "len": 161444
+      },
+      {
+        "video": "TC_00013",
+        "acc": 1.0,
+        "prod": 0.0,
+        "len": 1544
+      },
+      {
+        "video": "TC_00014",
+        "acc": 0.9182806835836355,
+        "prod": 6.818296604319938,
+        "len": 96568
+      },
+      {
+        "video": "TC_00015",
+        "acc": 0.9731282051282051,
+        "prod": 0.0,
+        "len": 4889
+      },
+      {
+        "video": "TC_00016",
+        "acc": 0.9558295605858855,
+        "prod": 16.82708953673568,
+        "len": 187788
+      },
+      {
+        "video": "TC_00019",
+        "acc": 0.8755994986770644,
+        "prod": 52.88875909081196,
+        "len": 179535
+      },
+      {
+        "video": "TC_00021",
+        "acc": 0.8672902684563758,
+        "prod": 11.403953370501773,
+        "len": 147136
+      }
+    ]
+  },
+  {
+    "params": {
+      "min_activity_duration_s": 1.2,
+      "dist_threshold": 0.05,
+      "idle_window": 36,
+      "fsm_min_dwell_seconds": 1.0,
+      "enable_fsm": false,
+      "override_travelling_only": true
+    },
+    "run_id": "PARAM_SET_5463",
+    "macro_acc": 0.8913744082875827,
+    "net_weighted_accuracy": 0.8813073664866549,
+    "avg_prod": 149.2614921491763,
+    "stopped_early": false,
+    "stop_reason": null,
+    "videos_evaluated": 11,
+    "total_videos": 11,
+    "video_details": [
+      {
+        "video": "Day_2",
+        "acc": 0.8288541014402003,
+        "prod": 314.2323359162047,
+        "len": 83027
+      },
+      {
+        "video": "Day_3",
+        "acc": 0.8663865036872411,
+        "prod": 90.26595844165561,
+        "len": 247510
+      },
+      {
+        "video": "Day_4_1",
+        "acc": 0.8638526912181304,
+        "prod": 240.1806486930341,
+        "len": 17670
+      },
+      {
+        "video": "TC_00011",
+        "acc": 0.8115492957746478,
+        "prod": 645.6521739130435,
+        "len": 32758
+      },
+      {
+        "video": "TC_00012",
+        "acc": 0.863956326268465,
+        "prod": 228.37244337767788,
+        "len": 161444
+      },
+      {
+        "video": "TC_00013",
+        "acc": 0.9901639344262295,
+        "prod": 0.0,
+        "len": 1544
+      },
+      {
+        "video": "TC_00014",
+        "acc": 0.9180113930605903,
+        "prod": 13.633838851391154,
+        "len": 96568
+      },
+      {
+        "video": "TC_00015",
+        "acc": 0.9731282051282051,
+        "prod": 0.0,
+        "len": 4889
+      },
+      {
+        "video": "TC_00016",
+        "acc": 0.9548069241011984,
+        "prod": 19.63255611033012,
+        "len": 187788
+      },
+      {
+        "video": "TC_00019",
+        "acc": 0.8698621361927308,
+        "prod": 75.96803145567998,
+        "len": 179535
+      },
+      {
+        "video": "TC_00021",
+        "acc": 0.8645469798657718,
+        "prod": 13.938426881922283,
+        "len": 147136
+      }
+    ]
+  },
+  {
+    "params": {
+      "min_activity_duration_s": 1.0,
+      "dist_threshold": 0.05,
+      "idle_window": 36,
+      "fsm_min_dwell_seconds": 1.0,
+      "enable_fsm": false,
+      "override_travelling_only": true
+    },
+    "run_id": "PARAM_SET_3663",
+    "macro_acc": 0.8888117182119067,
+    "net_weighted_accuracy": 0.8793085203253297,
+    "avg_prod": 176.46537594591993,
+    "stopped_early": false,
+    "stop_reason": null,
+    "videos_evaluated": 11,
+    "total_videos": 11,
+    "video_details": [
+      {
+        "video": "Day_2",
+        "acc": 0.8269380087664371,
+        "prod": 355.5950320831866,
+        "len": 83027
+      },
+      {
+        "video": "Day_3",
+        "acc": 0.8639781796141024,
+        "prod": 103.56232343416247,
+        "len": 247510
+      },
+      {
+        "video": "Day_4_1",
+        "acc": 0.8621529745042493,
+        "prod": 314.0823867524292,
+        "len": 17670
+      },
+      {
+        "video": "TC_00011",
+        "acc": 0.8066197183098591,
+        "prod": 763.0434782608695,
+        "len": 32758
+      },
+      {
+        "video": "TC_00012",
+        "acc": 0.8608220937700707,
+        "prod": 262.8420777131622,
+        "len": 161444
+      },
+      {
+        "video": "TC_00013",
+        "acc": 0.981639344262295,
+        "prod": 0.0,
+        "len": 1544
+      },
+      {
+        "video": "TC_00014",
+        "acc": 0.9167477990678405,
+        "prod": 11.361341143203394,
+        "len": 96568
+      },
+      {
+        "video": "TC_00015",
+        "acc": 0.9731282051282051,
+        "prod": 0.0,
+        "len": 4889
+      },
+      {
+        "video": "TC_00016",
+        "acc": 0.9537363515312917,
+        "prod": 24.306974231837287,
+        "len": 187788
+      },
+      {
+        "video": "TC_00019",
+        "acc": 0.8682467622893747,
+        "prod": 87.31839763454923,
+        "len": 179535
+      },
+      {
+        "video": "TC_00021",
+        "acc": 0.8629194630872483,
+        "prod": 19.00712415171909,
+        "len": 147136
+      }
+    ]
+  },
+  {
+    "params": {
+      "min_activity_duration_s": 0.5,
+      "dist_threshold": 0.05,
+      "idle_window": 36,
+      "fsm_min_dwell_seconds": 1.0,
+      "enable_fsm": false,
+      "override_travelling_only": true
+    },
+    "run_id": "PARAM_SET_063",
+    "macro_acc": 0.8830486769575355,
+    "net_weighted_accuracy": 0.8740897273537118,
+    "avg_prod": 214.44061849399353,
+    "stopped_early": false,
+    "stop_reason": null,
+    "videos_evaluated": 11,
+    "total_videos": 11,
+    "video_details": [
+      {
+        "video": "Day_2",
+        "acc": 0.8187601753287413,
+        "prod": 469.76102148218445,
+        "len": 83027
+      },
+      {
+        "video": "Day_3",
+        "acc": 0.8593756945145974,
+        "prod": 130.53403343857332,
+        "len": 247510
+      },
+      {
+        "video": "Day_4_1",
+        "acc": 0.8525779036827196,
+        "prod": 406.37613737429024,
+        "len": 17670
+      },
+      {
+        "video": "TC_00011",
+        "acc": 0.7998591549295775,
+        "prod": 763.375380600261,
+        "len": 32758
+      },
+      {
+        "video": "TC_00012",
+        "acc": 0.8525497752087348,
+        "prod": 368.9079422382672,
+        "len": 161444
+      },
+      {
+        "video": "TC_00013",
+        "acc": 0.9724590163934427,
+        "prod": 0.0,
+        "len": 1544
+      },
+      {
+        "video": "TC_00014",
+        "acc": 0.9131330916623511,
+        "prod": 14.459999357333363,
+        "len": 96568
+      },
+      {
+        "video": "TC_00015",
+        "acc": 0.9725128205128205,
+        "prod": 0.0,
+        "len": 4889
+      },
+      {
+        "video": "TC_00016",
+        "acc": 0.9504926764314248,
+        "prod": 35.525085696478655,
+        "len": 187788
+      },
+      {
+        "video": "TC_00019",
+        "acc": 0.8633839298147891,
+        "prod": 139.52204320865303,
+        "len": 179535
+      },
+      {
+        "video": "TC_00021",
+        "acc": 0.8584312080536913,
+        "prod": 30.38516003788767,
+        "len": 147136
+      }
+    ]
+  },
+  {
+    "params": {
+      "min_activity_duration_s": 0.5,
+      "dist_threshold": 0.05,
+      "idle_window": 24,
+      "fsm_min_dwell_seconds": 1.0,
+      "enable_fsm": false,
+      "override_travelling_only": true
+    },
+    "run_id": "PARAM_SET_023",
+    "macro_acc": 0.8822953674303657,
+    "net_weighted_accuracy": 0.8733991698531329,
+    "avg_prod": 215.2802386125354,
+    "stopped_early": false,
+    "stop_reason": null,
+    "videos_evaluated": 11,
+    "total_videos": 11,
+    "video_details": [
+      {
+        "video": "Day_2",
+        "acc": 0.8183844708829054,
+        "prod": 469.76102148218445,
+        "len": 83027
+      },
+      {
+        "video": "Day_3",
+        "acc": 0.8577593696332962,
+        "prod": 130.53403343857332,
+        "len": 247510
+      },
+      {
+        "video": "Day_4_1",
+        "acc": 0.8526912181303116,
+        "prod": 415.6119586782513,
+        "len": 17670
+      },
+      {
+        "video": "TC_00011",
+        "acc": 0.7956338028169014,
+        "prod": 763.375380600261,
+        "len": 32758
+      },
+      {
+        "video": "TC_00012",
+        "acc": 0.8521579961464355,
+        "prod": 368.9079422382672,
+        "len": 161444
+      },
+      {
+        "video": "TC_00013",
+        "acc": 0.9724590163934427,
+        "prod": 0.0,
+        "len": 1544
+      },
+      {
+        "video": "TC_00014",
+        "acc": 0.9112687726566546,
+        "prod": 14.459999357333363,
+        "len": 96568
+      },
+      {
+        "video": "TC_00015",
+        "acc": 0.9725128205128205,
+        "prod": 0.0,
+        "len": 4889
+      },
+      {
+        "video": "TC_00016",
+        "acc": 0.950098535286285,
+        "prod": 35.525085696478655,
+        "len": 187788
+      },
+      {
+        "video": "TC_00019",
+        "acc": 0.8638518312212784,
+        "prod": 139.52204320865303,
+        "len": 179535
+      },
+      {
+        "video": "TC_00021",
+        "acc": 0.8584312080536913,
+        "prod": 30.38516003788767,
+        "len": 147136
+      }
+    ]
+  }
+]

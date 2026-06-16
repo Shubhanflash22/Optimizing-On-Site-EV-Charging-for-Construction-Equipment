@@ -1,0 +1,16 @@
+{
+  "total_frames": 147136,
+  "duration_seconds": 5885.44,
+  "fps": 25,
+  "activity_distribution": {
+    "swinging": 13.505192474989125,
+    "idling": 70.19016420182687,
+    "travelling": 14.981377772944759,
+    "digging": 0.9236352762070466,
+    "loading": 0.3996302740321879
+  },
+  "num_cycles": 9,
+  "avg_cycle_time_seconds": 473.5199999999999,
+  "productivity_lcy_per_hour": 11.403953370501773,
+  "avg_confidence": 0.8930595258227337
+}

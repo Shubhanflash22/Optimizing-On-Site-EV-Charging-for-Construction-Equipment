@@ -1,0 +1,8151 @@
+[
+  {
+    "cycle_number": 1,
+    "start_frame": 1410,
+    "end_frame": 1467,
+    "duration_frames": 57,
+    "duration_seconds": 2.28,
+    "activity_counts": {
+      "digging": 29,
+      "swinging": 28
+    },
+    "activity_percentages": {
+      "digging": 50.877192982456144,
+      "swinging": 49.122807017543856
+    }
+  },
+  {
+    "cycle_number": 2,
+    "start_frame": 1467,
+    "end_frame": 1619,
+    "duration_frames": 152,
+    "duration_seconds": 6.08,
+    "activity_counts": {
+      "digging": 85,
+      "swinging": 16,
+      "idling": 51
+    },
+    "activity_percentages": {
+      "digging": 55.92105263157895,
+      "swinging": 10.526315789473683,
+      "idling": 33.55263157894737
+    }
+  },
+  {
+    "cycle_number": 3,
+    "start_frame": 1619,
+    "end_frame": 2641,
+    "duration_frames": 1022,
+    "duration_seconds": 40.88,
+    "activity_counts": {
+      "digging": 975,
+      "travelling": 21,
+      "swinging": 26
+    },
+    "activity_percentages": {
+      "digging": 95.40117416829746,
+      "travelling": 2.054794520547945,
+      "swinging": 2.5440313111545985
+    }
+  },
+  {
+    "cycle_number": 4,
+    "start_frame": 2641,
+    "end_frame": 2795,
+    "duration_frames": 154,
+    "duration_seconds": 6.16,
+    "activity_counts": {
+      "digging": 139,
+      "swinging": 15
+    },
+    "activity_percentages": {
+      "digging": 90.25974025974025,
+      "swinging": 9.740259740259742
+    }
+  },
+  {
+    "cycle_number": 5,
+    "start_frame": 2795,
+    "end_frame": 2909,
+    "duration_frames": 114,
+    "duration_seconds": 4.56,
+    "activity_counts": {
+      "digging": 59,
+      "swinging": 55
+    },
+    "activity_percentages": {
+      "digging": 51.75438596491229,
+      "swinging": 48.24561403508772
+    }
+  },
+  {
+    "cycle_number": 6,
+    "start_frame": 2909,
+    "end_frame": 3127,
+    "duration_frames": 218,
+    "duration_seconds": 8.72,
+    "activity_counts": {
+      "digging": 181,
+      "swinging": 37
+    },
+    "activity_percentages": {
+      "digging": 83.02752293577981,
+      "swinging": 16.972477064220186
+    }
+  },
+  {
+    "cycle_number": 7,
+    "start_frame": 3127,
+    "end_frame": 4430,
+    "duration_frames": 1303,
+    "duration_seconds": 52.12,
+    "activity_counts": {
+      "digging": 1296,
+      "swinging": 7
+    },
+    "activity_percentages": {
+      "digging": 99.46277820414429,
+      "swinging": 0.5372217958557176
+    }
+  },
+  {
+    "cycle_number": 8,
+    "start_frame": 4430,
+    "end_frame": 4556,
+    "duration_frames": 126,
+    "duration_seconds": 5.04,
+    "activity_counts": {
+      "digging": 12,
+      "swinging": 114
+    },
+    "activity_percentages": {
+      "digging": 9.523809523809524,
+      "swinging": 90.47619047619048
+    }
+  },
+  {
+    "cycle_number": 9,
+    "start_frame": 4556,
+    "end_frame": 6720,
+    "duration_frames": 2164,
+    "duration_seconds": 86.56,
+    "activity_counts": {
+      "digging": 33,
+      "swinging": 835,
+      "idling": 1201,
+      "travelling": 95
+    },
+    "activity_percentages": {
+      "digging": 1.5249537892791127,
+      "swinging": 38.58595194085028,
+      "idling": 55.49907578558225,
+      "travelling": 4.390018484288355
+    }
+  },
+  {
+    "cycle_number": 10,
+    "start_frame": 6720,
+    "end_frame": 7617,
+    "duration_frames": 897,
+    "duration_seconds": 35.88,
+    "activity_counts": {
+      "digging": 60,
+      "swinging": 654,
+      "idling": 181,
+      "travelling": 2
+    },
+    "activity_percentages": {
+      "digging": 6.688963210702341,
+      "swinging": 72.90969899665552,
+      "idling": 20.178372352285397,
+      "travelling": 0.2229654403567447
+    }
+  },
+  {
+    "cycle_number": 11,
+    "start_frame": 7617,
+    "end_frame": 7906,
+    "duration_frames": 289,
+    "duration_seconds": 11.56,
+    "activity_counts": {
+      "digging": 243,
+      "swinging": 14,
+      "travelling": 32
+    },
+    "activity_percentages": {
+      "digging": 84.08304498269896,
+      "swinging": 4.844290657439446,
+      "travelling": 11.072664359861593
+    }
+  },
+  {
+    "cycle_number": 12,
+    "start_frame": 7906,
+    "end_frame": 8020,
+    "duration_frames": 114,
+    "duration_seconds": 4.56,
+    "activity_counts": {
+      "digging": 65,
+      "swinging": 49
+    },
+    "activity_percentages": {
+      "digging": 57.01754385964912,
+      "swinging": 42.98245614035088
+    }
+  },
+  {
+    "cycle_number": 13,
+    "start_frame": 8020,
+    "end_frame": 8038,
+    "duration_frames": 18,
+    "duration_seconds": 0.72,
+    "activity_counts": {
+      "digging": 7,
+      "travelling": 11
+    },
+    "activity_percentages": {
+      "digging": 38.88888888888889,
+      "travelling": 61.111111111111114
+    }
+  },
+  {
+    "cycle_number": 14,
+    "start_frame": 8038,
+    "end_frame": 8261,
+    "duration_frames": 223,
+    "duration_seconds": 8.92,
+    "activity_counts": {
+      "digging": 174,
+      "swinging": 49
+    },
+    "activity_percentages": {
+      "digging": 78.02690582959642,
+      "swinging": 21.973094170403588
+    }
+  },
+  {
+    "cycle_number": 15,
+    "start_frame": 8261,
+    "end_frame": 8263,
+    "duration_frames": 2,
+    "duration_seconds": 0.08,
+    "activity_counts": {
+      "digging": 1,
+      "travelling": 1
+    },
+    "activity_percentages": {
+      "digging": 50.0,
+      "travelling": 50.0
+    }
+  },
+  {
+    "cycle_number": 16,
+    "start_frame": 8263,
+    "end_frame": 8374,
+    "duration_frames": 111,
+    "duration_seconds": 4.44,
+    "activity_counts": {
+      "digging": 62,
+      "idling": 49
+    },
+    "activity_percentages": {
+      "digging": 55.85585585585585,
+      "idling": 44.14414414414414
+    }
+  },
+  {
+    "cycle_number": 17,
+    "start_frame": 8374,
+    "end_frame": 8444,
+    "duration_frames": 70,
+    "duration_seconds": 2.8,
+    "activity_counts": {
+      "digging": 32,
+      "swinging": 38
+    },
+    "activity_percentages": {
+      "digging": 45.714285714285715,
+      "swinging": 54.285714285714285
+    }
+  },
+  {
+    "cycle_number": 18,
+    "start_frame": 8444,
+    "end_frame": 8585,
+    "duration_frames": 141,
+    "duration_seconds": 5.64,
+    "activity_counts": {
+      "digging": 40,
+      "swinging": 101
+    },
+    "activity_percentages": {
+      "digging": 28.368794326241137,
+      "swinging": 71.63120567375887
+    }
+  },
+  {
+    "cycle_number": 19,
+    "start_frame": 8585,
+    "end_frame": 8753,
+    "duration_frames": 168,
+    "duration_seconds": 6.72,
+    "activity_counts": {
+      "digging": 28,
+      "swinging": 6,
+      "idling": 134
+    },
+    "activity_percentages": {
+      "digging": 16.666666666666664,
+      "swinging": 3.571428571428571,
+      "idling": 79.76190476190477
+    }
+  },
+  {
+    "cycle_number": 20,
+    "start_frame": 8753,
+    "end_frame": 8935,
+    "duration_frames": 182,
+    "duration_seconds": 7.28,
+    "activity_counts": {
+      "digging": 151,
+      "swinging": 31
+    },
+    "activity_percentages": {
+      "digging": 82.96703296703298,
+      "swinging": 17.032967032967033
+    }
+  },
+  {
+    "cycle_number": 21,
+    "start_frame": 8935,
+    "end_frame": 9123,
+    "duration_frames": 188,
+    "duration_seconds": 7.52,
+    "activity_counts": {
+      "digging": 111,
+      "swinging": 77
+    },
+    "activity_percentages": {
+      "digging": 59.04255319148937,
+      "swinging": 40.95744680851064
+    }
+  },
+  {
+    "cycle_number": 22,
+    "start_frame": 9123,
+    "end_frame": 9489,
+    "duration_frames": 366,
+    "duration_seconds": 14.64,
+    "activity_counts": {
+      "digging": 130,
+      "travelling": 86,
+      "swinging": 37,
+      "idling": 84,
+      "loading": 29
+    },
+    "activity_percentages": {
+      "digging": 35.51912568306011,
+      "travelling": 23.497267759562842,
+      "swinging": 10.10928961748634,
+      "idling": 22.950819672131146,
+      "loading": 7.923497267759563
+    }
+  },
+  {
+    "cycle_number": 23,
+    "start_frame": 9489,
+    "end_frame": 9614,
+    "duration_frames": 125,
+    "duration_seconds": 5.0,
+    "activity_counts": {
+      "digging": 50,
+      "swinging": 33,
+      "travelling": 27,
+      "idling": 15
+    },
+    "activity_percentages": {
+      "digging": 40.0,
+      "swinging": 26.400000000000002,
+      "travelling": 21.6,
+      "idling": 12.0
+    }
+  },
+  {
+    "cycle_number": 24,
+    "start_frame": 9614,
+    "end_frame": 9776,
+    "duration_frames": 162,
+    "duration_seconds": 6.48,
+    "activity_counts": {
+      "digging": 108,
+      "swinging": 54
+    },
+    "activity_percentages": {
+      "digging": 66.66666666666666,
+      "swinging": 33.33333333333333
+    }
+  },
+  {
+    "cycle_number": 25,
+    "start_frame": 9776,
+    "end_frame": 9933,
+    "duration_frames": 157,
+    "duration_seconds": 6.28,
+    "activity_counts": {
+      "digging": 126,
+      "travelling": 31
+    },
+    "activity_percentages": {
+      "digging": 80.2547770700637,
+      "travelling": 19.745222929936308
+    }
+  },
+  {
+    "cycle_number": 26,
+    "start_frame": 9933,
+    "end_frame": 10041,
+    "duration_frames": 108,
+    "duration_seconds": 4.32,
+    "activity_counts": {
+      "digging": 77,
+      "swinging": 31
+    },
+    "activity_percentages": {
+      "digging": 71.29629629629629,
+      "swinging": 28.703703703703702
+    }
+  },
+  {
+    "cycle_number": 27,
+    "start_frame": 10041,
+    "end_frame": 10145,
+    "duration_frames": 104,
+    "duration_seconds": 4.16,
+    "activity_counts": {
+      "digging": 33,
+      "travelling": 71
+    },
+    "activity_percentages": {
+      "digging": 31.73076923076923,
+      "travelling": 68.26923076923077
+    }
+  },
+  {
+    "cycle_number": 28,
+    "start_frame": 10145,
+    "end_frame": 10242,
+    "duration_frames": 97,
+    "duration_seconds": 3.88,
+    "activity_counts": {
+      "digging": 41,
+      "travelling": 36,
+      "idling": 20
+    },
+    "activity_percentages": {
+      "digging": 42.2680412371134,
+      "travelling": 37.11340206185567,
+      "idling": 20.618556701030926
+    }
+  },
+  {
+    "cycle_number": 29,
+    "start_frame": 10242,
+    "end_frame": 10404,
+    "duration_frames": 162,
+    "duration_seconds": 6.48,
+    "activity_counts": {
+      "digging": 54,
+      "swinging": 108
+    },
+    "activity_percentages": {
+      "digging": 33.33333333333333,
+      "swinging": 66.66666666666666
+    }
+  },
+  {
+    "cycle_number": 30,
+    "start_frame": 10404,
+    "end_frame": 10650,
+    "duration_frames": 246,
+    "duration_seconds": 9.84,
+    "activity_counts": {
+      "digging": 206,
+      "travelling": 40
+    },
+    "activity_percentages": {
+      "digging": 83.73983739837398,
+      "travelling": 16.260162601626014
+    }
+  },
+  {
+    "cycle_number": 31,
+    "start_frame": 10650,
+    "end_frame": 10955,
+    "duration_frames": 305,
+    "duration_seconds": 12.2,
+    "activity_counts": {
+      "digging": 225,
+      "travelling": 36,
+      "swinging": 44
+    },
+    "activity_percentages": {
+      "digging": 73.77049180327869,
+      "travelling": 11.80327868852459,
+      "swinging": 14.426229508196723
+    }
+  },
+  {
+    "cycle_number": 32,
+    "start_frame": 10955,
+    "end_frame": 11292,
+    "duration_frames": 337,
+    "duration_seconds": 13.48,
+    "activity_counts": {
+      "digging": 312,
+      "idling": 25
+    },
+    "activity_percentages": {
+      "digging": 92.58160237388724,
+      "idling": 7.418397626112759
+    }
+  },
+  {
+    "cycle_number": 33,
+    "start_frame": 11292,
+    "end_frame": 11496,
+    "duration_frames": 204,
+    "duration_seconds": 8.16,
+    "activity_counts": {
+      "digging": 61,
+      "idling": 72,
+      "travelling": 71
+    },
+    "activity_percentages": {
+      "digging": 29.901960784313726,
+      "idling": 35.294117647058826,
+      "travelling": 34.80392156862745
+    }
+  },
+  {
+    "cycle_number": 34,
+    "start_frame": 11496,
+    "end_frame": 11667,
+    "duration_frames": 171,
+    "duration_seconds": 6.84,
+    "activity_counts": {
+      "digging": 73,
+      "swinging": 39,
+      "idling": 42,
+      "travelling": 17
+    },
+    "activity_percentages": {
+      "digging": 42.69005847953216,
+      "swinging": 22.807017543859647,
+      "idling": 24.561403508771928,
+      "travelling": 9.941520467836257
+    }
+  },
+  {
+    "cycle_number": 35,
+    "start_frame": 11667,
+    "end_frame": 11750,
+    "duration_frames": 83,
+    "duration_seconds": 3.32,
+    "activity_counts": {
+      "digging": 18,
+      "loading": 65
+    },
+    "activity_percentages": {
+      "digging": 21.686746987951807,
+      "loading": 78.3132530120482
+    }
+  },
+  {
+    "cycle_number": 36,
+    "start_frame": 11750,
+    "end_frame": 11886,
+    "duration_frames": 136,
+    "duration_seconds": 5.44,
+    "activity_counts": {
+      "digging": 9,
+      "swinging": 63,
+      "idling": 8,
+      "travelling": 56
+    },
+    "activity_percentages": {
+      "digging": 6.61764705882353,
+      "swinging": 46.32352941176471,
+      "idling": 5.88235294117647,
+      "travelling": 41.17647058823529
+    }
+  },
+  {
+    "cycle_number": 37,
+    "start_frame": 11886,
+    "end_frame": 11899,
+    "duration_frames": 13,
+    "duration_seconds": 0.52,
+    "activity_counts": {
+      "digging": 4,
+      "swinging": 9
+    },
+    "activity_percentages": {
+      "digging": 30.76923076923077,
+      "swinging": 69.23076923076923
+    }
+  },
+  {
+    "cycle_number": 38,
+    "start_frame": 11899,
+    "end_frame": 11983,
+    "duration_frames": 84,
+    "duration_seconds": 3.36,
+    "activity_counts": {
+      "digging": 10,
+      "swinging": 74
+    },
+    "activity_percentages": {
+      "digging": 11.904761904761903,
+      "swinging": 88.09523809523809
+    }
+  },
+  {
+    "cycle_number": 39,
+    "start_frame": 11983,
+    "end_frame": 12111,
+    "duration_frames": 128,
+    "duration_seconds": 5.12,
+    "activity_counts": {
+      "digging": 61,
+      "swinging": 67
+    },
+    "activity_percentages": {
+      "digging": 47.65625,
+      "swinging": 52.34375
+    }
+  },
+  {
+    "cycle_number": 40,
+    "start_frame": 12111,
+    "end_frame": 12250,
+    "duration_frames": 139,
+    "duration_seconds": 5.56,
+    "activity_counts": {
+      "digging": 50,
+      "swinging": 71,
+      "travelling": 18
+    },
+    "activity_percentages": {
+      "digging": 35.97122302158273,
+      "swinging": 51.07913669064749,
+      "travelling": 12.949640287769784
+    }
+  },
+  {
+    "cycle_number": 41,
+    "start_frame": 12250,
+    "end_frame": 12571,
+    "duration_frames": 321,
+    "duration_seconds": 12.84,
+    "activity_counts": {
+      "digging": 285,
+      "swinging": 36
+    },
+    "activity_percentages": {
+      "digging": 88.78504672897196,
+      "swinging": 11.214953271028037
+    }
+  },
+  {
+    "cycle_number": 42,
+    "start_frame": 12571,
+    "end_frame": 13125,
+    "duration_frames": 554,
+    "duration_seconds": 22.16,
+    "activity_counts": {
+      "digging": 177,
+      "loading": 7,
+      "swinging": 25,
+      "travelling": 242,
+      "idling": 103
+    },
+    "activity_percentages": {
+      "digging": 31.949458483754512,
+      "loading": 1.263537906137184,
+      "swinging": 4.512635379061372,
+      "travelling": 43.682310469314075,
+      "idling": 18.592057761732853
+    }
+  },
+  {
+    "cycle_number": 43,
+    "start_frame": 13125,
+    "end_frame": 13289,
+    "duration_frames": 164,
+    "duration_seconds": 6.56,
+    "activity_counts": {
+      "digging": 88,
+      "travelling": 76
+    },
+    "activity_percentages": {
+      "digging": 53.65853658536586,
+      "travelling": 46.34146341463415
+    }
+  },
+  {
+    "cycle_number": 44,
+    "start_frame": 13289,
+    "end_frame": 13448,
+    "duration_frames": 159,
+    "duration_seconds": 6.36,
+    "activity_counts": {
+      "digging": 78,
+      "swinging": 81
+    },
+    "activity_percentages": {
+      "digging": 49.056603773584904,
+      "swinging": 50.943396226415096
+    }
+  },
+  {
+    "cycle_number": 45,
+    "start_frame": 13448,
+    "end_frame": 13595,
+    "duration_frames": 147,
+    "duration_seconds": 5.88,
+    "activity_counts": {
+      "digging": 89,
+      "swinging": 9,
+      "loading": 49
+    },
+    "activity_percentages": {
+      "digging": 60.544217687074834,
+      "swinging": 6.122448979591836,
+      "loading": 33.33333333333333
+    }
+  },
+  {
+    "cycle_number": 46,
+    "start_frame": 13595,
+    "end_frame": 13709,
+    "duration_frames": 114,
+    "duration_seconds": 4.56,
+    "activity_counts": {
+      "digging": 24,
+      "swinging": 39,
+      "travelling": 51
+    },
+    "activity_percentages": {
+      "digging": 21.052631578947366,
+      "swinging": 34.21052631578947,
+      "travelling": 44.73684210526316
+    }
+  },
+  {
+    "cycle_number": 47,
+    "start_frame": 13709,
+    "end_frame": 13738,
+    "duration_frames": 29,
+    "duration_seconds": 1.16,
+    "activity_counts": {
+      "digging": 13,
+      "swinging": 16
+    },
+    "activity_percentages": {
+      "digging": 44.827586206896555,
+      "swinging": 55.172413793103445
+    }
+  },
+  {
+    "cycle_number": 48,
+    "start_frame": 13738,
+    "end_frame": 13878,
+    "duration_frames": 140,
+    "duration_seconds": 5.6,
+    "activity_counts": {
+      "digging": 138,
+      "swinging": 2
+    },
+    "activity_percentages": {
+      "digging": 98.57142857142858,
+      "swinging": 1.4285714285714286
+    }
+  },
+  {
+    "cycle_number": 49,
+    "start_frame": 13878,
+    "end_frame": 14167,
+    "duration_frames": 289,
+    "duration_seconds": 11.56,
+    "activity_counts": {
+      "digging": 2,
+      "swinging": 98,
+      "idling": 127,
+      "travelling": 62
+    },
+    "activity_percentages": {
+      "digging": 0.6920415224913495,
+      "swinging": 33.910034602076124,
+      "idling": 43.944636678200695,
+      "travelling": 21.453287197231834
+    }
+  },
+  {
+    "cycle_number": 50,
+    "start_frame": 14167,
+    "end_frame": 14364,
+    "duration_frames": 197,
+    "duration_seconds": 7.88,
+    "activity_counts": {
+      "digging": 139,
+      "travelling": 58
+    },
+    "activity_percentages": {
+      "digging": 70.55837563451777,
+      "travelling": 29.441624365482234
+    }
+  },
+  {
+    "cycle_number": 51,
+    "start_frame": 14364,
+    "end_frame": 15326,
+    "duration_frames": 962,
+    "duration_seconds": 38.48,
+    "activity_counts": {
+      "digging": 136,
+      "idling": 391,
+      "travelling": 435
+    },
+    "activity_percentages": {
+      "digging": 14.137214137214137,
+      "idling": 40.644490644490645,
+      "travelling": 45.21829521829522
+    }
+  },
+  {
+    "cycle_number": 52,
+    "start_frame": 15326,
+    "end_frame": 15437,
+    "duration_frames": 111,
+    "duration_seconds": 4.44,
+    "activity_counts": {
+      "digging": 52,
+      "idling": 59
+    },
+    "activity_percentages": {
+      "digging": 46.846846846846844,
+      "idling": 53.153153153153156
+    }
+  },
+  {
+    "cycle_number": 53,
+    "start_frame": 15437,
+    "end_frame": 15622,
+    "duration_frames": 185,
+    "duration_seconds": 7.4,
+    "activity_counts": {
+      "digging": 18,
+      "idling": 167
+    },
+    "activity_percentages": {
+      "digging": 9.72972972972973,
+      "idling": 90.27027027027027
+    }
+  },
+  {
+    "cycle_number": 54,
+    "start_frame": 15622,
+    "end_frame": 15798,
+    "duration_frames": 176,
+    "duration_seconds": 7.04,
+    "activity_counts": {
+      "digging": 69,
+      "idling": 50,
+      "travelling": 57
+    },
+    "activity_percentages": {
+      "digging": 39.20454545454545,
+      "idling": 28.40909090909091,
+      "travelling": 32.38636363636363
+    }
+  },
+  {
+    "cycle_number": 55,
+    "start_frame": 15798,
+    "end_frame": 15857,
+    "duration_frames": 59,
+    "duration_seconds": 2.36,
+    "activity_counts": {
+      "digging": 6,
+      "idling": 53
+    },
+    "activity_percentages": {
+      "digging": 10.16949152542373,
+      "idling": 89.83050847457628
+    }
+  },
+  {
+    "cycle_number": 56,
+    "start_frame": 15857,
+    "end_frame": 16117,
+    "duration_frames": 260,
+    "duration_seconds": 10.4,
+    "activity_counts": {
+      "digging": 22,
+      "idling": 238
+    },
+    "activity_percentages": {
+      "digging": 8.461538461538462,
+      "idling": 91.53846153846153
+    }
+  },
+  {
+    "cycle_number": 57,
+    "start_frame": 16117,
+    "end_frame": 16309,
+    "duration_frames": 192,
+    "duration_seconds": 7.68,
+    "activity_counts": {
+      "digging": 51,
+      "idling": 90,
+      "travelling": 51
+    },
+    "activity_percentages": {
+      "digging": 26.5625,
+      "idling": 46.875,
+      "travelling": 26.5625
+    }
+  },
+  {
+    "cycle_number": 58,
+    "start_frame": 16309,
+    "end_frame": 16371,
+    "duration_frames": 62,
+    "duration_seconds": 2.48,
+    "activity_counts": {
+      "digging": 59,
+      "idling": 3
+    },
+    "activity_percentages": {
+      "digging": 95.16129032258065,
+      "idling": 4.838709677419355
+    }
+  },
+  {
+    "cycle_number": 59,
+    "start_frame": 16371,
+    "end_frame": 16406,
+    "duration_frames": 35,
+    "duration_seconds": 1.4,
+    "activity_counts": {
+      "digging": 1,
+      "idling": 34
+    },
+    "activity_percentages": {
+      "digging": 2.857142857142857,
+      "idling": 97.14285714285714
+    }
+  },
+  {
+    "cycle_number": 60,
+    "start_frame": 16406,
+    "end_frame": 16656,
+    "duration_frames": 250,
+    "duration_seconds": 10.0,
+    "activity_counts": {
+      "digging": 12,
+      "travelling": 69,
+      "idling": 169
+    },
+    "activity_percentages": {
+      "digging": 4.8,
+      "travelling": 27.6,
+      "idling": 67.60000000000001
+    }
+  },
+  {
+    "cycle_number": 61,
+    "start_frame": 16656,
+    "end_frame": 16881,
+    "duration_frames": 225,
+    "duration_seconds": 9.0,
+    "activity_counts": {
+      "digging": 151,
+      "idling": 74
+    },
+    "activity_percentages": {
+      "digging": 67.11111111111111,
+      "idling": 32.88888888888889
+    }
+  },
+  {
+    "cycle_number": 62,
+    "start_frame": 16881,
+    "end_frame": 17037,
+    "duration_frames": 156,
+    "duration_seconds": 6.24,
+    "activity_counts": {
+      "digging": 103,
+      "idling": 53
+    },
+    "activity_percentages": {
+      "digging": 66.02564102564102,
+      "idling": 33.97435897435898
+    }
+  },
+  {
+    "cycle_number": 63,
+    "start_frame": 17037,
+    "end_frame": 18005,
+    "duration_frames": 968,
+    "duration_seconds": 38.72,
+    "activity_counts": {
+      "digging": 83,
+      "idling": 646,
+      "travelling": 202,
+      "swinging": 37
+    },
+    "activity_percentages": {
+      "digging": 8.574380165289258,
+      "idling": 66.73553719008265,
+      "travelling": 20.867768595041323,
+      "swinging": 3.8223140495867765
+    }
+  },
+  {
+    "cycle_number": 64,
+    "start_frame": 18005,
+    "end_frame": 19121,
+    "duration_frames": 1116,
+    "duration_seconds": 44.64,
+    "activity_counts": {
+      "digging": 61,
+      "idling": 476,
+      "travelling": 442,
+      "swinging": 129,
+      "loading": 8
+    },
+    "activity_percentages": {
+      "digging": 5.465949820788531,
+      "idling": 42.65232974910394,
+      "travelling": 39.60573476702509,
+      "swinging": 11.559139784946236,
+      "loading": 0.7168458781362007
+    }
+  },
+  {
+    "cycle_number": 65,
+    "start_frame": 19121,
+    "end_frame": 19394,
+    "duration_frames": 273,
+    "duration_seconds": 10.92,
+    "activity_counts": {
+      "digging": 64,
+      "travelling": 78,
+      "idling": 131
+    },
+    "activity_percentages": {
+      "digging": 23.44322344322344,
+      "travelling": 28.57142857142857,
+      "idling": 47.985347985347985
+    }
+  },
+  {
+    "cycle_number": 66,
+    "start_frame": 19394,
+    "end_frame": 19424,
+    "duration_frames": 30,
+    "duration_seconds": 1.2,
+    "activity_counts": {
+      "digging": 14,
+      "swinging": 16
+    },
+    "activity_percentages": {
+      "digging": 46.666666666666664,
+      "swinging": 53.333333333333336
+    }
+  },
+  {
+    "cycle_number": 67,
+    "start_frame": 19424,
+    "end_frame": 19496,
+    "duration_frames": 72,
+    "duration_seconds": 2.88,
+    "activity_counts": {
+      "digging": 5,
+      "swinging": 67
+    },
+    "activity_percentages": {
+      "digging": 6.944444444444445,
+      "swinging": 93.05555555555556
+    }
+  },
+  {
+    "cycle_number": 68,
+    "start_frame": 19496,
+    "end_frame": 19767,
+    "duration_frames": 271,
+    "duration_seconds": 10.84,
+    "activity_counts": {
+      "digging": 238,
+      "swinging": 33
+    },
+    "activity_percentages": {
+      "digging": 87.82287822878229,
+      "swinging": 12.177121771217712
+    }
+  },
+  {
+    "cycle_number": 69,
+    "start_frame": 19767,
+    "end_frame": 19836,
+    "duration_frames": 69,
+    "duration_seconds": 2.76,
+    "activity_counts": {
+      "digging": 55,
+      "swinging": 14
+    },
+    "activity_percentages": {
+      "digging": 79.71014492753623,
+      "swinging": 20.28985507246377
+    }
+  },
+  {
+    "cycle_number": 70,
+    "start_frame": 19836,
+    "end_frame": 20105,
+    "duration_frames": 269,
+    "duration_seconds": 10.76,
+    "activity_counts": {
+      "digging": 21,
+      "swinging": 93,
+      "idling": 84,
+      "travelling": 71
+    },
+    "activity_percentages": {
+      "digging": 7.806691449814126,
+      "swinging": 34.572490706319705,
+      "idling": 31.226765799256505,
+      "travelling": 26.394052044609666
+    }
+  },
+  {
+    "cycle_number": 71,
+    "start_frame": 20105,
+    "end_frame": 20931,
+    "duration_frames": 826,
+    "duration_seconds": 33.04,
+    "activity_counts": {
+      "digging": 614,
+      "travelling": 105,
+      "idling": 107
+    },
+    "activity_percentages": {
+      "digging": 74.33414043583535,
+      "travelling": 12.711864406779661,
+      "idling": 12.953995157384988
+    }
+  },
+  {
+    "cycle_number": 72,
+    "start_frame": 20931,
+    "end_frame": 21185,
+    "duration_frames": 254,
+    "duration_seconds": 10.16,
+    "activity_counts": {
+      "digging": 146,
+      "travelling": 82,
+      "idling": 26
+    },
+    "activity_percentages": {
+      "digging": 57.48031496062992,
+      "travelling": 32.28346456692913,
+      "idling": 10.236220472440944
+    }
+  },
+  {
+    "cycle_number": 73,
+    "start_frame": 21185,
+    "end_frame": 21584,
+    "duration_frames": 399,
+    "duration_seconds": 15.96,
+    "activity_counts": {
+      "digging": 49,
+      "swinging": 306,
+      "travelling": 44
+    },
+    "activity_percentages": {
+      "digging": 12.280701754385964,
+      "swinging": 76.69172932330827,
+      "travelling": 11.027568922305765
+    }
+  },
+  {
+    "cycle_number": 74,
+    "start_frame": 21584,
+    "end_frame": 21651,
+    "duration_frames": 67,
+    "duration_seconds": 2.68,
+    "activity_counts": {
+      "digging": 27,
+      "swinging": 40
+    },
+    "activity_percentages": {
+      "digging": 40.298507462686565,
+      "swinging": 59.70149253731343
+    }
+  },
+  {
+    "cycle_number": 75,
+    "start_frame": 21651,
+    "end_frame": 21691,
+    "duration_frames": 40,
+    "duration_seconds": 1.6,
+    "activity_counts": {
+      "digging": 32,
+      "swinging": 8
+    },
+    "activity_percentages": {
+      "digging": 80.0,
+      "swinging": 20.0
+    }
+  },
+  {
+    "cycle_number": 76,
+    "start_frame": 21691,
+    "end_frame": 21693,
+    "duration_frames": 2,
+    "duration_seconds": 0.08,
+    "activity_counts": {
+      "digging": 1,
+      "swinging": 1
+    },
+    "activity_percentages": {
+      "digging": 50.0,
+      "swinging": 50.0
+    }
+  },
+  {
+    "cycle_number": 77,
+    "start_frame": 21693,
+    "end_frame": 21779,
+    "duration_frames": 86,
+    "duration_seconds": 3.44,
+    "activity_counts": {
+      "digging": 1,
+      "travelling": 85
+    },
+    "activity_percentages": {
+      "digging": 1.1627906976744187,
+      "travelling": 98.83720930232558
+    }
+  },
+  {
+    "cycle_number": 78,
+    "start_frame": 21779,
+    "end_frame": 21887,
+    "duration_frames": 108,
+    "duration_seconds": 4.32,
+    "activity_counts": {
+      "digging": 74,
+      "swinging": 34
+    },
+    "activity_percentages": {
+      "digging": 68.51851851851852,
+      "swinging": 31.48148148148148
+    }
+  },
+  {
+    "cycle_number": 79,
+    "start_frame": 21887,
+    "end_frame": 22049,
+    "duration_frames": 162,
+    "duration_seconds": 6.48,
+    "activity_counts": {
+      "digging": 113,
+      "swinging": 49
+    },
+    "activity_percentages": {
+      "digging": 69.75308641975309,
+      "swinging": 30.246913580246915
+    }
+  },
+  {
+    "cycle_number": 80,
+    "start_frame": 22049,
+    "end_frame": 22473,
+    "duration_frames": 424,
+    "duration_seconds": 16.96,
+    "activity_counts": {
+      "digging": 24,
+      "swinging": 201,
+      "idling": 129,
+      "travelling": 70
+    },
+    "activity_percentages": {
+      "digging": 5.660377358490567,
+      "swinging": 47.40566037735849,
+      "idling": 30.424528301886795,
+      "travelling": 16.50943396226415
+    }
+  },
+  {
+    "cycle_number": 81,
+    "start_frame": 22473,
+    "end_frame": 23080,
+    "duration_frames": 607,
+    "duration_seconds": 24.28,
+    "activity_counts": {
+      "digging": 211,
+      "swinging": 148,
+      "idling": 144,
+      "travelling": 104
+    },
+    "activity_percentages": {
+      "digging": 34.76112026359143,
+      "swinging": 24.382207578253706,
+      "idling": 23.72322899505766,
+      "travelling": 17.1334431630972
+    }
+  },
+  {
+    "cycle_number": 82,
+    "start_frame": 23080,
+    "end_frame": 23439,
+    "duration_frames": 359,
+    "duration_seconds": 14.36,
+    "activity_counts": {
+      "digging": 42,
+      "swinging": 171,
+      "travelling": 23,
+      "idling": 123
+    },
+    "activity_percentages": {
+      "digging": 11.699164345403899,
+      "swinging": 47.63231197771588,
+      "travelling": 6.406685236768802,
+      "idling": 34.26183844011142
+    }
+  },
+  {
+    "cycle_number": 83,
+    "start_frame": 23439,
+    "end_frame": 23731,
+    "duration_frames": 292,
+    "duration_seconds": 11.68,
+    "activity_counts": {
+      "digging": 31,
+      "idling": 120,
+      "swinging": 141
+    },
+    "activity_percentages": {
+      "digging": 10.616438356164384,
+      "idling": 41.0958904109589,
+      "swinging": 48.28767123287671
+    }
+  },
+  {
+    "cycle_number": 84,
+    "start_frame": 23731,
+    "end_frame": 23883,
+    "duration_frames": 152,
+    "duration_seconds": 6.08,
+    "activity_counts": {
+      "digging": 63,
+      "idling": 50,
+      "swinging": 39
+    },
+    "activity_percentages": {
+      "digging": 41.44736842105263,
+      "idling": 32.89473684210527,
+      "swinging": 25.657894736842106
+    }
+  },
+  {
+    "cycle_number": 85,
+    "start_frame": 23883,
+    "end_frame": 24231,
+    "duration_frames": 348,
+    "duration_seconds": 13.92,
+    "activity_counts": {
+      "digging": 15,
+      "idling": 120,
+      "swinging": 70,
+      "travelling": 35,
+      "loading": 108
+    },
+    "activity_percentages": {
+      "digging": 4.310344827586207,
+      "idling": 34.48275862068966,
+      "swinging": 20.114942528735632,
+      "travelling": 10.057471264367816,
+      "loading": 31.03448275862069
+    }
+  },
+  {
+    "cycle_number": 86,
+    "start_frame": 24231,
+    "end_frame": 24827,
+    "duration_frames": 596,
+    "duration_seconds": 23.84,
+    "activity_counts": {
+      "digging": 93,
+      "swinging": 154,
+      "idling": 155,
+      "travelling": 194
+    },
+    "activity_percentages": {
+      "digging": 15.604026845637584,
+      "swinging": 25.838926174496645,
+      "idling": 26.006711409395972,
+      "travelling": 32.5503355704698
+    }
+  },
+  {
+    "cycle_number": 87,
+    "start_frame": 24827,
+    "end_frame": 25149,
+    "duration_frames": 322,
+    "duration_seconds": 12.88,
+    "activity_counts": {
+      "digging": 10,
+      "idling": 110,
+      "swinging": 188,
+      "travelling": 14
+    },
+    "activity_percentages": {
+      "digging": 3.1055900621118013,
+      "idling": 34.161490683229815,
+      "swinging": 58.38509316770186,
+      "travelling": 4.3478260869565215
+    }
+  },
+  {
+    "cycle_number": 88,
+    "start_frame": 25149,
+    "end_frame": 25507,
+    "duration_frames": 358,
+    "duration_seconds": 14.32,
+    "activity_counts": {
+      "digging": 3,
+      "travelling": 294,
+      "swinging": 38,
+      "loading": 23
+    },
+    "activity_percentages": {
+      "digging": 0.8379888268156425,
+      "travelling": 82.12290502793296,
+      "swinging": 10.614525139664805,
+      "loading": 6.424581005586592
+    }
+  },
+  {
+    "cycle_number": 89,
+    "start_frame": 25507,
+    "end_frame": 25546,
+    "duration_frames": 39,
+    "duration_seconds": 1.56,
+    "activity_counts": {
+      "digging": 38,
+      "travelling": 1
+    },
+    "activity_percentages": {
+      "digging": 97.43589743589743,
+      "travelling": 2.564102564102564
+    }
+  },
+  {
+    "cycle_number": 90,
+    "start_frame": 25546,
+    "end_frame": 25618,
+    "duration_frames": 72,
+    "duration_seconds": 2.88,
+    "activity_counts": {
+      "digging": 16,
+      "idling": 56
+    },
+    "activity_percentages": {
+      "digging": 22.22222222222222,
+      "idling": 77.77777777777779
+    }
+  },
+  {
+    "cycle_number": 91,
+    "start_frame": 25618,
+    "end_frame": 25816,
+    "duration_frames": 198,
+    "duration_seconds": 7.92,
+    "activity_counts": {
+      "digging": 83,
+      "swinging": 53,
+      "idling": 62
+    },
+    "activity_percentages": {
+      "digging": 41.91919191919192,
+      "swinging": 26.767676767676768,
+      "idling": 31.313131313131315
+    }
+  },
+  {
+    "cycle_number": 92,
+    "start_frame": 25816,
+    "end_frame": 25911,
+    "duration_frames": 95,
+    "duration_seconds": 3.8,
+    "activity_counts": {
+      "digging": 70,
+      "swinging": 25
+    },
+    "activity_percentages": {
+      "digging": 73.68421052631578,
+      "swinging": 26.31578947368421
+    }
+  },
+  {
+    "cycle_number": 93,
+    "start_frame": 25911,
+    "end_frame": 26055,
+    "duration_frames": 144,
+    "duration_seconds": 5.76,
+    "activity_counts": {
+      "digging": 143,
+      "idling": 1
+    },
+    "activity_percentages": {
+      "digging": 99.30555555555556,
+      "idling": 0.6944444444444444
+    }
+  },
+  {
+    "cycle_number": 94,
+    "start_frame": 26055,
+    "end_frame": 26388,
+    "duration_frames": 333,
+    "duration_seconds": 13.32,
+    "activity_counts": {
+      "digging": 8,
+      "swinging": 286,
+      "idling": 39
+    },
+    "activity_percentages": {
+      "digging": 2.4024024024024024,
+      "swinging": 85.88588588588588,
+      "idling": 11.711711711711711
+    }
+  },
+  {
+    "cycle_number": 95,
+    "start_frame": 26388,
+    "end_frame": 26926,
+    "duration_frames": 538,
+    "duration_seconds": 21.52,
+    "activity_counts": {
+      "digging": 39,
+      "swinging": 88,
+      "idling": 307,
+      "travelling": 104
+    },
+    "activity_percentages": {
+      "digging": 7.24907063197026,
+      "swinging": 16.356877323420075,
+      "idling": 57.06319702602231,
+      "travelling": 19.33085501858736
+    }
+  },
+  {
+    "cycle_number": 96,
+    "start_frame": 26926,
+    "end_frame": 27144,
+    "duration_frames": 218,
+    "duration_seconds": 8.72,
+    "activity_counts": {
+      "digging": 42,
+      "idling": 176
+    },
+    "activity_percentages": {
+      "digging": 19.26605504587156,
+      "idling": 80.73394495412845
+    }
+  },
+  {
+    "cycle_number": 97,
+    "start_frame": 27144,
+    "end_frame": 27420,
+    "duration_frames": 276,
+    "duration_seconds": 11.04,
+    "activity_counts": {
+      "digging": 40,
+      "idling": 236
+    },
+    "activity_percentages": {
+      "digging": 14.492753623188406,
+      "idling": 85.5072463768116
+    }
+  },
+  {
+    "cycle_number": 98,
+    "start_frame": 27420,
+    "end_frame": 27586,
+    "duration_frames": 166,
+    "duration_seconds": 6.64,
+    "activity_counts": {
+      "digging": 75,
+      "idling": 52,
+      "travelling": 39
+    },
+    "activity_percentages": {
+      "digging": 45.18072289156627,
+      "idling": 31.32530120481928,
+      "travelling": 23.49397590361446
+    }
+  },
+  {
+    "cycle_number": 99,
+    "start_frame": 27586,
+    "end_frame": 27769,
+    "duration_frames": 183,
+    "duration_seconds": 7.32,
+    "activity_counts": {
+      "digging": 59,
+      "idling": 115,
+      "swinging": 9
+    },
+    "activity_percentages": {
+      "digging": 32.240437158469945,
+      "idling": 62.841530054644814,
+      "swinging": 4.918032786885246
+    }
+  },
+  {
+    "cycle_number": 100,
+    "start_frame": 27769,
+    "end_frame": 27811,
+    "duration_frames": 42,
+    "duration_seconds": 1.68,
+    "activity_counts": {
+      "digging": 39,
+      "idling": 3
+    },
+    "activity_percentages": {
+      "digging": 92.85714285714286,
+      "idling": 7.142857142857142
+    }
+  },
+  {
+    "cycle_number": 101,
+    "start_frame": 27811,
+    "end_frame": 27916,
+    "duration_frames": 105,
+    "duration_seconds": 4.2,
+    "activity_counts": {
+      "digging": 1,
+      "travelling": 104
+    },
+    "activity_percentages": {
+      "digging": 0.9523809523809524,
+      "travelling": 99.04761904761905
+    }
+  },
+  {
+    "cycle_number": 102,
+    "start_frame": 27916,
+    "end_frame": 28033,
+    "duration_frames": 117,
+    "duration_seconds": 4.68,
+    "activity_counts": {
+      "digging": 73,
+      "travelling": 44
+    },
+    "activity_percentages": {
+      "digging": 62.39316239316239,
+      "travelling": 37.60683760683761
+    }
+  },
+  {
+    "cycle_number": 103,
+    "start_frame": 28033,
+    "end_frame": 28887,
+    "duration_frames": 854,
+    "duration_seconds": 34.16,
+    "activity_counts": {
+      "digging": 39,
+      "travelling": 68,
+      "idling": 126,
+      "swinging": 621
+    },
+    "activity_percentages": {
+      "digging": 4.566744730679157,
+      "travelling": 7.962529274004685,
+      "idling": 14.754098360655737,
+      "swinging": 72.71662763466043
+    }
+  },
+  {
+    "cycle_number": 104,
+    "start_frame": 28887,
+    "end_frame": 29050,
+    "duration_frames": 163,
+    "duration_seconds": 6.52,
+    "activity_counts": {
+      "digging": 30,
+      "idling": 133
+    },
+    "activity_percentages": {
+      "digging": 18.404907975460123,
+      "idling": 81.59509202453987
+    }
+  },
+  {
+    "cycle_number": 105,
+    "start_frame": 29050,
+    "end_frame": 29156,
+    "duration_frames": 106,
+    "duration_seconds": 4.24,
+    "activity_counts": {
+      "digging": 34,
+      "swinging": 72
+    },
+    "activity_percentages": {
+      "digging": 32.075471698113205,
+      "swinging": 67.9245283018868
+    }
+  },
+  {
+    "cycle_number": 106,
+    "start_frame": 29156,
+    "end_frame": 29228,
+    "duration_frames": 72,
+    "duration_seconds": 2.88,
+    "activity_counts": {
+      "digging": 40,
+      "swinging": 32
+    },
+    "activity_percentages": {
+      "digging": 55.55555555555556,
+      "swinging": 44.44444444444444
+    }
+  },
+  {
+    "cycle_number": 107,
+    "start_frame": 29228,
+    "end_frame": 29568,
+    "duration_frames": 340,
+    "duration_seconds": 13.6,
+    "activity_counts": {
+      "digging": 44,
+      "idling": 239,
+      "swinging": 57
+    },
+    "activity_percentages": {
+      "digging": 12.941176470588237,
+      "idling": 70.29411764705881,
+      "swinging": 16.76470588235294
+    }
+  },
+  {
+    "cycle_number": 108,
+    "start_frame": 29568,
+    "end_frame": 29885,
+    "duration_frames": 317,
+    "duration_seconds": 12.68,
+    "activity_counts": {
+      "digging": 77,
+      "idling": 158,
+      "swinging": 82
+    },
+    "activity_percentages": {
+      "digging": 24.290220820189273,
+      "idling": 49.8422712933754,
+      "swinging": 25.86750788643533
+    }
+  },
+  {
+    "cycle_number": 109,
+    "start_frame": 29885,
+    "end_frame": 29916,
+    "duration_frames": 31,
+    "duration_seconds": 1.24,
+    "activity_counts": {
+      "digging": 5,
+      "swinging": 6,
+      "idling": 20
+    },
+    "activity_percentages": {
+      "digging": 16.129032258064516,
+      "swinging": 19.35483870967742,
+      "idling": 64.51612903225806
+    }
+  },
+  {
+    "cycle_number": 110,
+    "start_frame": 29916,
+    "end_frame": 30132,
+    "duration_frames": 216,
+    "duration_seconds": 8.64,
+    "activity_counts": {
+      "digging": 167,
+      "swinging": 49
+    },
+    "activity_percentages": {
+      "digging": 77.31481481481481,
+      "swinging": 22.685185185185187
+    }
+  },
+  {
+    "cycle_number": 111,
+    "start_frame": 30132,
+    "end_frame": 30447,
+    "duration_frames": 315,
+    "duration_seconds": 12.6,
+    "activity_counts": {
+      "digging": 187,
+      "swinging": 99,
+      "travelling": 29
+    },
+    "activity_percentages": {
+      "digging": 59.36507936507937,
+      "swinging": 31.428571428571427,
+      "travelling": 9.206349206349207
+    }
+  },
+  {
+    "cycle_number": 112,
+    "start_frame": 30447,
+    "end_frame": 30531,
+    "duration_frames": 84,
+    "duration_seconds": 3.36,
+    "activity_counts": {
+      "digging": 63,
+      "idling": 21
+    },
+    "activity_percentages": {
+      "digging": 75.0,
+      "idling": 25.0
+    }
+  },
+  {
+    "cycle_number": 113,
+    "start_frame": 30531,
+    "end_frame": 30877,
+    "duration_frames": 346,
+    "duration_seconds": 13.84,
+    "activity_counts": {
+      "digging": 59,
+      "idling": 287
+    },
+    "activity_percentages": {
+      "digging": 17.052023121387283,
+      "idling": 82.94797687861272
+    }
+  },
+  {
+    "cycle_number": 114,
+    "start_frame": 30877,
+    "end_frame": 30881,
+    "duration_frames": 4,
+    "duration_seconds": 0.16,
+    "activity_counts": {
+      "digging": 3,
+      "travelling": 1
+    },
+    "activity_percentages": {
+      "digging": 75.0,
+      "travelling": 25.0
+    }
+  },
+  {
+    "cycle_number": 115,
+    "start_frame": 30881,
+    "end_frame": 30909,
+    "duration_frames": 28,
+    "duration_seconds": 1.12,
+    "activity_counts": {
+      "digging": 21,
+      "travelling": 7
+    },
+    "activity_percentages": {
+      "digging": 75.0,
+      "travelling": 25.0
+    }
+  },
+  {
+    "cycle_number": 116,
+    "start_frame": 30909,
+    "end_frame": 31001,
+    "duration_frames": 92,
+    "duration_seconds": 3.68,
+    "activity_counts": {
+      "digging": 32,
+      "travelling": 13,
+      "swinging": 25,
+      "idling": 22
+    },
+    "activity_percentages": {
+      "digging": 34.78260869565217,
+      "travelling": 14.130434782608695,
+      "swinging": 27.173913043478258,
+      "idling": 23.91304347826087
+    }
+  },
+  {
+    "cycle_number": 117,
+    "start_frame": 31001,
+    "end_frame": 31654,
+    "duration_frames": 653,
+    "duration_seconds": 26.12,
+    "activity_counts": {
+      "digging": 35,
+      "idling": 335,
+      "travelling": 39,
+      "swinging": 244
+    },
+    "activity_percentages": {
+      "digging": 5.359877488514548,
+      "idling": 51.301684532924966,
+      "travelling": 5.972434915773354,
+      "swinging": 37.36600306278714
+    }
+  },
+  {
+    "cycle_number": 118,
+    "start_frame": 31654,
+    "end_frame": 31760,
+    "duration_frames": 106,
+    "duration_seconds": 4.24,
+    "activity_counts": {
+      "digging": 71,
+      "idling": 3,
+      "travelling": 32
+    },
+    "activity_percentages": {
+      "digging": 66.98113207547169,
+      "idling": 2.8301886792452833,
+      "travelling": 30.18867924528302
+    }
+  },
+  {
+    "cycle_number": 119,
+    "start_frame": 31760,
+    "end_frame": 31846,
+    "duration_frames": 86,
+    "duration_seconds": 3.44,
+    "activity_counts": {
+      "digging": 31,
+      "travelling": 55
+    },
+    "activity_percentages": {
+      "digging": 36.04651162790697,
+      "travelling": 63.95348837209303
+    }
+  },
+  {
+    "cycle_number": 120,
+    "start_frame": 31846,
+    "end_frame": 32033,
+    "duration_frames": 187,
+    "duration_seconds": 7.48,
+    "activity_counts": {
+      "digging": 32,
+      "travelling": 59,
+      "idling": 96
+    },
+    "activity_percentages": {
+      "digging": 17.11229946524064,
+      "travelling": 31.550802139037433,
+      "idling": 51.33689839572193
+    }
+  },
+  {
+    "cycle_number": 121,
+    "start_frame": 32033,
+    "end_frame": 32419,
+    "duration_frames": 386,
+    "duration_seconds": 15.44,
+    "activity_counts": {
+      "digging": 34,
+      "travelling": 218,
+      "idling": 134
+    },
+    "activity_percentages": {
+      "digging": 8.808290155440414,
+      "travelling": 56.476683937823836,
+      "idling": 34.715025906735754
+    }
+  },
+  {
+    "cycle_number": 122,
+    "start_frame": 32419,
+    "end_frame": 32589,
+    "duration_frames": 170,
+    "duration_seconds": 6.8,
+    "activity_counts": {
+      "digging": 113,
+      "travelling": 57
+    },
+    "activity_percentages": {
+      "digging": 66.47058823529412,
+      "travelling": 33.52941176470588
+    }
+  },
+  {
+    "cycle_number": 123,
+    "start_frame": 32589,
+    "end_frame": 32729,
+    "duration_frames": 140,
+    "duration_seconds": 5.6,
+    "activity_counts": {
+      "digging": 69,
+      "idling": 71
+    },
+    "activity_percentages": {
+      "digging": 49.28571428571429,
+      "idling": 50.71428571428571
+    }
+  },
+  {
+    "cycle_number": 124,
+    "start_frame": 32729,
+    "end_frame": 32883,
+    "duration_frames": 154,
+    "duration_seconds": 6.16,
+    "activity_counts": {
+      "digging": 39,
+      "swinging": 36,
+      "idling": 79
+    },
+    "activity_percentages": {
+      "digging": 25.324675324675322,
+      "swinging": 23.376623376623375,
+      "idling": 51.298701298701296
+    }
+  },
+  {
+    "cycle_number": 125,
+    "start_frame": 32883,
+    "end_frame": 33151,
+    "duration_frames": 268,
+    "duration_seconds": 10.72,
+    "activity_counts": {
+      "digging": 97,
+      "idling": 48,
+      "travelling": 81,
+      "swinging": 42
+    },
+    "activity_percentages": {
+      "digging": 36.19402985074627,
+      "idling": 17.91044776119403,
+      "travelling": 30.223880597014922,
+      "swinging": 15.671641791044777
+    }
+  },
+  {
+    "cycle_number": 126,
+    "start_frame": 33151,
+    "end_frame": 33501,
+    "duration_frames": 350,
+    "duration_seconds": 14.0,
+    "activity_counts": {
+      "digging": 30,
+      "idling": 115,
+      "swinging": 85,
+      "travelling": 120
+    },
+    "activity_percentages": {
+      "digging": 8.571428571428571,
+      "idling": 32.857142857142854,
+      "swinging": 24.285714285714285,
+      "travelling": 34.285714285714285
+    }
+  },
+  {
+    "cycle_number": 127,
+    "start_frame": 33501,
+    "end_frame": 33540,
+    "duration_frames": 39,
+    "duration_seconds": 1.56,
+    "activity_counts": {
+      "digging": 21,
+      "swinging": 18
+    },
+    "activity_percentages": {
+      "digging": 53.84615384615385,
+      "swinging": 46.15384615384615
+    }
+  },
+  {
+    "cycle_number": 128,
+    "start_frame": 33540,
+    "end_frame": 33569,
+    "duration_frames": 29,
+    "duration_seconds": 1.16,
+    "activity_counts": {
+      "digging": 7,
+      "swinging": 22
+    },
+    "activity_percentages": {
+      "digging": 24.137931034482758,
+      "swinging": 75.86206896551724
+    }
+  },
+  {
+    "cycle_number": 129,
+    "start_frame": 33569,
+    "end_frame": 33736,
+    "duration_frames": 167,
+    "duration_seconds": 6.68,
+    "activity_counts": {
+      "digging": 105,
+      "swinging": 62
+    },
+    "activity_percentages": {
+      "digging": 62.874251497005986,
+      "swinging": 37.12574850299401
+    }
+  },
+  {
+    "cycle_number": 130,
+    "start_frame": 33736,
+    "end_frame": 33909,
+    "duration_frames": 173,
+    "duration_seconds": 6.92,
+    "activity_counts": {
+      "digging": 20,
+      "idling": 61,
+      "travelling": 92
+    },
+    "activity_percentages": {
+      "digging": 11.560693641618498,
+      "idling": 35.26011560693642,
+      "travelling": 53.179190751445084
+    }
+  },
+  {
+    "cycle_number": 131,
+    "start_frame": 33909,
+    "end_frame": 34016,
+    "duration_frames": 107,
+    "duration_seconds": 4.28,
+    "activity_counts": {
+      "digging": 77,
+      "idling": 30
+    },
+    "activity_percentages": {
+      "digging": 71.96261682242991,
+      "idling": 28.037383177570092
+    }
+  },
+  {
+    "cycle_number": 132,
+    "start_frame": 34016,
+    "end_frame": 34146,
+    "duration_frames": 130,
+    "duration_seconds": 5.2,
+    "activity_counts": {
+      "digging": 103,
+      "swinging": 27
+    },
+    "activity_percentages": {
+      "digging": 79.23076923076923,
+      "swinging": 20.76923076923077
+    }
+  },
+  {
+    "cycle_number": 133,
+    "start_frame": 34146,
+    "end_frame": 34722,
+    "duration_frames": 576,
+    "duration_seconds": 23.04,
+    "activity_counts": {
+      "digging": 109,
+      "idling": 368,
+      "swinging": 99
+    },
+    "activity_percentages": {
+      "digging": 18.92361111111111,
+      "idling": 63.888888888888886,
+      "swinging": 17.1875
+    }
+  },
+  {
+    "cycle_number": 134,
+    "start_frame": 34722,
+    "end_frame": 34839,
+    "duration_frames": 117,
+    "duration_seconds": 4.68,
+    "activity_counts": {
+      "digging": 59,
+      "idling": 58
+    },
+    "activity_percentages": {
+      "digging": 50.427350427350426,
+      "idling": 49.572649572649574
+    }
+  },
+  {
+    "cycle_number": 135,
+    "start_frame": 34839,
+    "end_frame": 35198,
+    "duration_frames": 359,
+    "duration_seconds": 14.36,
+    "activity_counts": {
+      "digging": 33,
+      "idling": 209,
+      "loading": 92,
+      "travelling": 25
+    },
+    "activity_percentages": {
+      "digging": 9.192200557103064,
+      "idling": 58.21727019498607,
+      "loading": 25.62674094707521,
+      "travelling": 6.963788300835655
+    }
+  },
+  {
+    "cycle_number": 136,
+    "start_frame": 35198,
+    "end_frame": 36011,
+    "duration_frames": 813,
+    "duration_seconds": 32.52,
+    "activity_counts": {
+      "digging": 546,
+      "idling": 223,
+      "swinging": 44
+    },
+    "activity_percentages": {
+      "digging": 67.15867158671587,
+      "idling": 27.429274292742928,
+      "swinging": 5.412054120541206
+    }
+  },
+  {
+    "cycle_number": 137,
+    "start_frame": 36011,
+    "end_frame": 36128,
+    "duration_frames": 117,
+    "duration_seconds": 4.68,
+    "activity_counts": {
+      "digging": 33,
+      "idling": 84
+    },
+    "activity_percentages": {
+      "digging": 28.205128205128204,
+      "idling": 71.7948717948718
+    }
+  },
+  {
+    "cycle_number": 138,
+    "start_frame": 36128,
+    "end_frame": 36224,
+    "duration_frames": 96,
+    "duration_seconds": 3.84,
+    "activity_counts": {
+      "digging": 54,
+      "idling": 42
+    },
+    "activity_percentages": {
+      "digging": 56.25,
+      "idling": 43.75
+    }
+  },
+  {
+    "cycle_number": 139,
+    "start_frame": 36224,
+    "end_frame": 36333,
+    "duration_frames": 109,
+    "duration_seconds": 4.36,
+    "activity_counts": {
+      "digging": 53,
+      "idling": 56
+    },
+    "activity_percentages": {
+      "digging": 48.62385321100918,
+      "idling": 51.37614678899083
+    }
+  },
+  {
+    "cycle_number": 140,
+    "start_frame": 36333,
+    "end_frame": 36578,
+    "duration_frames": 245,
+    "duration_seconds": 9.8,
+    "activity_counts": {
+      "digging": 124,
+      "idling": 121
+    },
+    "activity_percentages": {
+      "digging": 50.61224489795918,
+      "idling": 49.38775510204081
+    }
+  },
+  {
+    "cycle_number": 141,
+    "start_frame": 36578,
+    "end_frame": 36908,
+    "duration_frames": 330,
+    "duration_seconds": 13.2,
+    "activity_counts": {
+      "digging": 43,
+      "idling": 167,
+      "travelling": 120
+    },
+    "activity_percentages": {
+      "digging": 13.030303030303031,
+      "idling": 50.60606060606061,
+      "travelling": 36.36363636363637
+    }
+  },
+  {
+    "cycle_number": 142,
+    "start_frame": 36908,
+    "end_frame": 37039,
+    "duration_frames": 131,
+    "duration_seconds": 5.24,
+    "activity_counts": {
+      "digging": 32,
+      "idling": 54,
+      "travelling": 45
+    },
+    "activity_percentages": {
+      "digging": 24.427480916030532,
+      "idling": 41.221374045801525,
+      "travelling": 34.35114503816794
+    }
+  },
+  {
+    "cycle_number": 143,
+    "start_frame": 37039,
+    "end_frame": 37183,
+    "duration_frames": 144,
+    "duration_seconds": 5.76,
+    "activity_counts": {
+      "digging": 42,
+      "idling": 44,
+      "travelling": 58
+    },
+    "activity_percentages": {
+      "digging": 29.166666666666668,
+      "idling": 30.555555555555557,
+      "travelling": 40.27777777777778
+    }
+  },
+  {
+    "cycle_number": 144,
+    "start_frame": 37183,
+    "end_frame": 37395,
+    "duration_frames": 212,
+    "duration_seconds": 8.48,
+    "activity_counts": {
+      "digging": 24,
+      "idling": 188
+    },
+    "activity_percentages": {
+      "digging": 11.320754716981133,
+      "idling": 88.67924528301887
+    }
+  },
+  {
+    "cycle_number": 145,
+    "start_frame": 37395,
+    "end_frame": 37546,
+    "duration_frames": 151,
+    "duration_seconds": 6.04,
+    "activity_counts": {
+      "digging": 105,
+      "idling": 46
+    },
+    "activity_percentages": {
+      "digging": 69.5364238410596,
+      "idling": 30.4635761589404
+    }
+  },
+  {
+    "cycle_number": 146,
+    "start_frame": 37546,
+    "end_frame": 37824,
+    "duration_frames": 278,
+    "duration_seconds": 11.12,
+    "activity_counts": {
+      "digging": 98,
+      "travelling": 90,
+      "idling": 90
+    },
+    "activity_percentages": {
+      "digging": 35.25179856115108,
+      "travelling": 32.37410071942446,
+      "idling": 32.37410071942446
+    }
+  },
+  {
+    "cycle_number": 147,
+    "start_frame": 37824,
+    "end_frame": 38041,
+    "duration_frames": 217,
+    "duration_seconds": 8.68,
+    "activity_counts": {
+      "digging": 155,
+      "travelling": 62
+    },
+    "activity_percentages": {
+      "digging": 71.42857142857143,
+      "travelling": 28.57142857142857
+    }
+  },
+  {
+    "cycle_number": 148,
+    "start_frame": 38041,
+    "end_frame": 39095,
+    "duration_frames": 1054,
+    "duration_seconds": 42.16,
+    "activity_counts": {
+      "digging": 36,
+      "idling": 808,
+      "swinging": 99,
+      "travelling": 111
+    },
+    "activity_percentages": {
+      "digging": 3.415559772296015,
+      "idling": 76.66034155597723,
+      "swinging": 9.392789373814042,
+      "travelling": 10.531309297912713
+    }
+  },
+  {
+    "cycle_number": 149,
+    "start_frame": 39095,
+    "end_frame": 39667,
+    "duration_frames": 572,
+    "duration_seconds": 22.88,
+    "activity_counts": {
+      "digging": 120,
+      "idling": 353,
+      "swinging": 99
+    },
+    "activity_percentages": {
+      "digging": 20.97902097902098,
+      "idling": 61.713286713286706,
+      "swinging": 17.307692307692307
+    }
+  },
+  {
+    "cycle_number": 150,
+    "start_frame": 39667,
+    "end_frame": 40029,
+    "duration_frames": 362,
+    "duration_seconds": 14.48,
+    "activity_counts": {
+      "digging": 45,
+      "idling": 219,
+      "swinging": 98
+    },
+    "activity_percentages": {
+      "digging": 12.430939226519337,
+      "idling": 60.49723756906077,
+      "swinging": 27.071823204419886
+    }
+  },
+  {
+    "cycle_number": 151,
+    "start_frame": 40029,
+    "end_frame": 41185,
+    "duration_frames": 1156,
+    "duration_seconds": 46.24,
+    "activity_counts": {
+      "digging": 75,
+      "swinging": 365,
+      "travelling": 80,
+      "idling": 636
+    },
+    "activity_percentages": {
+      "digging": 6.487889273356401,
+      "swinging": 31.574394463667822,
+      "travelling": 6.920415224913495,
+      "idling": 55.017301038062286
+    }
+  },
+  {
+    "cycle_number": 152,
+    "start_frame": 41185,
+    "end_frame": 41344,
+    "duration_frames": 159,
+    "duration_seconds": 6.36,
+    "activity_counts": {
+      "digging": 33,
+      "idling": 126
+    },
+    "activity_percentages": {
+      "digging": 20.754716981132077,
+      "idling": 79.24528301886792
+    }
+  },
+  {
+    "cycle_number": 153,
+    "start_frame": 41344,
+    "end_frame": 41465,
+    "duration_frames": 121,
+    "duration_seconds": 4.84,
+    "activity_counts": {
+      "digging": 3,
+      "idling": 110,
+      "travelling": 8
+    },
+    "activity_percentages": {
+      "digging": 2.479338842975207,
+      "idling": 90.9090909090909,
+      "travelling": 6.6115702479338845
+    }
+  },
+  {
+    "cycle_number": 154,
+    "start_frame": 41465,
+    "end_frame": 42004,
+    "duration_frames": 539,
+    "duration_seconds": 21.56,
+    "activity_counts": {
+      "digging": 243,
+      "swinging": 37,
+      "idling": 259
+    },
+    "activity_percentages": {
+      "digging": 45.083487940630796,
+      "swinging": 6.8645640074211505,
+      "idling": 48.05194805194805
+    }
+  },
+  {
+    "cycle_number": 155,
+    "start_frame": 42004,
+    "end_frame": 42163,
+    "duration_frames": 159,
+    "duration_seconds": 6.36,
+    "activity_counts": {
+      "digging": 39,
+      "swinging": 28,
+      "idling": 77,
+      "travelling": 15
+    },
+    "activity_percentages": {
+      "digging": 24.528301886792452,
+      "swinging": 17.61006289308176,
+      "idling": 48.42767295597484,
+      "travelling": 9.433962264150944
+    }
+  },
+  {
+    "cycle_number": 156,
+    "start_frame": 42163,
+    "end_frame": 42303,
+    "duration_frames": 140,
+    "duration_seconds": 5.6,
+    "activity_counts": {
+      "digging": 58,
+      "idling": 82
+    },
+    "activity_percentages": {
+      "digging": 41.42857142857143,
+      "idling": 58.57142857142858
+    }
+  },
+  {
+    "cycle_number": 157,
+    "start_frame": 42303,
+    "end_frame": 42449,
+    "duration_frames": 146,
+    "duration_seconds": 5.84,
+    "activity_counts": {
+      "digging": 54,
+      "travelling": 16,
+      "swinging": 21,
+      "idling": 55
+    },
+    "activity_percentages": {
+      "digging": 36.986301369863014,
+      "travelling": 10.95890410958904,
+      "swinging": 14.383561643835616,
+      "idling": 37.67123287671233
+    }
+  },
+  {
+    "cycle_number": 158,
+    "start_frame": 42449,
+    "end_frame": 42550,
+    "duration_frames": 101,
+    "duration_seconds": 4.04,
+    "activity_counts": {
+      "digging": 93,
+      "idling": 8
+    },
+    "activity_percentages": {
+      "digging": 92.07920792079209,
+      "idling": 7.920792079207921
+    }
+  },
+  {
+    "cycle_number": 159,
+    "start_frame": 42550,
+    "end_frame": 42670,
+    "duration_frames": 120,
+    "duration_seconds": 4.8,
+    "activity_counts": {
+      "digging": 6,
+      "swinging": 114
+    },
+    "activity_percentages": {
+      "digging": 5.0,
+      "swinging": 95.0
+    }
+  },
+  {
+    "cycle_number": 160,
+    "start_frame": 42670,
+    "end_frame": 44841,
+    "duration_frames": 2171,
+    "duration_seconds": 86.84,
+    "activity_counts": {
+      "digging": 136,
+      "swinging": 426,
+      "travelling": 338,
+      "idling": 1271
+    },
+    "activity_percentages": {
+      "digging": 6.2643942883463835,
+      "swinging": 19.62229387379088,
+      "travelling": 15.568862275449103,
+      "idling": 58.54444956241364
+    }
+  },
+  {
+    "cycle_number": 161,
+    "start_frame": 44841,
+    "end_frame": 46051,
+    "duration_frames": 1210,
+    "duration_seconds": 48.4,
+    "activity_counts": {
+      "digging": 117,
+      "idling": 965,
+      "loading": 48,
+      "swinging": 80
+    },
+    "activity_percentages": {
+      "digging": 9.669421487603305,
+      "idling": 79.75206611570248,
+      "loading": 3.9669421487603307,
+      "swinging": 6.6115702479338845
+    }
+  },
+  {
+    "cycle_number": 162,
+    "start_frame": 46051,
+    "end_frame": 46126,
+    "duration_frames": 75,
+    "duration_seconds": 3.0,
+    "activity_counts": {
+      "digging": 22,
+      "loading": 51,
+      "swinging": 2
+    },
+    "activity_percentages": {
+      "digging": 29.333333333333332,
+      "loading": 68.0,
+      "swinging": 2.666666666666667
+    }
+  },
+  {
+    "cycle_number": 163,
+    "start_frame": 46126,
+    "end_frame": 46193,
+    "duration_frames": 67,
+    "duration_seconds": 2.68,
+    "activity_counts": {
+      "digging": 3,
+      "swinging": 2,
+      "loading": 51,
+      "idling": 11
+    },
+    "activity_percentages": {
+      "digging": 4.477611940298507,
+      "swinging": 2.9850746268656714,
+      "loading": 76.11940298507463,
+      "idling": 16.417910447761194
+    }
+  },
+  {
+    "cycle_number": 164,
+    "start_frame": 46193,
+    "end_frame": 46596,
+    "duration_frames": 403,
+    "duration_seconds": 16.12,
+    "activity_counts": {
+      "digging": 78,
+      "swinging": 325
+    },
+    "activity_percentages": {
+      "digging": 19.35483870967742,
+      "swinging": 80.64516129032258
+    }
+  },
+  {
+    "cycle_number": 165,
+    "start_frame": 46596,
+    "end_frame": 46996,
+    "duration_frames": 400,
+    "duration_seconds": 16.0,
+    "activity_counts": {
+      "digging": 39,
+      "idling": 275,
+      "swinging": 32,
+      "travelling": 54
+    },
+    "activity_percentages": {
+      "digging": 9.75,
+      "idling": 68.75,
+      "swinging": 8.0,
+      "travelling": 13.5
+    }
+  },
+  {
+    "cycle_number": 166,
+    "start_frame": 46996,
+    "end_frame": 47251,
+    "duration_frames": 255,
+    "duration_seconds": 10.2,
+    "activity_counts": {
+      "digging": 53,
+      "idling": 62,
+      "travelling": 29,
+      "swinging": 111
+    },
+    "activity_percentages": {
+      "digging": 20.784313725490197,
+      "idling": 24.313725490196077,
+      "travelling": 11.372549019607844,
+      "swinging": 43.529411764705884
+    }
+  },
+  {
+    "cycle_number": 167,
+    "start_frame": 47251,
+    "end_frame": 47258,
+    "duration_frames": 7,
+    "duration_seconds": 0.28,
+    "activity_counts": {
+      "digging": 2,
+      "idling": 5
+    },
+    "activity_percentages": {
+      "digging": 28.57142857142857,
+      "idling": 71.42857142857143
+    }
+  },
+  {
+    "cycle_number": 168,
+    "start_frame": 47258,
+    "end_frame": 47367,
+    "duration_frames": 109,
+    "duration_seconds": 4.36,
+    "activity_counts": {
+      "digging": 8,
+      "idling": 101
+    },
+    "activity_percentages": {
+      "digging": 7.339449541284404,
+      "idling": 92.66055045871559
+    }
+  },
+  {
+    "cycle_number": 169,
+    "start_frame": 47367,
+    "end_frame": 47822,
+    "duration_frames": 455,
+    "duration_seconds": 18.2,
+    "activity_counts": {
+      "digging": 52,
+      "travelling": 30,
+      "idling": 373
+    },
+    "activity_percentages": {
+      "digging": 11.428571428571429,
+      "travelling": 6.593406593406594,
+      "idling": 81.97802197802197
+    }
+  },
+  {
+    "cycle_number": 170,
+    "start_frame": 47822,
+    "end_frame": 47911,
+    "duration_frames": 89,
+    "duration_seconds": 3.56,
+    "activity_counts": {
+      "digging": 50,
+      "idling": 39
+    },
+    "activity_percentages": {
+      "digging": 56.17977528089888,
+      "idling": 43.82022471910113
+    }
+  },
+  {
+    "cycle_number": 171,
+    "start_frame": 47911,
+    "end_frame": 48036,
+    "duration_frames": 125,
+    "duration_seconds": 5.0,
+    "activity_counts": {
+      "digging": 36,
+      "swinging": 89
+    },
+    "activity_percentages": {
+      "digging": 28.799999999999997,
+      "swinging": 71.2
+    }
+  },
+  {
+    "cycle_number": 172,
+    "start_frame": 48036,
+    "end_frame": 48132,
+    "duration_frames": 96,
+    "duration_seconds": 3.84,
+    "activity_counts": {
+      "digging": 52,
+      "idling": 44
+    },
+    "activity_percentages": {
+      "digging": 54.166666666666664,
+      "idling": 45.83333333333333
+    }
+  },
+  {
+    "cycle_number": 173,
+    "start_frame": 48132,
+    "end_frame": 48214,
+    "duration_frames": 82,
+    "duration_seconds": 3.28,
+    "activity_counts": {
+      "digging": 37,
+      "swinging": 45
+    },
+    "activity_percentages": {
+      "digging": 45.1219512195122,
+      "swinging": 54.87804878048781
+    }
+  },
+  {
+    "cycle_number": 174,
+    "start_frame": 48214,
+    "end_frame": 48411,
+    "duration_frames": 197,
+    "duration_seconds": 7.88,
+    "activity_counts": {
+      "digging": 81,
+      "idling": 58,
+      "travelling": 38,
+      "swinging": 20
+    },
+    "activity_percentages": {
+      "digging": 41.11675126903553,
+      "idling": 29.441624365482234,
+      "travelling": 19.289340101522843,
+      "swinging": 10.152284263959391
+    }
+  },
+  {
+    "cycle_number": 175,
+    "start_frame": 48411,
+    "end_frame": 48613,
+    "duration_frames": 202,
+    "duration_seconds": 8.08,
+    "activity_counts": {
+      "digging": 75,
+      "loading": 18,
+      "idling": 51,
+      "travelling": 58
+    },
+    "activity_percentages": {
+      "digging": 37.12871287128713,
+      "loading": 8.91089108910891,
+      "idling": 25.247524752475247,
+      "travelling": 28.71287128712871
+    }
+  },
+  {
+    "cycle_number": 176,
+    "start_frame": 48613,
+    "end_frame": 48800,
+    "duration_frames": 187,
+    "duration_seconds": 7.48,
+    "activity_counts": {
+      "digging": 89,
+      "idling": 54,
+      "travelling": 35,
+      "swinging": 9
+    },
+    "activity_percentages": {
+      "digging": 47.593582887700535,
+      "idling": 28.87700534759358,
+      "travelling": 18.71657754010695,
+      "swinging": 4.81283422459893
+    }
+  },
+  {
+    "cycle_number": 177,
+    "start_frame": 48800,
+    "end_frame": 49098,
+    "duration_frames": 298,
+    "duration_seconds": 11.92,
+    "activity_counts": {
+      "digging": 264,
+      "idling": 34
+    },
+    "activity_percentages": {
+      "digging": 88.59060402684564,
+      "idling": 11.409395973154362
+    }
+  },
+  {
+    "cycle_number": 178,
+    "start_frame": 49098,
+    "end_frame": 49748,
+    "duration_frames": 650,
+    "duration_seconds": 26.0,
+    "activity_counts": {
+      "digging": 114,
+      "swinging": 60,
+      "idling": 476
+    },
+    "activity_percentages": {
+      "digging": 17.53846153846154,
+      "swinging": 9.230769230769232,
+      "idling": 73.23076923076923
+    }
+  },
+  {
+    "cycle_number": 179,
+    "start_frame": 49748,
+    "end_frame": 50126,
+    "duration_frames": 378,
+    "duration_seconds": 15.12,
+    "activity_counts": {
+      "digging": 49,
+      "swinging": 201,
+      "idling": 128
+    },
+    "activity_percentages": {
+      "digging": 12.962962962962962,
+      "swinging": 53.17460317460318,
+      "idling": 33.86243386243386
+    }
+  },
+  {
+    "cycle_number": 180,
+    "start_frame": 50126,
+    "end_frame": 50548,
+    "duration_frames": 422,
+    "duration_seconds": 16.88,
+    "activity_counts": {
+      "digging": 63,
+      "loading": 49,
+      "idling": 242,
+      "swinging": 68
+    },
+    "activity_percentages": {
+      "digging": 14.928909952606634,
+      "loading": 11.61137440758294,
+      "idling": 57.345971563981045,
+      "swinging": 16.113744075829384
+    }
+  },
+  {
+    "cycle_number": 181,
+    "start_frame": 50548,
+    "end_frame": 51636,
+    "duration_frames": 1088,
+    "duration_seconds": 43.52,
+    "activity_counts": {
+      "digging": 311,
+      "swinging": 356,
+      "travelling": 72,
+      "idling": 349
+    },
+    "activity_percentages": {
+      "digging": 28.58455882352941,
+      "swinging": 32.720588235294116,
+      "travelling": 6.61764705882353,
+      "idling": 32.07720588235294
+    }
+  },
+  {
+    "cycle_number": 182,
+    "start_frame": 51636,
+    "end_frame": 51662,
+    "duration_frames": 26,
+    "duration_seconds": 1.04,
+    "activity_counts": {
+      "digging": 1,
+      "swinging": 25
+    },
+    "activity_percentages": {
+      "digging": 3.8461538461538463,
+      "swinging": 96.15384615384616
+    }
+  },
+  {
+    "cycle_number": 183,
+    "start_frame": 51662,
+    "end_frame": 51998,
+    "duration_frames": 336,
+    "duration_seconds": 13.44,
+    "activity_counts": {
+      "digging": 1,
+      "idling": 100,
+      "swinging": 235
+    },
+    "activity_percentages": {
+      "digging": 0.2976190476190476,
+      "idling": 29.761904761904763,
+      "swinging": 69.94047619047619
+    }
+  },
+  {
+    "cycle_number": 184,
+    "start_frame": 51998,
+    "end_frame": 52178,
+    "duration_frames": 180,
+    "duration_seconds": 7.2,
+    "activity_counts": {
+      "digging": 34,
+      "travelling": 73,
+      "swinging": 73
+    },
+    "activity_percentages": {
+      "digging": 18.88888888888889,
+      "travelling": 40.55555555555556,
+      "swinging": 40.55555555555556
+    }
+  },
+  {
+    "cycle_number": 185,
+    "start_frame": 52178,
+    "end_frame": 52250,
+    "duration_frames": 72,
+    "duration_seconds": 2.88,
+    "activity_counts": {
+      "digging": 31,
+      "swinging": 41
+    },
+    "activity_percentages": {
+      "digging": 43.05555555555556,
+      "swinging": 56.94444444444444
+    }
+  },
+  {
+    "cycle_number": 186,
+    "start_frame": 52250,
+    "end_frame": 52615,
+    "duration_frames": 365,
+    "duration_seconds": 14.6,
+    "activity_counts": {
+      "digging": 132,
+      "idling": 105,
+      "travelling": 79,
+      "swinging": 49
+    },
+    "activity_percentages": {
+      "digging": 36.16438356164384,
+      "idling": 28.767123287671232,
+      "travelling": 21.643835616438356,
+      "swinging": 13.424657534246576
+    }
+  },
+  {
+    "cycle_number": 187,
+    "start_frame": 52615,
+    "end_frame": 56884,
+    "duration_frames": 4269,
+    "duration_seconds": 170.76,
+    "activity_counts": {
+      "digging": 1060,
+      "swinging": 229,
+      "idling": 2684,
+      "travelling": 202,
+      "loading": 94
+    },
+    "activity_percentages": {
+      "digging": 24.830171000234248,
+      "swinging": 5.364253923635512,
+      "idling": 62.871866947762946,
+      "travelling": 4.7317873038182245,
+      "loading": 2.2019208245490747
+    }
+  },
+  {
+    "cycle_number": 188,
+    "start_frame": 56884,
+    "end_frame": 56971,
+    "duration_frames": 87,
+    "duration_seconds": 3.48,
+    "activity_counts": {
+      "digging": 33,
+      "idling": 54
+    },
+    "activity_percentages": {
+      "digging": 37.93103448275862,
+      "idling": 62.06896551724138
+    }
+  },
+  {
+    "cycle_number": 189,
+    "start_frame": 56971,
+    "end_frame": 58057,
+    "duration_frames": 1086,
+    "duration_seconds": 43.44,
+    "activity_counts": {
+      "digging": 55,
+      "swinging": 358,
+      "idling": 575,
+      "loading": 98
+    },
+    "activity_percentages": {
+      "digging": 5.064456721915286,
+      "swinging": 32.96500920810313,
+      "idling": 52.94659300184163,
+      "loading": 9.023941068139964
+    }
+  },
+  {
+    "cycle_number": 190,
+    "start_frame": 58057,
+    "end_frame": 58206,
+    "duration_frames": 149,
+    "duration_seconds": 5.96,
+    "activity_counts": {
+      "digging": 48,
+      "idling": 62,
+      "loading": 39
+    },
+    "activity_percentages": {
+      "digging": 32.21476510067114,
+      "idling": 41.61073825503356,
+      "loading": 26.174496644295303
+    }
+  },
+  {
+    "cycle_number": 191,
+    "start_frame": 58206,
+    "end_frame": 58296,
+    "duration_frames": 90,
+    "duration_seconds": 3.6,
+    "activity_counts": {
+      "digging": 69,
+      "swinging": 21
+    },
+    "activity_percentages": {
+      "digging": 76.66666666666667,
+      "swinging": 23.333333333333332
+    }
+  },
+  {
+    "cycle_number": 192,
+    "start_frame": 58296,
+    "end_frame": 58632,
+    "duration_frames": 336,
+    "duration_seconds": 13.44,
+    "activity_counts": {
+      "digging": 158,
+      "loading": 13,
+      "idling": 165
+    },
+    "activity_percentages": {
+      "digging": 47.023809523809526,
+      "loading": 3.869047619047619,
+      "idling": 49.107142857142854
+    }
+  },
+  {
+    "cycle_number": 193,
+    "start_frame": 58632,
+    "end_frame": 58675,
+    "duration_frames": 43,
+    "duration_seconds": 1.72,
+    "activity_counts": {
+      "digging": 33,
+      "swinging": 10
+    },
+    "activity_percentages": {
+      "digging": 76.74418604651163,
+      "swinging": 23.25581395348837
+    }
+  },
+  {
+    "cycle_number": 194,
+    "start_frame": 58675,
+    "end_frame": 62734,
+    "duration_frames": 4059,
+    "duration_seconds": 162.36,
+    "activity_counts": {
+      "digging": 33,
+      "idling": 2415,
+      "loading": 72,
+      "swinging": 1382,
+      "travelling": 157
+    },
+    "activity_percentages": {
+      "digging": 0.8130081300813009,
+      "idling": 59.497413155949744,
+      "loading": 1.7738359201773837,
+      "swinging": 34.04779502340478,
+      "travelling": 3.867947770386795
+    }
+  },
+  {
+    "cycle_number": 195,
+    "start_frame": 62734,
+    "end_frame": 62846,
+    "duration_frames": 112,
+    "duration_seconds": 4.48,
+    "activity_counts": {
+      "digging": 25,
+      "idling": 35,
+      "swinging": 52
+    },
+    "activity_percentages": {
+      "digging": 22.321428571428573,
+      "idling": 31.25,
+      "swinging": 46.42857142857143
+    }
+  },
+  {
+    "cycle_number": 196,
+    "start_frame": 62846,
+    "end_frame": 62912,
+    "duration_frames": 66,
+    "duration_seconds": 2.64,
+    "activity_counts": {
+      "digging": 62,
+      "swinging": 4
+    },
+    "activity_percentages": {
+      "digging": 93.93939393939394,
+      "swinging": 6.0606060606060606
+    }
+  },
+  {
+    "cycle_number": 197,
+    "start_frame": 62912,
+    "end_frame": 63200,
+    "duration_frames": 288,
+    "duration_seconds": 11.52,
+    "activity_counts": {
+      "digging": 9,
+      "swinging": 127,
+      "idling": 138,
+      "travelling": 14
+    },
+    "activity_percentages": {
+      "digging": 3.125,
+      "swinging": 44.09722222222222,
+      "idling": 47.91666666666667,
+      "travelling": 4.861111111111112
+    }
+  },
+  {
+    "cycle_number": 198,
+    "start_frame": 63200,
+    "end_frame": 63216,
+    "duration_frames": 16,
+    "duration_seconds": 0.64,
+    "activity_counts": {
+      "digging": 1,
+      "idling": 15
+    },
+    "activity_percentages": {
+      "digging": 6.25,
+      "idling": 93.75
+    }
+  },
+  {
+    "cycle_number": 199,
+    "start_frame": 63216,
+    "end_frame": 63576,
+    "duration_frames": 360,
+    "duration_seconds": 14.4,
+    "activity_counts": {
+      "digging": 180,
+      "swinging": 144,
+      "idling": 36
+    },
+    "activity_percentages": {
+      "digging": 50.0,
+      "swinging": 40.0,
+      "idling": 10.0
+    }
+  },
+  {
+    "cycle_number": 200,
+    "start_frame": 63576,
+    "end_frame": 63896,
+    "duration_frames": 320,
+    "duration_seconds": 12.8,
+    "activity_counts": {
+      "digging": 33,
+      "idling": 187,
+      "swinging": 86,
+      "travelling": 14
+    },
+    "activity_percentages": {
+      "digging": 10.3125,
+      "idling": 58.4375,
+      "swinging": 26.875,
+      "travelling": 4.375
+    }
+  },
+  {
+    "cycle_number": 201,
+    "start_frame": 63896,
+    "end_frame": 64347,
+    "duration_frames": 451,
+    "duration_seconds": 18.04,
+    "activity_counts": {
+      "digging": 80,
+      "idling": 93,
+      "travelling": 109,
+      "swinging": 169
+    },
+    "activity_percentages": {
+      "digging": 17.738359201773836,
+      "idling": 20.620842572062084,
+      "travelling": 24.168514412416854,
+      "swinging": 37.472283813747225
+    }
+  },
+  {
+    "cycle_number": 202,
+    "start_frame": 64347,
+    "end_frame": 64467,
+    "duration_frames": 120,
+    "duration_seconds": 4.8,
+    "activity_counts": {
+      "digging": 105,
+      "swinging": 15
+    },
+    "activity_percentages": {
+      "digging": 87.5,
+      "swinging": 12.5
+    }
+  },
+  {
+    "cycle_number": 203,
+    "start_frame": 64467,
+    "end_frame": 64559,
+    "duration_frames": 92,
+    "duration_seconds": 3.68,
+    "activity_counts": {
+      "digging": 81,
+      "swinging": 11
+    },
+    "activity_percentages": {
+      "digging": 88.04347826086956,
+      "swinging": 11.956521739130435
+    }
+  },
+  {
+    "cycle_number": 204,
+    "start_frame": 64559,
+    "end_frame": 64589,
+    "duration_frames": 30,
+    "duration_seconds": 1.2,
+    "activity_counts": {
+      "digging": 13,
+      "swinging": 14,
+      "idling": 3
+    },
+    "activity_percentages": {
+      "digging": 43.333333333333336,
+      "swinging": 46.666666666666664,
+      "idling": 10.0
+    }
+  },
+  {
+    "cycle_number": 205,
+    "start_frame": 64589,
+    "end_frame": 68549,
+    "duration_frames": 3960,
+    "duration_seconds": 158.4,
+    "activity_counts": {
+      "digging": 46,
+      "idling": 3107,
+      "travelling": 649,
+      "swinging": 158
+    },
+    "activity_percentages": {
+      "digging": 1.1616161616161615,
+      "idling": 78.45959595959596,
+      "travelling": 16.38888888888889,
+      "swinging": 3.98989898989899
+    }
+  },
+  {
+    "cycle_number": 206,
+    "start_frame": 68549,
+    "end_frame": 68596,
+    "duration_frames": 47,
+    "duration_seconds": 1.88,
+    "activity_counts": {
+      "digging": 27,
+      "idling": 17,
+      "loading": 3
+    },
+    "activity_percentages": {
+      "digging": 57.446808510638306,
+      "idling": 36.17021276595745,
+      "loading": 6.382978723404255
+    }
+  },
+  {
+    "cycle_number": 207,
+    "start_frame": 68596,
+    "end_frame": 68761,
+    "duration_frames": 165,
+    "duration_seconds": 6.6,
+    "activity_counts": {
+      "digging": 5,
+      "loading": 23,
+      "swinging": 40,
+      "travelling": 21,
+      "idling": 76
+    },
+    "activity_percentages": {
+      "digging": 3.0303030303030303,
+      "loading": 13.939393939393941,
+      "swinging": 24.242424242424242,
+      "travelling": 12.727272727272727,
+      "idling": 46.06060606060606
+    }
+  },
+  {
+    "cycle_number": 208,
+    "start_frame": 68761,
+    "end_frame": 69198,
+    "duration_frames": 437,
+    "duration_seconds": 17.48,
+    "activity_counts": {
+      "digging": 39,
+      "travelling": 19,
+      "loading": 68,
+      "idling": 311
+    },
+    "activity_percentages": {
+      "digging": 8.924485125858125,
+      "travelling": 4.3478260869565215,
+      "loading": 15.560640732265446,
+      "idling": 71.16704805491992
+    }
+  },
+  {
+    "cycle_number": 209,
+    "start_frame": 69198,
+    "end_frame": 69766,
+    "duration_frames": 568,
+    "duration_seconds": 22.72,
+    "activity_counts": {
+      "digging": 127,
+      "travelling": 9,
+      "swinging": 19,
+      "loading": 34,
+      "idling": 379
+    },
+    "activity_percentages": {
+      "digging": 22.359154929577464,
+      "travelling": 1.584507042253521,
+      "swinging": 3.345070422535211,
+      "loading": 5.985915492957746,
+      "idling": 66.72535211267606
+    }
+  },
+  {
+    "cycle_number": 210,
+    "start_frame": 69766,
+    "end_frame": 70519,
+    "duration_frames": 753,
+    "duration_seconds": 30.12,
+    "activity_counts": {
+      "digging": 49,
+      "idling": 552,
+      "travelling": 152
+    },
+    "activity_percentages": {
+      "digging": 6.507304116865869,
+      "idling": 73.30677290836654,
+      "travelling": 20.185922974767596
+    }
+  },
+  {
+    "cycle_number": 211,
+    "start_frame": 70519,
+    "end_frame": 70829,
+    "duration_frames": 310,
+    "duration_seconds": 12.4,
+    "activity_counts": {
+      "digging": 19,
+      "idling": 210,
+      "travelling": 48,
+      "swinging": 33
+    },
+    "activity_percentages": {
+      "digging": 6.129032258064516,
+      "idling": 67.74193548387096,
+      "travelling": 15.483870967741936,
+      "swinging": 10.64516129032258
+    }
+  },
+  {
+    "cycle_number": 212,
+    "start_frame": 70829,
+    "end_frame": 72132,
+    "duration_frames": 1303,
+    "duration_seconds": 52.12,
+    "activity_counts": {
+      "digging": 42,
+      "idling": 942,
+      "swinging": 87,
+      "travelling": 232
+    },
+    "activity_percentages": {
+      "digging": 3.2233307751343054,
+      "idling": 72.29470452801228,
+      "swinging": 6.676899462778205,
+      "travelling": 17.805065234075208
+    }
+  },
+  {
+    "cycle_number": 213,
+    "start_frame": 72132,
+    "end_frame": 73100,
+    "duration_frames": 968,
+    "duration_seconds": 38.72,
+    "activity_counts": {
+      "digging": 114,
+      "swinging": 324,
+      "idling": 487,
+      "travelling": 43
+    },
+    "activity_percentages": {
+      "digging": 11.776859504132231,
+      "swinging": 33.47107438016529,
+      "idling": 50.3099173553719,
+      "travelling": 4.4421487603305785
+    }
+  },
+  {
+    "cycle_number": 214,
+    "start_frame": 73100,
+    "end_frame": 73165,
+    "duration_frames": 65,
+    "duration_seconds": 2.6,
+    "activity_counts": {
+      "digging": 2,
+      "travelling": 57,
+      "swinging": 6
+    },
+    "activity_percentages": {
+      "digging": 3.076923076923077,
+      "travelling": 87.6923076923077,
+      "swinging": 9.230769230769232
+    }
+  },
+  {
+    "cycle_number": 215,
+    "start_frame": 73165,
+    "end_frame": 73228,
+    "duration_frames": 63,
+    "duration_seconds": 2.52,
+    "activity_counts": {
+      "digging": 48,
+      "idling": 15
+    },
+    "activity_percentages": {
+      "digging": 76.19047619047619,
+      "idling": 23.809523809523807
+    }
+  },
+  {
+    "cycle_number": 216,
+    "start_frame": 73228,
+    "end_frame": 73316,
+    "duration_frames": 88,
+    "duration_seconds": 3.52,
+    "activity_counts": {
+      "digging": 4,
+      "travelling": 43,
+      "idling": 19,
+      "swinging": 22
+    },
+    "activity_percentages": {
+      "digging": 4.545454545454546,
+      "travelling": 48.86363636363637,
+      "idling": 21.59090909090909,
+      "swinging": 25.0
+    }
+  },
+  {
+    "cycle_number": 217,
+    "start_frame": 73316,
+    "end_frame": 73516,
+    "duration_frames": 200,
+    "duration_seconds": 8.0,
+    "activity_counts": {
+      "digging": 169,
+      "swinging": 31
+    },
+    "activity_percentages": {
+      "digging": 84.5,
+      "swinging": 15.5
+    }
+  },
+  {
+    "cycle_number": 218,
+    "start_frame": 73516,
+    "end_frame": 74603,
+    "duration_frames": 1087,
+    "duration_seconds": 43.48,
+    "activity_counts": {
+      "digging": 30,
+      "swinging": 125,
+      "idling": 756,
+      "travelling": 176
+    },
+    "activity_percentages": {
+      "digging": 2.7598896044158234,
+      "swinging": 11.499540018399264,
+      "idling": 69.54921803127874,
+      "travelling": 16.19135234590616
+    }
+  },
+  {
+    "cycle_number": 219,
+    "start_frame": 74603,
+    "end_frame": 74865,
+    "duration_frames": 262,
+    "duration_seconds": 10.48,
+    "activity_counts": {
+      "digging": 8,
+      "idling": 59,
+      "swinging": 115,
+      "travelling": 80
+    },
+    "activity_percentages": {
+      "digging": 3.0534351145038165,
+      "idling": 22.519083969465647,
+      "swinging": 43.89312977099237,
+      "travelling": 30.53435114503817
+    }
+  },
+  {
+    "cycle_number": 220,
+    "start_frame": 74865,
+    "end_frame": 75547,
+    "duration_frames": 682,
+    "duration_seconds": 27.28,
+    "activity_counts": {
+      "digging": 30,
+      "travelling": 413,
+      "idling": 147,
+      "swinging": 92
+    },
+    "activity_percentages": {
+      "digging": 4.398826979472141,
+      "travelling": 60.55718475073314,
+      "idling": 21.55425219941349,
+      "swinging": 13.48973607038123
+    }
+  },
+  {
+    "cycle_number": 221,
+    "start_frame": 75547,
+    "end_frame": 75678,
+    "duration_frames": 131,
+    "duration_seconds": 5.24,
+    "activity_counts": {
+      "digging": 50,
+      "travelling": 81
+    },
+    "activity_percentages": {
+      "digging": 38.16793893129771,
+      "travelling": 61.832061068702295
+    }
+  },
+  {
+    "cycle_number": 222,
+    "start_frame": 75678,
+    "end_frame": 75914,
+    "duration_frames": 236,
+    "duration_seconds": 9.44,
+    "activity_counts": {
+      "digging": 43,
+      "travelling": 180,
+      "swinging": 13
+    },
+    "activity_percentages": {
+      "digging": 18.220338983050848,
+      "travelling": 76.27118644067797,
+      "swinging": 5.508474576271186
+    }
+  },
+  {
+    "cycle_number": 223,
+    "start_frame": 75914,
+    "end_frame": 76189,
+    "duration_frames": 275,
+    "duration_seconds": 11.0,
+    "activity_counts": {
+      "digging": 34,
+      "travelling": 191,
+      "swinging": 50
+    },
+    "activity_percentages": {
+      "digging": 12.363636363636363,
+      "travelling": 69.45454545454545,
+      "swinging": 18.181818181818183
+    }
+  },
+  {
+    "cycle_number": 224,
+    "start_frame": 76189,
+    "end_frame": 76353,
+    "duration_frames": 164,
+    "duration_seconds": 6.56,
+    "activity_counts": {
+      "digging": 50,
+      "idling": 46,
+      "travelling": 68
+    },
+    "activity_percentages": {
+      "digging": 30.48780487804878,
+      "idling": 28.04878048780488,
+      "travelling": 41.46341463414634
+    }
+  },
+  {
+    "cycle_number": 225,
+    "start_frame": 76353,
+    "end_frame": 76550,
+    "duration_frames": 197,
+    "duration_seconds": 7.88,
+    "activity_counts": {
+      "digging": 75,
+      "travelling": 42,
+      "swinging": 46,
+      "idling": 34
+    },
+    "activity_percentages": {
+      "digging": 38.07106598984771,
+      "travelling": 21.31979695431472,
+      "swinging": 23.3502538071066,
+      "idling": 17.258883248730964
+    }
+  },
+  {
+    "cycle_number": 226,
+    "start_frame": 76550,
+    "end_frame": 77288,
+    "duration_frames": 738,
+    "duration_seconds": 29.52,
+    "activity_counts": {
+      "digging": 12,
+      "swinging": 11,
+      "travelling": 52,
+      "idling": 663
+    },
+    "activity_percentages": {
+      "digging": 1.6260162601626018,
+      "swinging": 1.4905149051490514,
+      "travelling": 7.046070460704606,
+      "idling": 89.83739837398373
+    }
+  },
+  {
+    "cycle_number": 227,
+    "start_frame": 77288,
+    "end_frame": 77610,
+    "duration_frames": 322,
+    "duration_seconds": 12.88,
+    "activity_counts": {
+      "digging": 58,
+      "travelling": 128,
+      "idling": 136
+    },
+    "activity_percentages": {
+      "digging": 18.012422360248447,
+      "travelling": 39.75155279503105,
+      "idling": 42.2360248447205
+    }
+  },
+  {
+    "cycle_number": 228,
+    "start_frame": 77610,
+    "end_frame": 77821,
+    "duration_frames": 211,
+    "duration_seconds": 8.44,
+    "activity_counts": {
+      "digging": 45,
+      "idling": 69,
+      "travelling": 97
+    },
+    "activity_percentages": {
+      "digging": 21.32701421800948,
+      "idling": 32.70142180094787,
+      "travelling": 45.97156398104265
+    }
+  },
+  {
+    "cycle_number": 229,
+    "start_frame": 77821,
+    "end_frame": 78538,
+    "duration_frames": 717,
+    "duration_seconds": 28.68,
+    "activity_counts": {
+      "digging": 51,
+      "idling": 595,
+      "travelling": 33,
+      "swinging": 38
+    },
+    "activity_percentages": {
+      "digging": 7.112970711297072,
+      "idling": 82.98465829846583,
+      "travelling": 4.602510460251046,
+      "swinging": 5.299860529986053
+    }
+  },
+  {
+    "cycle_number": 230,
+    "start_frame": 78538,
+    "end_frame": 90728,
+    "duration_frames": 12190,
+    "duration_seconds": 487.6,
+    "activity_counts": {
+      "digging": 27,
+      "swinging": 2862,
+      "idling": 8498,
+      "travelling": 444,
+      "loading": 359
+    },
+    "activity_percentages": {
+      "digging": 0.22149302707136997,
+      "swinging": 23.47826086956522,
+      "idling": 69.71287940935193,
+      "travelling": 3.6423297785069733,
+      "loading": 2.945036915504512
+    }
+  },
+  {
+    "cycle_number": 231,
+    "start_frame": 90728,
+    "end_frame": 90806,
+    "duration_frames": 78,
+    "duration_seconds": 3.12,
+    "activity_counts": {
+      "digging": 57,
+      "swinging": 21
+    },
+    "activity_percentages": {
+      "digging": 73.07692307692307,
+      "swinging": 26.923076923076923
+    }
+  },
+  {
+    "cycle_number": 232,
+    "start_frame": 90806,
+    "end_frame": 90921,
+    "duration_frames": 115,
+    "duration_seconds": 4.6,
+    "activity_counts": {
+      "digging": 3,
+      "swinging": 112
+    },
+    "activity_percentages": {
+      "digging": 2.608695652173913,
+      "swinging": 97.3913043478261
+    }
+  },
+  {
+    "cycle_number": 233,
+    "start_frame": 90921,
+    "end_frame": 91096,
+    "duration_frames": 175,
+    "duration_seconds": 7.0,
+    "activity_counts": {
+      "digging": 65,
+      "idling": 46,
+      "swinging": 64
+    },
+    "activity_percentages": {
+      "digging": 37.142857142857146,
+      "idling": 26.285714285714285,
+      "swinging": 36.57142857142857
+    }
+  },
+  {
+    "cycle_number": 234,
+    "start_frame": 91096,
+    "end_frame": 91121,
+    "duration_frames": 25,
+    "duration_seconds": 1.0,
+    "activity_counts": {
+      "digging": 16,
+      "swinging": 9
+    },
+    "activity_percentages": {
+      "digging": 64.0,
+      "swinging": 36.0
+    }
+  },
+  {
+    "cycle_number": 235,
+    "start_frame": 91121,
+    "end_frame": 91163,
+    "duration_frames": 42,
+    "duration_seconds": 1.68,
+    "activity_counts": {
+      "digging": 29,
+      "swinging": 13
+    },
+    "activity_percentages": {
+      "digging": 69.04761904761905,
+      "swinging": 30.952380952380953
+    }
+  },
+  {
+    "cycle_number": 236,
+    "start_frame": 91163,
+    "end_frame": 91836,
+    "duration_frames": 673,
+    "duration_seconds": 26.92,
+    "activity_counts": {
+      "digging": 95,
+      "swinging": 405,
+      "idling": 99,
+      "travelling": 74
+    },
+    "activity_percentages": {
+      "digging": 14.115898959881129,
+      "swinging": 60.178306092124814,
+      "idling": 14.710252600297178,
+      "travelling": 10.99554234769688
+    }
+  },
+  {
+    "cycle_number": 237,
+    "start_frame": 91836,
+    "end_frame": 92093,
+    "duration_frames": 257,
+    "duration_seconds": 10.28,
+    "activity_counts": {
+      "digging": 36,
+      "swinging": 85,
+      "idling": 136
+    },
+    "activity_percentages": {
+      "digging": 14.007782101167315,
+      "swinging": 33.07392996108949,
+      "idling": 52.918287937743195
+    }
+  },
+  {
+    "cycle_number": 238,
+    "start_frame": 92093,
+    "end_frame": 92391,
+    "duration_frames": 298,
+    "duration_seconds": 11.92,
+    "activity_counts": {
+      "digging": 19,
+      "swinging": 257,
+      "idling": 1,
+      "travelling": 21
+    },
+    "activity_percentages": {
+      "digging": 6.375838926174497,
+      "swinging": 86.24161073825503,
+      "idling": 0.33557046979865773,
+      "travelling": 7.046979865771812
+    }
+  },
+  {
+    "cycle_number": 239,
+    "start_frame": 92391,
+    "end_frame": 92699,
+    "duration_frames": 308,
+    "duration_seconds": 12.32,
+    "activity_counts": {
+      "digging": 302,
+      "idling": 6
+    },
+    "activity_percentages": {
+      "digging": 98.05194805194806,
+      "idling": 1.948051948051948
+    }
+  },
+  {
+    "cycle_number": 240,
+    "start_frame": 92699,
+    "end_frame": 93052,
+    "duration_frames": 353,
+    "duration_seconds": 14.12,
+    "activity_counts": {
+      "digging": 317,
+      "idling": 36
+    },
+    "activity_percentages": {
+      "digging": 89.80169971671388,
+      "idling": 10.198300283286118
+    }
+  },
+  {
+    "cycle_number": 241,
+    "start_frame": 93052,
+    "end_frame": 93389,
+    "duration_frames": 337,
+    "duration_seconds": 13.48,
+    "activity_counts": {
+      "digging": 31,
+      "idling": 306
+    },
+    "activity_percentages": {
+      "digging": 9.198813056379821,
+      "idling": 90.80118694362018
+    }
+  },
+  {
+    "cycle_number": 242,
+    "start_frame": 93389,
+    "end_frame": 93481,
+    "duration_frames": 92,
+    "duration_seconds": 3.68,
+    "activity_counts": {
+      "digging": 44,
+      "idling": 48
+    },
+    "activity_percentages": {
+      "digging": 47.82608695652174,
+      "idling": 52.17391304347826
+    }
+  },
+  {
+    "cycle_number": 243,
+    "start_frame": 93481,
+    "end_frame": 93697,
+    "duration_frames": 216,
+    "duration_seconds": 8.64,
+    "activity_counts": {
+      "digging": 97,
+      "idling": 119
+    },
+    "activity_percentages": {
+      "digging": 44.907407407407405,
+      "idling": 55.092592592592595
+    }
+  },
+  {
+    "cycle_number": 244,
+    "start_frame": 93697,
+    "end_frame": 93918,
+    "duration_frames": 221,
+    "duration_seconds": 8.84,
+    "activity_counts": {
+      "digging": 42,
+      "idling": 179
+    },
+    "activity_percentages": {
+      "digging": 19.004524886877828,
+      "idling": 80.99547511312217
+    }
+  },
+  {
+    "cycle_number": 245,
+    "start_frame": 93918,
+    "end_frame": 94055,
+    "duration_frames": 137,
+    "duration_seconds": 5.48,
+    "activity_counts": {
+      "digging": 50,
+      "idling": 87
+    },
+    "activity_percentages": {
+      "digging": 36.496350364963504,
+      "idling": 63.503649635036496
+    }
+  },
+  {
+    "cycle_number": 246,
+    "start_frame": 94055,
+    "end_frame": 94449,
+    "duration_frames": 394,
+    "duration_seconds": 15.76,
+    "activity_counts": {
+      "digging": 269,
+      "idling": 125
+    },
+    "activity_percentages": {
+      "digging": 68.2741116751269,
+      "idling": 31.725888324873097
+    }
+  },
+  {
+    "cycle_number": 247,
+    "start_frame": 94449,
+    "end_frame": 94505,
+    "duration_frames": 56,
+    "duration_seconds": 2.24,
+    "activity_counts": {
+      "digging": 27,
+      "idling": 29
+    },
+    "activity_percentages": {
+      "digging": 48.214285714285715,
+      "idling": 51.78571428571429
+    }
+  },
+  {
+    "cycle_number": 248,
+    "start_frame": 94505,
+    "end_frame": 94855,
+    "duration_frames": 350,
+    "duration_seconds": 14.0,
+    "activity_counts": {
+      "digging": 309,
+      "idling": 41
+    },
+    "activity_percentages": {
+      "digging": 88.28571428571429,
+      "idling": 11.714285714285715
+    }
+  },
+  {
+    "cycle_number": 249,
+    "start_frame": 94855,
+    "end_frame": 94947,
+    "duration_frames": 92,
+    "duration_seconds": 3.68,
+    "activity_counts": {
+      "digging": 42,
+      "idling": 50
+    },
+    "activity_percentages": {
+      "digging": 45.65217391304348,
+      "idling": 54.347826086956516
+    }
+  },
+  {
+    "cycle_number": 250,
+    "start_frame": 94947,
+    "end_frame": 95060,
+    "duration_frames": 113,
+    "duration_seconds": 4.52,
+    "activity_counts": {
+      "digging": 61,
+      "idling": 52
+    },
+    "activity_percentages": {
+      "digging": 53.98230088495575,
+      "idling": 46.017699115044245
+    }
+  },
+  {
+    "cycle_number": 251,
+    "start_frame": 95060,
+    "end_frame": 95125,
+    "duration_frames": 65,
+    "duration_seconds": 2.6,
+    "activity_counts": {
+      "digging": 18,
+      "idling": 47
+    },
+    "activity_percentages": {
+      "digging": 27.692307692307693,
+      "idling": 72.3076923076923
+    }
+  },
+  {
+    "cycle_number": 252,
+    "start_frame": 95125,
+    "end_frame": 95834,
+    "duration_frames": 709,
+    "duration_seconds": 28.36,
+    "activity_counts": {
+      "digging": 662,
+      "idling": 47
+    },
+    "activity_percentages": {
+      "digging": 93.37094499294781,
+      "idling": 6.629055007052186
+    }
+  },
+  {
+    "cycle_number": 253,
+    "start_frame": 95834,
+    "end_frame": 96971,
+    "duration_frames": 1137,
+    "duration_seconds": 45.48,
+    "activity_counts": {
+      "digging": 1031,
+      "swinging": 106
+    },
+    "activity_percentages": {
+      "digging": 90.67722075637643,
+      "swinging": 9.32277924362357
+    }
+  },
+  {
+    "cycle_number": 254,
+    "start_frame": 96971,
+    "end_frame": 101451,
+    "duration_frames": 4480,
+    "duration_seconds": 179.2,
+    "activity_counts": {
+      "digging": 4229,
+      "idling": 150,
+      "travelling": 101
+    },
+    "activity_percentages": {
+      "digging": 94.39732142857142,
+      "idling": 3.3482142857142856,
+      "travelling": 2.2544642857142856
+    }
+  },
+  {
+    "cycle_number": 255,
+    "start_frame": 101451,
+    "end_frame": 101476,
+    "duration_frames": 25,
+    "duration_seconds": 1.0,
+    "activity_counts": {
+      "digging": 6,
+      "idling": 19
+    },
+    "activity_percentages": {
+      "digging": 24.0,
+      "idling": 76.0
+    }
+  },
+  {
+    "cycle_number": 256,
+    "start_frame": 101476,
+    "end_frame": 102025,
+    "duration_frames": 549,
+    "duration_seconds": 21.96,
+    "activity_counts": {
+      "digging": 8,
+      "idling": 97,
+      "travelling": 25,
+      "swinging": 374,
+      "loading": 45
+    },
+    "activity_percentages": {
+      "digging": 1.4571948998178506,
+      "idling": 17.66848816029144,
+      "travelling": 4.553734061930783,
+      "swinging": 68.12386156648452,
+      "loading": 8.19672131147541
+    }
+  },
+  {
+    "cycle_number": 257,
+    "start_frame": 102025,
+    "end_frame": 103604,
+    "duration_frames": 1579,
+    "duration_seconds": 63.16,
+    "activity_counts": {
+      "digging": 1,
+      "swinging": 1192,
+      "idling": 386
+    },
+    "activity_percentages": {
+      "digging": 0.06333122229259025,
+      "swinging": 75.49081697276758,
+      "idling": 24.445851804939835
+    }
+  },
+  {
+    "cycle_number": 258,
+    "start_frame": 103604,
+    "end_frame": 103982,
+    "duration_frames": 378,
+    "duration_seconds": 15.12,
+    "activity_counts": {
+      "digging": 55,
+      "swinging": 70,
+      "idling": 250,
+      "travelling": 3
+    },
+    "activity_percentages": {
+      "digging": 14.550264550264549,
+      "swinging": 18.51851851851852,
+      "idling": 66.13756613756614,
+      "travelling": 0.7936507936507936
+    }
+  },
+  {
+    "cycle_number": 259,
+    "start_frame": 103982,
+    "end_frame": 104352,
+    "duration_frames": 370,
+    "duration_seconds": 14.8,
+    "activity_counts": {
+      "digging": 296,
+      "idling": 74
+    },
+    "activity_percentages": {
+      "digging": 80.0,
+      "idling": 20.0
+    }
+  },
+  {
+    "cycle_number": 260,
+    "start_frame": 104352,
+    "end_frame": 104415,
+    "duration_frames": 63,
+    "duration_seconds": 2.52,
+    "activity_counts": {
+      "digging": 55,
+      "loading": 8
+    },
+    "activity_percentages": {
+      "digging": 87.3015873015873,
+      "loading": 12.698412698412698
+    }
+  },
+  {
+    "cycle_number": 261,
+    "start_frame": 104415,
+    "end_frame": 104750,
+    "duration_frames": 335,
+    "duration_seconds": 13.4,
+    "activity_counts": {
+      "digging": 45,
+      "idling": 218,
+      "swinging": 72
+    },
+    "activity_percentages": {
+      "digging": 13.432835820895523,
+      "idling": 65.07462686567163,
+      "swinging": 21.492537313432834
+    }
+  },
+  {
+    "cycle_number": 262,
+    "start_frame": 104750,
+    "end_frame": 105485,
+    "duration_frames": 735,
+    "duration_seconds": 29.4,
+    "activity_counts": {
+      "digging": 24,
+      "travelling": 283,
+      "idling": 428
+    },
+    "activity_percentages": {
+      "digging": 3.2653061224489797,
+      "travelling": 38.50340136054422,
+      "idling": 58.23129251700681
+    }
+  },
+  {
+    "cycle_number": 263,
+    "start_frame": 105485,
+    "end_frame": 105632,
+    "duration_frames": 147,
+    "duration_seconds": 5.88,
+    "activity_counts": {
+      "digging": 135,
+      "swinging": 12
+    },
+    "activity_percentages": {
+      "digging": 91.83673469387756,
+      "swinging": 8.16326530612245
+    }
+  },
+  {
+    "cycle_number": 264,
+    "start_frame": 105632,
+    "end_frame": 105778,
+    "duration_frames": 146,
+    "duration_seconds": 5.84,
+    "activity_counts": {
+      "digging": 106,
+      "swinging": 40
+    },
+    "activity_percentages": {
+      "digging": 72.6027397260274,
+      "swinging": 27.397260273972602
+    }
+  },
+  {
+    "cycle_number": 265,
+    "start_frame": 105778,
+    "end_frame": 106115,
+    "duration_frames": 337,
+    "duration_seconds": 13.48,
+    "activity_counts": {
+      "digging": 204,
+      "swinging": 133
+    },
+    "activity_percentages": {
+      "digging": 60.534124629080125,
+      "swinging": 39.46587537091988
+    }
+  },
+  {
+    "cycle_number": 266,
+    "start_frame": 106115,
+    "end_frame": 106260,
+    "duration_frames": 145,
+    "duration_seconds": 5.8,
+    "activity_counts": {
+      "digging": 65,
+      "loading": 80
+    },
+    "activity_percentages": {
+      "digging": 44.827586206896555,
+      "loading": 55.172413793103445
+    }
+  },
+  {
+    "cycle_number": 267,
+    "start_frame": 106260,
+    "end_frame": 106336,
+    "duration_frames": 76,
+    "duration_seconds": 3.04,
+    "activity_counts": {
+      "digging": 44,
+      "swinging": 32
+    },
+    "activity_percentages": {
+      "digging": 57.89473684210527,
+      "swinging": 42.10526315789473
+    }
+  },
+  {
+    "cycle_number": 268,
+    "start_frame": 106336,
+    "end_frame": 106530,
+    "duration_frames": 194,
+    "duration_seconds": 7.76,
+    "activity_counts": {
+      "digging": 102,
+      "swinging": 92
+    },
+    "activity_percentages": {
+      "digging": 52.57731958762887,
+      "swinging": 47.42268041237113
+    }
+  },
+  {
+    "cycle_number": 269,
+    "start_frame": 106530,
+    "end_frame": 107005,
+    "duration_frames": 475,
+    "duration_seconds": 19.0,
+    "activity_counts": {
+      "digging": 174,
+      "loading": 301
+    },
+    "activity_percentages": {
+      "digging": 36.63157894736842,
+      "loading": 63.368421052631575
+    }
+  },
+  {
+    "cycle_number": 270,
+    "start_frame": 107005,
+    "end_frame": 107712,
+    "duration_frames": 707,
+    "duration_seconds": 28.28,
+    "activity_counts": {
+      "digging": 654,
+      "loading": 53
+    },
+    "activity_percentages": {
+      "digging": 92.5035360678925,
+      "loading": 7.4964639321074955
+    }
+  },
+  {
+    "cycle_number": 271,
+    "start_frame": 107712,
+    "end_frame": 107805,
+    "duration_frames": 93,
+    "duration_seconds": 3.72,
+    "activity_counts": {
+      "digging": 73,
+      "swinging": 20
+    },
+    "activity_percentages": {
+      "digging": 78.49462365591397,
+      "swinging": 21.50537634408602
+    }
+  },
+  {
+    "cycle_number": 272,
+    "start_frame": 107805,
+    "end_frame": 107907,
+    "duration_frames": 102,
+    "duration_seconds": 4.08,
+    "activity_counts": {
+      "digging": 27,
+      "loading": 75
+    },
+    "activity_percentages": {
+      "digging": 26.47058823529412,
+      "loading": 73.52941176470588
+    }
+  },
+  {
+    "cycle_number": 273,
+    "start_frame": 107907,
+    "end_frame": 109194,
+    "duration_frames": 1287,
+    "duration_seconds": 51.48,
+    "activity_counts": {
+      "digging": 148,
+      "loading": 254,
+      "idling": 457,
+      "swinging": 428
+    },
+    "activity_percentages": {
+      "digging": 11.499611499611499,
+      "loading": 19.735819735819735,
+      "idling": 35.50893550893551,
+      "swinging": 33.255633255633256
+    }
+  },
+  {
+    "cycle_number": 274,
+    "start_frame": 109194,
+    "end_frame": 109389,
+    "duration_frames": 195,
+    "duration_seconds": 7.8,
+    "activity_counts": {
+      "digging": 44,
+      "idling": 18,
+      "swinging": 133
+    },
+    "activity_percentages": {
+      "digging": 22.564102564102566,
+      "idling": 9.230769230769232,
+      "swinging": 68.2051282051282
+    }
+  },
+  {
+    "cycle_number": 275,
+    "start_frame": 109389,
+    "end_frame": 109515,
+    "duration_frames": 126,
+    "duration_seconds": 5.04,
+    "activity_counts": {
+      "digging": 71,
+      "swinging": 55
+    },
+    "activity_percentages": {
+      "digging": 56.34920634920635,
+      "swinging": 43.65079365079365
+    }
+  },
+  {
+    "cycle_number": 276,
+    "start_frame": 109515,
+    "end_frame": 110788,
+    "duration_frames": 1273,
+    "duration_seconds": 50.92,
+    "activity_counts": {
+      "digging": 391,
+      "swinging": 463,
+      "idling": 419
+    },
+    "activity_percentages": {
+      "digging": 30.71484681853888,
+      "swinging": 36.37077769049489,
+      "idling": 32.91437549096622
+    }
+  },
+  {
+    "cycle_number": 277,
+    "start_frame": 110788,
+    "end_frame": 111173,
+    "duration_frames": 385,
+    "duration_seconds": 15.4,
+    "activity_counts": {
+      "digging": 59,
+      "swinging": 270,
+      "travelling": 32,
+      "loading": 24
+    },
+    "activity_percentages": {
+      "digging": 15.324675324675324,
+      "swinging": 70.12987012987013,
+      "travelling": 8.311688311688311,
+      "loading": 6.233766233766234
+    }
+  },
+  {
+    "cycle_number": 278,
+    "start_frame": 111173,
+    "end_frame": 118369,
+    "duration_frames": 7196,
+    "duration_seconds": 287.84,
+    "activity_counts": {
+      "digging": 361,
+      "swinging": 1162,
+      "idling": 4980,
+      "travelling": 693
+    },
+    "activity_percentages": {
+      "digging": 5.016675931072818,
+      "swinging": 16.147859922178988,
+      "idling": 69.20511395219566,
+      "travelling": 9.63035019455253
+    }
+  },
+  {
+    "cycle_number": 279,
+    "start_frame": 118369,
+    "end_frame": 118517,
+    "duration_frames": 148,
+    "duration_seconds": 5.92,
+    "activity_counts": {
+      "digging": 53,
+      "travelling": 1,
+      "idling": 94
+    },
+    "activity_percentages": {
+      "digging": 35.810810810810814,
+      "travelling": 0.6756756756756757,
+      "idling": 63.51351351351351
+    }
+  },
+  {
+    "cycle_number": 280,
+    "start_frame": 118517,
+    "end_frame": 120488,
+    "duration_frames": 1971,
+    "duration_seconds": 78.84,
+    "activity_counts": {
+      "digging": 107,
+      "idling": 851,
+      "swinging": 589,
+      "travelling": 424
+    },
+    "activity_percentages": {
+      "digging": 5.428716387620497,
+      "idling": 43.17605276509386,
+      "swinging": 29.883307965499746,
+      "travelling": 21.511922881785893
+    }
+  },
+  {
+    "cycle_number": 281,
+    "start_frame": 120488,
+    "end_frame": 120611,
+    "duration_frames": 123,
+    "duration_seconds": 4.92,
+    "activity_counts": {
+      "digging": 109,
+      "loading": 14
+    },
+    "activity_percentages": {
+      "digging": 88.6178861788618,
+      "loading": 11.38211382113821
+    }
+  },
+  {
+    "cycle_number": 282,
+    "start_frame": 120611,
+    "end_frame": 120873,
+    "duration_frames": 262,
+    "duration_seconds": 10.48,
+    "activity_counts": {
+      "digging": 62,
+      "loading": 200
+    },
+    "activity_percentages": {
+      "digging": 23.66412213740458,
+      "loading": 76.33587786259542
+    }
+  },
+  {
+    "cycle_number": 283,
+    "start_frame": 120873,
+    "end_frame": 140604,
+    "duration_frames": 19731,
+    "duration_seconds": 789.24,
+    "activity_counts": {
+      "digging": 37,
+      "loading": 1532,
+      "swinging": 2784,
+      "idling": 14473,
+      "travelling": 905
+    },
+    "activity_percentages": {
+      "digging": 0.18752217322994272,
+      "loading": 7.76443160508844,
+      "swinging": 14.109776493842178,
+      "idling": 73.35157873397192,
+      "travelling": 4.586690993867518
+    }
+  },
+  {
+    "cycle_number": 284,
+    "start_frame": 140604,
+    "end_frame": 140959,
+    "duration_frames": 355,
+    "duration_seconds": 14.2,
+    "activity_counts": {
+      "digging": 51,
+      "swinging": 205,
+      "idling": 99
+    },
+    "activity_percentages": {
+      "digging": 14.366197183098592,
+      "swinging": 57.74647887323944,
+      "idling": 27.887323943661972
+    }
+  },
+  {
+    "cycle_number": 285,
+    "start_frame": 140959,
+    "end_frame": 141305,
+    "duration_frames": 346,
+    "duration_seconds": 13.84,
+    "activity_counts": {
+      "digging": 52,
+      "swinging": 115,
+      "idling": 179
+    },
+    "activity_percentages": {
+      "digging": 15.028901734104046,
+      "swinging": 33.23699421965318,
+      "idling": 51.73410404624278
+    }
+  },
+  {
+    "cycle_number": 286,
+    "start_frame": 141305,
+    "end_frame": 142220,
+    "duration_frames": 915,
+    "duration_seconds": 36.6,
+    "activity_counts": {
+      "digging": 80,
+      "swinging": 460,
+      "idling": 292,
+      "travelling": 83
+    },
+    "activity_percentages": {
+      "digging": 8.743169398907105,
+      "swinging": 50.27322404371585,
+      "idling": 31.91256830601093,
+      "travelling": 9.07103825136612
+    }
+  },
+  {
+    "cycle_number": 287,
+    "start_frame": 142220,
+    "end_frame": 142823,
+    "duration_frames": 603,
+    "duration_seconds": 24.12,
+    "activity_counts": {
+      "digging": 68,
+      "swinging": 101,
+      "idling": 434
+    },
+    "activity_percentages": {
+      "digging": 11.276948590381426,
+      "swinging": 16.749585406301822,
+      "idling": 71.97346600331676
+    }
+  },
+  {
+    "cycle_number": 288,
+    "start_frame": 142823,
+    "end_frame": 142953,
+    "duration_frames": 130,
+    "duration_seconds": 5.2,
+    "activity_counts": {
+      "digging": 74,
+      "travelling": 18,
+      "swinging": 38
+    },
+    "activity_percentages": {
+      "digging": 56.92307692307692,
+      "travelling": 13.846153846153847,
+      "swinging": 29.230769230769234
+    }
+  },
+  {
+    "cycle_number": 289,
+    "start_frame": 142953,
+    "end_frame": 143078,
+    "duration_frames": 125,
+    "duration_seconds": 5.0,
+    "activity_counts": {
+      "digging": 36,
+      "swinging": 30,
+      "idling": 59
+    },
+    "activity_percentages": {
+      "digging": 28.799999999999997,
+      "swinging": 24.0,
+      "idling": 47.199999999999996
+    }
+  },
+  {
+    "cycle_number": 290,
+    "start_frame": 143078,
+    "end_frame": 143638,
+    "duration_frames": 560,
+    "duration_seconds": 22.4,
+    "activity_counts": {
+      "digging": 139,
+      "idling": 214,
+      "swinging": 207
+    },
+    "activity_percentages": {
+      "digging": 24.821428571428573,
+      "idling": 38.21428571428571,
+      "swinging": 36.964285714285715
+    }
+  },
+  {
+    "cycle_number": 291,
+    "start_frame": 143638,
+    "end_frame": 144252,
+    "duration_frames": 614,
+    "duration_seconds": 24.56,
+    "activity_counts": {
+      "digging": 103,
+      "idling": 277,
+      "travelling": 168,
+      "swinging": 66
+    },
+    "activity_percentages": {
+      "digging": 16.775244299674267,
+      "idling": 45.11400651465798,
+      "travelling": 27.36156351791531,
+      "swinging": 10.749185667752444
+    }
+  },
+  {
+    "cycle_number": 292,
+    "start_frame": 144252,
+    "end_frame": 144905,
+    "duration_frames": 653,
+    "duration_seconds": 26.12,
+    "activity_counts": {
+      "digging": 119,
+      "idling": 352,
+      "swinging": 102,
+      "travelling": 80
+    },
+    "activity_percentages": {
+      "digging": 18.223583460949463,
+      "idling": 53.905053598774884,
+      "swinging": 15.620214395099541,
+      "travelling": 12.251148545176111
+    }
+  },
+  {
+    "cycle_number": 293,
+    "start_frame": 144905,
+    "end_frame": 145794,
+    "duration_frames": 889,
+    "duration_seconds": 35.56,
+    "activity_counts": {
+      "digging": 38,
+      "loading": 189,
+      "swinging": 322,
+      "idling": 338,
+      "travelling": 2
+    },
+    "activity_percentages": {
+      "digging": 4.274465691788527,
+      "loading": 21.25984251968504,
+      "swinging": 36.22047244094488,
+      "idling": 38.02024746906636,
+      "travelling": 0.22497187851518563
+    }
+  },
+  {
+    "cycle_number": 294,
+    "start_frame": 145794,
+    "end_frame": 146329,
+    "duration_frames": 535,
+    "duration_seconds": 21.4,
+    "activity_counts": {
+      "digging": 62,
+      "swinging": 157,
+      "idling": 316
+    },
+    "activity_percentages": {
+      "digging": 11.588785046728972,
+      "swinging": 29.345794392523366,
+      "idling": 59.06542056074766
+    }
+  },
+  {
+    "cycle_number": 295,
+    "start_frame": 146329,
+    "end_frame": 146412,
+    "duration_frames": 83,
+    "duration_seconds": 3.32,
+    "activity_counts": {
+      "digging": 53,
+      "swinging": 30
+    },
+    "activity_percentages": {
+      "digging": 63.85542168674698,
+      "swinging": 36.144578313253014
+    }
+  },
+  {
+    "cycle_number": 296,
+    "start_frame": 146412,
+    "end_frame": 146498,
+    "duration_frames": 86,
+    "duration_seconds": 3.44,
+    "activity_counts": {
+      "digging": 83,
+      "swinging": 3
+    },
+    "activity_percentages": {
+      "digging": 96.51162790697676,
+      "swinging": 3.488372093023256
+    }
+  },
+  {
+    "cycle_number": 297,
+    "start_frame": 146498,
+    "end_frame": 146853,
+    "duration_frames": 355,
+    "duration_seconds": 14.2,
+    "activity_counts": {
+      "digging": 5,
+      "swinging": 209,
+      "idling": 141
+    },
+    "activity_percentages": {
+      "digging": 1.4084507042253522,
+      "swinging": 58.87323943661972,
+      "idling": 39.718309859154935
+    }
+  },
+  {
+    "cycle_number": 298,
+    "start_frame": 146853,
+    "end_frame": 147327,
+    "duration_frames": 474,
+    "duration_seconds": 18.96,
+    "activity_counts": {
+      "digging": 81,
+      "loading": 42,
+      "swinging": 249,
+      "idling": 102
+    },
+    "activity_percentages": {
+      "digging": 17.088607594936708,
+      "loading": 8.860759493670885,
+      "swinging": 52.53164556962025,
+      "idling": 21.518987341772153
+    }
+  },
+  {
+    "cycle_number": 299,
+    "start_frame": 147327,
+    "end_frame": 147866,
+    "duration_frames": 539,
+    "duration_seconds": 21.56,
+    "activity_counts": {
+      "digging": 99,
+      "loading": 38,
+      "swinging": 253,
+      "idling": 149
+    },
+    "activity_percentages": {
+      "digging": 18.367346938775512,
+      "loading": 7.050092764378478,
+      "swinging": 46.93877551020408,
+      "idling": 27.643784786641927
+    }
+  },
+  {
+    "cycle_number": 300,
+    "start_frame": 147866,
+    "end_frame": 148347,
+    "duration_frames": 481,
+    "duration_seconds": 19.24,
+    "activity_counts": {
+      "digging": 232,
+      "swinging": 178,
+      "idling": 71
+    },
+    "activity_percentages": {
+      "digging": 48.232848232848234,
+      "swinging": 37.00623700623701,
+      "idling": 14.760914760914762
+    }
+  },
+  {
+    "cycle_number": 301,
+    "start_frame": 148347,
+    "end_frame": 148760,
+    "duration_frames": 413,
+    "duration_seconds": 16.52,
+    "activity_counts": {
+      "digging": 167,
+      "swinging": 123,
+      "idling": 123
+    },
+    "activity_percentages": {
+      "digging": 40.43583535108959,
+      "swinging": 29.782082324455207,
+      "idling": 29.782082324455207
+    }
+  },
+  {
+    "cycle_number": 302,
+    "start_frame": 148760,
+    "end_frame": 149175,
+    "duration_frames": 415,
+    "duration_seconds": 16.6,
+    "activity_counts": {
+      "digging": 150,
+      "swinging": 146,
+      "idling": 119
+    },
+    "activity_percentages": {
+      "digging": 36.144578313253014,
+      "swinging": 35.18072289156626,
+      "idling": 28.674698795180724
+    }
+  },
+  {
+    "cycle_number": 303,
+    "start_frame": 149175,
+    "end_frame": 149561,
+    "duration_frames": 386,
+    "duration_seconds": 15.44,
+    "activity_counts": {
+      "digging": 73,
+      "loading": 30,
+      "idling": 81,
+      "swinging": 202
+    },
+    "activity_percentages": {
+      "digging": 18.911917098445596,
+      "loading": 7.772020725388601,
+      "idling": 20.984455958549223,
+      "swinging": 52.331606217616574
+    }
+  },
+  {
+    "cycle_number": 304,
+    "start_frame": 149561,
+    "end_frame": 149711,
+    "duration_frames": 150,
+    "duration_seconds": 6.0,
+    "activity_counts": {
+      "digging": 105,
+      "swinging": 45
+    },
+    "activity_percentages": {
+      "digging": 70.0,
+      "swinging": 30.0
+    }
+  },
+  {
+    "cycle_number": 305,
+    "start_frame": 149711,
+    "end_frame": 152422,
+    "duration_frames": 2711,
+    "duration_seconds": 108.44,
+    "activity_counts": {
+      "digging": 174,
+      "idling": 420,
+      "travelling": 7,
+      "swinging": 2110
+    },
+    "activity_percentages": {
+      "digging": 6.418295831796385,
+      "idling": 15.492438214680929,
+      "travelling": 0.25820730357801547,
+      "swinging": 77.83105864994468
+    }
+  },
+  {
+    "cycle_number": 306,
+    "start_frame": 152422,
+    "end_frame": 153159,
+    "duration_frames": 737,
+    "duration_seconds": 29.48,
+    "activity_counts": {
+      "digging": 32,
+      "swinging": 586,
+      "idling": 119
+    },
+    "activity_percentages": {
+      "digging": 4.341926729986431,
+      "swinging": 79.51153324287652,
+      "idling": 16.14654002713704
+    }
+  },
+  {
+    "cycle_number": 307,
+    "start_frame": 153159,
+    "end_frame": 154067,
+    "duration_frames": 908,
+    "duration_seconds": 36.32,
+    "activity_counts": {
+      "digging": 57,
+      "swinging": 851
+    },
+    "activity_percentages": {
+      "digging": 6.277533039647578,
+      "swinging": 93.72246696035242
+    }
+  },
+  {
+    "cycle_number": 308,
+    "start_frame": 154067,
+    "end_frame": 154687,
+    "duration_frames": 620,
+    "duration_seconds": 24.8,
+    "activity_counts": {
+      "digging": 47,
+      "swinging": 560,
+      "travelling": 13
+    },
+    "activity_percentages": {
+      "digging": 7.580645161290322,
+      "swinging": 90.32258064516128,
+      "travelling": 2.0967741935483875
+    }
+  },
+  {
+    "cycle_number": 309,
+    "start_frame": 154687,
+    "end_frame": 155869,
+    "duration_frames": 1182,
+    "duration_seconds": 47.28,
+    "activity_counts": {
+      "digging": 46,
+      "swinging": 1096,
+      "travelling": 40
+    },
+    "activity_percentages": {
+      "digging": 3.8917089678511,
+      "swinging": 92.72419627749578,
+      "travelling": 3.3840947546531304
+    }
+  },
+  {
+    "cycle_number": 310,
+    "start_frame": 155869,
+    "end_frame": 156328,
+    "duration_frames": 459,
+    "duration_seconds": 18.36,
+    "activity_counts": {
+      "digging": 71,
+      "swinging": 362,
+      "travelling": 26
+    },
+    "activity_percentages": {
+      "digging": 15.468409586056644,
+      "swinging": 78.86710239651417,
+      "travelling": 5.664488017429194
+    }
+  },
+  {
+    "cycle_number": 311,
+    "start_frame": 156328,
+    "end_frame": 156596,
+    "duration_frames": 268,
+    "duration_seconds": 10.72,
+    "activity_counts": {
+      "digging": 151,
+      "swinging": 117
+    },
+    "activity_percentages": {
+      "digging": 56.343283582089555,
+      "swinging": 43.656716417910445
+    }
+  },
+  {
+    "cycle_number": 312,
+    "start_frame": 156596,
+    "end_frame": 156886,
+    "duration_frames": 290,
+    "duration_seconds": 11.6,
+    "activity_counts": {
+      "digging": 38,
+      "swinging": 221,
+      "idling": 31
+    },
+    "activity_percentages": {
+      "digging": 13.10344827586207,
+      "swinging": 76.20689655172413,
+      "idling": 10.689655172413794
+    }
+  },
+  {
+    "cycle_number": 313,
+    "start_frame": 156886,
+    "end_frame": 157265,
+    "duration_frames": 379,
+    "duration_seconds": 15.16,
+    "activity_counts": {
+      "digging": 49,
+      "swinging": 330
+    },
+    "activity_percentages": {
+      "digging": 12.928759894459102,
+      "swinging": 87.0712401055409
+    }
+  },
+  {
+    "cycle_number": 314,
+    "start_frame": 157265,
+    "end_frame": 157819,
+    "duration_frames": 554,
+    "duration_seconds": 22.16,
+    "activity_counts": {
+      "digging": 97,
+      "swinging": 319,
+      "travelling": 30,
+      "idling": 108
+    },
+    "activity_percentages": {
+      "digging": 17.509025270758123,
+      "swinging": 57.5812274368231,
+      "travelling": 5.415162454873646,
+      "idling": 19.494584837545126
+    }
+  },
+  {
+    "cycle_number": 315,
+    "start_frame": 157819,
+    "end_frame": 157961,
+    "duration_frames": 142,
+    "duration_seconds": 5.68,
+    "activity_counts": {
+      "digging": 8,
+      "swinging": 134
+    },
+    "activity_percentages": {
+      "digging": 5.633802816901409,
+      "swinging": 94.36619718309859
+    }
+  },
+  {
+    "cycle_number": 316,
+    "start_frame": 157961,
+    "end_frame": 158174,
+    "duration_frames": 213,
+    "duration_seconds": 8.52,
+    "activity_counts": {
+      "digging": 64,
+      "idling": 68,
+      "swinging": 81
+    },
+    "activity_percentages": {
+      "digging": 30.046948356807512,
+      "idling": 31.92488262910798,
+      "swinging": 38.028169014084504
+    }
+  },
+  {
+    "cycle_number": 317,
+    "start_frame": 158174,
+    "end_frame": 158448,
+    "duration_frames": 274,
+    "duration_seconds": 10.96,
+    "activity_counts": {
+      "digging": 219,
+      "swinging": 55
+    },
+    "activity_percentages": {
+      "digging": 79.92700729927007,
+      "swinging": 20.072992700729927
+    }
+  },
+  {
+    "cycle_number": 318,
+    "start_frame": 158448,
+    "end_frame": 158723,
+    "duration_frames": 275,
+    "duration_seconds": 11.0,
+    "activity_counts": {
+      "digging": 44,
+      "swinging": 231
+    },
+    "activity_percentages": {
+      "digging": 16.0,
+      "swinging": 84.0
+    }
+  },
+  {
+    "cycle_number": 319,
+    "start_frame": 158723,
+    "end_frame": 159205,
+    "duration_frames": 482,
+    "duration_seconds": 19.28,
+    "activity_counts": {
+      "digging": 102,
+      "swinging": 275,
+      "travelling": 40,
+      "idling": 65
+    },
+    "activity_percentages": {
+      "digging": 21.16182572614108,
+      "swinging": 57.05394190871369,
+      "travelling": 8.29875518672199,
+      "idling": 13.485477178423237
+    }
+  },
+  {
+    "cycle_number": 320,
+    "start_frame": 159205,
+    "end_frame": 159666,
+    "duration_frames": 461,
+    "duration_seconds": 18.44,
+    "activity_counts": {
+      "digging": 48,
+      "swinging": 386,
+      "travelling": 27
+    },
+    "activity_percentages": {
+      "digging": 10.412147505422993,
+      "swinging": 83.73101952277658,
+      "travelling": 5.856832971800434
+    }
+  },
+  {
+    "cycle_number": 321,
+    "start_frame": 159666,
+    "end_frame": 160075,
+    "duration_frames": 409,
+    "duration_seconds": 16.36,
+    "activity_counts": {
+      "digging": 67,
+      "swinging": 173,
+      "idling": 169
+    },
+    "activity_percentages": {
+      "digging": 16.381418092909534,
+      "swinging": 42.298288508557455,
+      "idling": 41.32029339853301
+    }
+  },
+  {
+    "cycle_number": 322,
+    "start_frame": 160075,
+    "end_frame": 160200,
+    "duration_frames": 125,
+    "duration_seconds": 5.0,
+    "activity_counts": {
+      "digging": 22,
+      "swinging": 92,
+      "idling": 11
+    },
+    "activity_percentages": {
+      "digging": 17.599999999999998,
+      "swinging": 73.6,
+      "idling": 8.799999999999999
+    }
+  },
+  {
+    "cycle_number": 323,
+    "start_frame": 160200,
+    "end_frame": 161582,
+    "duration_frames": 1382,
+    "duration_seconds": 55.28,
+    "activity_counts": {
+      "digging": 160,
+      "travelling": 233,
+      "swinging": 888,
+      "idling": 101
+    },
+    "activity_percentages": {
+      "digging": 11.577424023154848,
+      "travelling": 16.859623733719246,
+      "swinging": 64.25470332850941,
+      "idling": 7.308248914616498
+    }
+  },
+  {
+    "cycle_number": 324,
+    "start_frame": 161582,
+    "end_frame": 161676,
+    "duration_frames": 94,
+    "duration_seconds": 3.76,
+    "activity_counts": {
+      "digging": 61,
+      "swinging": 33
+    },
+    "activity_percentages": {
+      "digging": 64.8936170212766,
+      "swinging": 35.1063829787234
+    }
+  },
+  {
+    "cycle_number": 325,
+    "start_frame": 161676,
+    "end_frame": 165269,
+    "duration_frames": 3593,
+    "duration_seconds": 143.72,
+    "activity_counts": {
+      "digging": 94,
+      "swinging": 2172,
+      "idling": 755,
+      "travelling": 572
+    },
+    "activity_percentages": {
+      "digging": 2.6161981630949067,
+      "swinging": 60.450876704703596,
+      "idling": 21.013080990815475,
+      "travelling": 15.919844141386028
+    }
+  },
+  {
+    "cycle_number": 326,
+    "start_frame": 165269,
+    "end_frame": 168311,
+    "duration_frames": 3042,
+    "duration_seconds": 121.68,
+    "activity_counts": {
+      "digging": 76,
+      "idling": 2008,
+      "loading": 46,
+      "swinging": 629,
+      "travelling": 283
+    },
+    "activity_percentages": {
+      "digging": 2.498356344510191,
+      "idling": 66.00920447074293,
+      "loading": 1.5121630506245891,
+      "swinging": 20.677186061801446,
+      "travelling": 9.303090072320842
+    }
+  },
+  {
+    "cycle_number": 327,
+    "start_frame": 168311,
+    "end_frame": 172591,
+    "duration_frames": 4280,
+    "duration_seconds": 171.2,
+    "activity_counts": {
+      "digging": 36,
+      "swinging": 1406,
+      "idling": 2532,
+      "travelling": 306
+    },
+    "activity_percentages": {
+      "digging": 0.8411214953271028,
+      "swinging": 32.850467289719624,
+      "idling": 59.1588785046729,
+      "travelling": 7.149532710280374
+    }
+  },
+  {
+    "cycle_number": 328,
+    "start_frame": 172591,
+    "end_frame": 173102,
+    "duration_frames": 511,
+    "duration_seconds": 20.44,
+    "activity_counts": {
+      "digging": 168,
+      "swinging": 231,
+      "idling": 112
+    },
+    "activity_percentages": {
+      "digging": 32.87671232876712,
+      "swinging": 45.20547945205479,
+      "idling": 21.91780821917808
+    }
+  },
+  {
+    "cycle_number": 329,
+    "start_frame": 173102,
+    "end_frame": 175039,
+    "duration_frames": 1937,
+    "duration_seconds": 77.48,
+    "activity_counts": {
+      "digging": 81,
+      "swinging": 146,
+      "idling": 1710
+    },
+    "activity_percentages": {
+      "digging": 4.181724315952503,
+      "swinging": 7.537429013939081,
+      "idling": 88.28084667010842
+    }
+  },
+  {
+    "cycle_number": 330,
+    "start_frame": 175039,
+    "end_frame": 175310,
+    "duration_frames": 271,
+    "duration_seconds": 10.84,
+    "activity_counts": {
+      "digging": 144,
+      "swinging": 127
+    },
+    "activity_percentages": {
+      "digging": 53.13653136531366,
+      "swinging": 46.86346863468634
+    }
+  },
+  {
+    "cycle_number": 331,
+    "start_frame": 175310,
+    "end_frame": 175620,
+    "duration_frames": 310,
+    "duration_seconds": 12.4,
+    "activity_counts": {
+      "digging": 145,
+      "swinging": 46,
+      "idling": 119
+    },
+    "activity_percentages": {
+      "digging": 46.774193548387096,
+      "swinging": 14.838709677419354,
+      "idling": 38.387096774193544
+    }
+  },
+  {
+    "cycle_number": 332,
+    "start_frame": 175620,
+    "end_frame": 175755,
+    "duration_frames": 135,
+    "duration_seconds": 5.4,
+    "activity_counts": {
+      "digging": 37,
+      "swinging": 98
+    },
+    "activity_percentages": {
+      "digging": 27.40740740740741,
+      "swinging": 72.5925925925926
+    }
+  },
+  {
+    "cycle_number": 333,
+    "start_frame": 175755,
+    "end_frame": 176673,
+    "duration_frames": 918,
+    "duration_seconds": 36.72,
+    "activity_counts": {
+      "digging": 27,
+      "swinging": 391,
+      "idling": 500
+    },
+    "activity_percentages": {
+      "digging": 2.941176470588235,
+      "swinging": 42.592592592592595,
+      "idling": 54.46623093681917
+    }
+  },
+  {
+    "cycle_number": 334,
+    "start_frame": 176673,
+    "end_frame": 176991,
+    "duration_frames": 318,
+    "duration_seconds": 12.72,
+    "activity_counts": {
+      "digging": 116,
+      "swinging": 202
+    },
+    "activity_percentages": {
+      "digging": 36.477987421383645,
+      "swinging": 63.52201257861635
+    }
+  },
+  {
+    "cycle_number": 335,
+    "start_frame": 176991,
+    "end_frame": 177303,
+    "duration_frames": 312,
+    "duration_seconds": 12.48,
+    "activity_counts": {
+      "digging": 98,
+      "swinging": 158,
+      "idling": 56
+    },
+    "activity_percentages": {
+      "digging": 31.41025641025641,
+      "swinging": 50.641025641025635,
+      "idling": 17.94871794871795
+    }
+  },
+  {
+    "cycle_number": 336,
+    "start_frame": 177303,
+    "end_frame": 177837,
+    "duration_frames": 534,
+    "duration_seconds": 21.36,
+    "activity_counts": {
+      "digging": 100,
+      "swinging": 363,
+      "idling": 71
+    },
+    "activity_percentages": {
+      "digging": 18.726591760299627,
+      "swinging": 67.97752808988764,
+      "idling": 13.295880149812733
+    }
+  },
+  {
+    "cycle_number": 337,
+    "start_frame": 177837,
+    "end_frame": 177855,
+    "duration_frames": 18,
+    "duration_seconds": 0.72,
+    "activity_counts": {
+      "digging": 7,
+      "swinging": 11
+    },
+    "activity_percentages": {
+      "digging": 38.88888888888889,
+      "swinging": 61.111111111111114
+    }
+  },
+  {
+    "cycle_number": 338,
+    "start_frame": 177855,
+    "end_frame": 178119,
+    "duration_frames": 264,
+    "duration_seconds": 10.56,
+    "activity_counts": {
+      "digging": 18,
+      "swinging": 208,
+      "idling": 38
+    },
+    "activity_percentages": {
+      "digging": 6.8181818181818175,
+      "swinging": 78.78787878787878,
+      "idling": 14.393939393939394
+    }
+  },
+  {
+    "cycle_number": 339,
+    "start_frame": 178119,
+    "end_frame": 178195,
+    "duration_frames": 76,
+    "duration_seconds": 3.04,
+    "activity_counts": {
+      "digging": 4,
+      "idling": 20,
+      "swinging": 52
+    },
+    "activity_percentages": {
+      "digging": 5.263157894736842,
+      "idling": 26.31578947368421,
+      "swinging": 68.42105263157895
+    }
+  },
+  {
+    "cycle_number": 340,
+    "start_frame": 178195,
+    "end_frame": 178387,
+    "duration_frames": 192,
+    "duration_seconds": 7.68,
+    "activity_counts": {
+      "digging": 36,
+      "idling": 91,
+      "swinging": 65
+    },
+    "activity_percentages": {
+      "digging": 18.75,
+      "idling": 47.39583333333333,
+      "swinging": 33.85416666666667
+    }
+  },
+  {
+    "cycle_number": 341,
+    "start_frame": 178387,
+    "end_frame": 178857,
+    "duration_frames": 470,
+    "duration_seconds": 18.8,
+    "activity_counts": {
+      "digging": 69,
+      "swinging": 299,
+      "idling": 102
+    },
+    "activity_percentages": {
+      "digging": 14.680851063829786,
+      "swinging": 63.61702127659574,
+      "idling": 21.70212765957447
+    }
+  },
+  {
+    "cycle_number": 342,
+    "start_frame": 178857,
+    "end_frame": 179156,
+    "duration_frames": 299,
+    "duration_seconds": 11.96,
+    "activity_counts": {
+      "digging": 24,
+      "swinging": 117,
+      "idling": 120,
+      "travelling": 38
+    },
+    "activity_percentages": {
+      "digging": 8.02675585284281,
+      "swinging": 39.130434782608695,
+      "idling": 40.13377926421405,
+      "travelling": 12.709030100334449
+    }
+  },
+  {
+    "cycle_number": 343,
+    "start_frame": 179156,
+    "end_frame": 179523,
+    "duration_frames": 367,
+    "duration_seconds": 14.68,
+    "activity_counts": {
+      "digging": 78,
+      "idling": 87,
+      "swinging": 202
+    },
+    "activity_percentages": {
+      "digging": 21.25340599455041,
+      "idling": 23.705722070844686,
+      "swinging": 55.04087193460491
+    }
+  },
+  {
+    "cycle_number": 344,
+    "start_frame": 179523,
+    "end_frame": 180027,
+    "duration_frames": 504,
+    "duration_seconds": 20.16,
+    "activity_counts": {
+      "digging": 270,
+      "swinging": 131,
+      "idling": 66,
+      "travelling": 37
+    },
+    "activity_percentages": {
+      "digging": 53.57142857142857,
+      "swinging": 25.992063492063494,
+      "idling": 13.095238095238097,
+      "travelling": 7.341269841269842
+    }
+  },
+  {
+    "cycle_number": 345,
+    "start_frame": 180027,
+    "end_frame": 182036,
+    "duration_frames": 2009,
+    "duration_seconds": 80.36,
+    "activity_counts": {
+      "digging": 108,
+      "swinging": 333,
+      "idling": 1260,
+      "travelling": 308
+    },
+    "activity_percentages": {
+      "digging": 5.375808860129418,
+      "swinging": 16.575410652065703,
+      "idling": 62.7177700348432,
+      "travelling": 15.33101045296167
+    }
+  },
+  {
+    "cycle_number": 346,
+    "start_frame": 182036,
+    "end_frame": 182109,
+    "duration_frames": 73,
+    "duration_seconds": 2.92,
+    "activity_counts": {
+      "digging": 34,
+      "loading": 39
+    },
+    "activity_percentages": {
+      "digging": 46.57534246575342,
+      "loading": 53.42465753424658
+    }
+  },
+  {
+    "cycle_number": 347,
+    "start_frame": 182109,
+    "end_frame": 182531,
+    "duration_frames": 422,
+    "duration_seconds": 16.88,
+    "activity_counts": {
+      "digging": 104,
+      "idling": 318
+    },
+    "activity_percentages": {
+      "digging": 24.644549763033176,
+      "idling": 75.35545023696683
+    }
+  },
+  {
+    "cycle_number": 348,
+    "start_frame": 182531,
+    "end_frame": 184031,
+    "duration_frames": 1500,
+    "duration_seconds": 60.0,
+    "activity_counts": {
+      "digging": 145,
+      "idling": 567,
+      "loading": 44,
+      "swinging": 713,
+      "travelling": 31
+    },
+    "activity_percentages": {
+      "digging": 9.666666666666666,
+      "idling": 37.8,
+      "loading": 2.933333333333333,
+      "swinging": 47.53333333333333,
+      "travelling": 2.0666666666666664
+    }
+  },
+  {
+    "cycle_number": 349,
+    "start_frame": 184031,
+    "end_frame": 184351,
+    "duration_frames": 320,
+    "duration_seconds": 12.8,
+    "activity_counts": {
+      "digging": 264,
+      "loading": 56
+    },
+    "activity_percentages": {
+      "digging": 82.5,
+      "loading": 17.5
+    }
+  },
+  {
+    "cycle_number": 350,
+    "start_frame": 184351,
+    "end_frame": 184703,
+    "duration_frames": 352,
+    "duration_seconds": 14.08,
+    "activity_counts": {
+      "digging": 88,
+      "idling": 226,
+      "swinging": 14,
+      "travelling": 24
+    },
+    "activity_percentages": {
+      "digging": 25.0,
+      "idling": 64.20454545454545,
+      "swinging": 3.977272727272727,
+      "travelling": 6.8181818181818175
+    }
+  },
+  {
+    "cycle_number": 351,
+    "start_frame": 184703,
+    "end_frame": 185377,
+    "duration_frames": 674,
+    "duration_seconds": 26.96,
+    "activity_counts": {
+      "digging": 285,
+      "idling": 231,
+      "swinging": 62,
+      "travelling": 96
+    },
+    "activity_percentages": {
+      "digging": 42.28486646884273,
+      "idling": 34.27299703264095,
+      "swinging": 9.198813056379821,
+      "travelling": 14.243323442136498
+    }
+  },
+  {
+    "cycle_number": 352,
+    "start_frame": 185377,
+    "end_frame": 186433,
+    "duration_frames": 1056,
+    "duration_seconds": 42.24,
+    "activity_counts": {
+      "digging": 286,
+      "idling": 218,
+      "swinging": 168,
+      "travelling": 87,
+      "loading": 297
+    },
+    "activity_percentages": {
+      "digging": 27.083333333333332,
+      "idling": 20.643939393939394,
+      "swinging": 15.909090909090908,
+      "travelling": 8.238636363636363,
+      "loading": 28.125
+    }
+  },
+  {
+    "cycle_number": 353,
+    "start_frame": 186433,
+    "end_frame": 187176,
+    "duration_frames": 743,
+    "duration_seconds": 29.72,
+    "activity_counts": {
+      "digging": 316,
+      "idling": 420,
+      "travelling": 7
+    },
+    "activity_percentages": {
+      "digging": 42.530282637954244,
+      "idling": 56.527590847913864,
+      "travelling": 0.9421265141318977
+    }
+  },
+  {
+    "cycle_number": 354,
+    "start_frame": 187176,
+    "end_frame": 187704,
+    "duration_frames": 528,
+    "duration_seconds": 21.12,
+    "activity_counts": {
+      "digging": 137,
+      "idling": 308,
+      "swinging": 68,
+      "travelling": 15
+    },
+    "activity_percentages": {
+      "digging": 25.946969696969695,
+      "idling": 58.333333333333336,
+      "swinging": 12.878787878787879,
+      "travelling": 2.840909090909091
+    }
+  },
+  {
+    "cycle_number": 355,
+    "start_frame": 187704,
+    "end_frame": 188318,
+    "duration_frames": 614,
+    "duration_seconds": 24.56,
+    "activity_counts": {
+      "digging": 184,
+      "idling": 418,
+      "swinging": 12
+    },
+    "activity_percentages": {
+      "digging": 29.967426710097723,
+      "idling": 68.07817589576547,
+      "swinging": 1.9543973941368076
+    }
+  },
+  {
+    "cycle_number": 356,
+    "start_frame": 188318,
+    "end_frame": 188849,
+    "duration_frames": 531,
+    "duration_seconds": 21.24,
+    "activity_counts": {
+      "digging": 127,
+      "loading": 4,
+      "swinging": 67,
+      "idling": 333
+    },
+    "activity_percentages": {
+      "digging": 23.91713747645951,
+      "loading": 0.7532956685499058,
+      "swinging": 12.617702448210924,
+      "idling": 62.71186440677966
+    }
+  },
+  {
+    "cycle_number": 357,
+    "start_frame": 188849,
+    "end_frame": 189477,
+    "duration_frames": 628,
+    "duration_seconds": 25.12,
+    "activity_counts": {
+      "digging": 248,
+      "idling": 296,
+      "loading": 40,
+      "swinging": 44
+    },
+    "activity_percentages": {
+      "digging": 39.490445859872615,
+      "idling": 47.13375796178344,
+      "loading": 6.369426751592357,
+      "swinging": 7.006369426751593
+    }
+  },
+  {
+    "cycle_number": 358,
+    "start_frame": 189477,
+    "end_frame": 190079,
+    "duration_frames": 602,
+    "duration_seconds": 24.08,
+    "activity_counts": {
+      "digging": 157,
+      "idling": 347,
+      "swinging": 98
+    },
+    "activity_percentages": {
+      "digging": 26.079734219269103,
+      "idling": 57.64119601328903,
+      "swinging": 16.27906976744186
+    }
+  },
+  {
+    "cycle_number": 359,
+    "start_frame": 190079,
+    "end_frame": 191284,
+    "duration_frames": 1205,
+    "duration_seconds": 48.2,
+    "activity_counts": {
+      "digging": 147,
+      "idling": 434,
+      "loading": 418,
+      "swinging": 145,
+      "travelling": 61
+    },
+    "activity_percentages": {
+      "digging": 12.199170124481327,
+      "idling": 36.016597510373444,
+      "loading": 34.68879668049792,
+      "swinging": 12.033195020746888,
+      "travelling": 5.062240663900415
+    }
+  },
+  {
+    "cycle_number": 360,
+    "start_frame": 191284,
+    "end_frame": 192034,
+    "duration_frames": 750,
+    "duration_seconds": 30.0,
+    "activity_counts": {
+      "digging": 190,
+      "idling": 391,
+      "swinging": 115,
+      "travelling": 54
+    },
+    "activity_percentages": {
+      "digging": 25.333333333333336,
+      "idling": 52.13333333333333,
+      "swinging": 15.333333333333332,
+      "travelling": 7.199999999999999
+    }
+  },
+  {
+    "cycle_number": 361,
+    "start_frame": 192034,
+    "end_frame": 192587,
+    "duration_frames": 553,
+    "duration_seconds": 22.12,
+    "activity_counts": {
+      "digging": 149,
+      "swinging": 79,
+      "idling": 259,
+      "travelling": 66
+    },
+    "activity_percentages": {
+      "digging": 26.94394213381555,
+      "swinging": 14.285714285714285,
+      "idling": 46.835443037974684,
+      "travelling": 11.934900542495479
+    }
+  },
+  {
+    "cycle_number": 362,
+    "start_frame": 192587,
+    "end_frame": 193155,
+    "duration_frames": 568,
+    "duration_seconds": 22.72,
+    "activity_counts": {
+      "digging": 87,
+      "swinging": 55,
+      "idling": 394,
+      "travelling": 32
+    },
+    "activity_percentages": {
+      "digging": 15.316901408450704,
+      "swinging": 9.683098591549296,
+      "idling": 69.36619718309859,
+      "travelling": 5.633802816901409
+    }
+  },
+  {
+    "cycle_number": 363,
+    "start_frame": 193155,
+    "end_frame": 194547,
+    "duration_frames": 1392,
+    "duration_seconds": 55.68,
+    "activity_counts": {
+      "digging": 50,
+      "loading": 30,
+      "swinging": 245,
+      "idling": 701,
+      "travelling": 366
+    },
+    "activity_percentages": {
+      "digging": 3.5919540229885056,
+      "loading": 2.1551724137931036,
+      "swinging": 17.600574712643677,
+      "idling": 50.35919540229885,
+      "travelling": 26.29310344827586
+    }
+  },
+  {
+    "cycle_number": 364,
+    "start_frame": 194547,
+    "end_frame": 194604,
+    "duration_frames": 57,
+    "duration_seconds": 2.28,
+    "activity_counts": {
+      "digging": 13,
+      "swinging": 44
+    },
+    "activity_percentages": {
+      "digging": 22.807017543859647,
+      "swinging": 77.19298245614034
+    }
+  },
+  {
+    "cycle_number": 365,
+    "start_frame": 194604,
+    "end_frame": 195042,
+    "duration_frames": 438,
+    "duration_seconds": 17.52,
+    "activity_counts": {
+      "digging": 59,
+      "swinging": 245,
+      "travelling": 66,
+      "idling": 68
+    },
+    "activity_percentages": {
+      "digging": 13.470319634703195,
+      "swinging": 55.93607305936074,
+      "travelling": 15.068493150684931,
+      "idling": 15.52511415525114
+    }
+  },
+  {
+    "cycle_number": 366,
+    "start_frame": 195042,
+    "end_frame": 195709,
+    "duration_frames": 667,
+    "duration_seconds": 26.68,
+    "activity_counts": {
+      "digging": 215,
+      "swinging": 259,
+      "travelling": 193
+    },
+    "activity_percentages": {
+      "digging": 32.23388305847077,
+      "swinging": 38.830584707646175,
+      "travelling": 28.93553223388306
+    }
+  },
+  {
+    "cycle_number": 367,
+    "start_frame": 195709,
+    "end_frame": 195850,
+    "duration_frames": 141,
+    "duration_seconds": 5.64,
+    "activity_counts": {
+      "digging": 98,
+      "loading": 43
+    },
+    "activity_percentages": {
+      "digging": 69.50354609929079,
+      "loading": 30.49645390070922
+    }
+  },
+  {
+    "cycle_number": 368,
+    "start_frame": 195850,
+    "end_frame": 196286,
+    "duration_frames": 436,
+    "duration_seconds": 17.44,
+    "activity_counts": {
+      "digging": 44,
+      "swinging": 231,
+      "idling": 134,
+      "travelling": 27
+    },
+    "activity_percentages": {
+      "digging": 10.091743119266056,
+      "swinging": 52.981651376146786,
+      "idling": 30.73394495412844,
+      "travelling": 6.192660550458716
+    }
+  },
+  {
+    "cycle_number": 369,
+    "start_frame": 196286,
+    "end_frame": 198764,
+    "duration_frames": 2478,
+    "duration_seconds": 99.12,
+    "activity_counts": {
+      "digging": 193,
+      "travelling": 614,
+      "swinging": 369,
+      "idling": 1300,
+      "loading": 2
+    },
+    "activity_percentages": {
+      "digging": 7.788539144471347,
+      "travelling": 24.778046811945117,
+      "swinging": 14.891041162227603,
+      "idling": 52.46166263115416,
+      "loading": 0.08071025020177562
+    }
+  },
+  {
+    "cycle_number": 370,
+    "start_frame": 198764,
+    "end_frame": 198948,
+    "duration_frames": 184,
+    "duration_seconds": 7.36,
+    "activity_counts": {
+      "digging": 143,
+      "travelling": 8,
+      "swinging": 33
+    },
+    "activity_percentages": {
+      "digging": 77.71739130434783,
+      "travelling": 4.3478260869565215,
+      "swinging": 17.934782608695652
+    }
+  },
+  {
+    "cycle_number": 371,
+    "start_frame": 198948,
+    "end_frame": 199240,
+    "duration_frames": 292,
+    "duration_seconds": 11.68,
+    "activity_counts": {
+      "digging": 193,
+      "travelling": 26,
+      "idling": 73
+    },
+    "activity_percentages": {
+      "digging": 66.0958904109589,
+      "travelling": 8.904109589041095,
+      "idling": 25.0
+    }
+  },
+  {
+    "cycle_number": 372,
+    "start_frame": 199240,
+    "end_frame": 199373,
+    "duration_frames": 133,
+    "duration_seconds": 5.32,
+    "activity_counts": {
+      "digging": 89,
+      "travelling": 11,
+      "idling": 33
+    },
+    "activity_percentages": {
+      "digging": 66.9172932330827,
+      "travelling": 8.270676691729323,
+      "idling": 24.81203007518797
+    }
+  },
+  {
+    "cycle_number": 373,
+    "start_frame": 199373,
+    "end_frame": 199522,
+    "duration_frames": 149,
+    "duration_seconds": 5.96,
+    "activity_counts": {
+      "digging": 125,
+      "loading": 24
+    },
+    "activity_percentages": {
+      "digging": 83.89261744966443,
+      "loading": 16.10738255033557
+    }
+  },
+  {
+    "cycle_number": 374,
+    "start_frame": 199522,
+    "end_frame": 200092,
+    "duration_frames": 570,
+    "duration_seconds": 22.8,
+    "activity_counts": {
+      "digging": 31,
+      "loading": 39,
+      "swinging": 296,
+      "travelling": 96,
+      "idling": 108
+    },
+    "activity_percentages": {
+      "digging": 5.43859649122807,
+      "loading": 6.842105263157896,
+      "swinging": 51.92982456140351,
+      "travelling": 16.842105263157894,
+      "idling": 18.947368421052634
+    }
+  },
+  {
+    "cycle_number": 375,
+    "start_frame": 200092,
+    "end_frame": 200217,
+    "duration_frames": 125,
+    "duration_seconds": 5.0,
+    "activity_counts": {
+      "digging": 54,
+      "loading": 71
+    },
+    "activity_percentages": {
+      "digging": 43.2,
+      "loading": 56.8
+    }
+  },
+  {
+    "cycle_number": 376,
+    "start_frame": 200217,
+    "end_frame": 200594,
+    "duration_frames": 377,
+    "duration_seconds": 15.08,
+    "activity_counts": {
+      "digging": 38,
+      "swinging": 205,
+      "idling": 108,
+      "travelling": 26
+    },
+    "activity_percentages": {
+      "digging": 10.079575596816976,
+      "swinging": 54.37665782493368,
+      "idling": 28.647214854111407,
+      "travelling": 6.896551724137931
+    }
+  },
+  {
+    "cycle_number": 377,
+    "start_frame": 200594,
+    "end_frame": 201080,
+    "duration_frames": 486,
+    "duration_seconds": 19.44,
+    "activity_counts": {
+      "digging": 133,
+      "loading": 28,
+      "swinging": 226,
+      "travelling": 99
+    },
+    "activity_percentages": {
+      "digging": 27.36625514403292,
+      "loading": 5.761316872427984,
+      "swinging": 46.50205761316872,
+      "travelling": 20.37037037037037
+    }
+  },
+  {
+    "cycle_number": 378,
+    "start_frame": 201080,
+    "end_frame": 201599,
+    "duration_frames": 519,
+    "duration_seconds": 20.76,
+    "activity_counts": {
+      "digging": 166,
+      "swinging": 223,
+      "idling": 122,
+      "travelling": 8
+    },
+    "activity_percentages": {
+      "digging": 31.984585741811177,
+      "swinging": 42.96724470134875,
+      "idling": 23.50674373795761,
+      "travelling": 1.5414258188824663
+    }
+  },
+  {
+    "cycle_number": 379,
+    "start_frame": 201599,
+    "end_frame": 202101,
+    "duration_frames": 502,
+    "duration_seconds": 20.08,
+    "activity_counts": {
+      "digging": 119,
+      "swinging": 202,
+      "travelling": 73,
+      "idling": 108
+    },
+    "activity_percentages": {
+      "digging": 23.705179282868528,
+      "swinging": 40.23904382470119,
+      "travelling": 14.54183266932271,
+      "idling": 21.51394422310757
+    }
+  },
+  {
+    "cycle_number": 380,
+    "start_frame": 202101,
+    "end_frame": 202918,
+    "duration_frames": 817,
+    "duration_seconds": 32.68,
+    "activity_counts": {
+      "digging": 345,
+      "loading": 39,
+      "swinging": 146,
+      "travelling": 155,
+      "idling": 132
+    },
+    "activity_percentages": {
+      "digging": 42.227662178702566,
+      "loading": 4.773561811505508,
+      "swinging": 17.870257037943695,
+      "travelling": 18.9718482252142,
+      "idling": 16.156670746634028
+    }
+  },
+  {
+    "cycle_number": 381,
+    "start_frame": 202918,
+    "end_frame": 203021,
+    "duration_frames": 103,
+    "duration_seconds": 4.12,
+    "activity_counts": {
+      "digging": 47,
+      "swinging": 25,
+      "loading": 31
+    },
+    "activity_percentages": {
+      "digging": 45.63106796116505,
+      "swinging": 24.271844660194176,
+      "loading": 30.097087378640776
+    }
+  },
+  {
+    "cycle_number": 382,
+    "start_frame": 203021,
+    "end_frame": 203595,
+    "duration_frames": 574,
+    "duration_seconds": 22.96,
+    "activity_counts": {
+      "digging": 38,
+      "loading": 66,
+      "swinging": 128,
+      "idling": 285,
+      "travelling": 57
+    },
+    "activity_percentages": {
+      "digging": 6.620209059233449,
+      "loading": 11.498257839721255,
+      "swinging": 22.299651567944252,
+      "idling": 49.65156794425087,
+      "travelling": 9.930313588850174
+    }
+  },
+  {
+    "cycle_number": 383,
+    "start_frame": 203595,
+    "end_frame": 203668,
+    "duration_frames": 73,
+    "duration_seconds": 2.92,
+    "activity_counts": {
+      "digging": 50,
+      "loading": 23
+    },
+    "activity_percentages": {
+      "digging": 68.4931506849315,
+      "loading": 31.506849315068493
+    }
+  },
+  {
+    "cycle_number": 384,
+    "start_frame": 203668,
+    "end_frame": 204313,
+    "duration_frames": 645,
+    "duration_seconds": 25.8,
+    "activity_counts": {
+      "digging": 119,
+      "swinging": 97,
+      "travelling": 218,
+      "idling": 167,
+      "loading": 44
+    },
+    "activity_percentages": {
+      "digging": 18.449612403100776,
+      "swinging": 15.038759689922482,
+      "travelling": 33.798449612403104,
+      "idling": 25.891472868217054,
+      "loading": 6.821705426356589
+    }
+  },
+  {
+    "cycle_number": 385,
+    "start_frame": 204313,
+    "end_frame": 204511,
+    "duration_frames": 198,
+    "duration_seconds": 7.92,
+    "activity_counts": {
+      "digging": 151,
+      "swinging": 47
+    },
+    "activity_percentages": {
+      "digging": 76.26262626262627,
+      "swinging": 23.737373737373737
+    }
+  },
+  {
+    "cycle_number": 386,
+    "start_frame": 204511,
+    "end_frame": 204885,
+    "duration_frames": 374,
+    "duration_seconds": 14.96,
+    "activity_counts": {
+      "digging": 34,
+      "idling": 282,
+      "swinging": 34,
+      "travelling": 24
+    },
+    "activity_percentages": {
+      "digging": 9.090909090909092,
+      "idling": 75.40106951871658,
+      "swinging": 9.090909090909092,
+      "travelling": 6.417112299465241
+    }
+  },
+  {
+    "cycle_number": 387,
+    "start_frame": 204885,
+    "end_frame": 205663,
+    "duration_frames": 778,
+    "duration_seconds": 31.12,
+    "activity_counts": {
+      "digging": 293,
+      "swinging": 159,
+      "travelling": 66,
+      "idling": 260
+    },
+    "activity_percentages": {
+      "digging": 37.660668380462724,
+      "swinging": 20.43701799485861,
+      "travelling": 8.483290488431876,
+      "idling": 33.41902313624679
+    }
+  },
+  {
+    "cycle_number": 388,
+    "start_frame": 205663,
+    "end_frame": 205771,
+    "duration_frames": 108,
+    "duration_seconds": 4.32,
+    "activity_counts": {
+      "digging": 12,
+      "loading": 29,
+      "swinging": 67
+    },
+    "activity_percentages": {
+      "digging": 11.11111111111111,
+      "loading": 26.851851851851855,
+      "swinging": 62.03703703703704
+    }
+  },
+  {
+    "cycle_number": 389,
+    "start_frame": 205771,
+    "end_frame": 206287,
+    "duration_frames": 516,
+    "duration_seconds": 20.64,
+    "activity_counts": {
+      "digging": 4,
+      "loading": 35,
+      "swinging": 126,
+      "travelling": 92,
+      "idling": 259
+    },
+    "activity_percentages": {
+      "digging": 0.7751937984496124,
+      "loading": 6.782945736434108,
+      "swinging": 24.418604651162788,
+      "travelling": 17.829457364341085,
+      "idling": 50.1937984496124
+    }
+  },
+  {
+    "cycle_number": 390,
+    "start_frame": 206287,
+    "end_frame": 206900,
+    "duration_frames": 613,
+    "duration_seconds": 24.52,
+    "activity_counts": {
+      "digging": 133,
+      "swinging": 168,
+      "idling": 312
+    },
+    "activity_percentages": {
+      "digging": 21.69657422512235,
+      "swinging": 27.40619902120718,
+      "idling": 50.89722675367048
+    }
+  },
+  {
+    "cycle_number": 391,
+    "start_frame": 206900,
+    "end_frame": 206913,
+    "duration_frames": 13,
+    "duration_seconds": 0.52,
+    "activity_counts": {
+      "digging": 10,
+      "loading": 3
+    },
+    "activity_percentages": {
+      "digging": 76.92307692307693,
+      "loading": 23.076923076923077
+    }
+  },
+  {
+    "cycle_number": 392,
+    "start_frame": 206913,
+    "end_frame": 206996,
+    "duration_frames": 83,
+    "duration_seconds": 3.32,
+    "activity_counts": {
+      "digging": 3,
+      "loading": 34,
+      "swinging": 46
+    },
+    "activity_percentages": {
+      "digging": 3.614457831325301,
+      "loading": 40.963855421686745,
+      "swinging": 55.42168674698795
+    }
+  },
+  {
+    "cycle_number": 393,
+    "start_frame": 206996,
+    "end_frame": 207006,
+    "duration_frames": 10,
+    "duration_seconds": 0.4,
+    "activity_counts": {
+      "digging": 9,
+      "loading": 1
+    },
+    "activity_percentages": {
+      "digging": 90.0,
+      "loading": 10.0
+    }
+  },
+  {
+    "cycle_number": 394,
+    "start_frame": 207006,
+    "end_frame": 207735,
+    "duration_frames": 729,
+    "duration_seconds": 29.16,
+    "activity_counts": {
+      "digging": 35,
+      "loading": 54,
+      "swinging": 86,
+      "travelling": 126,
+      "idling": 428
+    },
+    "activity_percentages": {
+      "digging": 4.801097393689986,
+      "loading": 7.4074074074074066,
+      "swinging": 11.796982167352537,
+      "travelling": 17.28395061728395,
+      "idling": 58.71056241426612
+    }
+  },
+  {
+    "cycle_number": 395,
+    "start_frame": 207735,
+    "end_frame": 208228,
+    "duration_frames": 493,
+    "duration_seconds": 19.72,
+    "activity_counts": {
+      "digging": 174,
+      "loading": 15,
+      "swinging": 160,
+      "idling": 144
+    },
+    "activity_percentages": {
+      "digging": 35.294117647058826,
+      "loading": 3.0425963488843815,
+      "swinging": 32.454361054766736,
+      "idling": 29.20892494929006
+    }
+  },
+  {
+    "cycle_number": 396,
+    "start_frame": 208228,
+    "end_frame": 208649,
+    "duration_frames": 421,
+    "duration_seconds": 16.84,
+    "activity_counts": {
+      "digging": 33,
+      "loading": 115,
+      "swinging": 235,
+      "travelling": 38
+    },
+    "activity_percentages": {
+      "digging": 7.8384798099762465,
+      "loading": 27.315914489311165,
+      "swinging": 55.819477434679335,
+      "travelling": 9.026128266033254
+    }
+  },
+  {
+    "cycle_number": 397,
+    "start_frame": 208649,
+    "end_frame": 209058,
+    "duration_frames": 409,
+    "duration_seconds": 16.36,
+    "activity_counts": {
+      "digging": 364,
+      "loading": 45
+    },
+    "activity_percentages": {
+      "digging": 88.99755501222494,
+      "loading": 11.00244498777506
+    }
+  },
+  {
+    "cycle_number": 398,
+    "start_frame": 209058,
+    "end_frame": 209443,
+    "duration_frames": 385,
+    "duration_seconds": 15.4,
+    "activity_counts": {
+      "digging": 41,
+      "swinging": 223,
+      "idling": 121
+    },
+    "activity_percentages": {
+      "digging": 10.649350649350648,
+      "swinging": 57.92207792207792,
+      "idling": 31.428571428571427
+    }
+  },
+  {
+    "cycle_number": 399,
+    "start_frame": 209443,
+    "end_frame": 209605,
+    "duration_frames": 162,
+    "duration_seconds": 6.48,
+    "activity_counts": {
+      "digging": 52,
+      "loading": 110
+    },
+    "activity_percentages": {
+      "digging": 32.098765432098766,
+      "loading": 67.90123456790124
+    }
+  },
+  {
+    "cycle_number": 400,
+    "start_frame": 209605,
+    "end_frame": 210064,
+    "duration_frames": 459,
+    "duration_seconds": 18.36,
+    "activity_counts": {
+      "digging": 39,
+      "loading": 35,
+      "swinging": 210,
+      "idling": 175
+    },
+    "activity_percentages": {
+      "digging": 8.49673202614379,
+      "loading": 7.625272331154684,
+      "swinging": 45.751633986928105,
+      "idling": 38.12636165577342
+    }
+  },
+  {
+    "cycle_number": 401,
+    "start_frame": 210064,
+    "end_frame": 210590,
+    "duration_frames": 526,
+    "duration_seconds": 21.04,
+    "activity_counts": {
+      "digging": 150,
+      "swinging": 159,
+      "travelling": 26,
+      "idling": 191
+    },
+    "activity_percentages": {
+      "digging": 28.517110266159694,
+      "swinging": 30.228136882129274,
+      "travelling": 4.942965779467681,
+      "idling": 36.31178707224335
+    }
+  },
+  {
+    "cycle_number": 402,
+    "start_frame": 210590,
+    "end_frame": 210708,
+    "duration_frames": 118,
+    "duration_seconds": 4.72,
+    "activity_counts": {
+      "digging": 15,
+      "idling": 103
+    },
+    "activity_percentages": {
+      "digging": 12.711864406779661,
+      "idling": 87.28813559322035
+    }
+  },
+  {
+    "cycle_number": 403,
+    "start_frame": 210708,
+    "end_frame": 211037,
+    "duration_frames": 329,
+    "duration_seconds": 13.16,
+    "activity_counts": {
+      "digging": 17,
+      "idling": 172,
+      "travelling": 46,
+      "loading": 94
+    },
+    "activity_percentages": {
+      "digging": 5.167173252279635,
+      "idling": 52.27963525835866,
+      "travelling": 13.98176291793313,
+      "loading": 28.57142857142857
+    }
+  },
+  {
+    "cycle_number": 404,
+    "start_frame": 211037,
+    "end_frame": 211271,
+    "duration_frames": 234,
+    "duration_seconds": 9.36,
+    "activity_counts": {
+      "digging": 139,
+      "loading": 18,
+      "idling": 77
+    },
+    "activity_percentages": {
+      "digging": 59.401709401709404,
+      "loading": 7.6923076923076925,
+      "idling": 32.9059829059829
+    }
+  },
+  {
+    "cycle_number": 405,
+    "start_frame": 211271,
+    "end_frame": 211662,
+    "duration_frames": 391,
+    "duration_seconds": 15.64,
+    "activity_counts": {
+      "digging": 318,
+      "idling": 73
+    },
+    "activity_percentages": {
+      "digging": 81.32992327365729,
+      "idling": 18.67007672634271
+    }
+  },
+  {
+    "cycle_number": 406,
+    "start_frame": 211662,
+    "end_frame": 211814,
+    "duration_frames": 152,
+    "duration_seconds": 6.08,
+    "activity_counts": {
+      "digging": 45,
+      "travelling": 48,
+      "swinging": 54,
+      "loading": 5
+    },
+    "activity_percentages": {
+      "digging": 29.605263157894733,
+      "travelling": 31.57894736842105,
+      "swinging": 35.526315789473685,
+      "loading": 3.289473684210526
+    }
+  },
+  {
+    "cycle_number": 407,
+    "start_frame": 211814,
+    "end_frame": 211843,
+    "duration_frames": 29,
+    "duration_seconds": 1.16,
+    "activity_counts": {
+      "digging": 9,
+      "loading": 20
+    },
+    "activity_percentages": {
+      "digging": 31.03448275862069,
+      "loading": 68.96551724137932
+    }
+  },
+  {
+    "cycle_number": 408,
+    "start_frame": 211843,
+    "end_frame": 211947,
+    "duration_frames": 104,
+    "duration_seconds": 4.16,
+    "activity_counts": {
+      "digging": 5,
+      "loading": 10,
+      "swinging": 89
+    },
+    "activity_percentages": {
+      "digging": 4.807692307692308,
+      "loading": 9.615384615384617,
+      "swinging": 85.57692307692307
+    }
+  },
+  {
+    "cycle_number": 409,
+    "start_frame": 211947,
+    "end_frame": 212380,
+    "duration_frames": 433,
+    "duration_seconds": 17.32,
+    "activity_counts": {
+      "digging": 156,
+      "swinging": 197,
+      "loading": 58,
+      "travelling": 22
+    },
+    "activity_percentages": {
+      "digging": 36.027713625866056,
+      "swinging": 45.49653579676674,
+      "loading": 13.394919168591224,
+      "travelling": 5.080831408775981
+    }
+  },
+  {
+    "cycle_number": 410,
+    "start_frame": 212380,
+    "end_frame": 212797,
+    "duration_frames": 417,
+    "duration_seconds": 16.68,
+    "activity_counts": {
+      "digging": 69,
+      "swinging": 233,
+      "travelling": 92,
+      "idling": 23
+    },
+    "activity_percentages": {
+      "digging": 16.546762589928058,
+      "swinging": 55.875299760191844,
+      "travelling": 22.062350119904075,
+      "idling": 5.515587529976019
+    }
+  },
+  {
+    "cycle_number": 411,
+    "start_frame": 212797,
+    "end_frame": 213354,
+    "duration_frames": 557,
+    "duration_seconds": 22.28,
+    "activity_counts": {
+      "digging": 106,
+      "loading": 63,
+      "swinging": 304,
+      "travelling": 84
+    },
+    "activity_percentages": {
+      "digging": 19.03052064631957,
+      "loading": 11.310592459605028,
+      "swinging": 54.57809694793537,
+      "travelling": 15.080789946140035
+    }
+  },
+  {
+    "cycle_number": 412,
+    "start_frame": 213354,
+    "end_frame": 213867,
+    "duration_frames": 513,
+    "duration_seconds": 20.52,
+    "activity_counts": {
+      "digging": 155,
+      "swinging": 181,
+      "idling": 93,
+      "travelling": 84
+    },
+    "activity_percentages": {
+      "digging": 30.214424951267056,
+      "swinging": 35.28265107212476,
+      "idling": 18.128654970760234,
+      "travelling": 16.374269005847953
+    }
+  },
+  {
+    "cycle_number": 413,
+    "start_frame": 213867,
+    "end_frame": 214100,
+    "duration_frames": 233,
+    "duration_seconds": 9.32,
+    "activity_counts": {
+      "digging": 28,
+      "loading": 174,
+      "swinging": 31
+    },
+    "activity_percentages": {
+      "digging": 12.017167381974248,
+      "loading": 74.67811158798283,
+      "swinging": 13.304721030042918
+    }
+  },
+  {
+    "cycle_number": 414,
+    "start_frame": 214100,
+    "end_frame": 214582,
+    "duration_frames": 482,
+    "duration_seconds": 19.28,
+    "activity_counts": {
+      "digging": 38,
+      "loading": 47,
+      "swinging": 153,
+      "idling": 177,
+      "travelling": 67
+    },
+    "activity_percentages": {
+      "digging": 7.883817427385892,
+      "loading": 9.751037344398341,
+      "swinging": 31.742738589211616,
+      "idling": 36.72199170124482,
+      "travelling": 13.900414937759336
+    }
+  },
+  {
+    "cycle_number": 415,
+    "start_frame": 214582,
+    "end_frame": 214886,
+    "duration_frames": 304,
+    "duration_seconds": 12.16,
+    "activity_counts": {
+      "digging": 263,
+      "loading": 41
+    },
+    "activity_percentages": {
+      "digging": 86.51315789473685,
+      "loading": 13.486842105263158
+    }
+  },
+  {
+    "cycle_number": 416,
+    "start_frame": 214886,
+    "end_frame": 215065,
+    "duration_frames": 179,
+    "duration_seconds": 7.16,
+    "activity_counts": {
+      "digging": 151,
+      "travelling": 22,
+      "idling": 6
+    },
+    "activity_percentages": {
+      "digging": 84.35754189944134,
+      "travelling": 12.290502793296088,
+      "idling": 3.35195530726257
+    }
+  },
+  {
+    "cycle_number": 417,
+    "start_frame": 215065,
+    "end_frame": 215640,
+    "duration_frames": 575,
+    "duration_seconds": 23.0,
+    "activity_counts": {
+      "digging": 156,
+      "swinging": 297,
+      "travelling": 25,
+      "loading": 97
+    },
+    "activity_percentages": {
+      "digging": 27.1304347826087,
+      "swinging": 51.65217391304348,
+      "travelling": 4.3478260869565215,
+      "loading": 16.869565217391305
+    }
+  },
+  {
+    "cycle_number": 418,
+    "start_frame": 215640,
+    "end_frame": 215734,
+    "duration_frames": 94,
+    "duration_seconds": 3.76,
+    "activity_counts": {
+      "digging": 5,
+      "travelling": 17,
+      "loading": 72
+    },
+    "activity_percentages": {
+      "digging": 5.319148936170213,
+      "travelling": 18.085106382978726,
+      "loading": 76.59574468085107
+    }
+  },
+  {
+    "cycle_number": 419,
+    "start_frame": 215734,
+    "end_frame": 215871,
+    "duration_frames": 137,
+    "duration_seconds": 5.48,
+    "activity_counts": {
+      "digging": 86,
+      "loading": 51
+    },
+    "activity_percentages": {
+      "digging": 62.77372262773723,
+      "loading": 37.22627737226277
+    }
+  },
+  {
+    "cycle_number": 420,
+    "start_frame": 215871,
+    "end_frame": 215934,
+    "duration_frames": 63,
+    "duration_seconds": 2.52,
+    "activity_counts": {
+      "digging": 31,
+      "swinging": 32
+    },
+    "activity_percentages": {
+      "digging": 49.2063492063492,
+      "swinging": 50.79365079365079
+    }
+  },
+  {
+    "cycle_number": 421,
+    "start_frame": 215934,
+    "end_frame": 216049,
+    "duration_frames": 115,
+    "duration_seconds": 4.6,
+    "activity_counts": {
+      "digging": 65,
+      "loading": 50
+    },
+    "activity_percentages": {
+      "digging": 56.52173913043478,
+      "loading": 43.47826086956522
+    }
+  },
+  {
+    "cycle_number": 422,
+    "start_frame": 216049,
+    "end_frame": 216224,
+    "duration_frames": 175,
+    "duration_seconds": 7.0,
+    "activity_counts": {
+      "digging": 20,
+      "loading": 61,
+      "travelling": 47,
+      "idling": 47
+    },
+    "activity_percentages": {
+      "digging": 11.428571428571429,
+      "loading": 34.85714285714286,
+      "travelling": 26.857142857142858,
+      "idling": 26.857142857142858
+    }
+  },
+  {
+    "cycle_number": 423,
+    "start_frame": 216224,
+    "end_frame": 216931,
+    "duration_frames": 707,
+    "duration_seconds": 28.28,
+    "activity_counts": {
+      "digging": 38,
+      "idling": 221,
+      "swinging": 86,
+      "travelling": 223,
+      "loading": 139
+    },
+    "activity_percentages": {
+      "digging": 5.374823196605375,
+      "idling": 31.25884016973126,
+      "swinging": 12.164073550212164,
+      "travelling": 31.541725601131542,
+      "loading": 19.660537482319658
+    }
+  },
+  {
+    "cycle_number": 424,
+    "start_frame": 216931,
+    "end_frame": 217053,
+    "duration_frames": 122,
+    "duration_seconds": 4.88,
+    "activity_counts": {
+      "digging": 70,
+      "swinging": 52
+    },
+    "activity_percentages": {
+      "digging": 57.377049180327866,
+      "swinging": 42.62295081967213
+    }
+  },
+  {
+    "cycle_number": 425,
+    "start_frame": 217053,
+    "end_frame": 217198,
+    "duration_frames": 145,
+    "duration_seconds": 5.8,
+    "activity_counts": {
+      "digging": 49,
+      "swinging": 65,
+      "loading": 31
+    },
+    "activity_percentages": {
+      "digging": 33.793103448275865,
+      "swinging": 44.827586206896555,
+      "loading": 21.379310344827587
+    }
+  },
+  {
+    "cycle_number": 426,
+    "start_frame": 217198,
+    "end_frame": 217579,
+    "duration_frames": 381,
+    "duration_seconds": 15.24,
+    "activity_counts": {
+      "digging": 126,
+      "idling": 28,
+      "travelling": 85,
+      "loading": 107,
+      "swinging": 35
+    },
+    "activity_percentages": {
+      "digging": 33.07086614173229,
+      "idling": 7.349081364829396,
+      "travelling": 22.30971128608924,
+      "loading": 28.083989501312335,
+      "swinging": 9.186351706036746
+    }
+  },
+  {
+    "cycle_number": 427,
+    "start_frame": 217579,
+    "end_frame": 217870,
+    "duration_frames": 291,
+    "duration_seconds": 11.64,
+    "activity_counts": {
+      "digging": 7,
+      "travelling": 75,
+      "idling": 116,
+      "swinging": 29,
+      "loading": 64
+    },
+    "activity_percentages": {
+      "digging": 2.405498281786942,
+      "travelling": 25.773195876288657,
+      "idling": 39.86254295532646,
+      "swinging": 9.965635738831615,
+      "loading": 21.993127147766323
+    }
+  },
+  {
+    "cycle_number": 428,
+    "start_frame": 217870,
+    "end_frame": 218522,
+    "duration_frames": 652,
+    "duration_seconds": 26.08,
+    "activity_counts": {
+      "digging": 25,
+      "swinging": 293,
+      "idling": 66,
+      "travelling": 188,
+      "loading": 80
+    },
+    "activity_percentages": {
+      "digging": 3.834355828220859,
+      "swinging": 44.93865030674847,
+      "idling": 10.122699386503067,
+      "travelling": 28.834355828220858,
+      "loading": 12.269938650306749
+    }
+  },
+  {
+    "cycle_number": 429,
+    "start_frame": 218522,
+    "end_frame": 218601,
+    "duration_frames": 79,
+    "duration_seconds": 3.16,
+    "activity_counts": {
+      "digging": 39,
+      "loading": 40
+    },
+    "activity_percentages": {
+      "digging": 49.36708860759494,
+      "loading": 50.63291139240506
+    }
+  },
+  {
+    "cycle_number": 430,
+    "start_frame": 218601,
+    "end_frame": 218642,
+    "duration_frames": 41,
+    "duration_seconds": 1.64,
+    "activity_counts": {
+      "digging": 37,
+      "swinging": 4
+    },
+    "activity_percentages": {
+      "digging": 90.2439024390244,
+      "swinging": 9.75609756097561
+    }
+  },
+  {
+    "cycle_number": 431,
+    "start_frame": 218642,
+    "end_frame": 219489,
+    "duration_frames": 847,
+    "duration_seconds": 33.88,
+    "activity_counts": {
+      "digging": 15,
+      "idling": 512,
+      "travelling": 193,
+      "loading": 102,
+      "swinging": 25
+    },
+    "activity_percentages": {
+      "digging": 1.770956316410862,
+      "idling": 60.44864226682408,
+      "travelling": 22.786304604486425,
+      "loading": 12.04250295159386,
+      "swinging": 2.95159386068477
+    }
+  },
+  {
+    "cycle_number": 432,
+    "start_frame": 219489,
+    "end_frame": 219644,
+    "duration_frames": 155,
+    "duration_seconds": 6.2,
+    "activity_counts": {
+      "digging": 72,
+      "swinging": 83
+    },
+    "activity_percentages": {
+      "digging": 46.45161290322581,
+      "swinging": 53.5483870967742
+    }
+  },
+  {
+    "cycle_number": 433,
+    "start_frame": 219644,
+    "end_frame": 220191,
+    "duration_frames": 547,
+    "duration_seconds": 21.88,
+    "activity_counts": {
+      "digging": 261,
+      "loading": 63,
+      "swinging": 45,
+      "idling": 178
+    },
+    "activity_percentages": {
+      "digging": 47.714808043875685,
+      "loading": 11.517367458866545,
+      "swinging": 8.226691042047532,
+      "idling": 32.541133455210236
+    }
+  },
+  {
+    "cycle_number": 434,
+    "start_frame": 220191,
+    "end_frame": 220317,
+    "duration_frames": 126,
+    "duration_seconds": 5.04,
+    "activity_counts": {
+      "digging": 48,
+      "swinging": 8,
+      "idling": 39,
+      "travelling": 31
+    },
+    "activity_percentages": {
+      "digging": 38.095238095238095,
+      "swinging": 6.349206349206349,
+      "idling": 30.952380952380953,
+      "travelling": 24.6031746031746
+    }
+  },
+  {
+    "cycle_number": 435,
+    "start_frame": 220317,
+    "end_frame": 221628,
+    "duration_frames": 1311,
+    "duration_seconds": 52.44,
+    "activity_counts": {
+      "digging": 164,
+      "idling": 534,
+      "travelling": 303,
+      "swinging": 310
+    },
+    "activity_percentages": {
+      "digging": 12.509534706331046,
+      "idling": 40.73226544622426,
+      "travelling": 23.112128146453088,
+      "swinging": 23.64607170099161
+    }
+  },
+  {
+    "cycle_number": 436,
+    "start_frame": 221628,
+    "end_frame": 229190,
+    "duration_frames": 7562,
+    "duration_seconds": 302.48,
+    "activity_counts": {
+      "digging": 17,
+      "swinging": 153,
+      "travelling": 4189,
+      "idling": 3169,
+      "loading": 34
+    },
+    "activity_percentages": {
+      "digging": 0.224808251785242,
+      "swinging": 2.023274266067178,
+      "travelling": 55.39539804284581,
+      "idling": 41.90690293573129,
+      "loading": 0.449616503570484
+    }
+  },
+  {
+    "cycle_number": 437,
+    "start_frame": 229190,
+    "end_frame": 237358,
+    "duration_frames": 8168,
+    "duration_seconds": 326.72,
+    "activity_counts": {
+      "digging": 38,
+      "travelling": 5413,
+      "idling": 2238,
+      "loading": 479
+    },
+    "activity_percentages": {
+      "digging": 0.465230166503428,
+      "travelling": 66.27081292850147,
+      "idling": 27.399608227228207,
+      "loading": 5.864348677766895
+    }
+  },
+  {
+    "cycle_number": 438,
+    "start_frame": 237358,
+    "end_frame": 237472,
+    "duration_frames": 114,
+    "duration_seconds": 4.56,
+    "activity_counts": {
+      "digging": 11,
+      "travelling": 12,
+      "idling": 16,
+      "swinging": 59,
+      "loading": 16
+    },
+    "activity_percentages": {
+      "digging": 9.649122807017543,
+      "travelling": 10.526315789473683,
+      "idling": 14.035087719298245,
+      "swinging": 51.75438596491229,
+      "loading": 14.035087719298245
+    }
+  },
+  {
+    "cycle_number": 439,
+    "start_frame": 237472,
+    "end_frame": 237692,
+    "duration_frames": 220,
+    "duration_seconds": 8.8,
+    "activity_counts": {
+      "digging": 15,
+      "loading": 36,
+      "travelling": 111,
+      "idling": 58
+    },
+    "activity_percentages": {
+      "digging": 6.8181818181818175,
+      "loading": 16.363636363636363,
+      "travelling": 50.45454545454545,
+      "idling": 26.36363636363636
+    }
+  },
+  {
+    "cycle_number": 440,
+    "start_frame": 237692,
+    "end_frame": 237769,
+    "duration_frames": 77,
+    "duration_seconds": 3.08,
+    "activity_counts": {
+      "digging": 41,
+      "idling": 27,
+      "swinging": 9
+    },
+    "activity_percentages": {
+      "digging": 53.246753246753244,
+      "idling": 35.064935064935064,
+      "swinging": 11.688311688311687
+    }
+  },
+  {
+    "cycle_number": 441,
+    "start_frame": 237769,
+    "end_frame": 238084,
+    "duration_frames": 315,
+    "duration_seconds": 12.6,
+    "activity_counts": {
+      "digging": 139,
+      "idling": 44,
+      "swinging": 52,
+      "loading": 7,
+      "travelling": 73
+    },
+    "activity_percentages": {
+      "digging": 44.12698412698413,
+      "idling": 13.968253968253968,
+      "swinging": 16.507936507936506,
+      "loading": 2.2222222222222223,
+      "travelling": 23.174603174603174
+    }
+  },
+  {
+    "cycle_number": 442,
+    "start_frame": 238084,
+    "end_frame": 238270,
+    "duration_frames": 186,
+    "duration_seconds": 7.44,
+    "activity_counts": {
+      "digging": 1,
+      "idling": 124,
+      "travelling": 61
+    },
+    "activity_percentages": {
+      "digging": 0.5376344086021506,
+      "idling": 66.66666666666666,
+      "travelling": 32.795698924731184
+    }
+  },
+  {
+    "cycle_number": 443,
+    "start_frame": 238270,
+    "end_frame": 238501,
+    "duration_frames": 231,
+    "duration_seconds": 9.24,
+    "activity_counts": {
+      "digging": 118,
+      "swinging": 56,
+      "loading": 57
+    },
+    "activity_percentages": {
+      "digging": 51.082251082251084,
+      "swinging": 24.242424242424242,
+      "loading": 24.675324675324674
+    }
+  },
+  {
+    "cycle_number": 444,
+    "start_frame": 238501,
+    "end_frame": 238620,
+    "duration_frames": 119,
+    "duration_seconds": 4.76,
+    "activity_counts": {
+      "digging": 20,
+      "idling": 99
+    },
+    "activity_percentages": {
+      "digging": 16.80672268907563,
+      "idling": 83.19327731092437
+    }
+  },
+  {
+    "cycle_number": 445,
+    "start_frame": 238620,
+    "end_frame": 238691,
+    "duration_frames": 71,
+    "duration_seconds": 2.84,
+    "activity_counts": {
+      "digging": 66,
+      "loading": 5
+    },
+    "activity_percentages": {
+      "digging": 92.95774647887323,
+      "loading": 7.042253521126761
+    }
+  },
+  {
+    "cycle_number": 446,
+    "start_frame": 238691,
+    "end_frame": 238727,
+    "duration_frames": 36,
+    "duration_seconds": 1.44,
+    "activity_counts": {
+      "digging": 4,
+      "loading": 32
+    },
+    "activity_percentages": {
+      "digging": 11.11111111111111,
+      "loading": 88.88888888888889
+    }
+  },
+  {
+    "cycle_number": 447,
+    "start_frame": 238727,
+    "end_frame": 238915,
+    "duration_frames": 188,
+    "duration_seconds": 7.52,
+    "activity_counts": {
+      "digging": 136,
+      "idling": 52
+    },
+    "activity_percentages": {
+      "digging": 72.3404255319149,
+      "idling": 27.659574468085108
+    }
+  },
+  {
+    "cycle_number": 448,
+    "start_frame": 238915,
+    "end_frame": 239009,
+    "duration_frames": 94,
+    "duration_seconds": 3.76,
+    "activity_counts": {
+      "digging": 23,
+      "loading": 20,
+      "travelling": 51
+    },
+    "activity_percentages": {
+      "digging": 24.46808510638298,
+      "loading": 21.27659574468085,
+      "travelling": 54.25531914893617
+    }
+  },
+  {
+    "cycle_number": 449,
+    "start_frame": 239009,
+    "end_frame": 239534,
+    "duration_frames": 525,
+    "duration_seconds": 21.0,
+    "activity_counts": {
+      "digging": 33,
+      "swinging": 110,
+      "travelling": 224,
+      "idling": 158
+    },
+    "activity_percentages": {
+      "digging": 6.2857142857142865,
+      "swinging": 20.952380952380953,
+      "travelling": 42.66666666666667,
+      "idling": 30.0952380952381
+    }
+  },
+  {
+    "cycle_number": 450,
+    "start_frame": 239534,
+    "end_frame": 239555,
+    "duration_frames": 21,
+    "duration_seconds": 0.84,
+    "activity_counts": {
+      "digging": 12,
+      "swinging": 9
+    },
+    "activity_percentages": {
+      "digging": 57.14285714285714,
+      "swinging": 42.857142857142854
+    }
+  },
+  {
+    "cycle_number": 451,
+    "start_frame": 239555,
+    "end_frame": 239747,
+    "duration_frames": 192,
+    "duration_seconds": 7.68,
+    "activity_counts": {
+      "digging": 72,
+      "idling": 20,
+      "travelling": 100
+    },
+    "activity_percentages": {
+      "digging": 37.5,
+      "idling": 10.416666666666668,
+      "travelling": 52.083333333333336
+    }
+  },
+  {
+    "cycle_number": 452,
+    "start_frame": 239747,
+    "end_frame": 240198,
+    "duration_frames": 451,
+    "duration_seconds": 18.04,
+    "activity_counts": {
+      "digging": 52,
+      "swinging": 144,
+      "idling": 229,
+      "travelling": 26
+    },
+    "activity_percentages": {
+      "digging": 11.529933481152993,
+      "swinging": 31.9290465631929,
+      "idling": 50.77605321507761,
+      "travelling": 5.764966740576496
+    }
+  },
+  {
+    "cycle_number": 453,
+    "start_frame": 240198,
+    "end_frame": 240454,
+    "duration_frames": 256,
+    "duration_seconds": 10.24,
+    "activity_counts": {
+      "digging": 13,
+      "idling": 188,
+      "travelling": 28,
+      "loading": 27
+    },
+    "activity_percentages": {
+      "digging": 5.078125,
+      "idling": 73.4375,
+      "travelling": 10.9375,
+      "loading": 10.546875
+    }
+  },
+  {
+    "cycle_number": 454,
+    "start_frame": 240454,
+    "end_frame": 240629,
+    "duration_frames": 175,
+    "duration_seconds": 7.0,
+    "activity_counts": {
+      "digging": 48,
+      "travelling": 49,
+      "idling": 71,
+      "swinging": 7
+    },
+    "activity_percentages": {
+      "digging": 27.42857142857143,
+      "travelling": 28.000000000000004,
+      "idling": 40.57142857142857,
+      "swinging": 4.0
+    }
+  },
+  {
+    "cycle_number": 455,
+    "start_frame": 240629,
+    "end_frame": 240751,
+    "duration_frames": 122,
+    "duration_seconds": 4.88,
+    "activity_counts": {
+      "digging": 55,
+      "travelling": 67
+    },
+    "activity_percentages": {
+      "digging": 45.08196721311475,
+      "travelling": 54.91803278688525
+    }
+  },
+  {
+    "cycle_number": 456,
+    "start_frame": 240751,
+    "end_frame": 240940,
+    "duration_frames": 189,
+    "duration_seconds": 7.56,
+    "activity_counts": {
+      "digging": 35,
+      "swinging": 68,
+      "loading": 38,
+      "idling": 48
+    },
+    "activity_percentages": {
+      "digging": 18.51851851851852,
+      "swinging": 35.978835978835974,
+      "loading": 20.105820105820104,
+      "idling": 25.396825396825395
+    }
+  },
+  {
+    "cycle_number": 457,
+    "start_frame": 240940,
+    "end_frame": 241203,
+    "duration_frames": 263,
+    "duration_seconds": 10.52,
+    "activity_counts": {
+      "digging": 40,
+      "travelling": 65,
+      "swinging": 46,
+      "idling": 93,
+      "loading": 19
+    },
+    "activity_percentages": {
+      "digging": 15.209125475285171,
+      "travelling": 24.714828897338403,
+      "swinging": 17.490494296577946,
+      "idling": 35.361216730038024,
+      "loading": 7.224334600760455
+    }
+  },
+  {
+    "cycle_number": 458,
+    "start_frame": 241203,
+    "end_frame": 241613,
+    "duration_frames": 410,
+    "duration_seconds": 16.4,
+    "activity_counts": {
+      "digging": 43,
+      "travelling": 192,
+      "swinging": 18,
+      "idling": 100,
+      "loading": 57
+    },
+    "activity_percentages": {
+      "digging": 10.487804878048781,
+      "travelling": 46.82926829268293,
+      "swinging": 4.390243902439024,
+      "idling": 24.390243902439025,
+      "loading": 13.902439024390246
+    }
+  },
+  {
+    "cycle_number": 459,
+    "start_frame": 241613,
+    "end_frame": 241739,
+    "duration_frames": 126,
+    "duration_seconds": 5.04,
+    "activity_counts": {
+      "digging": 90,
+      "loading": 36
+    },
+    "activity_percentages": {
+      "digging": 71.42857142857143,
+      "loading": 28.57142857142857
+    }
+  },
+  {
+    "cycle_number": 460,
+    "start_frame": 241739,
+    "end_frame": 241982,
+    "duration_frames": 243,
+    "duration_seconds": 9.72,
+    "activity_counts": {
+      "digging": 233,
+      "travelling": 10
+    },
+    "activity_percentages": {
+      "digging": 95.88477366255144,
+      "travelling": 4.11522633744856
+    }
+  },
+  {
+    "cycle_number": 461,
+    "start_frame": 241982,
+    "end_frame": 242061,
+    "duration_frames": 79,
+    "duration_seconds": 3.16,
+    "activity_counts": {
+      "digging": 22,
+      "swinging": 57
+    },
+    "activity_percentages": {
+      "digging": 27.848101265822784,
+      "swinging": 72.15189873417721
+    }
+  },
+  {
+    "cycle_number": 462,
+    "start_frame": 242061,
+    "end_frame": 242242,
+    "duration_frames": 181,
+    "duration_seconds": 7.24,
+    "activity_counts": {
+      "digging": 135,
+      "loading": 46
+    },
+    "activity_percentages": {
+      "digging": 74.58563535911603,
+      "loading": 25.41436464088398
+    }
+  },
+  {
+    "cycle_number": 463,
+    "start_frame": 242242,
+    "end_frame": 242395,
+    "duration_frames": 153,
+    "duration_seconds": 6.12,
+    "activity_counts": {
+      "digging": 71,
+      "swinging": 68,
+      "travelling": 2,
+      "idling": 12
+    },
+    "activity_percentages": {
+      "digging": 46.40522875816993,
+      "swinging": 44.44444444444444,
+      "travelling": 1.3071895424836601,
+      "idling": 7.8431372549019605
+    }
+  },
+  {
+    "cycle_number": 464,
+    "start_frame": 242395,
+    "end_frame": 242599,
+    "duration_frames": 204,
+    "duration_seconds": 8.16,
+    "activity_counts": {
+      "digging": 91,
+      "loading": 113
+    },
+    "activity_percentages": {
+      "digging": 44.6078431372549,
+      "loading": 55.392156862745104
+    }
+  },
+  {
+    "cycle_number": 465,
+    "start_frame": 242599,
+    "end_frame": 242665,
+    "duration_frames": 66,
+    "duration_seconds": 2.64,
+    "activity_counts": {
+      "digging": 21,
+      "travelling": 45
+    },
+    "activity_percentages": {
+      "digging": 31.818181818181817,
+      "travelling": 68.18181818181817
+    }
+  },
+  {
+    "cycle_number": 466,
+    "start_frame": 242665,
+    "end_frame": 242886,
+    "duration_frames": 221,
+    "duration_seconds": 8.84,
+    "activity_counts": {
+      "digging": 5,
+      "idling": 123,
+      "travelling": 75,
+      "swinging": 18
+    },
+    "activity_percentages": {
+      "digging": 2.262443438914027,
+      "idling": 55.65610859728507,
+      "travelling": 33.93665158371041,
+      "swinging": 8.144796380090497
+    }
+  },
+  {
+    "cycle_number": 467,
+    "start_frame": 242886,
+    "end_frame": 243989,
+    "duration_frames": 1103,
+    "duration_seconds": 44.12,
+    "activity_counts": {
+      "digging": 66,
+      "idling": 526,
+      "travelling": 255,
+      "swinging": 256
+    },
+    "activity_percentages": {
+      "digging": 5.983680870353581,
+      "idling": 47.68812330009066,
+      "travelling": 23.11876699909338,
+      "swinging": 23.209428830462375
+    }
+  },
+  {
+    "cycle_number": 468,
+    "start_frame": 243989,
+    "end_frame": 243995,
+    "duration_frames": 6,
+    "duration_seconds": 0.24,
+    "activity_counts": {
+      "digging": 5,
+      "swinging": 1
+    },
+    "activity_percentages": {
+      "digging": 83.33333333333334,
+      "swinging": 16.666666666666664
+    }
+  },
+  {
+    "cycle_number": 469,
+    "start_frame": 243995,
+    "end_frame": 244386,
+    "duration_frames": 391,
+    "duration_seconds": 15.64,
+    "activity_counts": {
+      "digging": 1,
+      "idling": 326,
+      "swinging": 37,
+      "travelling": 27
+    },
+    "activity_percentages": {
+      "digging": 0.2557544757033248,
+      "idling": 83.37595907928389,
+      "swinging": 9.462915601023019,
+      "travelling": 6.905370843989769
+    }
+  },
+  {
+    "cycle_number": 470,
+    "start_frame": 244386,
+    "end_frame": 244471,
+    "duration_frames": 85,
+    "duration_seconds": 3.4,
+    "activity_counts": {
+      "digging": 15,
+      "idling": 70
+    },
+    "activity_percentages": {
+      "digging": 17.647058823529413,
+      "idling": 82.35294117647058
+    }
+  },
+  {
+    "cycle_number": 471,
+    "start_frame": 244471,
+    "end_frame": 244609,
+    "duration_frames": 138,
+    "duration_seconds": 5.52,
+    "activity_counts": {
+      "digging": 6,
+      "idling": 132
+    },
+    "activity_percentages": {
+      "digging": 4.3478260869565215,
+      "idling": 95.65217391304348
+    }
+  },
+  {
+    "cycle_number": 472,
+    "start_frame": 244609,
+    "end_frame": 244759,
+    "duration_frames": 150,
+    "duration_seconds": 6.0,
+    "activity_counts": {
+      "digging": 11,
+      "idling": 61,
+      "swinging": 78
+    },
+    "activity_percentages": {
+      "digging": 7.333333333333333,
+      "idling": 40.666666666666664,
+      "swinging": 52.0
+    }
+  },
+  {
+    "cycle_number": 473,
+    "start_frame": 244759,
+    "end_frame": 244849,
+    "duration_frames": 90,
+    "duration_seconds": 3.6,
+    "activity_counts": {
+      "digging": 42,
+      "swinging": 48
+    },
+    "activity_percentages": {
+      "digging": 46.666666666666664,
+      "swinging": 53.333333333333336
+    }
+  },
+  {
+    "cycle_number": 474,
+    "start_frame": 244849,
+    "end_frame": 245605,
+    "duration_frames": 756,
+    "duration_seconds": 30.24,
+    "activity_counts": {
+      "digging": 37,
+      "swinging": 153,
+      "idling": 367,
+      "travelling": 199
+    },
+    "activity_percentages": {
+      "digging": 4.894179894179894,
+      "swinging": 20.238095238095237,
+      "idling": 48.544973544973544,
+      "travelling": 26.322751322751326
+    }
+  },
+  {
+    "cycle_number": 475,
+    "start_frame": 245605,
+    "end_frame": 245686,
+    "duration_frames": 81,
+    "duration_seconds": 3.24,
+    "activity_counts": {
+      "digging": 19,
+      "idling": 62
+    },
+    "activity_percentages": {
+      "digging": 23.456790123456788,
+      "idling": 76.5432098765432
+    }
+  },
+  {
+    "cycle_number": 476,
+    "start_frame": 245686,
+    "end_frame": 245927,
+    "duration_frames": 241,
+    "duration_seconds": 9.64,
+    "activity_counts": {
+      "digging": 137,
+      "swinging": 104
+    },
+    "activity_percentages": {
+      "digging": 56.84647302904564,
+      "swinging": 43.15352697095436
+    }
+  },
+  {
+    "cycle_number": 477,
+    "start_frame": 245927,
+    "end_frame": 246108,
+    "duration_frames": 181,
+    "duration_seconds": 7.24,
+    "activity_counts": {
+      "digging": 57,
+      "swinging": 124
+    },
+    "activity_percentages": {
+      "digging": 31.491712707182316,
+      "swinging": 68.50828729281768
+    }
+  },
+  {
+    "cycle_number": 478,
+    "start_frame": 246108,
+    "end_frame": 246170,
+    "duration_frames": 62,
+    "duration_seconds": 2.48,
+    "activity_counts": {
+      "digging": 10,
+      "idling": 32,
+      "travelling": 20
+    },
+    "activity_percentages": {
+      "digging": 16.129032258064516,
+      "idling": 51.61290322580645,
+      "travelling": 32.25806451612903
+    }
+  },
+  {
+    "cycle_number": 479,
+    "start_frame": 246170,
+    "end_frame": 246823,
+    "duration_frames": 653,
+    "duration_seconds": 26.12,
+    "activity_counts": {
+      "digging": 76,
+      "idling": 567,
+      "swinging": 10
+    },
+    "activity_percentages": {
+      "digging": 11.638591117917304,
+      "idling": 86.83001531393569,
+      "swinging": 1.5313935681470139
+    }
+  },
+  {
+    "cycle_number": 480,
+    "start_frame": 246823,
+    "end_frame": 246938,
+    "duration_frames": 115,
+    "duration_seconds": 4.6,
+    "activity_counts": {
+      "digging": 37,
+      "idling": 78
+    },
+    "activity_percentages": {
+      "digging": 32.17391304347826,
+      "idling": 67.82608695652173
+    }
+  },
+  {
+    "cycle_number": 481,
+    "start_frame": 246938,
+    "end_frame": 247367,
+    "duration_frames": 429,
+    "duration_seconds": 17.16,
+    "activity_counts": {
+      "digging": 30,
+      "idling": 399
+    },
+    "activity_percentages": {
+      "digging": 6.993006993006993,
+      "idling": 93.00699300699301
+    }
+  }
+]

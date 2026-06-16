@@ -1,0 +1,166 @@
+============================================================
+LOADING MODELS & ASSETS
+============================================================
+Clip length : 16
+Target FPS  : 25
+Classes     : ['digging', 'idling', 'loading', 'swinging', 'travelling']
+
+Val manifest loaded — 11 videos registered.
+
+Best params locked in:
+min_activity_duration_s: 2.0
+dist_threshold: 0.05
+idle_window: 36
+fsm_min_dwell_seconds: 1.0
+enable_fsm: False
+override_travelling_only: True
+
+============================================================
+Processing: Day_2.mp4
+Val frames to evaluate : 13470
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 13470  |  Correct : 10660  |  Acc : 79.14%
+
+============================================================
+Processing: Day_3.mp4
+Val frames to evaluate : 39207
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 39207  |  Correct : 32877  |  Acc : 83.85%
+
+============================================================
+Processing: Day_4_1.mp4
+Val frames to evaluate : 2432
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 2432  |  Correct : 2009  |  Acc : 82.61%
+
+============================================================
+Processing: TC_00011.mp4
+Val frames to evaluate : 5937
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 5937  |  Correct : 5604  |  Acc : 94.39%
+
+============================================================
+Processing: TC_00012.mp4
+Val frames to evaluate : 25932
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 25932  |  Correct : 22513  |  Acc : 86.82%
+
+============================================================
+Processing: TC_00013.mp4
+Val frames to evaluate : 365
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 365  |  Correct : 365  |  Acc : 100.00%
+
+============================================================
+Processing: TC_00014.mp4
+Val frames to evaluate : 16600
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 16600  |  Correct : 15273  |  Acc : 92.01%
+
+============================================================
+Processing: TC_00015.mp4
+Val frames to evaluate : 1413
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 1413  |  Correct : 1298  |  Acc : 91.86%
+
+============================================================
+Processing: TC_00016.mp4
+Val frames to evaluate : 23512
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 23512  |  Correct : 22602  |  Acc : 96.13%
+
+============================================================
+Processing: TC_00019.mp4
+Val frames to evaluate : 21340
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 21340  |  Correct : 19050  |  Acc : 89.27%
+
+============================================================
+Processing: TC_00021.mp4
+Val frames to evaluate : 18893
+============================================================
+Running continuous AI inference...
+
+Applying post-processing (idling physics + majority voting + FSM)...
+Filtering to val frames only...
+Val frames evaluated : 18893  |  Correct : 16431  |  Acc : 86.97%
+
+============================================================
+FINAL RESULTS — VAL SET ONLY (training frames excluded)
+============================================================
+Best params used:
+min_activity_duration_s: 2.0
+dist_threshold: 0.05
+idle_window: 36
+fsm_min_dwell_seconds: 1.0
+enable_fsm: False
+override_travelling_only: True
+
+Overall Accuracy : 87.92%  (148682/169101 frames)
+
+precision    recall  f1-score   support
+
+digging     0.8511    0.8791    0.8649     21193
+idling     0.9182    0.9814    0.9487     80675
+loading     0.6403    0.7278    0.6812      7457
+swinging     0.8985    0.7242    0.8020     39853
+travelling     0.8137    0.8328    0.8231     19923
+
+accuracy                         0.8792    169101
+macro avg     0.8244    0.8290    0.8240    169101
+weighted avg     0.8806    0.8792    0.8770    169101
+
+Confusion Matrix (rows=GT, cols=Pred):
+diggin  idling  loadin  swingi  travel
+digging    18631     768     572     957     265
+idling       201   79171     104     501     698
+loading      960     210    5427     794      66
+swinging    1752    4229    2240   28862    2770
+travelling   347    1843     133    1009   16591
+
+Generating Overall Macro Visualizations...
+
+[Success] All 24 images plotted and saved in: /data/shubhan_avik_work/Targeted_run_2/plots
+============================================================
+hi
+

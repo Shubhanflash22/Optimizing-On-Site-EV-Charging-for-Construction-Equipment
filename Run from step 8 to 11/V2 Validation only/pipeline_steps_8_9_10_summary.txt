@@ -1,0 +1,237 @@
+================================================================================
+STEP 8 — YOLO + CVAT → ResNet-3D Dataset Builder (val-manifest edition)
+================================================================================
+Output dir : /data/shubhan_avik_work/Targeted_run_2/Dataset_Ten_days
+Videos     : 11
+Clip       : 16 frames @ 25 FPS (stride=3)
+Split      : 85/15 train/val (group size = 20 clips)
+YOLO model loaded successfully.
+
+Per-video breakdown (annotated frames → resampled to 25 FPS → clips emitted / val clips):
+
+  #  Video           Annotated   Native FPS   Resampled@25FPS   Clips Emitted   Val Clips
+  1  Day_2           198,693     59.94 FPS    83,027            23,309          3,580
+  2  Day_3           592,565     59.94 FPS    247,510           75,808          10,560
+  3  Day_4_1         21,093      29.97 FPS    17,670            5,413           620
+  4  TC_00011        39,245      30.00 FPS    32,759            10,555          1,615
+  5  TC_00012        186,247     30.00 FPS    161,444           46,871          6,980
+  6  TC_00013        1,850       30.00 FPS    1,544             397             100
+  7  TC_00014        115,709     30.00 FPS    96,568            29,684          4,580
+  8  TC_00015        5,858       30.00 FPS    4,890             1,576           380
+  9  TC_00016        225,138     30.00 FPS    187,789           45,104          6,364
+ 10  TC_00019        215,150     30.00 FPS    179,535           35,153          5,640
+ 11  TC_00021        142,827     29.98 FPS    147,136            32,910          5,080
+
+VAL MANIFEST saved → .../Dataset_Ten_days/val_manifest.json
+  Total val clips recorded : 45,499
+
+VAL FRAME REGISTRY saved → .../Dataset_Ten_days/val_frame_registry.json
+  Videos in registry        : 11
+  Total unique val frames   : 169,101
+
+Val clips per activity:
+  digging      : 5,721
+  idling       : 22,242
+  loading      : 1,788
+  swinging     : 10,485
+  travelling   : 5,263
+
+FINAL DATASET SUMMARY
+  TRAIN (261,281 clips):
+    digging      : 32,257 clips  (516,112 frames)
+    idling       : 126,180 clips (2,018,880 frames)
+    loading      : 10,743 clips  (171,888 frames)
+    swinging     : 62,252 clips  (996,032 frames)
+    travelling   : 29,849 clips  (477,584 frames)
+
+  VAL (45,499 clips):
+    digging      : 5,721 clips   (91,536 frames)
+    idling       : 22,242 clips  (355,872 frames)
+    loading      : 1,788 clips   (28,608 frames)
+    swinging     : 10,485 clips  (167,760 frames)
+    travelling   : 5,263 clips   (84,208 frames)
+
+  Total clips  : 306,780
+  Temporal res : 25 FPS — each clip = 0.64 s
+  Dataset root : /data/shubhan_avik_work/Targeted_run_2/Dataset_Ten_days
+
+  Status: Done — dataset ready for training. Manifest ready for evaluation.
+  No errors/exceptions encountered.
+
+
+================================================================================
+STEP 9 — Custom ResNet (R3D-18) Model Training
+================================================================================
+Configuration:
+  Target FPS    : 25 (matches paper)
+  Clip Length   : 16 frames (matches paper)
+  Spatial Size  : 112×112 (matches paper)
+  Batch Size    : 16 (matches paper)
+  Learning Rate : 0.001 (matches paper)
+  Device        : cuda
+
+Dataset loaded:
+  Train clips found : 261,281 (digging 32,257 / idling 126,180 / loading 10,743 /
+                       swinging 62,252 / travelling 29,849)
+  Val clips found   : 45,499  (digging 5,721 / idling 22,242 / loading 1,788 /
+                       swinging 10,485 / travelling 5,263)
+
+Computed normalization stats (sampled 200 clips):
+  Mean : [0.2725, 0.3182, 0.3059]
+  Std  : [0.1956, 0.1834, 0.1846]
+
+Model: R3D-18, Kinetics-400 pretrained, final layer replaced 512→5 classes.
+Layer freezing: all layers frozen except layer4 + fc (classifier) unfrozen.
+  Trainable parameters: 24,911,365 / 33,168,837 (75.1%)
+
+Training config:
+  Optimizer     : Adam, LR = 0.001
+  LR Scheduler  : ReduceLROnPlateau
+  Loss          : CrossEntropyLoss
+  Mixed precision (AMP) training enabled
+  Total epochs  : 20
+  Batch size    : 16
+  Batches/epoch : 16,331
+
+Minor warnings (non-fatal, deprecation only):
+  - torch.cuda.amp.GradScaler(...) deprecated → use torch.amp.GradScaler('cuda', ...)
+  - torch.cuda.amp.autocast(...) deprecated → use torch.amp.autocast('cuda', ...)
+
+Per-epoch summary (Train Loss/Acc | Val Loss/Acc | Avg Precision/Recall):
+ Ep   Train Loss  Train Acc   Val Loss   Val Acc   Avg Prec   Avg Recall
+  1    0.4100      84.95%     0.4458     84.44%     76.1%       80.6%
+  2    0.1957      93.11%     0.3646     87.79%     79.6%       82.6%
+  3    0.1425      95.03%     0.3728     87.65%     78.8%       84.4%
+  4    0.1149      95.93%     0.3498     89.68%     84.1%       83.4%   ← best val loss
+  5    0.0964      96.60%     0.4600     86.23%     78.3%       83.0%
+  6    0.0857      97.02%     0.3759     89.12%     82.4%       84.2%
+  7    0.0753      97.32%     0.3844     88.69%     81.3%       83.9%
+  8    0.0694      97.56%     0.4810     87.36%     78.8%       83.5%
+  9    0.0443      98.44%     0.3936     90.13%     83.0%       86.1%
+ 10    0.0402      98.55%     0.3765     90.20%     82.6%       85.9%
+ 11    0.0368      98.66%     0.4112     89.64%     83.5%       84.2%
+ 12    0.0341      98.77%     0.4129     90.11%     83.0%       86.5%
+ 13    0.0255      99.08%     0.3925     90.43%     83.8%       86.2%
+ 14    0.0232      99.17%     0.4016     90.78%     84.2%       86.3%
+ 15    0.0215      99.22%     0.3928     90.96%     84.9%       85.9%
+ 16    0.0210      99.23%     0.4175     90.26%     83.8%       85.0%
+ 17    0.0172      99.37%     0.4242     90.68%     84.4%       85.7%
+ 18    0.0162      99.40%     0.4118     91.22%     85.0%       86.8%
+ 19    0.0156      99.42%     0.4061     91.41%     86.0%       86.0%
+ 20    0.0151      99.45%     0.4357     91.38%     86.4%       85.2%
+
+Final epoch (20) per-class precision/recall:
+  digging     : 87.3% / 90.3%
+  idling      : 97.0% / 97.3%
+  loading     : 73.9% / 67.5%
+  swinging    : 86.3% / 87.6%
+  travelling  : 87.7% / 83.1%
+  Average     : 86.4% / 85.2%
+
+TRAINING COMPLETE
+  Best Validation Loss     : 0.3498  (epoch 4)
+  Best Validation Accuracy : 89.68%
+  Training history saved to: /data/shubhan_avik_work/Targeted_run_2/training_history.json
+
+Paper comparison:
+  Paper achieved 87.6% average accuracy on 3 classes.
+  This implementation: 89.68% on 5 classes.
+
+Alignment with paper:
+  Matches paper: model (R3D-18), Kinetics-400 pretrain, 16×112×112 input,
+    25 FPS, batch size 16, LR 0.001, augmentation (flip/channel shift/shear),
+    metrics (precision/recall/accuracy).
+  Valid assumptions/extensions: 5 activity classes (vs 3 in paper), Adam optimizer,
+    ReduceLROnPlateau scheduler, mixed precision training, weighted sampling for
+    class balance, 80/20 train/val split.
+
+No errors/exceptions encountered (only the two deprecation warnings above).
+
+
+================================================================================
+STEP 10 — Inference + Post-Processing Evaluation on Validation Set
+================================================================================
+Loaded models & assets:
+  Clip length : 16
+  Target FPS  : 25
+  Classes     : digging, idling, loading, swinging, travelling
+  Val manifest loaded — 11 videos registered.
+
+Best params locked in:
+  min_activity_duration_s   : 2.0
+  dist_threshold             : 0.05
+  idle_window                 : 36
+  fsm_min_dwell_seconds       : 1.0
+  enable_fsm                  : False
+  override_travelling_only    : True
+
+Per-video validation accuracy (continuous inference + post-processing: idling
+physics + majority voting + FSM):
+
+  Video        Val Frames    Correct     Accuracy
+  Day_2        13,470        10,660      79.14%
+  Day_3        39,207        32,877      83.85%
+  Day_4_1      2,432         2,009       82.61%
+  TC_00011     5,937         5,604       94.39%
+  TC_00012     25,932        22,513      86.82%
+  TC_00013     365           365         100.00%
+  TC_00014     16,600        15,273      92.01%
+  TC_00015     1,413         1,298       91.86%
+  TC_00016     23,512        22,602      96.13%
+  TC_00019     21,340        19,050      89.27%
+  TC_00021     18,893        16,431      86.97%
+
+FINAL RESULTS — VAL SET ONLY (training frames excluded)
+  Overall Accuracy : 87.92% (148,682 / 169,101 frames)
+
+  Per-class metrics:
+                precision   recall   f1-score   support
+    digging       0.8511    0.8791    0.8649     21,193
+    idling        0.9182    0.9814    0.9487     80,675
+    loading       0.6403    0.7278    0.6812      7,457
+    swinging      0.8985    0.7242    0.8020     39,853
+    travelling    0.8137    0.8328    0.8231     19,923
+
+    accuracy                          0.8792    169,101
+    macro avg     0.8244    0.8290    0.8240    169,101
+    weighted avg  0.8806    0.8792    0.8770    169,101
+
+  Confusion Matrix (rows = ground truth, cols = predicted):
+                 digging   idling   loading   swinging   travelling
+    digging      18,631      768       572        957          265
+    idling           201   79,171       104        501          698
+    loading           960      210     5,427        794           66
+    swinging        1,752    4,229     2,240     28,862        2,770
+    travelling        347    1,843       133      1,009       16,591
+
+  Generated overall macro visualizations — all 24 plots saved to:
+    /data/shubhan_avik_work/Targeted_run_2/plots
+
+No errors/exceptions encountered.
+
+================================================================================
+KEY TAKEAWAYS ACROSS ALL THREE STEPS
+================================================================================
+1. Dataset (Step 8): 11 source videos → 306,780 total 16-frame clips @25FPS
+   (261,281 train / 45,499 val), 5 activity classes, train/val split by video
+   groups with no frame leakage between sets.
+
+2. Training (Step 9): R3D-18 (Kinetics-400 pretrained), only layer4+fc unfrozen
+   (75.1% trainable params), 20 epochs, Adam @ LR=0.001, mixed precision.
+   Training accuracy climbed to 99.45%, but validation accuracy plateaued
+   ~89–91% after epoch ~9 — classic overfitting pattern (train loss kept
+   dropping to 0.015 while val loss hovered/rose to 0.40-0.48). Best val loss
+   was actually at epoch 4 (0.3498, 89.68% acc), suggesting early stopping
+   around epoch 4-9 could generalize better than training the full 20 epochs.
+   Final model: 89.68% best val accuracy vs paper's 87.6% (on fewer/different
+   classes — not a strictly apples-to-apples comparison).
+
+3. Inference/Evaluation (Step 10): Running full post-processed inference on
+   val-only frames across all 11 videos gives 87.92% overall accuracy —
+   close to the raw classifier's val accuracy, meaning the post-processing
+   (idling-physics + majority voting; FSM disabled) is roughly neutral.
+   "loading" remains the weakest class everywhere (lowest support, lowest
+   precision/recall in both training and inference: 64-74% range), while
+   "idling" is consistently the strongest (>91% recall, >97% precision).
+   Per-video accuracy ranges widely (79.14% on Day_2 to 100% on TC_00013,
+   the latter having very few val frames so it's not very informative).

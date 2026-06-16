@@ -1,0 +1,14 @@
+{
+  "total_frames": 4889,
+  "duration_seconds": 195.56,
+  "fps": 25,
+  "activity_distribution": {
+    "idling": 85.78441399059112,
+    "swinging": 4.86807118020045,
+    "travelling": 9.347514829208427
+  },
+  "num_cycles": 0,
+  "avg_cycle_time_seconds": 0,
+  "productivity_lcy_per_hour": 0.0,
+  "avg_confidence": 0.9834024829229564
+}

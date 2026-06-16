@@ -124,12 +124,12 @@ class ActivityFSM:
 # ============================
 
 HYPERPARAM_GRID = {
-     'min_activity_duration_s': [3.5],
-     'dist_threshold': [0.1],
-     'idle_window': [20],
-     'fsm_min_dwell_seconds': [1.0],
-     'enable_fsm': [False],
-     'override_travelling_only': [False]
+     'min_activity_duration_s': [0.5, 0.8, 1.0, 1.2, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0],
+     'dist_threshold': [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6],
+     'idle_window': [20, 24, 30, 36, 40, 48, 56, 64, 80],
+     'fsm_min_dwell_seconds': [1.0, 1.5, 2.0, 2.5, 3.0],
+     'enable_fsm': [True, False],
+     'override_travelling_only': [True, False]
 }
 
 # --- PATHS ---

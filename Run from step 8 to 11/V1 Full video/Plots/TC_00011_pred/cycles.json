@@ -1,0 +1,104 @@
+[
+  {
+    "cycle_number": 1,
+    "start_frame": 0,
+    "end_frame": 303,
+    "duration_frames": 303,
+    "duration_seconds": 12.12,
+    "activity_counts": {
+      "digging": 70,
+      "swinging": 72,
+      "travelling": 161
+    },
+    "activity_percentages": {
+      "digging": 23.1023102310231,
+      "swinging": 23.762376237623762,
+      "travelling": 53.135313531353134
+    }
+  },
+  {
+    "cycle_number": 2,
+    "start_frame": 303,
+    "end_frame": 970,
+    "duration_frames": 667,
+    "duration_seconds": 26.68,
+    "activity_counts": {
+      "digging": 635,
+      "swinging": 32
+    },
+    "activity_percentages": {
+      "digging": 95.2023988005997,
+      "swinging": 4.7976011994003
+    }
+  },
+  {
+    "cycle_number": 3,
+    "start_frame": 970,
+    "end_frame": 1192,
+    "duration_frames": 222,
+    "duration_seconds": 8.88,
+    "activity_counts": {
+      "digging": 151,
+      "swinging": 71
+    },
+    "activity_percentages": {
+      "digging": 68.01801801801803,
+      "swinging": 31.98198198198198
+    }
+  },
+  {
+    "cycle_number": 4,
+    "start_frame": 1192,
+    "end_frame": 1392,
+    "duration_frames": 200,
+    "duration_seconds": 8.0,
+    "activity_counts": {
+      "digging": 49,
+      "swinging": 57,
+      "idling": 77,
+      "loading": 17
+    },
+    "activity_percentages": {
+      "digging": 24.5,
+      "swinging": 28.499999999999996,
+      "idling": 38.5,
+      "loading": 8.5
+    }
+  },
+  {
+    "cycle_number": 5,
+    "start_frame": 1392,
+    "end_frame": 1562,
+    "duration_frames": 170,
+    "duration_seconds": 6.8,
+    "activity_counts": {
+      "digging": 83,
+      "loading": 43,
+      "swinging": 44
+    },
+    "activity_percentages": {
+      "digging": 48.8235294117647,
+      "loading": 25.294117647058822,
+      "swinging": 25.882352941176475
+    }
+  },
+  {
+    "cycle_number": 6,
+    "start_frame": 1562,
+    "end_frame": 2300,
+    "duration_frames": 738,
+    "duration_seconds": 29.52,
+    "activity_counts": {
+      "digging": 33,
+      "swinging": 487,
+      "loading": 169,
+      "idling": 49
+    },
+    "activity_percentages": {
+      "digging": 4.471544715447155,
+      "swinging": 65.98915989159892,
+      "loading": 22.899728997289973,
+      "idling": 6.639566395663957
+    }
+  }
+]

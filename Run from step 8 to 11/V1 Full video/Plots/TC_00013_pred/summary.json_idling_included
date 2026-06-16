@@ -1,0 +1,12 @@
+{
+  "total_frames": 1544,
+  "duration_seconds": 61.76,
+  "fps": 25,
+  "activity_distribution": {
+    "idling": 100.0
+  },
+  "num_cycles": 0,
+  "avg_cycle_time_seconds": 0,
+  "productivity_lcy_per_hour": 0.0,
+  "avg_confidence": 0.9712360423695238
+}

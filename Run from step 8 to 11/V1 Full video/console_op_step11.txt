@@ -1,0 +1,1854 @@
+  Day_3: acc=79.58% | net_running=78.68%
+  Day_4_1: acc=81.08% | net_running=78.80%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19598
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=54.60% | net_running=54.60%
+  Day_3: acc=43.14% | net_running=46.02%
+  Day_4_1: acc=41.50% | net_running=45.79%
+  [EARLY STOP] Net running avg (45.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19599
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.38% | net_running=75.38%
+  Day_3: acc=80.37% | net_running=79.12%
+  Day_4_1: acc=82.48% | net_running=79.29%
+  [EARLY STOP] Net running avg (79.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19600
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=54.14% | net_running=54.14%
+  Day_3: acc=43.06% | net_running=45.85%
+  Day_4_1: acc=41.08% | net_running=45.61%
+  [EARLY STOP] Net running avg (45.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19601
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=77.14% | net_running=77.14%
+  Day_3: acc=80.19% | net_running=79.42%
+  Day_4_1: acc=81.93% | net_running=79.55%
+  [EARLY STOP] Net running avg (79.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19602
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=59.41% | net_running=59.41%
+  Day_3: acc=44.09% | net_running=47.94%
+  Day_4_1: acc=42.62% | net_running=47.67%
+  [EARLY STOP] Net running avg (47.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19603
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.75% | net_running=75.75%
+  Day_3: acc=80.43% | net_running=79.26%
+  Day_4_1: acc=81.88% | net_running=79.39%
+  [EARLY STOP] Net running avg (79.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19604
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=58.23% | net_running=58.23%
+  Day_3: acc=44.07% | net_running=47.63%
+  Day_4_1: acc=42.09% | net_running=47.35%
+  [EARLY STOP] Net running avg (47.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19605
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=77.03% | net_running=77.03%
+  Day_3: acc=80.18% | net_running=79.39%
+  Day_4_1: acc=81.77% | net_running=79.51%
+  [EARLY STOP] Net running avg (79.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19606
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=59.31% | net_running=59.31%
+  Day_3: acc=44.11% | net_running=47.93%
+  Day_4_1: acc=42.56% | net_running=47.66%
+  [EARLY STOP] Net running avg (47.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19607
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.75% | net_running=75.75%
+  Day_3: acc=80.43% | net_running=79.26%
+  Day_4_1: acc=81.88% | net_running=79.39%
+  [EARLY STOP] Net running avg (79.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19608
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=58.23% | net_running=58.23%
+  Day_3: acc=44.07% | net_running=47.63%
+  Day_4_1: acc=42.09% | net_running=47.35%
+  [EARLY STOP] Net running avg (47.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19609
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=76.94% | net_running=76.94%
+  Day_3: acc=80.16% | net_running=79.35%
+  Day_4_1: acc=81.47% | net_running=79.46%
+  [EARLY STOP] Net running avg (79.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19610
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=59.17% | net_running=59.17%
+  Day_3: acc=44.11% | net_running=47.89%
+  Day_4_1: acc=42.49% | net_running=47.62%
+  [EARLY STOP] Net running avg (47.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19611
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.75% | net_running=75.75%
+  Day_3: acc=80.43% | net_running=79.26%
+  Day_4_1: acc=81.88% | net_running=79.39%
+  [EARLY STOP] Net running avg (79.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19612
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=58.23% | net_running=58.23%
+  Day_3: acc=44.07% | net_running=47.63%
+  Day_4_1: acc=42.09% | net_running=47.35%
+  [EARLY STOP] Net running avg (47.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19613
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=76.64% | net_running=76.64%
+  Day_3: acc=80.00% | net_running=79.16%
+  Day_4_1: acc=81.07% | net_running=79.25%
+  [EARLY STOP] Net running avg (79.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19614
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=59.00% | net_running=59.00%
+  Day_3: acc=44.11% | net_running=47.85%
+  Day_4_1: acc=42.44% | net_running=47.58%
+  [EARLY STOP] Net running avg (47.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19615
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.75% | net_running=75.75%
+  Day_3: acc=80.43% | net_running=79.26%
+  Day_4_1: acc=81.88% | net_running=79.39%
+  [EARLY STOP] Net running avg (79.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19616
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=58.23% | net_running=58.23%
+  Day_3: acc=44.07% | net_running=47.63%
+  Day_4_1: acc=42.09% | net_running=47.35%
+  [EARLY STOP] Net running avg (47.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19617
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=76.38% | net_running=76.38%
+  Day_3: acc=79.64% | net_running=78.82%
+  Day_4_1: acc=80.48% | net_running=78.90%
+  [EARLY STOP] Net running avg (78.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19618
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=58.76% | net_running=58.76%
+  Day_3: acc=44.11% | net_running=47.79%
+  Day_4_1: acc=42.36% | net_running=47.51%
+  [EARLY STOP] Net running avg (47.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19619
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.75% | net_running=75.75%
+  Day_3: acc=80.43% | net_running=79.26%
+  Day_4_1: acc=81.88% | net_running=79.39%
+  [EARLY STOP] Net running avg (79.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19620
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=58.23% | net_running=58.23%
+  Day_3: acc=44.07% | net_running=47.63%
+  Day_4_1: acc=42.09% | net_running=47.35%
+  [EARLY STOP] Net running avg (47.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19621
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.79% | net_running=73.79%
+  Day_3: acc=79.61% | net_running=78.15%
+  Day_4_1: acc=80.97% | net_running=78.29%
+  [EARLY STOP] Net running avg (78.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19622
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=38.20% | net_running=38.20%
+  Day_3: acc=36.79% | net_running=37.14%
+  Day_4_1: acc=27.99% | net_running=36.68%
+  [EARLY STOP] Net running avg (36.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19623
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.44% | net_running=72.44%
+  Day_3: acc=79.85% | net_running=77.99%
+  Day_4_1: acc=80.98% | net_running=78.14%
+  [EARLY STOP] Net running avg (78.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19624
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=37.18% | net_running=37.18%
+  Day_3: acc=36.77% | net_running=36.87%
+  Day_4_1: acc=27.25% | net_running=36.38%
+  [EARLY STOP] Net running avg (36.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19625
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.76% | net_running=73.76%
+  Day_3: acc=79.57% | net_running=78.11%
+  Day_4_1: acc=80.89% | net_running=78.25%
+  [EARLY STOP] Net running avg (78.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19626
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=38.18% | net_running=38.18%
+  Day_3: acc=36.83% | net_running=37.17%
+  Day_4_1: acc=28.06% | net_running=36.70%
+  [EARLY STOP] Net running avg (36.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19627
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.44% | net_running=72.44%
+  Day_3: acc=79.85% | net_running=77.99%
+  Day_4_1: acc=80.98% | net_running=78.14%
+  [EARLY STOP] Net running avg (78.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19628
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=37.18% | net_running=37.18%
+  Day_3: acc=36.77% | net_running=36.87%
+  Day_4_1: acc=27.25% | net_running=36.38%
+  [EARLY STOP] Net running avg (36.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19629
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.66% | net_running=73.66%
+  Day_3: acc=79.57% | net_running=78.08%
+  Day_4_1: acc=80.63% | net_running=78.21%
+  [EARLY STOP] Net running avg (78.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19630
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=38.22% | net_running=38.22%
+  Day_3: acc=36.88% | net_running=37.21%
+  Day_4_1: acc=28.10% | net_running=36.75%
+  [EARLY STOP] Net running avg (36.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19631
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.44% | net_running=72.44%
+  Day_3: acc=79.85% | net_running=77.99%
+  Day_4_1: acc=80.98% | net_running=78.14%
+  [EARLY STOP] Net running avg (78.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19632
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=37.18% | net_running=37.18%
+  Day_3: acc=36.77% | net_running=36.87%
+  Day_4_1: acc=27.25% | net_running=36.38%
+  [EARLY STOP] Net running avg (36.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19633
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.46% | net_running=73.46%
+  Day_3: acc=79.42% | net_running=77.92%
+  Day_4_1: acc=80.41% | net_running=78.05%
+  [EARLY STOP] Net running avg (78.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19634
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=38.20% | net_running=38.20%
+  Day_3: acc=36.92% | net_running=37.24%
+  Day_4_1: acc=28.05% | net_running=36.78%
+  [EARLY STOP] Net running avg (36.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19635
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.44% | net_running=72.44%
+  Day_3: acc=79.85% | net_running=77.99%
+  Day_4_1: acc=80.98% | net_running=78.14%
+  [EARLY STOP] Net running avg (78.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19636
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=37.18% | net_running=37.18%
+  Day_3: acc=36.77% | net_running=36.87%
+  Day_4_1: acc=27.25% | net_running=36.38%
+  [EARLY STOP] Net running avg (36.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19637
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.28% | net_running=73.28%
+  Day_3: acc=79.08% | net_running=77.62%
+  Day_4_1: acc=80.05% | net_running=77.75%
+  [EARLY STOP] Net running avg (77.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19638
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=38.16% | net_running=38.16%
+  Day_3: acc=37.04% | net_running=37.32%
+  Day_4_1: acc=28.06% | net_running=36.85%
+  [EARLY STOP] Net running avg (36.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19639
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.44% | net_running=72.44%
+  Day_3: acc=79.85% | net_running=77.99%
+  Day_4_1: acc=80.98% | net_running=78.14%
+  [EARLY STOP] Net running avg (78.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19640
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=37.18% | net_running=37.18%
+  Day_3: acc=36.77% | net_running=36.87%
+  Day_4_1: acc=27.25% | net_running=36.38%
+  [EARLY STOP] Net running avg (36.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19641
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.83% | net_running=73.83%
+  Day_3: acc=79.69% | net_running=78.22%
+  Day_4_1: acc=80.97% | net_running=78.36%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19642
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.84% | net_running=39.84%
+  Day_3: acc=37.89% | net_running=38.38%
+  Day_4_1: acc=28.00% | net_running=37.85%
+  [EARLY STOP] Net running avg (37.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19643
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.51% | net_running=72.51%
+  Day_3: acc=79.93% | net_running=78.07%
+  Day_4_1: acc=80.97% | net_running=78.21%
+  [EARLY STOP] Net running avg (78.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19644
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.05% | net_running=39.05%
+  Day_3: acc=37.89% | net_running=38.18%
+  Day_4_1: acc=27.30% | net_running=37.63%
+  [EARLY STOP] Net running avg (37.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19645
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.82% | net_running=73.82%
+  Day_3: acc=79.66% | net_running=78.20%
+  Day_4_1: acc=80.88% | net_running=78.33%
+  [EARLY STOP] Net running avg (78.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19646
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.84% | net_running=39.84%
+  Day_3: acc=37.91% | net_running=38.39%
+  Day_4_1: acc=28.20% | net_running=37.87%
+  [EARLY STOP] Net running avg (37.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19647
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.51% | net_running=72.51%
+  Day_3: acc=79.93% | net_running=78.07%
+  Day_4_1: acc=80.97% | net_running=78.21%
+  [EARLY STOP] Net running avg (78.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19648
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.05% | net_running=39.05%
+  Day_3: acc=37.89% | net_running=38.18%
+  Day_4_1: acc=27.30% | net_running=37.63%
+  [EARLY STOP] Net running avg (37.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19649
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.66% | net_running=73.66%
+  Day_3: acc=79.65% | net_running=78.15%
+  Day_4_1: acc=80.63% | net_running=78.27%
+  [EARLY STOP] Net running avg (78.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19650
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.61% | net_running=39.61%
+  Day_3: acc=37.93% | net_running=38.35%
+  Day_4_1: acc=28.35% | net_running=37.84%
+  [EARLY STOP] Net running avg (37.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19651
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.51% | net_running=72.51%
+  Day_3: acc=79.93% | net_running=78.07%
+  Day_4_1: acc=80.97% | net_running=78.21%
+  [EARLY STOP] Net running avg (78.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19652
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.05% | net_running=39.05%
+  Day_3: acc=37.89% | net_running=38.18%
+  Day_4_1: acc=27.30% | net_running=37.63%
+  [EARLY STOP] Net running avg (37.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19653
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.45% | net_running=73.45%
+  Day_3: acc=79.50% | net_running=77.98%
+  Day_4_1: acc=80.24% | net_running=78.09%
+  [EARLY STOP] Net running avg (78.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19654
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.66% | net_running=39.66%
+  Day_3: acc=37.99% | net_running=38.41%
+  Day_4_1: acc=28.49% | net_running=37.91%
+  [EARLY STOP] Net running avg (37.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19655
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.51% | net_running=72.51%
+  Day_3: acc=79.93% | net_running=78.07%
+  Day_4_1: acc=80.97% | net_running=78.21%
+  [EARLY STOP] Net running avg (78.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19656
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.05% | net_running=39.05%
+  Day_3: acc=37.89% | net_running=38.18%
+  Day_4_1: acc=27.30% | net_running=37.63%
+  [EARLY STOP] Net running avg (37.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19657
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.19% | net_running=73.19%
+  Day_3: acc=79.14% | net_running=77.64%
+  Day_4_1: acc=79.73% | net_running=77.75%
+  [EARLY STOP] Net running avg (77.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19658
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.50% | net_running=39.50%
+  Day_3: acc=38.00% | net_running=38.37%
+  Day_4_1: acc=28.69% | net_running=37.88%
+  [EARLY STOP] Net running avg (37.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19659
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=72.51% | net_running=72.51%
+  Day_3: acc=79.93% | net_running=78.07%
+  Day_4_1: acc=80.97% | net_running=78.21%
+  [EARLY STOP] Net running avg (78.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19660
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=39.05% | net_running=39.05%
+  Day_3: acc=37.89% | net_running=38.18%
+  Day_4_1: acc=27.30% | net_running=37.63%
+  [EARLY STOP] Net running avg (37.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19661
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.37% | net_running=74.37%
+  Day_3: acc=79.78% | net_running=78.42%
+  Day_4_1: acc=81.63% | net_running=78.58%
+  [EARLY STOP] Net running avg (78.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19662
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=42.44% | net_running=42.44%
+  Day_3: acc=38.90% | net_running=39.79%
+  Day_4_1: acc=31.35% | net_running=39.36%
+  [EARLY STOP] Net running avg (39.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19663
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.04% | net_running=73.04%
+  Day_3: acc=80.02% | net_running=78.27%
+  Day_4_1: acc=81.59% | net_running=78.43%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19664
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=41.46% | net_running=41.46%
+  Day_3: acc=38.89% | net_running=39.54%
+  Day_4_1: acc=30.21% | net_running=39.06%
+  [EARLY STOP] Net running avg (39.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19665
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.33% | net_running=74.33%
+  Day_3: acc=79.76% | net_running=78.40%
+  Day_4_1: acc=81.56% | net_running=78.56%
+  [EARLY STOP] Net running avg (78.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19666
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=42.37% | net_running=42.37%
+  Day_3: acc=38.92% | net_running=39.78%
+  Day_4_1: acc=31.21% | net_running=39.35%
+  [EARLY STOP] Net running avg (39.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19667
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.04% | net_running=73.04%
+  Day_3: acc=80.02% | net_running=78.27%
+  Day_4_1: acc=81.59% | net_running=78.43%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19668
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=41.46% | net_running=41.46%
+  Day_3: acc=38.89% | net_running=39.54%
+  Day_4_1: acc=30.21% | net_running=39.06%
+  [EARLY STOP] Net running avg (39.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19669
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.22% | net_running=74.22%
+  Day_3: acc=79.74% | net_running=78.35%
+  Day_4_1: acc=81.35% | net_running=78.51%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19670
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=42.38% | net_running=42.38%
+  Day_3: acc=38.97% | net_running=39.83%
+  Day_4_1: acc=30.66% | net_running=39.36%
+  [EARLY STOP] Net running avg (39.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19671
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.04% | net_running=73.04%
+  Day_3: acc=80.02% | net_running=78.27%
+  Day_4_1: acc=81.59% | net_running=78.43%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19672
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=41.46% | net_running=41.46%
+  Day_3: acc=38.89% | net_running=39.54%
+  Day_4_1: acc=30.21% | net_running=39.06%
+  [EARLY STOP] Net running avg (39.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19673
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.07% | net_running=74.07%
+  Day_3: acc=79.62% | net_running=78.22%
+  Day_4_1: acc=80.87% | net_running=78.36%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19674
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=42.42% | net_running=42.42%
+  Day_3: acc=38.99% | net_running=39.85%
+  Day_4_1: acc=31.36% | net_running=39.42%
+  [EARLY STOP] Net running avg (39.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19675
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.04% | net_running=73.04%
+  Day_3: acc=80.02% | net_running=78.27%
+  Day_4_1: acc=81.59% | net_running=78.43%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19676
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=41.46% | net_running=41.46%
+  Day_3: acc=38.89% | net_running=39.54%
+  Day_4_1: acc=30.21% | net_running=39.06%
+  [EARLY STOP] Net running avg (39.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19677
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.89% | net_running=73.89%
+  Day_3: acc=79.24% | net_running=77.90%
+  Day_4_1: acc=80.50% | net_running=78.03%
+  [EARLY STOP] Net running avg (78.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19678
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+^[[?61;4;6;7;14;21;22;23;24;28;32;42;52c^[[>0;10;1c  Day_2: acc=42.41% | net_running=42.41%
+  Day_3: acc=38.95% | net_running=39.82%
+  Day_4_1: acc=31.18% | net_running=39.38%
+  [EARLY STOP] Net running avg (39.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19679
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.04% | net_running=73.04%
+  Day_3: acc=80.02% | net_running=78.27%
+  Day_4_1: acc=81.59% | net_running=78.43%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19680
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=41.46% | net_running=41.46%
+  Day_3: acc=38.89% | net_running=39.54%
+  Day_4_1: acc=30.21% | net_running=39.06%
+  [EARLY STOP] Net running avg (39.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19681
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.53% | net_running=74.53%
+  Day_3: acc=79.78% | net_running=78.47%
+  Day_4_1: acc=81.48% | net_running=78.62%
+  [EARLY STOP] Net running avg (78.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19682
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.54% | net_running=44.54%
+  Day_3: acc=39.35% | net_running=40.65%
+  Day_4_1: acc=32.33% | net_running=40.23%
+  [EARLY STOP] Net running avg (40.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19683
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.12% | net_running=73.12%
+  Day_3: acc=80.03% | net_running=78.30%
+  Day_4_1: acc=81.43% | net_running=78.46%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19684
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=43.40% | net_running=43.40%
+  Day_3: acc=39.35% | net_running=40.37%
+  Day_4_1: acc=31.40% | net_running=39.91%
+  [EARLY STOP] Net running avg (39.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19685
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.49% | net_running=74.49%
+  Day_3: acc=79.76% | net_running=78.44%
+  Day_4_1: acc=81.33% | net_running=78.58%
+  [EARLY STOP] Net running avg (78.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19686
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.50% | net_running=44.50%
+^[[?61;4;6;7;14;21;22;23;24;28;32;42;52c^[[>0;10;1c  Day_3: acc=39.37% | net_running=40.66%
+  Day_4_1: acc=32.19% | net_running=40.23%
+  [EARLY STOP] Net running avg (40.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19687
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.12% | net_running=73.12%
+  Day_3: acc=80.03% | net_running=78.30%
+  Day_4_1: acc=81.43% | net_running=78.46%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19688
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=43.40% | net_running=43.40%
+  Day_3: acc=39.35% | net_running=40.37%
+  Day_4_1: acc=31.40% | net_running=39.91%
+  [EARLY STOP] Net running avg (39.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19689
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.40% | net_running=74.40%
+  Day_3: acc=79.74% | net_running=78.40%
+  Day_4_1: acc=81.03% | net_running=78.53%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19690
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.41% | net_running=44.41%
+  Day_3: acc=39.44% | net_running=40.69%
+  Day_4_1: acc=31.51% | net_running=40.23%
+  [EARLY STOP] Net running avg (40.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19691
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.12% | net_running=73.12%
+  Day_3: acc=80.03% | net_running=78.30%
+  Day_4_1: acc=81.43% | net_running=78.46%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19692
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=43.40% | net_running=43.40%
+  Day_3: acc=39.35% | net_running=40.37%
+  Day_4_1: acc=31.40% | net_running=39.91%
+  [EARLY STOP] Net running avg (39.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19693
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.21% | net_running=74.21%
+  Day_3: acc=79.62% | net_running=78.26%
+  Day_4_1: acc=80.62% | net_running=78.38%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19694
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.37% | net_running=44.37%
+  Day_3: acc=39.46% | net_running=40.69%
+  Day_4_1: acc=32.19% | net_running=40.26%
+  [EARLY STOP] Net running avg (40.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19695
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.12% | net_running=73.12%
+  Day_3: acc=80.03% | net_running=78.30%
+  Day_4_1: acc=81.43% | net_running=78.46%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19696
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=43.40% | net_running=43.40%
+  Day_3: acc=39.35% | net_running=40.37%
+  Day_4_1: acc=31.40% | net_running=39.91%
+  [EARLY STOP] Net running avg (39.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19697
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.01% | net_running=74.01%
+  Day_3: acc=79.25% | net_running=77.93%
+  Day_4_1: acc=80.03% | net_running=78.04%
+  [EARLY STOP] Net running avg (78.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19698
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.12% | net_running=44.12%
+  Day_3: acc=39.44% | net_running=40.61%
+  Day_4_1: acc=32.06% | net_running=40.18%
+  [EARLY STOP] Net running avg (40.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19699
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.12% | net_running=73.12%
+  Day_3: acc=80.03% | net_running=78.30%
+  Day_4_1: acc=81.43% | net_running=78.46%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19700
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=43.40% | net_running=43.40%
+  Day_3: acc=39.35% | net_running=40.37%
+  Day_4_1: acc=31.40% | net_running=39.91%
+  [EARLY STOP] Net running avg (39.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19701
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.75% | net_running=74.75%
+  Day_3: acc=79.78% | net_running=78.51%
+  Day_4_1: acc=81.48% | net_running=78.67%
+  [EARLY STOP] Net running avg (78.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19702
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=45.85% | net_running=45.85%
+  Day_3: acc=39.95% | net_running=41.44%
+  Day_4_1: acc=34.59% | net_running=41.09%
+  [EARLY STOP] Net running avg (41.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19703
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.32% | net_running=73.32%
+  Day_3: acc=80.03% | net_running=78.35%
+  Day_4_1: acc=81.43% | net_running=78.50%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19704
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.61% | net_running=44.61%
+  Day_3: acc=39.96% | net_running=41.13%
+  Day_4_1: acc=33.52% | net_running=40.74%
+  [EARLY STOP] Net running avg (40.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19705
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.74% | net_running=74.74%
+  Day_3: acc=79.76% | net_running=78.49%
+  Day_4_1: acc=81.33% | net_running=78.64%
+  [EARLY STOP] Net running avg (78.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19706
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=45.90% | net_running=45.90%
+  Day_3: acc=39.99% | net_running=41.47%
+  Day_4_1: acc=34.63% | net_running=41.13%
+  [EARLY STOP] Net running avg (41.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19707
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.32% | net_running=73.32%
+  Day_3: acc=80.03% | net_running=78.35%
+  Day_4_1: acc=81.43% | net_running=78.50%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19708
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.61% | net_running=44.61%
+  Day_3: acc=39.96% | net_running=41.13%
+  Day_4_1: acc=33.52% | net_running=40.74%
+  [EARLY STOP] Net running avg (40.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19709
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.60% | net_running=74.60%
+  Day_3: acc=79.73% | net_running=78.44%
+  Day_4_1: acc=81.03% | net_running=78.57%
+  [EARLY STOP] Net running avg (78.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19710
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=45.89% | net_running=45.89%
+  Day_3: acc=40.03% | net_running=41.50%
+  Day_4_1: acc=34.41% | net_running=41.14%
+  [EARLY STOP] Net running avg (41.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19711
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.32% | net_running=73.32%
+  Day_3: acc=80.03% | net_running=78.35%
+  Day_4_1: acc=81.43% | net_running=78.50%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19712
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.61% | net_running=44.61%
+  Day_3: acc=39.96% | net_running=41.13%
+  Day_4_1: acc=33.52% | net_running=40.74%
+  [EARLY STOP] Net running avg (40.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19713
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.49% | net_running=74.49%
+  Day_3: acc=79.61% | net_running=78.32%
+  Day_4_1: acc=80.62% | net_running=78.44%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19714
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=45.71% | net_running=45.71%
+  Day_3: acc=40.02% | net_running=41.45%
+  Day_4_1: acc=34.02% | net_running=41.07%
+  [EARLY STOP] Net running avg (41.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19715
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.32% | net_running=73.32%
+  Day_3: acc=80.03% | net_running=78.35%
+  Day_4_1: acc=81.43% | net_running=78.50%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19716
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.61% | net_running=44.61%
+  Day_3: acc=39.96% | net_running=41.13%
+  Day_4_1: acc=33.52% | net_running=40.74%
+  [EARLY STOP] Net running avg (40.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19717
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.30% | net_running=74.30%
+  Day_3: acc=79.23% | net_running=77.99%
+  Day_4_1: acc=80.03% | net_running=78.10%
+  [EARLY STOP] Net running avg (78.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19718
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=45.52% | net_running=45.52%
+  Day_3: acc=40.01% | net_running=41.40%
+  Day_4_1: acc=33.71% | net_running=41.01%
+  [EARLY STOP] Net running avg (41.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19719
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.32% | net_running=73.32%
+  Day_3: acc=80.03% | net_running=78.35%
+  Day_4_1: acc=81.43% | net_running=78.50%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19720
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=44.61% | net_running=44.61%
+  Day_3: acc=39.96% | net_running=41.13%
+  Day_4_1: acc=33.52% | net_running=40.74%
+  [EARLY STOP] Net running avg (40.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19721
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.18% | net_running=75.18%
+  Day_3: acc=79.85% | net_running=78.68%
+  Day_4_1: acc=81.48% | net_running=78.82%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19722
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=47.47% | net_running=47.47%
+  Day_3: acc=40.74% | net_running=42.43%
+  Day_4_1: acc=35.37% | net_running=42.07%
+  [EARLY STOP] Net running avg (42.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19723
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.76% | net_running=73.76%
+  Day_3: acc=80.11% | net_running=78.52%
+  Day_4_1: acc=81.43% | net_running=78.66%
+  [EARLY STOP] Net running avg (78.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19724
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=46.26% | net_running=46.26%
+  Day_3: acc=40.73% | net_running=42.12%
+  Day_4_1: acc=34.24% | net_running=41.72%
+  [EARLY STOP] Net running avg (41.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19725
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.14% | net_running=75.14%
+  Day_3: acc=79.83% | net_running=78.65%
+  Day_4_1: acc=81.31% | net_running=78.79%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19726
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=47.48% | net_running=47.48%
+  Day_3: acc=40.75% | net_running=42.44%
+  Day_4_1: acc=35.46% | net_running=42.09%
+  [EARLY STOP] Net running avg (42.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19727
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.76% | net_running=73.76%
+  Day_3: acc=80.11% | net_running=78.52%
+  Day_4_1: acc=81.43% | net_running=78.66%
+  [EARLY STOP] Net running avg (78.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19728
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=46.26% | net_running=46.26%
+  Day_3: acc=40.73% | net_running=42.12%
+  Day_4_1: acc=34.24% | net_running=41.72%
+  [EARLY STOP] Net running avg (41.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19729
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.02% | net_running=75.02%
+  Day_3: acc=79.81% | net_running=78.60%
+  Day_4_1: acc=81.01% | net_running=78.73%
+  [EARLY STOP] Net running avg (78.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19730
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=47.37% | net_running=47.37%
+  Day_3: acc=40.76% | net_running=42.42%
+  Day_4_1: acc=35.39% | net_running=42.06%
+  [EARLY STOP] Net running avg (42.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19731
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.76% | net_running=73.76%
+  Day_3: acc=80.11% | net_running=78.52%
+  Day_4_1: acc=81.43% | net_running=78.66%
+  [EARLY STOP] Net running avg (78.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19732
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=46.26% | net_running=46.26%
+  Day_3: acc=40.73% | net_running=42.12%
+  Day_4_1: acc=34.24% | net_running=41.72%
+  [EARLY STOP] Net running avg (41.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19733
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.79% | net_running=74.79%
+  Day_3: acc=79.66% | net_running=78.43%
+  Day_4_1: acc=80.62% | net_running=78.54%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19734
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=47.22% | net_running=47.22%
+  Day_3: acc=40.76% | net_running=42.38%
+  Day_4_1: acc=35.04% | net_running=42.01%
+  [EARLY STOP] Net running avg (42.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19735
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.76% | net_running=73.76%
+  Day_3: acc=80.11% | net_running=78.52%
+  Day_4_1: acc=81.43% | net_running=78.66%
+  [EARLY STOP] Net running avg (78.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19736
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=46.26% | net_running=46.26%
+  Day_3: acc=40.73% | net_running=42.12%
+  Day_4_1: acc=34.24% | net_running=41.72%
+  [EARLY STOP] Net running avg (41.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19737
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.56% | net_running=74.56%
+  Day_3: acc=79.30% | net_running=78.11%
+  Day_4_1: acc=80.02% | net_running=78.21%
+  [EARLY STOP] Net running avg (78.2%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19738
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=47.00% | net_running=47.00%
+  Day_3: acc=40.72% | net_running=42.29%
+  Day_4_1: acc=34.61% | net_running=41.90%
+  [EARLY STOP] Net running avg (41.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19739
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=73.76% | net_running=73.76%
+  Day_3: acc=80.11% | net_running=78.52%
+  Day_4_1: acc=81.43% | net_running=78.66%
+  [EARLY STOP] Net running avg (78.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19740
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=46.26% | net_running=46.26%
+  Day_3: acc=40.73% | net_running=42.12%
+  Day_4_1: acc=34.24% | net_running=41.72%
+  [EARLY STOP] Net running avg (41.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19741
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.65% | net_running=75.65%
+  Day_3: acc=79.90% | net_running=78.83%
+  Day_4_1: acc=81.71% | net_running=78.98%
+  [EARLY STOP] Net running avg (79.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19742
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=49.30% | net_running=49.30%
+  Day_3: acc=41.36% | net_running=43.35%
+  Day_4_1: acc=34.94% | net_running=42.93%
+  [EARLY STOP] Net running avg (42.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19743
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.28% | net_running=74.28%
+  Day_3: acc=80.16% | net_running=78.68%
+  Day_4_1: acc=81.66% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19744
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.06% | net_running=48.06%
+  Day_3: acc=41.34% | net_running=43.03%
+  Day_4_1: acc=34.09% | net_running=42.58%
+  [EARLY STOP] Net running avg (42.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19745
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.59% | net_running=75.59%
+  Day_3: acc=79.89% | net_running=78.81%
+  Day_4_1: acc=81.54% | net_running=78.95%
+  [EARLY STOP] Net running avg (78.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19746
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=49.27% | net_running=49.27%
+  Day_3: acc=41.38% | net_running=43.37%
+  Day_4_1: acc=35.07% | net_running=42.94%
+  [EARLY STOP] Net running avg (42.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19747
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.28% | net_running=74.28%
+  Day_3: acc=80.16% | net_running=78.68%
+  Day_4_1: acc=81.66% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19748
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.06% | net_running=48.06%
+  Day_3: acc=41.34% | net_running=43.03%
+  Day_4_1: acc=34.09% | net_running=42.58%
+  [EARLY STOP] Net running avg (42.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19749
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.45% | net_running=75.45%
+  Day_3: acc=79.87% | net_running=78.76%
+  Day_4_1: acc=81.30% | net_running=78.89%
+  [EARLY STOP] Net running avg (78.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19750
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=49.15% | net_running=49.15%
+  Day_3: acc=41.39% | net_running=43.34%
+  Day_4_1: acc=35.19% | net_running=42.93%
+  [EARLY STOP] Net running avg (42.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19751
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.28% | net_running=74.28%
+  Day_3: acc=80.16% | net_running=78.68%
+  Day_4_1: acc=81.66% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19752
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.06% | net_running=48.06%
+  Day_3: acc=41.34% | net_running=43.03%
+  Day_4_1: acc=34.09% | net_running=42.58%
+  [EARLY STOP] Net running avg (42.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19753
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.24% | net_running=75.24%
+  Day_3: acc=79.71% | net_running=78.59%
+  Day_4_1: acc=80.97% | net_running=78.71%
+  [EARLY STOP] Net running avg (78.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19754
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=49.00% | net_running=49.00%
+  Day_3: acc=41.39% | net_running=43.31%
+  Day_4_1: acc=35.26% | net_running=42.90%
+  [EARLY STOP] Net running avg (42.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19755
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.28% | net_running=74.28%
+  Day_3: acc=80.16% | net_running=78.68%
+  Day_4_1: acc=81.66% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19756
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.06% | net_running=48.06%
+  Day_3: acc=41.34% | net_running=43.03%
+  Day_4_1: acc=34.09% | net_running=42.58%
+  [EARLY STOP] Net running avg (42.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19757
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.02% | net_running=75.02%
+  Day_3: acc=79.35% | net_running=78.26%
+  Day_4_1: acc=80.45% | net_running=78.37%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19758
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.86% | net_running=48.86%
+  Day_3: acc=41.39% | net_running=43.27%
+  Day_4_1: acc=35.20% | net_running=42.86%
+  [EARLY STOP] Net running avg (42.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19759
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.28% | net_running=74.28%
+  Day_3: acc=80.16% | net_running=78.68%
+  Day_4_1: acc=81.66% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19760
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.06% | net_running=48.06%
+  Day_3: acc=41.34% | net_running=43.03%
+  Day_4_1: acc=34.09% | net_running=42.58%
+  [EARLY STOP] Net running avg (42.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19761
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.51% | net_running=75.51%
+  Day_3: acc=79.93% | net_running=78.82%
+  Day_4_1: acc=81.78% | net_running=78.97%
+  [EARLY STOP] Net running avg (79.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19762
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=50.06% | net_running=50.06%
+  Day_3: acc=42.11% | net_running=44.11%
+  Day_4_1: acc=37.80% | net_running=43.79%
+  [EARLY STOP] Net running avg (43.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19763
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.20% | net_running=74.20%
+  Day_3: acc=80.18% | net_running=78.68%
+  Day_4_1: acc=81.73% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19764
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.81% | net_running=48.81%
+  Day_3: acc=42.08% | net_running=43.77%
+  Day_4_1: acc=37.14% | net_running=43.43%
+  [EARLY STOP] Net running avg (43.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19765
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.41% | net_running=75.41%
+  Day_3: acc=79.91% | net_running=78.78%
+  Day_4_1: acc=81.63% | net_running=78.93%
+  [EARLY STOP] Net running avg (78.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19766
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=49.95% | net_running=49.95%
+  Day_3: acc=42.14% | net_running=44.10%
+  Day_4_1: acc=37.85% | net_running=43.78%
+  [EARLY STOP] Net running avg (43.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19767
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.20% | net_running=74.20%
+  Day_3: acc=80.18% | net_running=78.68%
+  Day_4_1: acc=81.73% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19768
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.81% | net_running=48.81%
+  Day_3: acc=42.08% | net_running=43.77%
+  Day_4_1: acc=37.14% | net_running=43.43%
+  [EARLY STOP] Net running avg (43.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19769
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.27% | net_running=75.27%
+  Day_3: acc=79.89% | net_running=78.73%
+  Day_4_1: acc=81.33% | net_running=78.86%
+  [EARLY STOP] Net running avg (78.9%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19770
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=49.74% | net_running=49.74%
+  Day_3: acc=42.13% | net_running=44.04%
+  Day_4_1: acc=37.80% | net_running=43.73%
+  [EARLY STOP] Net running avg (43.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19771
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.20% | net_running=74.20%
+  Day_3: acc=80.18% | net_running=78.68%
+  Day_4_1: acc=81.73% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19772
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.81% | net_running=48.81%
+  Day_3: acc=42.08% | net_running=43.77%
+  Day_4_1: acc=37.14% | net_running=43.43%
+  [EARLY STOP] Net running avg (43.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19773
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.06% | net_running=75.06%
+  Day_3: acc=79.73% | net_running=78.56%
+  Day_4_1: acc=80.97% | net_running=78.68%
+  [EARLY STOP] Net running avg (78.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19774
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=49.62% | net_running=49.62%
+  Day_3: acc=42.12% | net_running=44.01%
+  Day_4_1: acc=37.78% | net_running=43.69%
+  [EARLY STOP] Net running avg (43.7%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19775
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.20% | net_running=74.20%
+  Day_3: acc=80.18% | net_running=78.68%
+  Day_4_1: acc=81.73% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19776
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.81% | net_running=48.81%
+  Day_3: acc=42.08% | net_running=43.77%
+  Day_4_1: acc=37.14% | net_running=43.43%
+  [EARLY STOP] Net running avg (43.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19777
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.89% | net_running=74.89%
+  Day_3: acc=79.36% | net_running=78.24%
+  Day_4_1: acc=80.46% | net_running=78.35%
+  [EARLY STOP] Net running avg (78.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19778
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=49.41% | net_running=49.41%
+  Day_3: acc=42.11% | net_running=43.95%
+  Day_4_1: acc=37.80% | net_running=43.64%
+  [EARLY STOP] Net running avg (43.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19779
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.20% | net_running=74.20%
+  Day_3: acc=80.18% | net_running=78.68%
+  Day_4_1: acc=81.73% | net_running=78.83%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19780
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=48.81% | net_running=48.81%
+  Day_3: acc=42.08% | net_running=43.77%
+  Day_4_1: acc=37.14% | net_running=43.43%
+  [EARLY STOP] Net running avg (43.4%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19781
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.67% | net_running=75.67%
+  Day_3: acc=80.09% | net_running=78.98%
+  Day_4_1: acc=81.47% | net_running=79.11%
+  [EARLY STOP] Net running avg (79.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19782
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=53.78% | net_running=53.78%
+  Day_3: acc=43.30% | net_running=45.93%
+  Day_4_1: acc=39.44% | net_running=45.60%
+  [EARLY STOP] Net running avg (45.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19783
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.36% | net_running=74.36%
+  Day_3: acc=80.35% | net_running=78.85%
+  Day_4_1: acc=81.43% | net_running=78.98%
+  [EARLY STOP] Net running avg (79.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19784
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=52.61% | net_running=52.61%
+  Day_3: acc=43.27% | net_running=45.62%
+  Day_4_1: acc=38.90% | net_running=45.27%
+  [EARLY STOP] Net running avg (45.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19785
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.61% | net_running=75.61%
+  Day_3: acc=80.07% | net_running=78.95%
+  Day_4_1: acc=81.32% | net_running=79.07%
+  [EARLY STOP] Net running avg (79.1%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19786
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=53.72% | net_running=53.72%
+  Day_3: acc=43.31% | net_running=45.93%
+  Day_4_1: acc=39.44% | net_running=45.60%
+  [EARLY STOP] Net running avg (45.6%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19787
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.36% | net_running=74.36%
+  Day_3: acc=80.35% | net_running=78.85%
+  Day_4_1: acc=81.43% | net_running=78.98%
+  [EARLY STOP] Net running avg (79.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19788
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=52.61% | net_running=52.61%
+  Day_3: acc=43.27% | net_running=45.62%
+  Day_4_1: acc=38.90% | net_running=45.27%
+  [EARLY STOP] Net running avg (45.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19789
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.40% | net_running=75.40%
+  Day_3: acc=80.04% | net_running=78.88%
+  Day_4_1: acc=81.02% | net_running=78.99%
+  [EARLY STOP] Net running avg (79.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19790
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=53.53% | net_running=53.53%
+  Day_3: acc=43.30% | net_running=45.87%
+  Day_4_1: acc=39.46% | net_running=45.54%
+  [EARLY STOP] Net running avg (45.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19791
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.36% | net_running=74.36%
+  Day_3: acc=80.35% | net_running=78.85%
+  Day_4_1: acc=81.43% | net_running=78.98%
+  [EARLY STOP] Net running avg (79.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19792
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=52.61% | net_running=52.61%
+  Day_3: acc=43.27% | net_running=45.62%
+  Day_4_1: acc=38.90% | net_running=45.27%
+  [EARLY STOP] Net running avg (45.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19793
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.25% | net_running=75.25%
+  Day_3: acc=79.89% | net_running=78.72%
+  Day_4_1: acc=80.61% | net_running=78.82%
+  [EARLY STOP] Net running avg (78.8%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19794
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=53.42% | net_running=53.42%
+  Day_3: acc=43.31% | net_running=45.85%
+  Day_4_1: acc=39.55% | net_running=45.53%
+  [EARLY STOP] Net running avg (45.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19795
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.36% | net_running=74.36%
+  Day_3: acc=80.35% | net_running=78.85%
+  Day_4_1: acc=81.43% | net_running=78.98%
+  [EARLY STOP] Net running avg (79.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19796
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=52.61% | net_running=52.61%
+  Day_3: acc=43.27% | net_running=45.62%
+  Day_4_1: acc=38.90% | net_running=45.27%
+  [EARLY STOP] Net running avg (45.3%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19797
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=75.00% | net_running=75.00%
+  Day_3: acc=79.52% | net_running=78.38%
+  Day_4_1: acc=80.03% | net_running=78.47%
+  [EARLY STOP] Net running avg (78.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19798
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=53.27% | net_running=53.27%
+  Day_3: acc=43.29% | net_running=45.79%
+  Day_4_1: acc=39.67% | net_running=45.48%
+  [EARLY STOP] Net running avg (45.5%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19799
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=74.36% | net_running=74.36%
+  Day_3: acc=80.35% | net_running=78.85%
+  Day_4_1: acc=81.43% | net_running=78.98%
+  [EARLY STOP] Net running avg (79.0%) fell below Top-15 threshold (86.6%)
+
+======================================================================
+RUNNING: PARAM_SET_19800
+Dynamic Threshold Active: Must maintain > 86.56% net weighted accuracy
+======================================================================
+  Day_2: acc=52.61% | net_running=52.61%
+  Day_3: acc=43.27% | net_running=45.62%
+  Day_4_1: acc=38.90% | net_running=45.27%
+  [EARLY STOP] Net running avg (45.3%) fell below Top-15 threshold (86.6%)
+
+============================================================
+TOP 5 PARAMETER SETS (Generating Output Plots...)
+============================================================
+
+[1] RUN: PARAM_SET_9063 | Net Weighted Acc: 88.59%
+Params: {'min_activity_duration_s': 2.0, 'dist_threshold': 0.05, 'idle_window': 36, 'fsm_min_dwell_seconds': 1.0, 'enable_fsm': False, 'override_travelling_only': True}
+
+[2] RUN: PARAM_SET_5463 | Net Weighted Acc: 88.13%
+Params: {'min_activity_duration_s': 1.2, 'dist_threshold': 0.05, 'idle_window': 36, 'fsm_min_dwell_seconds': 1.0, 'enable_fsm': False, 'override_travelling_only': True}
+
+[3] RUN: PARAM_SET_3663 | Net Weighted Acc: 87.93%
+Params: {'min_activity_duration_s': 1.0, 'dist_threshold': 0.05, 'idle_window': 36, 'fsm_min_dwell_seconds': 1.0, 'enable_fsm': False, 'override_travelling_only': True}
+
+[4] RUN: PARAM_SET_063 | Net Weighted Acc: 87.41%
+Params: {'min_activity_duration_s': 0.5, 'dist_threshold': 0.05, 'idle_window': 36, 'fsm_min_dwell_seconds': 1.0, 'enable_fsm': False, 'override_travelling_only': True}
+
+[5] RUN: PARAM_SET_023 | Net Weighted Acc: 87.34%
+Params: {'min_activity_duration_s': 0.5, 'dist_threshold': 0.05, 'idle_window': 24, 'fsm_min_dwell_seconds': 1.0, 'enable_fsm': False, 'override_travelling_only': True}
+
+DONE.
+Saved JSON/CSV reports and Top 5 visualizations in: /data/shubhan_avik_work/Targeted_run/optimization_runs
+(torch-env) avik@shigroup-TRX50-AI-TOP:/data/shubhan_avik_work/Targeted_run$ tmux capture-pane -S - -p > console_op_step11.txt
+

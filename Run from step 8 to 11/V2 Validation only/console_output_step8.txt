@@ -1,0 +1,278 @@
+============================================================
+YOLO + CVAT  ->  ResNet-3D Dataset Builder  [val-manifest edition]
+Output : /data/shubhan_avik_work/Targeted_run_2/Dataset_Ten_days
+Videos : 11
+Clip   : 16 frames @ 25 FPS  (stride=3)
+Split  : 85/15 train/val  (group size=20 clips)
+============================================================
+
+Loading YOLO model (once)...
+YOLO ready.
+
+
+────────────────────────────────────────────────────────────
+Video 1/11 : /data/shubhan_avik_work/Targeted_run_2/Day_2.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/Day_2_annotations.xml
+Annotated frames : 198693
+Digging: 58559 frames
+Idling: 43175 frames
+Loading: 13456 frames
+Swinging: 53506 frames
+Travelling: 29997 frames
+Video  : 199064 frames @ 59.94 FPS
+Resamp : 83027 frames @ 25 FPS (interval = 2.3976)
+Scanning frames...
+
+Buffer : 83027 resampled frames (76575 with valid detections)
+Skipped: no_label=176  no_detect=5492  low_conf=784
+Emitting clips...
+
+Clips emitted this video: 23309  (val entries recorded: 3580)
+
+────────────────────────────────────────────────────────────
+Video 2/11 : /data/shubhan_avik_work/Targeted_run_2/Day_3.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/Day_3_annotations.xml
+Annotated frames : 592565
+Digging: 78040 frames
+Idling: 170559 frames
+Loading: 53570 frames
+Swinging: 229653 frames
+Travelling: 60743 frames
+Video  : 593429 frames @ 59.94 FPS
+Resamp : 247510 frames @ 25 FPS (interval = 2.3976)
+Scanning frames...
+
+Buffer : 247510 resampled frames (242475 with valid detections)
+Skipped: no_label=423  no_detect=2955  low_conf=1657
+Emitting clips...
+
+Clips emitted this video: 75808  (val entries recorded: 10560)
+
+────────────────────────────────────────────────────────────
+Video 3/11 : /data/shubhan_avik_work/Targeted_run_2/Day_4_1.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/Day_4_1_annotations.xml
+Annotated frames : 21093
+Digging: 4931 frames
+Idling: 4545 frames
+Loading: 2219 frames
+Swinging: 8236 frames
+Travelling: 1162 frames
+Video  : 21183 frames @ 29.97 FPS
+Resamp : 17670 frames @ 25 FPS (interval = 1.1988)
+Scanning frames...
+
+Buffer : 17670 resampled frames (17597 with valid detections)
+Skipped: no_label=73  no_detect=0  low_conf=0
+Emitting clips...
+
+Clips emitted this video: 5413  (val entries recorded: 620)
+
+────────────────────────────────────────────────────────────
+Video 4/11 : /data/shubhan_avik_work/Targeted_run_2/TC_00011.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/TC_00011_annotations.xml
+Annotated frames : 39245
+Digging: 1460 frames
+Idling: 31171 frames
+Loading: 1312 frames
+Swinging: 3989 frames
+Travelling: 1313 frames
+Video  : 39307 frames @ 30.00 FPS
+Resamp : 32759 frames @ 25 FPS (interval = 1.1999)
+Scanning frames...
+
+Buffer : 32758 resampled frames (32649 with valid detections)
+Skipped: no_label=61  no_detect=32  low_conf=16
+Emitting clips...
+
+Clips emitted this video: 10555  (val entries recorded: 1615)
+
+────────────────────────────────────────────────────────────
+Video 5/11 : /data/shubhan_avik_work/Targeted_run_2/TC_00012.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/TC_00012_annotations.xml
+Annotated frames : 186247
+Digging: 54807 frames
+Idling: 39251 frames
+Loading: 12359 frames
+Swinging: 52913 frames
+Travelling: 26917 frames
+Video  : 193715 frames @ 30.00 FPS
+Resamp : 161444 frames @ 25 FPS (interval = 1.1999)
+Scanning frames...
+
+Buffer : 161444 resampled frames (151856 with valid detections)
+Skipped: no_label=6322  no_detect=1627  low_conf=1639
+Emitting clips...
+
+Clips emitted this video: 46871  (val entries recorded: 6980)
+
+────────────────────────────────────────────────────────────
+Video 6/11 : /data/shubhan_avik_work/Targeted_run_2/TC_00013.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/TC_00013_annotations.xml
+Annotated frames : 1850
+Idling: 1850 frames
+Video  : 1853 frames @ 30.00 FPS
+Resamp : 1544 frames @ 25 FPS (interval = 1.1999)
+Scanning frames...
+
+Buffer : 1544 resampled frames (1369 with valid detections)
+Skipped: no_label=2  no_detect=85  low_conf=88
+Emitting clips...
+
+Clips emitted this video: 397  (val entries recorded: 100)
+
+────────────────────────────────────────────────────────────
+Video 7/11 : /data/shubhan_avik_work/Targeted_run_2/TC_00014.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/TC_00014_annotations.xml
+Annotated frames : 115709
+Digging: 1015 frames
+Idling: 73490 frames
+Loading: 2803 frames
+Swinging: 15917 frames
+Travelling: 22484 frames
+Video  : 115871 frames @ 30.00 FPS
+Resamp : 96568 frames @ 25 FPS (interval = 1.1999)
+Scanning frames...
+
+Buffer : 96568 resampled frames (92639 with valid detections)
+Skipped: no_label=161  no_detect=2237  low_conf=1531
+Emitting clips...
+
+Clips emitted this video: 29684  (val entries recorded: 4580)
+
+────────────────────────────────────────────────────────────
+Video 8/11 : /data/shubhan_avik_work/Targeted_run_2/TC_00015.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/TC_00015_annotations.xml
+Annotated frames : 5858
+Idling: 4814 frames
+Swinging: 386 frames
+Travelling: 658 frames
+Video  : 5867 frames @ 30.00 FPS
+Resamp : 4890 frames @ 25 FPS (interval = 1.1999)
+Scanning frames...
+
+Buffer : 4889 resampled frames (4869 with valid detections)
+Skipped: no_label=8  no_detect=0  low_conf=12
+Emitting clips...
+
+Clips emitted this video: 1576  (val entries recorded: 380)
+
+────────────────────────────────────────────────────────────
+Video 9/11 : /data/shubhan_avik_work/Targeted_run_2/TC_00016.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/TC_00016_annotations.xml
+Annotated frames : 225138
+Digging: 4458 frames
+Idling: 173486 frames
+Loading: 1819 frames
+Swinging: 13190 frames
+Travelling: 32185 frames
+Video  : 225325 frames @ 30.00 FPS
+Resamp : 187789 frames @ 25 FPS (interval = 1.1999)
+Scanning frames...
+
+Buffer : 187788 resampled frames (150614 with valid detections)
+Skipped: no_label=186  no_detect=9241  low_conf=27747
+Emitting clips...
+
+Clips emitted this video: 45104  (val entries recorded: 6364)
+
+────────────────────────────────────────────────────────────
+Video 10/11 : /data/shubhan_avik_work/Targeted_run_2/TC_00019.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/TC_00019_annotations.xml
+Annotated frames : 215150
+Digging: 15834 frames
+Idling: 144444 frames
+Loading: 1213 frames
+Swinging: 31870 frames
+Travelling: 21789 frames
+Video  : 215422 frames @ 30.00 FPS
+Resamp : 179535 frames @ 25 FPS (interval = 1.1999)
+Scanning frames...
+
+Buffer : 179535 resampled frames (123407 with valid detections)
+Skipped: no_label=182  no_detect=34159  low_conf=21787
+Emitting clips...
+
+Clips emitted this video: 35153  (val entries recorded: 5640)
+
+────────────────────────────────────────────────────────────
+Video 11/11 : /data/shubhan_avik_work/Targeted_run_2/TC_00021.mp4
+────────────────────────────────────────────────────────────
+Parsing XML: /data/shubhan_avik_work/Targeted_run_2/TC_00021_annotations.xml
+Annotated frames : 142827
+Digging: 1881 frames
+Idling: 87440 frames
+Loading: 743 frames
+Swinging: 34824 frames
+Travelling: 17939 frames
+Video  : 176466 frames @ 29.98 FPS
+Resamp : 147136 frames @ 25 FPS (interval = 1.1993)
+Scanning frames...
+
+Buffer : 147136 resampled frames (110020 with valid detections)
+Skipped: no_label=28083  no_detect=407  low_conf=8626
+Emitting clips...
+
+Clips emitted this video: 32910  (val entries recorded: 5080)
+
+============================================================
+VAL MANIFEST saved → /data/shubhan_avik_work/Targeted_run_2/Dataset_Ten_days/val_manifest.json
+Total val clips recorded : 45499
+
+VAL FRAME REGISTRY saved → /data/shubhan_avik_work/Targeted_run_2/Dataset_Ten_days/val_frame_registry.json
+Videos in registry       : 11
+Total unique val frames  : 169101
+
+Val clips per video:
+Day_2.mp4: 3580 clips  (13470 unique frames)
+Day_3.mp4: 10560 clips  (39207 unique frames)
+Day_4_1.mp4: 620 clips  (2432 unique frames)
+TC_00011.mp4: 1615 clips  (5937 unique frames)
+TC_00012.mp4: 6980 clips  (25932 unique frames)
+TC_00013.mp4: 100 clips  (365 unique frames)
+TC_00014.mp4: 4580 clips  (16600 unique frames)
+TC_00015.mp4: 380 clips  (1413 unique frames)
+TC_00016.mp4: 6364 clips  (23512 unique frames)
+TC_00019.mp4: 5640 clips  (21340 unique frames)
+TC_00021.mp4: 5080 clips  (18893 unique frames)
+
+Val clips per activity:
+digging: 5721
+idling: 22242
+loading: 1788
+swinging: 10485
+travelling: 5263
+
+============================================================
+FINAL DATASET SUMMARY
+============================================================
+
+TRAIN  (261281 clips):
+digging             : 32257 clips  ( 516112 frames)
+idling              : 126180 clips  (2018880 frames)
+loading             : 10743 clips  ( 171888 frames)
+swinging            : 62252 clips  ( 996032 frames)
+travelling          : 29849 clips  ( 477584 frames)
+
+VAL  (45499 clips):
+digging             :  5721 clips  (  91536 frames)
+idling              : 22242 clips  ( 355872 frames)
+loading             :  1788 clips  (  28608 frames)
+swinging            : 10485 clips  ( 167760 frames)
+travelling          :  5263 clips  (  84208 frames)
+
+Total clips : 306780
+Temporal res: 25 FPS — each clip = 0.64 s
+Dataset root: /data/shubhan_avik_work/Targeted_run_2/Dataset_Ten_days
+============================================================
+Done — dataset ready for training. Manifest ready for evaluation.
+

@@ -1,0 +1,17 @@
+RANK 1
+RUN ID: PARAM_SET_9063
+Overall Accuracy: 88.81%
+digging : 87.82%
+idling : 98.64%
+loading : 81.78%
+swinging : 74.60%
+travelling : 80.94%
+Parameters:
+{
+    "min_activity_duration_s": 2.0,
+    "dist_threshold": 0.05,
+    "idle_window": 36,
+    "fsm_min_dwell_seconds": 1.0,
+    "enable_fsm": false,
+    "override_travelling_only": true
+}

@@ -1,0 +1,479 @@
+(torch-env) avik@shigroup-TRX50-AI-TOP:/data/shubhan_avik_work$ python3 "10.Step 4 - Resnet.py"
+============================================================
+Loading Model
+============================================================
+  Clip Length : 16
+  Crop Size   : 112x112
+  Target FPS  : 25
+  Classes     : 5  →  ['digging', 'idling', 'loading', 'swinging', 'travelling']
+  Model loaded  (epoch 4, val-acc 89.68%)
+Loading YOLO model...
+Found 11 video(s) to process:
+  Day_2.mp4
+  Day_3.mp4
+  Day_4_1.mp4
+  TC_00011.mp4
+  TC_00012.mp4
+  TC_00013.mp4
+  TC_00014.mp4
+  TC_00015.mp4
+  TC_00016.mp4
+  TC_00019.mp4
+  TC_00021.mp4
+============================================================
+Processing: Day_2.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/Day_2_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 199064 frames at 59.94 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 83027 resampled frames
+Inference Streaming: 100%|███████████████████████████████████████████████████████████████████████████████████| 83027/83027 [11:19<00:00, 122.21it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 2971 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 6730 frames (8.1%)
+
+Calculating work cycles (fps=25)...
+  Found 108 digging events
+  Avg cycle time : 24.20 s   →  148.8 cycles/hr
+
+Productivity:
+  Cycles          : 107
+  Total time      : 43.1 min
+  Cycles / hr     : 148.79
+  Bucket payload  : 1.5 LCY
+  Productivity    : 223.18 LCY/hr
+  Saved: /data/shubhan_avik_work/Targeted_run/Day_2_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/Day_2_pred
+  Duration : 55.35 min
+  idling      :  30.73%
+  digging     :  27.51%
+  swinging    :  22.70%
+  travelling  :  10.25%
+  loading     :   8.80%
+  Cycles   : 107   Avg confidence: 86.3%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/Day_2_pred
+============================================================
+Processing: Day_3.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/Day_3_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 593429 frames at 59.94 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 247510 resampled frames
+Inference Streaming: 100%|█████████████████████████████████████████████████████████████████████████████████| 247510/247510 [32:21<00:00, 127.49it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 14634 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 13598 frames (5.5%)
+
+Calculating work cycles (fps=25)...
+  Found 111 digging events
+  Avg cycle time : 77.77 s   →  46.3 cycles/hr
+
+Productivity:
+  Cycles          : 110
+  Total time      : 142.6 min
+  Cycles / hr     : 46.29
+  Bucket payload  : 1.5 LCY
+  Productivity    : 69.44 LCY/hr
+  Saved: /data/shubhan_avik_work/Targeted_run/Day_3_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/Day_3_pred
+  Duration : 165.01 min
+  idling      :  39.04%
+  swinging    :  34.75%
+  digging     :  13.17%
+  loading     :   9.64%
+  travelling  :   3.40%
+  Cycles   : 110   Avg confidence: 90.9%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/Day_3_pred
+============================================================
+Processing: Day_4_1.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/Day_4_1_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 21183 frames at 29.97 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 17670 resampled frames
+Inference Streaming: 100%|███████████████████████████████████████████████████████████████████████████████████| 17670/17670 [02:21<00:00, 125.31it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 679 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 1402 frames (7.9%)
+
+Calculating work cycles (fps=25)...
+  Found 25 digging events
+  Avg cycle time : 24.35 s   →  147.8 cycles/hr
+
+Productivity:
+  Cycles          : 24
+  Total time      : 9.7 min
+  Cycles / hr     : 147.83
+  Bucket payload  : 1.5 LCY
+  Productivity    : 221.75 LCY/hr
+  Saved: /data/shubhan_avik_work/Targeted_run/Day_4_1_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/Day_4_1_pred
+  Duration : 11.78 min
+  swinging    :  41.64%
+  idling      :  27.11%
+  digging     :  19.55%
+  loading     :   8.37%
+  travelling  :   3.32%
+  Cycles   : 24   Avg confidence: 86.2%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/Day_4_1_pred
+============================================================
+Processing: TC_00011.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/TC_00011_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 39307 frames at 30.00 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 32759 resampled frames
+Inference Streaming: 100%|██████████████████████████████████████████████████████████████████████████████████▉| 32758/32759 [04:22<00:00, 124.90it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 718 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 744 frames (2.3%)
+
+Calculating work cycles (fps=25)...
+  Found 7 digging events
+  Avg cycle time : 15.33 s   →  234.8 cycles/hr
+
+Productivity:
+  Cycles          : 6
+  Total time      : 1.5 min
+  Cycles / hr     : 234.78
+  Bucket payload  : 1.5 LCY
+  Productivity    : 352.17 LCY/hr
+  Saved: /data/shubhan_avik_work/Targeted_run/TC_00011_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/TC_00011_pred
+  Duration : 21.84 min
+  idling      :  81.24%
+  swinging    :   9.32%
+  loading     :   4.12%
+  digging     :   3.30%
+  travelling  :   2.02%
+  Cycles   : 6   Avg confidence: 97.3%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/TC_00011_pred
+============================================================
+Processing: TC_00012.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/TC_00012_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 193715 frames at 30.00 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 161444 resampled frames
+Inference Streaming: 100%|█████████████████████████████████████████████████████████████████████████████████| 161444/161444 [21:32<00:00, 124.89it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 4416 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 12784 frames (7.9%)
+
+Calculating work cycles (fps=25)...
+  Found 192 digging events
+  Avg cycle time : 32.81 s   →  109.7 cycles/hr
+
+Productivity:
+  Cycles          : 191
+  Total time      : 104.4 min
+  Cycles / hr     : 109.74
+  Bucket payload  : 1.5 LCY
+  Productivity    : 164.60 LCY/hr
+  Saved: /data/shubhan_avik_work/Targeted_run/TC_00012_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/TC_00012_pred
+  Duration : 107.63 min
+  digging     :  30.84%
+  idling      :  25.89%
+  swinging    :  20.66%
+  travelling  :  12.42%
+  loading     :  10.18%
+  Cycles   : 191   Avg confidence: 90.3%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/TC_00012_pred
+============================================================
+Processing: TC_00013.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/TC_00013_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 1853 frames at 30.00 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 1544 resampled frames
+Inference Streaming: 100%|█████████████████████████████████████████████████████████████████████████████████████| 1544/1544 [00:12<00:00, 125.94it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 0 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 64 frames (4.1%)
+
+Calculating work cycles (fps=25)...
+  Found 0 digging events
+
+No complete cycles  →  productivity = 0
+  Saved: /data/shubhan_avik_work/Targeted_run/TC_00013_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/TC_00013_pred
+  Duration : 1.03 min
+  idling      : 100.00%
+  Cycles   : 0   Avg confidence: 97.1%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/TC_00013_pred
+============================================================
+Processing: TC_00014.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/TC_00014_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 115871 frames at 30.00 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 96568 resampled frames
+Inference Streaming: 100%|███████████████████████████████████████████████████████████████████████████████████| 96568/96568 [12:54<00:00, 124.65it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 9444 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 3004 frames (3.1%)
+
+Calculating work cycles (fps=25)...
+  Found 4 digging events
+  Avg cycle time : 791.99 s   →  4.5 cycles/hr
+
+Productivity:
+  Cycles          : 3
+  Total time      : 39.6 min
+  Cycles / hr     : 4.55
+  Bucket payload  : 1.5 LCY
+  Productivity    : 6.82 LCY/hr
+  Saved: /data/shubhan_avik_work/Targeted_run/TC_00014_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/TC_00014_pred
+  Duration : 64.38 min
+  idling      :  77.18%
+  swinging    :  11.00%
+  travelling  :   8.34%
+  loading     :   2.79%
+  digging     :   0.70%
+  Cycles   : 3   Avg confidence: 95.2%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/TC_00014_pred
+============================================================
+Processing: TC_00015.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/TC_00015_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 5867 frames at 30.00 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 4890 resampled frames
+Inference Streaming: 100%|████████████████████████████████████████████████████████████████████████████████████▉| 4889/4890 [00:39<00:00, 125.04it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 129 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 58 frames (1.2%)
+
+Calculating work cycles (fps=25)...
+  Found 0 digging events
+
+No complete cycles  →  productivity = 0
+  Saved: /data/shubhan_avik_work/Targeted_run/TC_00015_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/TC_00015_pred
+  Duration : 3.26 min
+  idling      :  85.78%
+  travelling  :   9.35%
+  swinging    :   4.87%
+  Cycles   : 0   Avg confidence: 98.3%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/TC_00015_pred
+============================================================
+Processing: TC_00016.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/TC_00016_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 225325 frames at 30.00 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 187789 resampled frames
+Inference Streaming: 100%|████████████████████████████████████████████████████████████████████████████████▉| 187788/187789 [24:52<00:00, 125.84it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 4830 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 4922 frames (2.6%)
+
+Calculating work cycles (fps=25)...
+  Found 19 digging events
+  Avg cycle time : 320.91 s   →  11.2 cycles/hr
+
+Productivity:
+  Cycles          : 18
+  Total time      : 96.3 min
+  Cycles / hr     : 11.22
+  Bucket payload  : 1.5 LCY
+  Productivity    : 16.83 LCY/hr
+  Saved: /data/shubhan_avik_work/Targeted_run/TC_00016_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/TC_00016_pred
+  Duration : 125.19 min
+  idling      :  81.01%
+  travelling  :  11.75%
+  swinging    :   4.05%
+  digging     :   1.81%
+  loading     :   1.40%
+  Cycles   : 18   Avg confidence: 97.1%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/TC_00016_pred
+============================================================
+Processing: TC_00019.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/TC_00019_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 215422 frames at 30.00 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 179535 resampled frames
+Inference Streaming: 100%|█████████████████████████████████████████████████████████████████████████████████| 179535/179535 [23:48<00:00, 125.71it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 1309 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 11854 frames (6.6%)
+
+Calculating work cycles (fps=25)...
+  Found 56 digging events
+  Avg cycle time : 102.10 s   →  35.3 cycles/hr
+
+Productivity:
+  Cycles          : 55
+  Total time      : 93.6 min
+  Cycles / hr     : 35.26
+  Bucket payload  : 1.5 LCY
+  Productivity    : 52.89 LCY/hr
+  Saved: /data/shubhan_avik_work/Targeted_run/TC_00019_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/TC_00019_pred
+  Duration : 119.69 min
+  idling      :  74.59%
+  swinging    :   9.79%
+  travelling  :   8.35%
+  digging     :   5.35%
+  loading     :   1.91%
+  Cycles   : 55   Avg confidence: 90.7%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/TC_00019_pred
+============================================================
+Processing: TC_00021.mp4
+Output dir: /data/shubhan_avik_work/Targeted_run/TC_00021_pred
+============================================================
+============================================================
+EXCAVATOR ACTIVITY RECOGNITION  —  INFERENCE  (FPS-fixed)
+============================================================
+
+Step 1: AI Inference + Tracking...
+
+Video: 176466 frames at 29.98 FPS
+Resampling to 25 FPS (Streaming Mode)
+  → Will process 147136 resampled frames
+Inference Streaming: 100%|█████████████████████████████████████████████████████████████████████████████████| 147136/147136 [19:26<00:00, 126.11it/s]
+
+Step 2: Applying Physics-Based Correction (Part 6 Logic)...
+  → Physics Engine corrected 2461 frames to 'Idling'
+
+Majority voting  (window = 50 frames = 2.0 s at 25 FPS)
+  Corrected 11316 frames (7.7%)
+
+Calculating work cycles (fps=25)...
+  Found 10 digging events
+  Avg cycle time : 473.52 s   →  7.6 cycles/hr
+
+Productivity:
+  Cycles          : 9
+  Total time      : 71.0 min
+  Cycles / hr     : 7.60
+  Bucket payload  : 1.5 LCY
+  Productivity    : 11.40 LCY/hr
+  Saved: /data/shubhan_avik_work/Targeted_run/TC_00021_pred/activity_timeline_idling_included.png
+
+Results saved to /data/shubhan_avik_work/Targeted_run/TC_00021_pred
+  Duration : 98.09 min
+  idling      :  70.19%
+  travelling  :  14.98%
+  swinging    :  13.51%
+  digging     :   0.92%
+  loading     :   0.40%
+  Cycles   : 9   Avg confidence: 89.3%
+
+Done.  Results in /data/shubhan_avik_work/Targeted_run/TC_00021_pred
+(torch-env) avik@shigroup-TRX50-AI-TOP:/data/shubhan_avik_work$ tmux capture-pane -S - -p > console_op_step10.txt
+
