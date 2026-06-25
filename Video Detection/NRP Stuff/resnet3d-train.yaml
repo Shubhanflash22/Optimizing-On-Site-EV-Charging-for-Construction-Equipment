@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resnet3d-train
+  namespace: shi-group-ece-advanced
+spec:
+  restartPolicy: Never
+  containers:
+  - name: trainer
+    image: pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
+    command: ["/bin/bash"]
+    args: ["-c", "sleep infinity"]
+    resources:
+      requests:
+        nvidia.com/rtxa6000: 1
+        memory: "32Gi"
+        ephemeral-storage: "50Gi"
+        cpu: "8"
+      limits:
+        nvidia.com/rtxa6000: 1
+        memory: "32Gi"
+        ephemeral-storage: "50Gi"
+        cpu: "8"
+    volumeMounts:
+    - mountPath: /data
+      name: dataset-pvc
+  volumes:
+  - name: dataset-pvc
+    persistentVolumeClaim:
+      claimName: resnet-data-vol
+

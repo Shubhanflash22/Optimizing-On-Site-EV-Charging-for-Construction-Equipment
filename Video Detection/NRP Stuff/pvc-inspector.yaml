@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-inspector
+  namespace: shi-group-ece-advanced
+spec:
+  restartPolicy: Never
+  containers:
+    - name: inspector
+      image: pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
+      command: ["/bin/bash", "-c"]
+      args: ["sleep infinity"]
+      volumeMounts:
+        - mountPath: /data
+          name: resnet-data
+  volumes:
+    - name: resnet-data
+      persistentVolumeClaim:
+        claimName: resnet-data-vol

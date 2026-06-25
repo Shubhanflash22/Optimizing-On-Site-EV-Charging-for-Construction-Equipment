@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: resnet3d-train
+  namespace: shi-group-ece-advanced
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+
+      containers:
+      - name: trainer
+        image: pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
+
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            set -e
+            echo "Installing Python dependencies..."
+            pip install -r /data/scripts/requirements.txt
+
+            echo "Starting training..."
+            python /data/scripts/train_resnet3d.py
+
+        resources:
+          requests:
+            nvidia.com/rtxa6000: "1"
+            memory: "32Gi"
+            cpu: "8"
+          limits:
+            nvidia.com/rtxa6000: "1"
+            memory: "32Gi"
+            cpu: "8"
+
+        volumeMounts:
+        - mountPath: /data
+          name: resnet-data
+        - mountPath: /dev/shm
+          name: dshm
+
+      volumes:
+      - name: resnet-data
+        persistentVolumeClaim:
+          claimName: resnet-data-vol
+
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 16Gi

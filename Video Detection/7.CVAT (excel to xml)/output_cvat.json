@@ -1,0 +1,2590 @@
+{
+    "version": "1.1",
+    "tags": [
+        {
+            "label": "Idling",
+            "frame": 0,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 1199,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 2998,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 4316,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 5275,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 5755,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 5935,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 6894,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 7253,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 8092,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 8272,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 9291,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 9411,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 9651,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Dumping",
+            "frame": 9711,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 9771,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 9831,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 10070,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 10310,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 10790,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 11089,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 11209,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 11509,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 11749,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 11989,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 12108,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 12468,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 12708,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 12888,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 13067,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 13307,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 13427,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 13667,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 13787,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 13967,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 14146,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 14386,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 15105,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 15285,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 17563,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 17683,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 18042,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 18402,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 19241,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 19361,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 19601,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 19721,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 19961,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 20080,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 20320,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 20680,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 20800,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 21039,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 22958,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 23017,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 23137,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 23497,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 23737,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 24096,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 24396,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 24696,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 24876,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 25235,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 25655,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 25715,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 26014,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 26134,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 26554,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 26914,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 27273,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 27393,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 27693,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 27873,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 28232,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 28352,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 28712,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 28892,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 29251,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 30090,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 30210,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 30510,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 30750,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 30870,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 31169,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 31409,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 31529,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 31649,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 32008,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 32308,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 32728,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 32848,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 33327,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 33447,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 33927,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 34106,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 34586,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 34706,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 35065,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 35125,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 35425,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 35545,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 35785,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 35905,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 36264,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 36384,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 36744,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 37043,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 37163,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 37703,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 37823,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 37943,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 38182,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 38482,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 38602,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 39021,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 39141,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 39501,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 44416,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 44716,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 45375,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 45555,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 45974,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 46274,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 46394,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 46634,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 46754,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 46874,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 47233,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 47413,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 47533,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 47833,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 48072,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 48192,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 48672,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 48912,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 49271,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 49391,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 49631,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 49751,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 50170,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 50350,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 50710,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 51009,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 51189,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 51309,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 51549,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 51669,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 51968,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 52088,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 52328,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 52508,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 53347,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 53947,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 54306,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 54606,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 55085,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 62818,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 62938,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 63297,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 63477,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 63657,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 63837,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 64316,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 64556,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 68272,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 68512,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 68872,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 68991,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 69291,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 69411,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 69711,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 69831,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 70190,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 70310,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 71029,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 71149,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 71329,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 71689,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 71869,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 72168,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 72348,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 72947,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 73487,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 73727,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 74446,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 75105,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 75225,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 75585,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 75825,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 76004,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 76124,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 76604,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 77203,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 77323,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 77563,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 78462,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 78642,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 78762,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 78882,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 79121,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 79301,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 79841,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 80020,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 80440,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 80560,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 80680,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 81099,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 81159,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 81219,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 81399,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 81519,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 81579,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 81759,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 81819,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 82058,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 82118,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 82418,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 83197,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 83257,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 83737,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 84096,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 84216,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 85175,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 85475,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 85595,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 85895,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 86134,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 86734,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 87573,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 87873,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 88292,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 89491,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 89970,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 90390,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 90690,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 90929,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 91169,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 91349,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 91649,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 91709,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 92368,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 92608,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 92728,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 93207,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 93387,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 93627,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 94046,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 94226,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 95065,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 95305,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 95425,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 95545,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 95665,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 95845,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 95964,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 96804,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 97103,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 97883,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 98062,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 98902,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 99441,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 99861,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 100640,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 100820,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 101419,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 101719,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 101779,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 102498,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 102738,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 102798,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 103577,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 104176,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 104296,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 104416,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 113227,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 113647,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 113887,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 114006,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 114366,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 114965,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 115205,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 115505,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 116284,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 116404,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 118382,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 118502,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 119221,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 119401,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 119461,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 120300,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 122997,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 123057,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 123777,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 124016,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 124856,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 126953,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 127313,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 127433,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 129111,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 132108,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 132468,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 133667,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 133787,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 134326,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 134506,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 134566,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 134626,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 134686,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 135345,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 135525,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 135585,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 136244,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 137083,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 137443,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 139001,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 140140,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 143257,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 143317,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 144456,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 144816,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 148292,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 148472,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 151589,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 151829,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 152308,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 152848,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 154826,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 155605,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 156204,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 160580,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 160700,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 161659,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 165135,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 165195,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 166154,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 169091,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 169271,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Digging",
+            "frame": 170590,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Loading",
+            "frame": 171609,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 171789,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 172028,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 172688,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 173047,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 174246,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 174606,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 174666,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 177783,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 178022,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 178861,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 179221,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 179401,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 179521,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 180120,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 181319,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 181619,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 182218,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 182338,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 182578,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 183117,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 183657,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 184796,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Swinging",
+            "frame": 186354,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 186833,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 187673,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 188152,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 189051,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Travelling",
+            "frame": 194086,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 196903,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        },
+        {
+            "label": "Idling",
+            "frame": 199061,
+            "attributes": {},
+            "source": "manual",
+            "group": 0
+        }
+    ],
+    "shapes": [],
+    "tracks": []
+}
