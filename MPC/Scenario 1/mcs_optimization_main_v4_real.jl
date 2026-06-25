@@ -65,8 +65,25 @@ function parse_highs_mip_log(path::AbstractString)
             gap_pct=Float64[], cuts=Int[], in_lp=Int[], confl=Int[],
             lp_iters=Int[], time_s=Float64[])
     isfile(path) || return DataFrame(cols)
-    parsenum(t) = (t == "inf" || t == "Large") ? Inf :
-                  (t == "-inf") ? -Inf : something(tryparse(Float64, t), NaN)
+    # HiGHS abbreviates large magnitudes with a k/m/g/t suffix (e.g. "1005k" = 1.005e6)
+    # and prints "inf"/"-inf"/"Large" for unbounded bounds/gaps. Returns nothing on any
+    # token it cannot interpret, so callers can skip non-progress rows instead of throwing.
+    function parsenum(t)
+        s = String(strip(t))
+        (s == "inf" || s == "Large") && return Inf
+        s == "-inf" && return -Inf
+        mult = 1.0
+        if !isempty(s)
+            c = lowercase(last(s))
+            c == 'k' && (mult = 1e3; s = chop(s))
+            c == 'm' && (mult = 1e6; s = chop(s))
+            c == 'g' && (mult = 1e9; s = chop(s))
+            c == 't' && (mult = 1e12; s = chop(s))
+        end
+        v = tryparse(Float64, s)
+        return v === nothing ? nothing : v * mult
+    end
+    asint(x) = (x === nothing || !isfinite(x)) ? nothing : round(Int, x)
     for raw in eachline(path)
         line = strip(raw)
         isempty(line) && continue
@@ -77,17 +94,29 @@ function parse_highs_mip_log(path::AbstractString)
             src = String(toks[1]); toks = toks[2:end]    # strip the optional Src flag
         end
         length(toks) == 12 || continue                   # exactly the 12 data columns
-        t = tryparse(Float64, replace(toks[12], "s" => ""))
-        n = tryparse(Int, toks[1])
-        (t === nothing || n === nothing) && continue
-        push!(cols.src, src);                         push!(cols.nodes, n)
-        push!(cols.in_queue, parse(Int, toks[2]));    push!(cols.leaves, parse(Int, toks[3]))
-        push!(cols.explored_pct, parsenum(replace(toks[4], "%" => "")))
-        push!(cols.best_bound, parsenum(toks[5]));    push!(cols.best_sol, parsenum(toks[6]))
-        push!(cols.gap_pct, parsenum(replace(toks[7], "%" => "")))
-        push!(cols.cuts, parse(Int, toks[8]));        push!(cols.in_lp, parse(Int, toks[9]))
-        push!(cols.confl, parse(Int, toks[10]));      push!(cols.lp_iters, parse(Int, toks[11]))
-        push!(cols.time_s, t)
+        # toks: Proc InQueue Leaves Expl% BestBound BestSol Gap Cuts InLp Confl LpIters Time
+        nodes    = asint(parsenum(toks[1]))
+        in_queue = asint(parsenum(toks[2]))
+        leaves   = asint(parsenum(toks[3]))
+        expl     = parsenum(replace(toks[4], "%" => ""))
+        bbound   = parsenum(toks[5])
+        bsol     = parsenum(toks[6])
+        gap      = parsenum(replace(toks[7], "%" => ""))
+        cuts     = asint(parsenum(toks[8]))
+        in_lp    = asint(parsenum(toks[9]))
+        confl    = asint(parsenum(toks[10]))
+        lp_iters = asint(parsenum(toks[11]))
+        time_s   = parsenum(replace(toks[12], "s" => ""))
+        # Skip any line that does not parse as a full numeric progress row (e.g. headers).
+        any(x -> x === nothing, (nodes, in_queue, leaves, expl, bbound, bsol, gap,
+                                 cuts, in_lp, confl, lp_iters, time_s)) && continue
+        push!(cols.src, src);           push!(cols.nodes, nodes)
+        push!(cols.in_queue, in_queue); push!(cols.leaves, leaves)
+        push!(cols.explored_pct, expl); push!(cols.best_bound, bbound)
+        push!(cols.best_sol, bsol);     push!(cols.gap_pct, gap)
+        push!(cols.cuts, cuts);         push!(cols.in_lp, in_lp)
+        push!(cols.confl, confl);       push!(cols.lp_iters, lp_iters)
+        push!(cols.time_s, time_s)
     end
     return DataFrame(cols)
 end
