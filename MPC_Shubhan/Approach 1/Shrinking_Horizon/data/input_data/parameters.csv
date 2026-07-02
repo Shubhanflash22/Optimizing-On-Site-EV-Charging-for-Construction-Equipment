@@ -1,0 +1,19 @@
+Parameter,Value,Unit,Description
+k_trv,10,kWh/hour,MCS Average enegy consumption per hour
+rho_miss,2000,-,Large  constant
+delta_T,0.25,h,Time step duration
+p_digging,4.79,kW,Power of digging
+p_loading_swinging,3.16,kW,Power of loading+swinging
+p_traveling,4.71,kW,Power of traveling
+lambda_demand_NC,20.12,$/kW,NCDC rate
+lambda_demand_OP,20.58,$/kW,OPDC rate
+carbon_price_per_ton,50,$/tonneCO2,carbon
+rho_labor,250,$/hr,$/hr per man
+p_idling,0,kW,Idle power (idle = no work = 0 kW)
+scale,2,-,Precedence multiple kappa_seq (loading <= scale*digging)
+t_limit_rest,1,h,Eq. 12e rest rule ENABLED: >=1 idle break per rolling (t_limit+15min) window
+kappa_wt,4,-,Travel-pacing: productive intervals per CEV travel (two-sided band)
+day_end_hour,18,h,Daytime horizon end (two-phase split); MCS home by 18:00
+prior_sigma_frac,0.2,-,Bayesian prior std as a fraction of each activity power
+obs_noise_std,0.05,kWh,Bayesian telemetry noise std (simulation only)
+co2_unit_scale,1,-,Raw intensity_tons_emissions scale (objective divides carbon_price by 1000)

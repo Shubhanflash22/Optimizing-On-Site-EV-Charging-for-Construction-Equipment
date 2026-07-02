@@ -1,0 +1,94 @@
+============================================================
+ Scenario 1 - How to run (Windows terminal / PowerShell)
+============================================================
+
+Use a PLAIN terminal (PowerShell), NOT the VS Code Julia REPL.
+For the long synthetic run a plain terminal is more stable and
+keeps the editor responsive.
+
+REQUIREMENTS
+------------
+- Julia installed and on PATH   (check:  julia --version)
+- Project packages installed (JuMP, HiGHS, Turing, CSV,
+  DataFrames, Plots, ...). The first run may precompile (slow
+  once, fast afterwards).
+
+WHERE TO RUN
+------------
+Run from the  code/  folder. Paths auto-resolve (data in ../data,
+output in ../output), so you can launch from anywhere, but the
+examples assume you are here:
+
+    C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\code
+
+Open a PowerShell window there (File Explorer > right-click the
+folder > "Open in Terminal"), or cd into it.
+
+
+------------------------------------------------------------
+1) SYNTHETIC MODE  (built-in demo data: 2 CEVs, 2 sites)
+------------------------------------------------------------
+The script auto-runs synthetic mode, so just run it:
+
+    julia Scenario_1.jl
+
+Results go to  ..\output\synthetic\ . To go faster, use the REPL
+form below with a smaller time_limit_sec.
+
+
+------------------------------------------------------------
+2) INPUT MODE  (your real 7-CSV dataset in ..\data\input_data)
+------------------------------------------------------------
+Results go to  ..\output\input\ .  Start Julia:
+
+    julia
+
+Then at the  julia>  prompt type these three lines:
+
+    SCENARIO1_NO_AUTORUN = true
+    include("Scenario_1.jl")
+    run_scenario_1(mode = :input)
+
+Runtime: ~4 min.  (SCENARIO1_NO_AUTORUN stops the file from
+auto-launching the synthetic run when it is included.)
+
+Optional one-liner (PowerShell) - the --% makes PowerShell pass
+the quotes through to Julia unchanged:
+
+    julia --% -e "SCENARIO1_NO_AUTORUN=true; include(\"Scenario_1.jl\"); run_scenario_1(mode=:input)"
+
+
+------------------------------------------------------------
+OPTIONS  (keywords to run_scenario_1)
+------------------------------------------------------------
+Example:
+
+    run_scenario_1(mode = :input, time_limit_sec = 20.0)
+
+- mode            :synthetic (default) or :input
+- time_limit_sec  solver seconds per 15-min window (default 60).
+                  Lower = faster run, slightly lower quality.
+- H, shrinking, refit_every, mcmc_samples, out_dir, ...
+                  see ../README.md for the full list.
+
+
+------------------------------------------------------------
+OUTPUTS  (written to ..\output\<mode>\ , i.e. output\input or output\synthetic)
+------------------------------------------------------------
+- worker_schedule.csv         simple per-CEV plan for site workers
+- closed_loop_trajectory.csv  detailed daytime data for analysts
+- overnight_mcs_charge.csv    Phase-2 overnight smart-charge
+- replan_grids/               per-step forward plans (.csv + colored .html)
+- 01..04_*.png                plots
+- a KPI summary is also printed to the terminal
+- what each file means: see docs/output_files_explained.md
+
+
+NOTES
+-----
+- Red text such as:
+      julia : [ Info: [Turing]: progress logging is disabled globally
+      ... NativeCommandError
+  is NOT an error. PowerShell just colours Julia's stderr info
+  logs red. If the KPI summary prints, the run succeeded.
+- Run ONE job at a time - each solve uses a lot of CPU/RAM.
