@@ -439,8 +439,18 @@ Remaining notes (not simplifications of the model, just MPC realities):
 
 ## Relation to Scenario 2
 
-Scenario 1 is the **certainty-equivalent** approach: it acts on the single best
-(posterior mean) power estimate. The estimator already exposes the full posterior
-(`mu` and `sd`), which is the natural hook for **Scenario 2 (scenario-based
-stochastic MPC)**: sample multiple power scenarios from the posterior and optimize
-over them instead of the mean.
+Both scenarios run the **same Bayesian regression** — the estimator fits the full
+posterior over the per-activity powers with NUTS/MCMC and exposes both its mean
+(`mu`) and standard deviation (`sd`), re-fitting online from telemetry. The
+difference is **only in how the MILP uses that posterior**:
+
+- **Scenario 1 (this code) — certainty-equivalent:** collapse the posterior to its
+  **mean** (`mu`) and solve a single MILP on that point estimate each step. The
+  `sd` is tracked (and plotted as uncertainty bands) but the optimizer ignores it.
+- **Scenario 2 — scenario-based stochastic MPC:** **sample multiple power scenarios**
+  from the *same* posterior and optimize over all of them, so the uncertainty (`sd`)
+  actually shapes the dispatch instead of being discarded.
+
+So it is not "point estimate vs. Bayesian" — both are Bayesian. It is
+**mean-only vs. distribution-aware optimization**, and the posterior `sd` the
+estimator already computes is the ready hook for Scenario 2.

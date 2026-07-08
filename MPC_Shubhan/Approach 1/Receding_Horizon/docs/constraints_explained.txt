@@ -1,0 +1,198 @@
+================================================================================
+SCENARIO 1 - THE RULES, IN PLAIN ENGLISH
+================================================================================
+This lists every constraint the optimiser uses. Each rule is tagged
+with its model equation number and marked:
+  [HARD] = can never be broken (physics / safety),
+  [SOFT] = a goal we try to hit; the plan may miss it at a penalty cost (so the
+           planner can never get "stuck" with no valid plan), or
+  [S1]   = a Scenario-1 implementation choice / adaptation of the base model.
+
+HOW SCENARIO 1 RUNS (context for the rules below):
+The controller is a MULTI-DAY, CROSS-DAY RECEDING HORIZON. The plan is re-solved every
+15 minutes, and each window spans the rest of TODAY plus `lookahead_days` future daytime
+blocks (global interval index g = (day-1)*n_day + k), so the plan always "sees" tomorrow.
+We simulate `n_days` reported days PLUS one extra BUFFER day that is dropped from all
+outputs (it just gives the last kept day full lookahead). Each day has TWO PHASES:
+  * PHASE 1 - daytime MPC (08:00-18:00 per day): all the constraints below are solved
+    together for the CEV work and the MCS routing/charging.
+  * PHASE 2 - overnight (18:00-08:00, EVERY night): a simple, deterministic "smart-charge"
+    that refills the MCS in the cheapest hours, closing the MCS nightly cycle (8a).
+Across a night the MCS is recharged to full + parked at the grid, while the CEV battery
+and any unfinished work CARRY OVER unchanged into the next morning.
+Productive work happens 08:00-12:00 and 14:00-17:00, with a 12:00-14:00 lunch.
+
+
+================================================================================
+OBJECTIVE (Eq. 1) - what the planner minimises
+================================================================================
+The cheapest overall plan, adding up:
+  - (1) ENERGY cost: electricity bought from the grid, priced by time of day;
+  - (1) CARBON cost: optional $/ton on the grid CO2 of that electricity;
+  - (1) DEMAND charges: a whole-day (non-coincident) peak charge plus an extra
+        on-peak (16:00-21:00) peak charge;
+  - (1) MISSED-WORK penalty: rho_miss per hour of unfinished work (the model's own
+        soft slack from 12c);
+  - (1) MCS TOWING labour: rho_labor per hour the MCS spends being towed between
+        nodes (discourages excessive shuttling).
+  The objective is EXACTLY Eq. (1): there are NO extra tuning penalties. Precedence
+  (12d), travel pacing (13) and the CEV energy-neutral terminal (8b) are enforced as
+  HARD constraints (see below), not as objective penalties.
+
+
+================================================================================
+A. CHARGING & DISCHARGING POWER OF THE MCSs AND CEVs  (Eqs. 2-4)
+================================================================================
+(2) [HARD] Each MCS's total charge / discharge power is the sum of its per-node
+    charging (at grid nodes) and discharging (at construction sites) (2a-2b); it
+    charges ONLY at grid nodes and discharges ONLY at sites (2c-2d); power leaving an
+    MCS at a site equals the total delivered to the CEVs plugged in there (2e); all
+    powers are non-negative (2f).
+
+(3) [HARD] An MCS can draw grid power only where it is physically present, capped by
+    its charge rate (3a-3b); only ONE MCS may use a single grid connection per
+    interval (3c); site discharge is capped by the discharge rate and allowed only
+    where the MCS is present (3d).
+
+(4) [HARD] Power into a CEV through one plug is capped, and zero unless that CEV is
+    plugged into that MCS (4a); a CEV's total intake is capped by its accept rate and
+    allowed only while it is in charging mode (4b); an MCS can charge at most n_plug
+    CEVs at once (4c).
+
+
+================================================================================
+B. ENERGY CONSUMPTION & STATE OF ENERGY  (Eqs. 5-8)
+================================================================================
+(5) [HARD] A CEV's work power is bounded by its work capacity and is zero outside
+    productive hours (5a-5c); in any interval it does at most one activity and is
+    either working OR charging, never both (5d); its work power equals the chosen
+    activity's draw (5e).
+    [S1] productive hours = 08:00-12:00 and 14:00-17:00 (the 12:00-14:00 lunch and
+    17:00-18:00 wind-down are excluded; the CEV idles then, and may charge).
+
+(6) [HARD] Driving consumes a fixed energy per in-transit interval, summed over arcs
+    into the MCS's travel energy (6a-6b).
+
+(7) [HARD] Battery bookkeeping: each MCS / CEV next-SOE = SOE now + energy charged in
+    - energy discharged / worked out - travel loss (7a-7b).
+
+(8) [HARD] ENERGY NEUTRAL: every battery ends the FULL CYCLE at the level it started,
+    SOE_end = SOE_ini (8a-8b); and SOE always stays within [min, max], floor = 20% of
+    capacity (8c-8d).
+    [S1] In the multi-day horizon the CEV battery FLOWS across days - it is NOT forced
+    back to its start level every evening. The "return to start" rule (8b) is applied
+    ONLY when a window reaches the TRUE horizon end (the buffer day's 18:00), written as
+    the one-sided inequality SOE_CEV[end] >= SOE_CEV_ini - term_tol. The upper side is
+    already the SOE_max bound, so with term_tol = 0 this is the EXACT equality. A SMALL
+    default margin term_tol = 0.1 kWh (~0.7% of pack) absorbs the online estimator's
+    certainty-equivalent drift (planned vs. true powers); with a zero-margin equality that
+    drift can make the re-plan INFEASIBLE. There is still NO reactive fallback: if even this
+    margin is exceeded the window is reported INFEASIBLE and the plant HOLDS state.
+    [S1] The MCS is treated differently: within a day it draws from the grid only as needed
+    to respect its 20% floor; the SOE link is BROKEN across each night and the MCS is reset
+    to full (SOE_MCS_ini) by the Phase-2 overnight smart-charge - one refill PER NIGHT.
+
+
+================================================================================
+C. SPATIAL ROUTING & CONNECTION STATUS OF THE MCSs  (Eqs. 9-11)
+================================================================================
+(9) [HARD] A CEV may connect at a node only if it is assigned there (9a), and only if
+    an MCS is physically present at that node (9b).
+
+(10) [HARD] No travel from a node to itself (10a); the in-transit flag follows from
+     the departure decision and the arc travel time (10b); at each instant an MCS is
+     parked at exactly one node OR in transit on exactly one arc (10c); each MCS
+     starts each day at a grid node (10d); and ENDS EVERY daytime block parked
+     at a grid node - "home" by each 18:00, ready for that night's overnight recharge (10e).
+
+(11) [HARD] Arrival / departure bookkeeping ties presence to the trips taken with the
+     travel-time delay (11a-11c); total arrivals = total departures over the horizon
+     (11d); a node cannot be both arrived at and departed from in one interval (11e).
+     [S1] the plan also starts the MCS exactly where it really is now (parked, or
+     part-way through a trip it already began).
+
+
+================================================================================
+D. OPERATIONAL ADJUSTMENT FOR CEV WORK SCHEDULING  (Eqs. 12-13)
+================================================================================
+(12) Each CEV does at most one sub-activity per interval, only at the site it is
+     assigned to (12a-12b) [HARD]; all required digging / loading hours per site
+     should be done, any shortfall being "missed work" at the rho_miss penalty (12c)
+     [SOFT - this is the model's own slack]. [S1] the quota is a CUMULATIVE, per-day
+     target: a fresh day's hours arrive each morning and any shortfall ROLLS OVER (and is
+     re-penalised) into the next day, so leftover work is carried, never faked or lost.
+     PRECEDENCE - cumulative loading cannot
+     outpace a fixed multiple (scale) of cumulative digging (12d) [HARD], evaluated WITHIN
+     each day-block (the counters restart each morning); REST RULE -
+     over any rolling (t_limit+15 min)
+     window a CEV does at most t_limit hours of construction work, i.e. >=1 idle break
+     interval per hour, and the break may be used to charge (12e) [HARD].
+     NOTE: t_limit is a USER INPUT (no fixed numeric value). It is ENABLED here with
+     t_limit_rest = 1 (>=1 idle break per rolling 5-interval / 75-min window); set
+     t_limit_rest large (e.g. 999) to disable the rest rule.
+     [S1] across the daytime the CEV is always doing exactly one of dig / load /
+     travel / idle (idle is the residual, and is when it may charge).
+
+(13) [HARD] TRAVEL PACING: a CEV's cumulative repositioning (traveling) is tied to
+     its cumulative productive work - about one travel interval per kappa_wt (= 4)
+     productive intervals - as a two-sided band (13a-13b).
+
+
+================================================================================
+E. ADDITIONAL CONSTRAINTS IN THE MODEL  (present in Scenario_1.jl, but not one of
+   the numbered equations 1-13)
+================================================================================
+These are real constraints in the solved MILP. They either realise an objective
+term from Eq. (1), or handle the closed-loop (every-15-min re-solve) reality, or are
+optional switches.
+
+(E1) [HARD] PEAK-DEMAND TRACKERS. Two variables track the grid peak that the demand
+     charges in Eq. (1) are priced on: a whole-day (non-coincident) peak and an
+     on-peak (16:00-21:00) peak; each must be >= the total grid draw in every
+     (relevant) interval. [S1] they are also seeded with the realised peak so far, so
+     the demand charge reflects the WHOLE day across the re-solves.
+
+(E2) [HARD, optional] GRID-DRAW CAP. An extra hard cap on total grid power per
+     interval (`peak_demand_limit`) can be switched on; it is OFF by default.
+
+(E3) [HARD] CLOSED-LOOP CARRY-IN. Each 15-min re-solve is initialised from the REAL
+     measured state: every MCS/CEV starting SOE equals its measured value; the MCS
+     starts exactly where it physically is (parked at its node, OR part-way through a
+     trip already begun, which is forced to continue to completion); and completed
+     work and daily peaks so far are carried in. (This is the MPC form of the
+     initial conditions in 7-8 and 10d.)
+
+(E4) [HARD] CHARGE-ONLY-WHILE-IDLE LINK. A CEV may be in charging mode only in an
+     interval whose chosen activity is "idle" - the implementation link behind the
+     work-or-charge exclusivity of (5d).
+
+(E5) [HARD, optional] SITE-VISIT SWITCHES. `require_site_visit` (each MCS must visit
+     at least one site) and `single_visit_per_site` (at most one arrival + one
+     departure per site) can be enabled; both are OFF in the shipped model.
+
+(E6) [S1] NO FALLBACK. The model is HARD by default (Eq. 1 objective; precedence 12d,
+     pacing 13 and the CEV terminal 8b as hard constraints), with only missed-work (12c)
+     carrying the model's own slack. If a 15-min re-plan is infeasible from a drifted
+     realised state, NOTHING is relaxed automatically: that window is reported INFEASIBLE
+     and the plant HOLDS state (no work / no charging) for that interval. The count of
+     infeasible/held windows is reported at the end of a run. Relaxation is available only
+     MANUALLY via the run_scenario_1 kwargs soft_prec / soft_pace / soft_term (all default
+     false = hard).
+
+
+================================================================================
+SCENARIO-1 NOTES (design choices and adaptations)
+================================================================================
+- MULTI-DAY, CROSS-DAY: each 15-min window spans the rest of today + `lookahead_days`
+  future daytime blocks. `n_days` reported days are simulated plus one dropped buffer day.
+- TWO-PHASE solve PER DAY: a daytime MPC (Phase 1, all equations above) plus a
+  deterministic overnight smart-charge (Phase 2) that closes the MCS cycle (8a) each night.
+- Nights: the MCS SOE link is broken and reset to full each night; the CEV battery and any
+  unfinished work carry over. The CEV "return to start" (8b) fires only at the horizon end.
+- Productive hours are split by a lunch break; both fleets use a 20% SOE floor.
+
+The model is HARD by default (objective = Eq. 1; precedence 12d, pacing 13, CEV terminal
+8b all hard) with NO automatic fallback. When a 15-min re-plan cannot satisfy the hard
+constraints from the realised state, that window is reported INFEASIBLE and the plant
+simply HOLDS state (no work / no charging) for it - the constraints are honoured exactly
+whenever the realised state allows, and never relaxed silently when it does not.

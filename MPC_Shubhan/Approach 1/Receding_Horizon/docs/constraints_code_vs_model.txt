@@ -1,0 +1,118 @@
+================================================================================
+ SCENARIO 1 - CONSTRAINT-BY-CONSTRAINT COMPARISON: CODE vs PDF
+================================================================================
+This compares what the Julia code (code/Scenario_1.jl) actually enforces against
+what the source model "Optimization.pdf" specifies.
+
+The controller is a MULTI-DAY, CROSS-DAY receding horizon: each 15-min window spans the
+rest of today + `lookahead_days` future daytime blocks (global index g=(day-1)*n_day+k).
+`n_days` reported days are simulated plus one dropped BUFFER day. Nights link the day-
+blocks (MCS reset to full + parked at grid; CEV SOE + unfinished work carry over).
+
+Cross-checked against the actual Optimization.pdf (equation numbers verified),
+and against our plain-English/formal transcriptions
+(docs/math_model.tex + docs/constraints_explained.txt).
+
+Legend:  OK       = code matches the PDF exactly
+         ADAPTED  = deliberate Scenario-1 adaptation (documented)
+         ~OK      = matches up to a small, documented tolerance
+
+
+--------------------------------------------------------------------------------
+ Eq.        | What the PDF specifies            | What the code does            | Status
+--------------------------------------------------------------------------------
+ (1) Obj.   | min energy + carbon + NC/OP       | Exactly this; slacks pinned   | OK
+            | demand charges + missed-work      | to 0 so no extra tuning       |
+            | slack (rho_miss) + towing labour  | penalties (Scenario_1.jl      |
+            |                                   | ~585-591)                     |
+--------------------------------------------------------------------------------
+ (2)        | MCS power aggregation; charge     | Hard, as written              | OK
+            | only at grid, discharge at sites  |                               |
+--------------------------------------------------------------------------------
+ (3)        | Grid draw only where present,     | Hard                          | OK
+            | capped; one MCS per grid conn.    |                               |
+--------------------------------------------------------------------------------
+ (4)        | CEV plug caps; charge only if     | Hard                          | OK
+            | plugged & in charge mode; <=nplug |                               |
+--------------------------------------------------------------------------------
+ (5a-5e)    | Work power <= capacity R, 0 off-  | Hard; 5a with (1-mu) factor   | OK
+            | shift; one activity; work XOR     | (Scenario_1.jl ~789-796)      |
+            | charge; P_work = chosen draw      |                               |
+--------------------------------------------------------------------------------
+ (6)        | Travel energy per in-transit      | Hard                          | OK
+            | interval                          |                               |
+--------------------------------------------------------------------------------
+ (7)        | SOE bookkeeping (next = now +     | Hard WITHIN a day; MCS SOE    | ADAPTED
+            | charge - work - travel loss)      | link BROKEN each night (reset | (nights)
+            |                                   | to full); CEV SOE carries over|
+--------------------------------------------------------------------------------
+ (8a) MCS   | MCS energy-neutral                | SPLIT: no daytime MCS         | ADAPTED
+     energy | SOE_end = SOE_ini                 | terminal; closed OVERNIGHT    | (per-night
+     neutral|                                   | EVERY night by deterministic  |  two-phase)
+            |                                   | Phase-2 smart-charge          |
+--------------------------------------------------------------------------------
+ (8b) CEV   | CEV energy-neutral                | SOE_end >= SOE_ini - term_tol | ADAPTED
+     energy | SOE_end = SOE_ini                 | ONLY at true horizon end      | (horizon-
+     neutral|                                   | (buffer day 18:00); CEV flows |  end only,
+            |                                   | across days. term_tol=0.1 kWh |  0.1 margin)
+--------------------------------------------------------------------------------
+ (8c-8d)    | SOE within [min,max], 20% floor   | Hard                          | OK
+--------------------------------------------------------------------------------
+ (9)        | Connect only if assigned & MCS    | Hard                          | OK
+            | present                           |                               |
+--------------------------------------------------------------------------------
+ (10a-10d)  | No self-loop; transit flag;       | Hard; start node = realized   | OK
+            | presence partition; start at grid | position (MPC carry-in)       |
+--------------------------------------------------------------------------------
+ (10e)      | MCS ends horizon at a grid node   | Enforced at EVERY 18:00        | ADAPTED
+            |                                   | (each day's daytime end)      | (per-day)
+--------------------------------------------------------------------------------
+ (11)       | Arrival/departure bookkeeping;    | Hard; + MPC carry-in of the   | OK
+            | arr = dep; not both in one step   | real current position         |
+--------------------------------------------------------------------------------
+ (12a-12b)  | One sub-activity per interval,    | Hard                          | OK
+            | only at the assigned site         |                               |
+--------------------------------------------------------------------------------
+ (12c)      | Finish all work or pay rho_miss   | SOFT; CUMULATIVE per-day      | ADAPTED
+            |                                   | quota that ROLLS OVER unmet   | (rollover)
+            |                                   | hours to the next day         |
+--------------------------------------------------------------------------------
+ (12d)      | PRECEDENCE: cumulative loading    | HARD by default (s_prec       | OK
+            | <= scale * cumulative digging     | pinned to 0); WITHIN each day |
+            |                                   | (counters restart each morning)|
+--------------------------------------------------------------------------------
+ (12e)      | REST RULE: over any rolling       | HARD, t_limit_rest = 1 h:     | OK
+            | (t_limit + 15min) window, <=      | >=1 idle break per rolling    |
+            | t_limit hours of work (>=1 idle   | 5-interval window (t_limit is |
+            | break per window)                 | a user input).                |
+--------------------------------------------------------------------------------
+ (13)       | TRAVEL PACING: cumulative travel  | HARD by default (s_pace       | OK
+            | tied to productive work, two-     | pinned to 0); kappa_wt = 4    |
+            | sided band (~1 travel per         |                               |
+            | kappa_wt productive intervals)    |                               |
+--------------------------------------------------------------------------------
+
+
+EXTRA CONSTRAINTS IN THE CODE (not among PDF Eqs. 1-13)
+--------------------------------------------------------------------------------
+ E1  Peak-demand trackers  | NC + OP peak vars >= grid draw    | realizes the
+                           |                                   | demand terms of Eq.(1)
+ E2  Grid-draw cap         | optional hard cap; OFF by default | convenience
+ E3  Closed-loop carry-in  | each 15-min re-solve starts from  | MPC form of PDF
+                           | measured SOE/position/work done   | init. cond. (7,8,10d)
+ E4  Charge-only-while-idle| mu <= u[idle]                     | implements (5d)
+ E5  Site-visit switches   | optional; OFF by default          | original flags
+ E6  No fallback           | infeasible window -> hold state,  | user decision
+                           | nothing auto-relaxed              |
+
+
+SUMMARY OF THE ONLY REAL DEVIATIONS
+--------------------------------------------------------------------------------
+ 1. (8a)/(10e) TWO-PHASE SPLIT - MCS energy-neutrality and "home by end" are
+    closed overnight (Phase 2) rather than inside one 24h horizon. Deliberate.
+ 2. (8b) term_tol = 0.1 kWh - a tiny margin on the CEV terminal (exact at
+    term_tol = 0, but that goes infeasible under online-estimator drift).
+
+Everything else is enforced exactly as the PDF specifies (all HARD by default;
+only missed-work 12c is soft, which is the PDF's own slack). The rest rule (12e)
+is enabled with t_limit = 1 h.

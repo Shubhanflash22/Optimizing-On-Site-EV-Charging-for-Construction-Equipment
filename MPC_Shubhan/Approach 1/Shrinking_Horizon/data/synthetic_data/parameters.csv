@@ -1,4 +1,4 @@
-Parameter,Value,Unit,Description
+﻿Parameter,Value,Unit,Description
 k_trv,2.0,kWh/hour,MCS average energy consumption per hour
 rho_miss,50.0,$/h,Missed-work penalty
 delta_T,0.25,h,Time step duration
@@ -13,7 +13,6 @@ p_idling,0.5,kW,Idle power (idling kept as a 4th activity)
 scale,2,-,Precedence multiple kappa_seq (loading<=scale*digging)
 t_limit_rest,999.0,h,Rest rule: max work per (t_limit_rest+delta_T) window
 kappa_wt,4,-,Travel-pacing productive intervals per travel
-day_end_hour,18,h,Daytime horizon end (two-phase split)
 prior_sigma_frac,0.217,-,Bayesian prior std as fraction of power
 obs_noise_std,0.05,kWh,Bayesian telemetry noise std (simulation)
 co2_unit_scale,1,-,Raw intensity_tons_emissions scale
