@@ -84,6 +84,14 @@ B. ENERGY CONSUMPTION & STATE OF ENERGY  (Eqs. 5-8)
     reported INFEASIBLE and the plant HOLDS state. The MCS reaches its neutral level
     OVERNIGHT via the Phase-2 smart-charge; during the day the MCS draws from the grid only
     when needed to respect its 20% floor.
+    [S1] PROACTIVE KEEP-UP RESERVE (recursive feasibility, see E7): because a CEV can only
+    be charged while the MCS is parked at its site, and the MCS must leave for a grid node
+    before 18:00 (10e), there is a LAST interval after which the CEV can no longer be topped
+    up. If the closed loop ever let a CEV drain past what remains rechargeable before that
+    cut-off, the hard terminal (8b) would become unreachable and later windows would go
+    INFEASIBLE ("drained too late"). A per-boundary lower bound on CEV SOE now forbids that
+    state, so a feasible recovery always remains - the terminal is honoured recursively
+    rather than as a knife-edge.
 
 
 ================================================================================
@@ -119,6 +127,18 @@ D. OPERATIONAL ADJUSTMENT FOR CEV WORK SCHEDULING  (Eqs. 12-13)
      NOTE: t_limit is a USER INPUT (no fixed numeric value). It is ENABLED here with
      t_limit_rest = 1 (>=1 idle break per rolling 5-interval / 75-min window); set
      t_limit_rest large (e.g. 999) to disable the rest rule.
+     [S1] CLOSED-LOOP-CORRECT REST RULE (history-seeded). A window solved in isolation has
+     no memory of what was applied before it, so a plain within-window rolling limit lets
+     work-runs LEAK across the every-15-min re-solves (e.g. 4 work intervals at the end of
+     one window + 4 more at the start of the next = 8 in a row - the violation seen in
+     earlier output). The rule is now seeded from a SHARED per-CEV applied-activity history:
+     each rolling window that STRADDLES the window start counts the already-applied work/
+     break flags as constants (the "seam" constraints). The binding seam - the last t_limit
+     applied intervals plus the current one - guarantees the realised trajectory never runs
+     a (t_limit+1)-th consecutive work interval, INCLUDING at the day-end boundary. The same
+     shared history also seeds precedence (12d) and travel pacing (13), so all three rolling
+     rules read from one consistent record of what actually happened. Held (infeasible)
+     intervals are recorded as breaks.
      [S1] across the daytime the CEV is always doing exactly one of dig / load /
      travel / idle (idle is the residual, and is when it may charge).
 
@@ -167,6 +187,23 @@ optional switches.
      infeasible/held windows is reported at the end of a run. Relaxation is available only
      MANUALLY via the run_scenario_1 kwargs soft_prec / soft_pace / soft_term (all default
      false = hard).
+
+(E7) [S1] CEV KEEP-UP RESERVE (recursive feasibility of the hard terminal 8b). On every
+     window that reaches day-end, a per-boundary lower bound is placed on each CEV's SOE:
+         SOE_CEV[e,t] >= (minimum SOE from which a full recovery to the 8b target is still
+                          possible before the MCS must leave for the grid).
+     It is built backwards from 18:00 using the physics that actually limit recovery:
+       * charging happens ONLY while the MCS is parked at the CEV's site, and the MCS needs
+         `tgrid` intervals to reach a grid node by 18:00 (10e) - so there is a last
+         chargeable interval, after which the CEV only idles;
+       * charging requires charging-mode, which is an IDLE activity (E4), and idle itself
+         draws a little power - so the NET gain per charging interval is (max charge rate -
+         idle draw), and during the idle tail after the MCS leaves the SOE strictly DRAINS;
+       * the target is (SOE_CEV_ini - term_tol), matching 8b.
+     Enforced every step, this bound keeps the CEV on a trajectory from which 8b is always
+     reachable, converting the terminal from a fragile knife-edge into a recursively
+     feasible guarantee. (Verified: both synthetic and input runs complete with ZERO
+     infeasible windows and every CEV within term_tol of its target at 18:00.)
 
 
 ================================================================================

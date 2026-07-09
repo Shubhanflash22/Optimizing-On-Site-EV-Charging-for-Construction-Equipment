@@ -118,9 +118,12 @@ D. OPERATIONAL ADJUSTMENT FOR CEV WORK SCHEDULING  (Eqs. 12-13)
 (12) Each CEV does at most one sub-activity per interval, only at the site it is
      assigned to (12a-12b) [HARD]; all required digging / loading hours per site
      should be done, any shortfall being "missed work" at the rho_miss penalty (12c)
-     [SOFT - this is the model's own slack]. [S1] the quota is a CUMULATIVE, per-day
-     target: a fresh day's hours arrive each morning and any shortfall ROLLS OVER (and is
-     re-penalised) into the next day, so leftover work is carried, never faked or lost.
+     [SOFT - this is the model's own slack]. [S1] work is a PER-DAY SCHEDULE, not a single
+     lumpsum: each reported day has its OWN per-site dig/load quota (from work_by_day.csv,
+     or the place.csv default repeated). The quota is a CUMULATIVE target: that day's hours
+     arrive each morning and any shortfall ROLLS OVER (and is re-penalised) into the next
+     day, so leftover work is carried, never faked or lost. The dropped buffer day gets NO
+     fresh work (wind-down only).
      PRECEDENCE - cumulative loading cannot
      outpace a fixed multiple (scale) of cumulative digging (12d) [HARD], evaluated WITHIN
      each day-block (the counters restart each morning); REST RULE -
@@ -129,7 +132,9 @@ D. OPERATIONAL ADJUSTMENT FOR CEV WORK SCHEDULING  (Eqs. 12-13)
      interval per hour, and the break may be used to charge (12e) [HARD].
      NOTE: t_limit is a USER INPUT (no fixed numeric value). It is ENABLED here with
      t_limit_rest = 1 (>=1 idle break per rolling 5-interval / 75-min window); set
-     t_limit_rest large (e.g. 999) to disable the rest rule.
+     t_limit_rest large (e.g. 999) to disable the rest rule. [S1] the rest rule is SEEDED
+     from the current day's applied Work/Break history (a seam constraint), so the limit
+     holds ACROSS the every-15-min re-solves, not just inside one window.
      [S1] across the daytime the CEV is always doing exactly one of dig / load /
      travel / idle (idle is the residual, and is when it may charge).
 
@@ -178,6 +183,18 @@ optional switches.
      infeasible/held windows is reported at the end of a run. Relaxation is available only
      MANUALLY via the run_scenario_1 kwargs soft_prec / soft_pace / soft_term (all default
      false = hard).
+
+(E7) [HARD] CEV KEEP-UP RESERVE (recursive feasibility of the terminal 8b). A CEV is only
+     charged while the MCS is parked at its site, and the MCS must leave for a grid node
+     before the horizon end (evening end-at-grid rule); after it leaves the CEV only idles,
+     and because idling itself draws power the SOE strictly DRAINS. So the terminal target
+     (SOE_ini - term_tol) can become unreachable if the CEV is left too low too late. The
+     reserve lower-bounds each CEV's SOE at every boundary by the least level from which the
+     terminal is still reachable - built backward from the buffer day's 18:00 using the NET
+     charge rate (max charge minus idle draw) and the last interval the MCS can still charge.
+     It only binds in the final tail (inside the dropped buffer day), never distorting the
+     reported days, and makes the hard terminal recursively feasible instead of a knife-edge.
+     Result: both datasets run with ZERO infeasible/held windows.
 
 
 ================================================================================

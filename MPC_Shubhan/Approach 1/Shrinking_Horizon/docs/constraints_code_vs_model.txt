@@ -47,8 +47,9 @@ Legend:  OK       = code matches the PDF exactly
 --------------------------------------------------------------------------------
  (8b) CEV   | CEV energy-neutral                | SOE_end >= SOE_ini - term_tol | ~OK
      energy | SOE_end = SOE_ini                 | term_tol = 0.1 kWh default    | (0.1 kWh
-     neutral|                                   | (= exact equality when        |  margin)
-            |                                   | term_tol = 0)                 |
+     neutral|                                   | (= exact equality when        |  margin,
+            |                                   | term_tol = 0); kept feasible  |  + E7)
+            |                                   | by keep-up reserve E7         |
 --------------------------------------------------------------------------------
  (8c-8d)    | SOE within [min,max], 20% floor   | Hard                          | OK
 --------------------------------------------------------------------------------
@@ -73,9 +74,11 @@ Legend:  OK       = code matches the PDF exactly
             | <= scale * cumulative digging     | pinned to 0)                  |
 --------------------------------------------------------------------------------
  (12e)      | REST RULE: over any rolling       | HARD, t_limit_rest = 1 h:     | OK
-            | (t_limit + 15min) window, <=      | >=1 idle break per rolling    |
-            | t_limit hours of work (>=1 idle   | 5-interval window (t_limit is |
-            | break per window)                 | a user input).                |
+            | (t_limit + 15min) window, <=      | >=1 idle break per rolling    | (history-
+            | t_limit hours of work (>=1 idle   | 5-interval window; SEEDED     |  seeded)
+            | break per window)                 | from applied history so it    |
+            |                                   | holds ACROSS re-solves &      |
+            |                                   | at day-end (MCSModel.jl seam) |
 --------------------------------------------------------------------------------
  (13)       | TRAVEL PACING: cumulative travel  | HARD by default (s_pace       | OK
             | tied to productive work, two-     | pinned to 0); kappa_wt = 4    |
@@ -95,6 +98,11 @@ EXTRA CONSTRAINTS IN THE CODE (not among PDF Eqs. 1-13)
  E5  Site-visit switches   | optional; OFF by default          | original flags
  E6  No fallback           | infeasible window -> hold state,  | user decision
                            | nothing auto-relaxed              |
+ E7  CEV keep-up reserve   | per-boundary SOE floor = min SOE  | makes hard 8b
+                           | still recoverable before the MCS  | recursively
+                           | must leave for grid; net charge   | feasible
+                           | rate (charge - idle draw) + idle  | (MCSModel.jl)
+                           | tail after departure              |
 
 
 SUMMARY OF THE ONLY REAL DEVIATIONS
@@ -107,3 +115,11 @@ SUMMARY OF THE ONLY REAL DEVIATIONS
 Everything else is enforced exactly as the PDF specifies (all HARD by default;
 only missed-work 12c is soft, which is the PDF's own slack). The rest rule (12e)
 is enabled with t_limit = 1 h.
+
+CLOSED-LOOP CORRECTNESS (Shrinking-horizon MPC, modular code MCSModel.jl / MPCLoop.jl):
+ - The three rolling rules (rest 12e, precedence 12d, pacing 13) are seeded from a
+   SHARED per-CEV applied-activity history, so a within-window limit can no longer
+   "leak" work-runs across the every-15-min re-solves (the 8-in-a-row artefact).
+ - The keep-up reserve (E7) makes the hard CEV terminal (8b) recursively feasible.
+ VERIFIED: synthetic + input Shrinking runs finish with ZERO infeasible windows and
+ every constraint satisfied on every row of the realised trajectory.

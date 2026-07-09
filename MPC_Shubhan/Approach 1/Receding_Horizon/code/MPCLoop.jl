@@ -116,10 +116,17 @@ function run_mpc(d; time_limit_sec::Float64 = 60.0,
     # ---- REAL physical state carried ACROSS DAYS ----
     soe_mcs  = copy(float.(d.SOE_MCS_ini))
     soe_cev  = copy(float.(d.SOE_CEV_ini))
-    daily_dig  = copy(float.(d.hours_digging))
-    daily_load = copy(float.(d.hours_loading_swinging))
-    rem_dig    = zeros(length(d.hours_digging))
-    rem_load   = zeros(length(d.hours_loading_swinging))
+    nN_work  = length(d.hours_digging)
+    rem_dig  = zeros(nN_work)
+    rem_load = zeros(nN_work)
+    # PER-DAY work quota: each reported day issues its own per-site dig/load quota
+    # (d.dig_by_day / d.load_by_day). The dropped buffer day (and any out-of-range
+    # day) gets NO fresh work. Unfinished work rolls over via rem_* below.
+    quota_dig(day)  = (1 <= day <= min(n_days_keep, length(d.dig_by_day)))  ? float.(d.dig_by_day[day])  : zeros(nN_work)
+    quota_load(day) = (1 <= day <= min(n_days_keep, length(d.load_by_day))) ? float.(d.load_by_day[day]) : zeros(nN_work)
+    # SHARED applied Work(1)/Break(0) flags for the CURRENT day (reset every morning);
+    # seeds the rest-rule seam so a work-run cannot leak across the 15-min re-solves.
+    work_hist = [Int[] for _ in d.E]
 
     est = BayesianActivityEstimator(d.prior_mu, d.prior_sigma; mcmc_samples = mcmc_samples)
     rng = MersenneTwister(seed)
@@ -168,8 +175,9 @@ function run_mpc(d; time_limit_sec::Float64 = 60.0,
     missed_kept = 0.0
 
     for day in 1:D_total
-        rem_dig  .+= daily_dig
-        rem_load .+= daily_load
+        rem_dig  .+= quota_dig(day)
+        rem_load .+= quota_load(day)
+        for e in d.E; empty!(work_hist[e]); end          # night = long break; rest count restarts
         cum_dig_e  = zeros(length(d.E)); cum_load_e = zeros(length(d.E)); cum_trv_e = zeros(length(d.E))
         peak_nc = 0.0; peak_op = 0.0
         mcs_node = [first(d.N_g) for _ in d.M]
@@ -203,7 +211,8 @@ function run_mpc(d; time_limit_sec::Float64 = 60.0,
             model = build_window_model(d, K_win, soe_mcs, soe_cev, mcs_node, mcs_transit,
                                        rem_dig, rem_load, cum_dig_e, cum_load_e, cum_trv_e,
                                        peak_nc, peak_op, est.mu;
-                                       daily_dig = daily_dig, daily_load = daily_load,
+                                       dig_by_day = d.dig_by_day, load_by_day = d.load_by_day,
+                                       work_hist = work_hist,
                                        require_site_visit = require_site_visit,
                                        single_visit_per_site = single_visit_per_site,
                                        time_limit_sec = time_limit_sec,
@@ -223,7 +232,7 @@ function run_mpc(d; time_limit_sec::Float64 = 60.0,
                             est.mu[1], est.mu[2], est.mu[3], est.mu[4],
                             est.sd[1], est.sd[2], est.sd[3], est.sd[4], n_obs_total))
                 push!(fe_time, clk)
-                for e in d.E; push!(fe_act[e], "Idle"); push!(fe_chg[e], "No"); end
+                for e in d.E; push!(fe_act[e], "Idle"); push!(fe_chg[e], "No"); push!(work_hist[e], 0); end
                 push!(fe_mcs, "No")
                 if kept; for m in d.M; real_loc[m, gk] = cur_node; end; end
                 continue
@@ -272,6 +281,10 @@ function run_mpc(d; time_limit_sec::Float64 = 60.0,
                 (kept && site !== nothing) && (real_mu[site, e, gk] = value(model[:mu][site, e, g0]))
             end
             push!(fe_mcs, mcs_should_charge(model, d, g0))
+            for e in d.E
+                act = planned_activity(model, d, e, g0)
+                push!(work_hist[e], act in ("Digging", "Loading/Swinging", "Traveling") ? 1 : 0)
+            end
 
             a_real = Dict(e => realized_activity_durations(rng, model, e, g0, d;
                                                            multi = multi_activity) for e in d.E)

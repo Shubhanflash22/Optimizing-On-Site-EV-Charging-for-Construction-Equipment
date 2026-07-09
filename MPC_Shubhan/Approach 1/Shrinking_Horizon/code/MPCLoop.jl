@@ -85,6 +85,16 @@ function advance_mcs_state(model, m, k0, nK, d)
     return (node0 === nothing ? first(d.N_g) : node0, nothing)
 end
 
+# Applied (scheduled) activity index 1..4 for CEV e at k0, read from the u decision
+# actually executed (1=dig, 2=load, 3=travel, 4=idle). Used to append to the shared
+# history so the window model knows what was really done.
+function applied_act_index(model, d, e, k0)
+    for i in d.N_c, (ai, act) in enumerate(d.B)
+        value(model[:u][e, i, act, k0]) > 0.5 && return ai
+    end
+    return length(d.B)   # nothing scheduled -> idle (a break)
+end
+
 # ---- worker-facing plan readouts ----
 function planned_activity(model, d, e, k0)
     site = findfirst(i -> d.A[i, e] == 1, d.N)
@@ -124,7 +134,10 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
     mcs_transit = Any[nothing for _ in d.M]
     rem_dig  = copy(float.(d.hours_digging))
     rem_load = copy(float.(d.hours_loading_swinging))
-    cum_dig_e = zeros(length(d.E)); cum_load_e = zeros(length(d.E)); cum_trv_e = zeros(length(d.E))
+    # SHARED applied-activity history, one growing list per CEV. Each entry is
+    # (act, hrs): act = applied activity index; hrs = realized [dig,load,trv,idle] h.
+    # Seeds precedence, pacing AND the rest rule inside build_window_model.
+    hist = [Vector{Tuple{Int, Vector{Float64}}}() for _ in d.E]
     peak_nc = 0.0; peak_op = 0.0
 
     # ---- online learner ----
@@ -185,7 +198,7 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
 
         # (1) OPTIMISE
         model = build_window_model(d, K_win, soe_mcs, soe_cev, mcs_node, mcs_transit,
-                                   rem_dig, rem_load, cum_dig_e, cum_load_e, cum_trv_e,
+                                   rem_dig, rem_load, hist,
                                    peak_nc, peak_op, est.mu;
                                    require_site_visit = require_site_visit,
                                    single_visit_per_site = single_visit_per_site,
@@ -209,6 +222,9 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
             for e in d.E; push!(fe_act[e], "Idle"); push!(fe_chg[e], "No"); end
             push!(fe_mcs, "No")
             for m in d.M; real_loc[m, k0] = cur_node; end
+            # A held (infeasible) interval is a BREAK for every CEV -> record it in
+            # history so the rest rule counts it correctly on the next window.
+            for e in d.E; push!(hist[e], (length(d.B), [0.0, 0.0, 0.0, d.delta_T])); end
             continue
         end
 
@@ -290,16 +306,14 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
             soe_cev[e] = clamp(soe_cev[e] + charged - work_true, d.SOE_CEV_min[e], d.SOE_CEV_max[e])
         end
 
-        # Update remaining/cumulative work from the realized durations.
+        # Update remaining work + append this interval to the SHARED history.
         for e in d.E
             site_e = findfirst(i -> d.A[i, e] == 1, d.N)
             if site_e !== nothing
                 rem_dig[site_e]  = max(rem_dig[site_e]  - a_real[e][1], 0.0)
                 rem_load[site_e] = max(rem_load[site_e] - a_real[e][2], 0.0)
             end
-            cum_dig_e[e]  += a_real[e][1]
-            cum_load_e[e] += a_real[e][2]
-            cum_trv_e[e]  += a_real[e][3]
+            push!(hist[e], (applied_act_index(model, d, e, k0), copy(a_real[e])))
         end
 
         peak_nc = max(peak_nc, grid_kW)

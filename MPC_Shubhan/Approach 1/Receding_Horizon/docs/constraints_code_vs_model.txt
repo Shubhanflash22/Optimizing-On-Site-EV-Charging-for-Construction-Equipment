@@ -73,18 +73,21 @@ Legend:  OK       = code matches the PDF exactly
  (12a-12b)  | One sub-activity per interval,    | Hard                          | OK
             | only at the assigned site         |                               |
 --------------------------------------------------------------------------------
- (12c)      | Finish all work or pay rho_miss   | SOFT; CUMULATIVE per-day      | ADAPTED
-            |                                   | quota that ROLLS OVER unmet   | (rollover)
-            |                                   | hours to the next day         |
+ (12c)      | Finish all work or pay rho_miss   | SOFT; PER-DAY SCHEDULE (each  | ADAPTED
+            |                                   | day its own quota via         | (per-day
+            |                                   | work_by_day.csv); CUMULATIVE, |  schedule +
+            |                                   | ROLLS OVER unmet to next day  |  rollover)
 --------------------------------------------------------------------------------
  (12d)      | PRECEDENCE: cumulative loading    | HARD by default (s_prec       | OK
             | <= scale * cumulative digging     | pinned to 0); WITHIN each day |
             |                                   | (counters restart each morning)|
 --------------------------------------------------------------------------------
  (12e)      | REST RULE: over any rolling       | HARD, t_limit_rest = 1 h:     | OK
-            | (t_limit + 15min) window, <=      | >=1 idle break per rolling    |
-            | t_limit hours of work (>=1 idle   | 5-interval window (t_limit is |
-            | break per window)                 | a user input).                |
+            | (t_limit + 15min) window, <=      | >=1 idle break per rolling    | (seam-
+            | t_limit hours of work (>=1 idle   | 5-interval window; SEEDED from|  seeded)
+            | break per window)                 | the current day's applied     |
+            |                                   | Work/Break history so it holds|
+            |                                   | across the 15-min re-solves   |
 --------------------------------------------------------------------------------
  (13)       | TRAVEL PACING: cumulative travel  | HARD by default (s_pace       | OK
             | tied to productive work, two-     | pinned to 0); kappa_wt = 4    |
@@ -104,6 +107,11 @@ EXTRA CONSTRAINTS IN THE CODE (not among PDF Eqs. 1-13)
  E5  Site-visit switches   | optional; OFF by default          | original flags
  E6  No fallback           | infeasible window -> hold state,  | user decision
                            | nothing auto-relaxed              |
+ E7  CEV keep-up reserve   | per-boundary SOE floor, built     | makes hard CEV
+                           | backward from horizon end using   | terminal (8b)
+                           | NET charge rate (charge-idle) &   | recursively
+                           | last chargeable interval; only    | feasible; 0
+                           | binds in the buffer-day tail      | infeasible windows
 
 
 SUMMARY OF THE ONLY REAL DEVIATIONS
@@ -111,7 +119,14 @@ SUMMARY OF THE ONLY REAL DEVIATIONS
  1. (8a)/(10e) TWO-PHASE SPLIT - MCS energy-neutrality and "home by end" are
     closed overnight (Phase 2) rather than inside one 24h horizon. Deliberate.
  2. (8b) term_tol = 0.1 kWh - a tiny margin on the CEV terminal (exact at
-    term_tol = 0, but that goes infeasible under online-estimator drift).
+    term_tol = 0). Recursive feasibility is guaranteed by the E7 keep-up reserve,
+    so with term_tol = 0.1 both datasets run with ZERO infeasible/held windows.
+ 3. (12c) work is a PER-DAY SCHEDULE (work_by_day.csv), not one lumpsum: each
+    reported day carries its own dig/load quota; unmet hours roll over.
+
+CLOSED-LOOP CORRECTNESS: the rest rule (12e), precedence (12d) and pacing (13) are
+seeded from the current day's applied history, so they hold ACROSS the 15-min
+re-solves (no work-run leaking over a re-solve seam).
 
 Everything else is enforced exactly as the PDF specifies (all HARD by default;
 only missed-work 12c is soft, which is the PDF's own slack). The rest rule (12e)

@@ -129,9 +129,17 @@ function build_default_data()
     p_traveling        = prior_mu[3]
     p_idling           = prior_mu[4]
 
-    # ---- per-site work-hour requirements (only N_c entries used) ----
-    hours_digging          = [0.0, 2.5, 1.5]
-    hours_loading_swinging = [0.0, 1.5, 1.0]
+    # ---- per-site work-hour requirements, PER DAY (only N_c entries used) ----
+    # Work is a PER-DAY schedule (not a single lumpsum): each kept day carries its
+    # own digging/loading quota per site. `dig_by_day[dy]` / `load_by_day[dy]` are
+    # node-length vectors for reported day dy (1..n_days); the dropped buffer day
+    # gets NO fresh work. `hours_digging` / `hours_loading_swinging` stay as the
+    # day-1 vectors for any legacy/default reference.
+    dig_by_day  = [[0.0, 2.5, 1.5], [0.0, 2.0, 1.0]]
+    load_by_day = [[0.0, 1.5, 1.0], [0.0, 1.0, 0.5]]
+    @assert length(dig_by_day) == n_days == length(load_by_day)
+    hours_digging          = copy(dig_by_day[1])
+    hours_loading_swinging = copy(load_by_day[1])
 
     # ---- travel ----
     # tau_trv[i,j] = travel time in INTERVALS; k_trv = kWh consumed per arc traversal.
@@ -180,10 +188,37 @@ function build_default_data()
               SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV,
               p_digging, p_loading_swinging, p_traveling, p_idling,
               prior_mu, prior_sigma, true_powers, obs_noise_std,
-              hours_digging, hours_loading_swinging, tau_trv, k_trv,
+              hours_digging, hours_loading_swinging, dig_by_day, load_by_day, tau_trv, k_trv,
               lambda_whl_elec, lambda_CO2, R_work,
               rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP,
               carbon_price_per_ton, scale, B)
+end
+
+# Read an OPTIONAL per-day work schedule `work_by_day.csv` (columns:
+# site, day, hours_digging, hours_loading_swinging). Returns
+# (dig_by_day, load_by_day) as n_days node-length vectors, or `nothing` if the
+# file is absent (caller then repeats the single place.csv quota each day).
+function _read_work_by_day(input_dir, node_ids, node_idx, n_days)
+    path = joinpath(input_dir, "work_by_day.csv")
+    isfile(path) || return nothing
+    df = CSV.read(path, DataFrame)
+    for c in ("site", "day", "hours_digging", "hours_loading_swinging")
+        Symbol(c) in propertynames(df) ||
+            error("work_by_day.csv missing required column '$c'")
+    end
+    nN = length(node_ids)
+    dig_by_day  = [zeros(nN) for _ in 1:n_days]
+    load_by_day = [zeros(nN) for _ in 1:n_days]
+    for r in 1:nrow(df)
+        dy = Int(round(Float64(df.day[r])))
+        (1 <= dy <= n_days) || continue
+        loc = lowercase(strip(string(df.site[r])))
+        haskey(node_idx, loc) || continue
+        i = node_idx[loc]
+        dig_by_day[dy][i]  = Float64(df.hours_digging[r])
+        load_by_day[dy][i] = Float64(df.hours_loading_swinging[r])
+    end
+    return (dig_by_day, load_by_day)
 end
 
 # =============================================================================
@@ -314,12 +349,25 @@ function load_input_data(input_dir::AbstractString)
     true_powers = copy(prior_mu)
     p_digging, p_loading_swinging, p_traveling = prior_mu[1], prior_mu[2], prior_mu[3]
 
-    # ---- work demand per node ----
+    # ---- work demand per node (default daily quota from place.csv) ----
     hours_digging = zeros(length(N)); hours_loading_swinging = zeros(length(N))
     for r in 1:nrow(plc)
         i = node_idx[lowercase(node_ids[r])]
         hours_digging[i]          = Float64(plc.hours_digging[r])
         hours_loading_swinging[i] = Float64(plc.hours_loading_swinging[r])
+    end
+
+    # ---- PER-DAY work schedule ----
+    # If work_by_day.csv exists, each reported day gets its own per-site quota;
+    # otherwise the single place.csv quota is repeated for all n_days days.
+    wbd = _read_work_by_day(input_dir, node_ids, node_idx, n_days)
+    if wbd === nothing
+        dig_by_day  = [copy(hours_digging)          for _ in 1:n_days]
+        load_by_day = [copy(hours_loading_swinging) for _ in 1:n_days]
+    else
+        dig_by_day, load_by_day = wbd
+        hours_digging          = copy(dig_by_day[1])   # legacy day-1 default reference
+        hours_loading_swinging = copy(load_by_day[1])
     end
 
     # ---- travel-time matrix (values in INTERVALS; node names case-insensitive) ----
@@ -351,7 +399,7 @@ function load_input_data(input_dir::AbstractString)
               SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV,
               p_digging, p_loading_swinging, p_traveling, p_idling,
               prior_mu, prior_sigma, true_powers, obs_noise_std,
-              hours_digging, hours_loading_swinging, tau_trv, k_trv,
+              hours_digging, hours_loading_swinging, dig_by_day, load_by_day, tau_trv, k_trv,
               lambda_whl_elec, lambda_CO2, R_work,
               rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP,
               carbon_price_per_ton, scale, B)
@@ -496,7 +544,13 @@ end
 function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit0,
                             rem_dig, rem_load, cum_dig_e, cum_load_e, cum_trv_e,
                             peak_nc0, peak_op0, pvec;
-                            daily_dig = rem_dig, daily_load = rem_load,
+                            # PER-DAY work schedule: node-length quotas indexed by day.
+                            # `nothing` => repeat d.hours_* each day (legacy lumpsum).
+                            dig_by_day = nothing,
+                            load_by_day = nothing,
+                            # SHARED applied Work(1)/Break(0) flags for the CURRENT day,
+                            # one growing list per CEV (seeds the rest-rule seam).
+                            work_hist = nothing,
                             require_site_visit::Bool = false,
                             single_visit_per_site::Bool = false,
                             peak_demand_limit = nothing,
@@ -759,6 +813,38 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         else
             @constraint(model, [e in E], SOE_CEV[e, last(Tb)] >= d.SOE_CEV_ini[e] - term_tol)
         end
+
+        # ---- PROACTIVE KEEP-UP RESERVE (keeps the hard terminal recursively feasible) --
+        # Built backward from the GLOBAL terminal Gterm = last(K) (the buffer day's final
+        # interval). A CEV is only charged while the MCS is parked at its site; to honour
+        # the evening end-at-grid rule the MCS must depart `tgrid` intervals before Gterm,
+        # so the LAST interval it can charge is `Lc`. After that the CEV idles and, because
+        # idling itself draws power, its SOE strictly DRAINS. We lower-bound the CEV SOE at
+        # every boundary by the least level from which the terminal is still reachable. The
+        # bound only binds in the final tail (well inside the buffer day, after the last
+        # night), so it never distorts the productive days; applied every step it makes the
+        # hard terminal recursively feasible instead of a knife-edge.
+        Gterm    = last(K)
+        plug_cap = maximum(d.DCH_MCS_plug)
+        idle_a   = B[4]
+        for e in E
+            site_e = findfirst(i -> d.A[i, e] == 1, N)
+            site_e === nothing && continue
+            tgrid = minimum(travel_steps[site_e, g] for g in N_g) + 1   # +1: departure interval is transit
+            Lc    = Gterm - tgrid                                        # last interval the MCS can charge here
+            Lc < first(K) && continue                                    # window past last charge -> terminal handles it
+            idle_drain = p_activity[idle_a] * delta_T
+            chg_net    = max(min(d.CH_CEV[e], plug_cap) * delta_T - idle_drain, 1.0e-6)
+            n_tail     = Gterm - Lc
+            target_e   = d.SOE_CEV_ini[e] - term_tol
+            S_star     = target_e + idle_drain * n_tail
+            for t in Tb
+                lb = t <= Lc + 1 ? S_star - chg_net * ((Lc + 1) - t) :
+                                   target_e + idle_drain * (Gterm + 1 - t)
+                lb = min(lb, d.SOE_CEV_max[e])
+                lb > d.SOE_CEV_min[e] && @constraint(model, SOE_CEV[e, t] >= lb)
+            end
+        end
     end
 
     # ---- plugging / presence logic ----
@@ -860,22 +946,29 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @constraint(model, [i in N_c, e in E, k in K],
         P_work[i, e, k] == sum(p_activity[a] * u[e, i, a, k] for a in B))
 
-    # ---- remaining work demand: DAILY quota as a soft, cumulative TARGET ------------
-    # Each day a fresh quota (daily_dig / daily_load) arrives; the window-start remaining
-    # rem_* already holds the CURRENT day's outstanding hours plus any carried leftover.
-    # For every day-block dy present in the window we require the CUMULATIVE work done
-    # through the END of dy to reach the CUMULATIVE target (rem_* + one fresh quota per
-    # subsequent morning). Any shortfall s_miss_* >= 0 is penalised (rho_miss) and, because
-    # the target is cumulative, automatically ROLLS OVER into the next day -- exactly the
-    # "leftover work carries to the next day with a penalty" behaviour. Working AHEAD is
-    # allowed (slack simply hits 0), so no upper-bound infeasibility.
-    for (p, dy) in enumerate(blockdays)
+    # ---- remaining work demand: PER-DAY quota as a soft, cumulative TARGET -----------
+    # Work is a PER-DAY SCHEDULE (not a single lumpsum): each reported day dy carries its
+    # own per-site quota qd(dy,i)/ql(dy,i) (from dig_by_day/load_by_day, falling back to
+    # d.hours_* if not supplied; out-of-range/buffer days => 0). The window-start rem_*
+    # already holds the CURRENT day's outstanding hours plus any carried leftover; each
+    # SUBSEQUENT morning in the window adds THAT day's own fresh quota. For every day-block
+    # dy present we require the CUMULATIVE work done through the END of dy to reach the
+    # cumulative target. Any shortfall s_miss_* >= 0 is penalised (rho_miss) and, being
+    # cumulative, automatically ROLLS OVER into the next day. Working AHEAD is allowed
+    # (slack hits 0), so no upper-bound infeasibility.
+    qd(dd, i) = dig_by_day  === nothing ? d.hours_digging[i]          :
+                (1 <= dd <= length(dig_by_day)  ? dig_by_day[dd][i]  : 0.0)
+    ql(dd, i) = load_by_day === nothing ? d.hours_loading_swinging[i] :
+                (1 <= dd <= length(load_by_day) ? load_by_day[dd][i] : 0.0)
+    for dy in blockdays
         Kupto = [k for k in K if dayof(k) <= dy]           # window intervals up to end of dy
+        extra_dig(i)  = sum((qd(dd, i) for dd in blockdays if firstday < dd <= dy); init = 0.0)
+        extra_load(i) = sum((ql(dd, i) for dd in blockdays if firstday < dd <= dy); init = 0.0)
         @constraint(model, [i in N_c],
-            s_miss_dig[i, dy] >= (max(rem_dig[i], 0.0) + (p - 1) * daily_dig[i]) -
+            s_miss_dig[i, dy] >= (max(rem_dig[i], 0.0) + extra_dig(i)) -
                                  delta_T * sum(u[e, i, B[1], k] for e in E, k in Kupto))
         @constraint(model, [i in N_c],
-            s_miss_load[i, dy] >= (max(rem_load[i], 0.0) + (p - 1) * daily_load[i]) -
+            s_miss_load[i, dy] >= (max(rem_load[i], 0.0) + extra_load(i)) -
                                   delta_T * sum(u[e, i, B[2], k] for e in E, k in Kupto))
     end
 
@@ -897,13 +990,32 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # i.e. >= 1 idle break interval per window. The idle interval may be used to charge.
     rest_cap = Int(round(d.t_limit_rest / delta_T))      # max work intervals per window
     rest_win = rest_cap + 1                               # window length in intervals
+    Wc(e, i, k) = sum(u[e, i, a, k] for a in (B[1], B[2], B[3]))
     if length(K) >= rest_win
-        # Only apply to rolling windows that stay WITHIN a single day-block (a night is a
-        # full rest, so a break need not be enforced across it).
+        # (a) within-window: rolling windows that stay WITHIN a single day-block (a night
+        # is a full rest, so a break need not be enforced across it).
         rest_starts = [k0 for k0 in first(K):(last(K) - rest_win + 1)
                        if dayof(k0) == dayof(k0 + rest_win - 1)]
         @constraint(model, [i in N_c, e in E, k0 in rest_starts],
-            sum(u[e, i, a, k] for a in (B[1], B[2], B[3]), k in k0:(k0 + rest_win - 1)) <= rest_cap)
+            sum(Wc(e, i, k) for k in k0:(k0 + rest_win - 1)) <= rest_cap)
+    end
+    # (b) SEAM: because the controller re-solves every step and applies only the first
+    # interval, a purely within-window rest limit would let a work-run LEAK across the
+    # re-solves (rest_cap at the tail of one window + rest_cap at the head of the next).
+    # Seed the rule with the CURRENT day's applied Work/Break flags (work_hist, reset each
+    # morning). For overlap o = 1..rest_cap we count the last o applied flags as constants;
+    # the binding o = rest_cap seam forbids continuing a maximal work-run into the window.
+    if work_hist !== nothing
+        for e in E
+            h = work_hist[e]; Lh = length(h)
+            for o in 1:min(rest_cap, Lh)
+                nfut = rest_win - o
+                ks = [first(K) + t for t in 0:(nfut - 1)]
+                all(k -> k in K && dayof(k) == firstday, ks) || continue
+                hsum = sum(h[(Lh - o + 1):Lh])
+                @constraint(model, [i in N_c], hsum + sum(Wc(e, i, k) for k in ks) <= rest_cap)
+            end
+        end
     end
 
     # ---- travel pacing (Eq. 13): CEV repositioning cadence ----
@@ -1152,12 +1264,18 @@ function run_scenario_1(; mode::Symbol = :synthetic,
     # ---- realized physical state (CARRIED across days) ----
     soe_mcs  = copy(float.(d.SOE_MCS_ini))
     soe_cev  = copy(float.(d.SOE_CEV_ini))
-    # Per-day work quota that ARRIVES each morning; whatever is left unfinished stays in
-    # rem_* and carries into the next day (a soft, penalised carry via the MILP s_miss).
-    daily_dig  = copy(float.(d.hours_digging))
-    daily_load = copy(float.(d.hours_loading_swinging))
-    rem_dig    = zeros(length(d.hours_digging))
-    rem_load   = zeros(length(d.hours_loading_swinging))
+    # PER-DAY work quota: each reported day issues its OWN per-site dig/load quota
+    # (d.dig_by_day / d.load_by_day). The dropped buffer day (and any out-of-range day)
+    # gets NO fresh work. Whatever is left unfinished stays in rem_* and carries into the
+    # next day (a soft, penalised carry via the MILP s_miss).
+    nN_work    = length(d.hours_digging)
+    quota_dig(day)  = (1 <= day <= min(n_days_keep, length(d.dig_by_day)))  ? float.(d.dig_by_day[day])  : zeros(nN_work)
+    quota_load(day) = (1 <= day <= min(n_days_keep, length(d.load_by_day))) ? float.(d.load_by_day[day]) : zeros(nN_work)
+    rem_dig    = zeros(nN_work)
+    rem_load   = zeros(nN_work)
+    # SHARED applied Work(1)/Break(0) flags for the CURRENT day (reset every morning);
+    # seeds the rest-rule seam so a work-run cannot leak across the 15-min re-solves.
+    work_hist  = [Int[] for _ in d.E]
 
     # ---- ONLINE Bayesian estimator seeded with the offline TruncatedNormal prior ----
     est = BayesianActivityEstimator(d.prior_mu, d.prior_sigma; mcmc_samples = mcmc_samples)
@@ -1205,9 +1323,11 @@ function run_scenario_1(; mode::Symbol = :synthetic,
     # =========================================================================
     for day in 1:D_total
         # ---- start-of-day resets ----
-        # New work quota arrives; leftover from prior days is already in rem_* (carried).
-        rem_dig  .+= daily_dig
-        rem_load .+= daily_load
+        # THIS day's own fresh quota arrives; leftover from prior days is already in rem_*
+        # (carried). The rest-rule history restarts (a night is a long break).
+        rem_dig  .+= quota_dig(day)
+        rem_load .+= quota_load(day)
+        for e in d.E; empty!(work_hist[e]); end
         # Precedence / travel-pacing counters restart each day (they describe a within-day
         # cadence), as do the daily demand-charge peak trackers.
         cum_dig_e  = zeros(length(d.E))
@@ -1241,7 +1361,8 @@ function run_scenario_1(; mode::Symbol = :synthetic,
             model = build_window_model(d, K_win, soe_mcs, soe_cev, mcs_node, mcs_transit,
                                        rem_dig, rem_load, cum_dig_e, cum_load_e, cum_trv_e,
                                        peak_nc, peak_op, est.mu;
-                                       daily_dig = daily_dig, daily_load = daily_load,
+                                       dig_by_day = d.dig_by_day, load_by_day = d.load_by_day,
+                                       work_hist = work_hist,
                                        require_site_visit = require_site_visit,
                                        single_visit_per_site = single_visit_per_site,
                                        time_limit_sec = time_limit_sec,
@@ -1262,6 +1383,7 @@ function run_scenario_1(; mode::Symbol = :synthetic,
                 push!(fe_time, clk)
                 for e in d.E
                     push!(fe_act[e], "Idle"); push!(fe_chg[e], "No")
+                    push!(work_hist[e], 0)                # held interval counts as a break
                 end
                 push!(fe_mcs, "No")
                 continue
@@ -1293,8 +1415,10 @@ function run_scenario_1(; mode::Symbol = :synthetic,
             # ---- worker-facing front-end row for the APPLIED interval ----
             push!(fe_time, clk)
             for e in d.E
-                push!(fe_act[e], _planned_activity(model, d, e, g0))
+                act = _planned_activity(model, d, e, g0)
+                push!(fe_act[e], act)
                 push!(fe_chg[e], _cev_should_charge(model, d, e, g0))
+                push!(work_hist[e], act in ("Digging", "Loading/Swinging", "Traveling") ? 1 : 0)
             end
             push!(fe_mcs, _mcs_should_charge(model, d, g0))
 

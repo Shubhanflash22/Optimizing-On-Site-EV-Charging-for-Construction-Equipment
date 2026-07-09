@@ -377,7 +377,12 @@ logic, routing (departure/arrival indicators, presence partition, flow
 conservation), travel energy `k_trv·Δt·y`, digging→loading precedence (12d),
 the **rest rule** (12e) and **travel pacing** (13), peak-demand trackers, and the
 optional `require_site_visit` / `single_visit_per_site` rules. Labour is a
-**per-hour MCS towing** cost (`rho_labor·Δt·Σ y_trv`).
+**per-hour MCS towing** cost (`rho_labor·Δt·Σ y_trv`). The three rolling rules
+(rest 12e, precedence 12d, pacing 13) are **seeded from a shared per-CEV
+applied-activity history**, so they hold *across* the every-15-min re-solves — a plain
+within-window rest limit would otherwise let a work-run leak over the window seam
+(4 + 4 = 8 in a row). A **keep-up reserve** (E7) additionally keeps the hard CEV
+terminal recursively feasible (see below).
 
 The controller runs in **two phases**:
 
@@ -408,8 +413,10 @@ terminal (8b) are **hard constraints**. State is handed off exactly between solv
   apply boundary (`mcs_transit = (i, j, remaining)`; `advance_mcs_state`).
 - **Daily peaks** (`peak_nc` / `peak_op`) carry over so demand charges reflect
   the whole day.
-- **Completed work** enters via remaining demand `rem_*` and per-CEV cumulative
-  hours `cum_*_e` (seeding precedence).
+- **Completed work / activity pattern** enters via remaining demand `rem_*` and a
+  **shared per-CEV applied-activity history** `hist` — the single source that seeds
+  precedence (cumulative dig/load), pacing (cumulative travel vs work) *and* the rest
+  rule (recent Work/Break flags). Held (infeasible) intervals are logged as breaks.
 
 Remaining notes (not simplifications of the model, just MPC realities):
 
@@ -419,11 +426,16 @@ Remaining notes (not simplifications of the model, just MPC realities):
   for speed. Likewise the shrinking horizon re-solves the daytime MILP each step —
   raise `time_limit_sec` (or set `shrinking=false`) if runtime matters.
 - The window MILP is solved with the **hard constraints only** — there is
-  **no fallback**. If a re-plan from the realized carry-in state cannot satisfy them (in
-  practice only the CEV energy-neutral terminal 8b can go infeasible, when a drifted
-  state can't be refilled to exactly `soe_ini` in the time left), that interval is
-  reported **INFEASIBLE** and the plant simply **holds state** (no work / no charging)
-  for it. The number of infeasible/held windows is reported at the end of each run.
+  **no fallback**. The one relation that could go infeasible in closed loop is the CEV
+  energy-neutral terminal (8b), when a drifted state can't be refilled to `soe_ini` in the
+  time left. This is prevented by the **keep-up reserve (E7)**: a per-boundary lower bound
+  on each CEV's SOE — built backward from 18:00 using the *net* charge rate (charge minus
+  the idle draw that persists while plugged in) and the last interval the MCS can charge
+  before it must leave for the grid — that forbids any state from which recovery is
+  impossible. **With it, both the synthetic and input datasets run with zero
+  infeasible/held windows** and every constraint is satisfied on every realized interval.
+  Should a window ever still be infeasible, it is reported **INFEASIBLE** and the plant
+  simply **holds state** (no work / no charging) for it; the count is reported per run.
   Relaxation is available only manually via `soft_prec` / `soft_pace` / `soft_term`
   (all default `false` = hard).
 - Limiting Phase 1 to the **daytime** (≤40 intervals) keeps the heavy MILP small;

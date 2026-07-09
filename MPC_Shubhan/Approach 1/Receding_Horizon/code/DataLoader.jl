@@ -89,9 +89,18 @@ function build_default_data()
     p_traveling        = prior_mu[3]
     p_idling           = prior_mu[4]
 
-    # ---- required work hours per node (only site rows 2,3 are used) ----
-    hours_digging          = [0.0, 2.5, 1.5]
-    hours_loading_swinging = [0.0, 1.5, 1.0]
+    # ---- required work hours per node, PER DAY (only site rows 2,3 are used) ----
+    # Work is a PER-DAY schedule (not a single lumpsum): each kept day carries its
+    # own digging/loading quota per site. `dig_by_day[dy]` / `load_by_day[dy]` are
+    # node-length vectors for reported day dy (1..n_days). The dropped buffer day
+    # gets NO fresh work (wind-down only). `hours_digging`/`hours_loading_swinging`
+    # remain the day-1 vectors for any legacy/default reference.
+    n_days = 2                     # synthetic default (reported days KEPT)
+    dig_by_day  = [[0.0, 2.5, 1.5], [0.0, 2.0, 1.0]]
+    load_by_day = [[0.0, 1.5, 1.0], [0.0, 1.0, 0.5]]
+    @assert length(dig_by_day) == n_days == length(load_by_day)
+    hours_digging          = copy(dig_by_day[1])
+    hours_loading_swinging = copy(load_by_day[1])
 
     # ---- travel model: tau_trv[i,j] in INTERVALS, k_trv = kWh per arc ----
     tau_trv = [0.0 2.0 3.0;
@@ -136,9 +145,6 @@ function build_default_data()
 
     scale = 2
     B = [1, 2, 3, 4]
-    # Receding horizon: number of days to KEEP in the results. The driver simulates
-    # n_days + 1 (the last is a dropped buffer day). Synthetic default = 2.
-    n_days = 2
 
     return (; delta_T, K, T, t_start, n_int, n_day, day_end_hour, t_limit_rest, kappa_wt,
               n_days,
@@ -148,10 +154,37 @@ function build_default_data()
               SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV,
               p_digging, p_loading_swinging, p_traveling, p_idling,
               prior_mu, prior_sigma, true_powers, obs_noise_std,
-              hours_digging, hours_loading_swinging, tau_trv, k_trv,
+              hours_digging, hours_loading_swinging, dig_by_day, load_by_day, tau_trv, k_trv,
               lambda_whl_elec, lambda_CO2, R_work,
               rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP,
               carbon_price_per_ton, scale, B)
+end
+
+# Read an OPTIONAL per-day work schedule `work_by_day.csv` (columns:
+# site, day, hours_digging, hours_loading_swinging). Returns
+# (dig_by_day, load_by_day) as n_days node-length vectors, or `nothing` if the
+# file is absent (caller then repeats the single place.csv quota each day).
+function _read_work_by_day(input_dir, node_ids, node_idx, n_days)
+    path = joinpath(input_dir, "work_by_day.csv")
+    isfile(path) || return nothing
+    df = CSV.read(path, DataFrame)
+    for c in ("site", "day", "hours_digging", "hours_loading_swinging")
+        Symbol(c) in propertynames(df) ||
+            error("DataLoader: work_by_day.csv missing required column '$c'")
+    end
+    nN = length(node_ids)
+    dig_by_day  = [zeros(nN) for _ in 1:n_days]
+    load_by_day = [zeros(nN) for _ in 1:n_days]
+    for r in 1:nrow(df)
+        dy = Int(round(Float64(df.day[r])))
+        (1 <= dy <= n_days) || continue
+        loc = lowercase(strip(string(df.site[r])))
+        haskey(node_idx, loc) || continue
+        i = node_idx[loc]
+        dig_by_day[dy][i]  = Float64(df.hours_digging[r])
+        load_by_day[dy][i] = Float64(df.hours_loading_swinging[r])
+    end
+    return (dig_by_day, load_by_day)
 end
 
 # =============================================================================
@@ -292,6 +325,21 @@ function load_input_data(input_dir::AbstractString)
     B = [1, 2, 3, 4]
     # Receding horizon: days to KEEP (driver simulates n_days + 1, drops the buffer day).
     n_days = max(1, Int(round(_psd_opt(par, "n_days", 2.0))))
+
+    # ---- PER-DAY work schedule ----
+    # If work_by_day.csv exists, each reported day gets its own per-site quota;
+    # otherwise the single place.csv quota is repeated for all n_days days.
+    wbd = _read_work_by_day(input_dir, node_ids, node_idx, n_days)
+    if wbd === nothing
+        dig_by_day  = [copy(hours_digging)          for _ in 1:n_days]
+        load_by_day = [copy(hours_loading_swinging) for _ in 1:n_days]
+    else
+        dig_by_day, load_by_day = wbd
+        # keep the day-1 vectors as the legacy default reference
+        hours_digging          = copy(dig_by_day[1])
+        hours_loading_swinging = copy(load_by_day[1])
+    end
+
     return (; delta_T, K, T, t_start, n_int, n_day, day_end_hour, t_limit_rest, kappa_wt,
               n_days,
               N, N_g, N_c, M, E, A,
@@ -300,7 +348,7 @@ function load_input_data(input_dir::AbstractString)
               SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV,
               p_digging, p_loading_swinging, p_traveling, p_idling,
               prior_mu, prior_sigma, true_powers, obs_noise_std,
-              hours_digging, hours_loading_swinging, tau_trv, k_trv,
+              hours_digging, hours_loading_swinging, dig_by_day, load_by_day, tau_trv, k_trv,
               lambda_whl_elec, lambda_CO2, R_work,
               rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP,
               carbon_price_per_ton, scale, B)

@@ -36,8 +36,14 @@ export build_window_model, phase2_overnight_charge
 function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit0,
                             rem_dig, rem_load, cum_dig_e, cum_load_e, cum_trv_e,
                             peak_nc0, peak_op0, pvec;
-                            daily_dig::AbstractVector = d.hours_digging,
-                            daily_load::AbstractVector = d.hours_loading_swinging,
+                            # PER-DAY work schedule (absolute-day indexed vectors of
+                            # node-length quotas). `nothing` => repeat d.hours_* each day.
+                            dig_by_day = nothing,
+                            load_by_day = nothing,
+                            # SHARED applied Work(1)/Break(0) flags for the CURRENT day,
+                            # one growing list per CEV (seeds the rest-rule seam). `nothing`
+                            # => no seam (legacy within-window-only behaviour).
+                            work_hist = nothing,
                             require_site_visit::Bool = false,
                             single_visit_per_site::Bool = false,
                             peak_demand_limit = nothing,
@@ -233,6 +239,38 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         else
             @constraint(model, [e in E], SOE_CEV[e, last(Tb)] >= d.SOE_CEV_ini[e] - term_tol)
         end
+
+        # ---- PROACTIVE KEEP-UP RESERVE (keeps the hard terminal recursively feasible) ----
+        # Built backward from the GLOBAL terminal Gterm = last(K) (the buffer day's final
+        # interval). A CEV is only charged while the MCS is parked at its site; to honour
+        # the evening end-at-grid rule the MCS must depart `tgrid` intervals before Gterm,
+        # so the LAST interval it can charge is `Lc`. After that the CEV idles and, because
+        # idling itself draws power, its SOE strictly DRAINS. We lower-bound the CEV SOE at
+        # every boundary by the least level from which the terminal is still reachable. The
+        # bound only binds in the final tail (well inside the buffer day, after the last
+        # night), so it never distorts the productive days. Applied every step, it makes the
+        # hard terminal recursively feasible instead of a knife-edge.
+        Gterm    = last(K)
+        plug_cap = maximum(d.DCH_MCS_plug)
+        idle_a   = B[4]
+        for e in E
+            site_e = findfirst(i -> d.A[i, e] == 1, N)
+            site_e === nothing && continue
+            tgrid = minimum(travel_steps[site_e, g] for g in N_g) + 1   # +1: departure interval is transit
+            Lc    = Gterm - tgrid                                       # last interval the MCS can charge here
+            Lc < first(K) && continue                                  # window past last charge -> terminal handles it
+            idle_drain = p_activity[idle_a] * delta_T
+            chg_net    = max(min(d.CH_CEV[e], plug_cap) * delta_T - idle_drain, 1.0e-6)
+            n_tail     = Gterm - Lc
+            target_e   = d.SOE_CEV_ini[e] - term_tol
+            S_star     = target_e + idle_drain * n_tail
+            for t in Tb
+                lb = t <= Lc + 1 ? S_star - chg_net * ((Lc + 1) - t) :
+                                   target_e + idle_drain * (Gterm + 1 - t)
+                lb = min(lb, d.SOE_CEV_max[e])
+                lb > d.SOE_CEV_min[e] && @constraint(model, SOE_CEV[e, t] >= lb)
+            end
+        end
     end
 
     # ---- plugging / presence logic ----
@@ -301,16 +339,24 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         P_work[i, e, k] == sum(p_activity[a] * u[e, i, a, k] for a in B))
 
     # ---- daily work quota: soft, CUMULATIVE target that rolls over ----
-    # For every day-block dy in the window, the CUMULATIVE work done through the END of
-    # dy must reach the cumulative target (window-start rem_* + one fresh quota per
-    # subsequent morning). Shortfall s_miss_* >= 0 is penalised and rolls over.
-    for (p, dy) in enumerate(blockdays)
+    # Work is a PER-DAY schedule: each morning after the window's first day adds that
+    # day's own quota (dig_by_day[dd] / load_by_day[dd]). For every day-block dy in the
+    # window, the CUMULATIVE work done through the END of dy must reach the cumulative
+    # target (window-start rem_*, which already includes the first day's fresh quota,
+    # PLUS each subsequent morning's own quota). Shortfall s_miss_* >= 0 rolls over.
+    qd(dd, i) = dig_by_day  === nothing ? d.hours_digging[i]          :
+                (1 <= dd <= length(dig_by_day)  ? dig_by_day[dd][i]  : 0.0)
+    ql(dd, i) = load_by_day === nothing ? d.hours_loading_swinging[i] :
+                (1 <= dd <= length(load_by_day) ? load_by_day[dd][i] : 0.0)
+    for dy in blockdays
         Kupto = [k for k in K if dayof(k) <= dy]
+        extra_dig(i)  = sum((qd(dd, i) for dd in blockdays if firstday < dd <= dy); init = 0.0)
+        extra_load(i) = sum((ql(dd, i) for dd in blockdays if firstday < dd <= dy); init = 0.0)
         @constraint(model, [i in N_c],
-            s_miss_dig[i, dy] >= (max(rem_dig[i], 0.0) + (p - 1) * daily_dig[i]) -
+            s_miss_dig[i, dy] >= (max(rem_dig[i], 0.0) + extra_dig(i)) -
                                  delta_T * sum(u[e, i, B[1], k] for e in E, k in Kupto))
         @constraint(model, [i in N_c],
-            s_miss_load[i, dy] >= (max(rem_load[i], 0.0) + (p - 1) * daily_load[i]) -
+            s_miss_load[i, dy] >= (max(rem_load[i], 0.0) + extra_load(i)) -
                                   delta_T * sum(u[e, i, B[2], k] for e in E, k in Kupto))
     end
 
@@ -324,14 +370,33 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
             delta_T * sum(u[e, i, B[1], tau] for tau in bstart(k):k, e in E)) +
         s_prec[i, k])
 
-    # rest rule: <= t_limit_rest hours of work per rolling window, WITHIN a day-block.
+    # rest rule: <= rest_cap work intervals in any (rest_cap+1) window, WITHIN a day-block
+    # (a night is a long break, so the count restarts each morning). Two parts:
+    #   (a) within-window: every (rest_cap+1)-window lying fully inside one day-block of K;
+    #   (b) SEAM: windows straddling the window start, seeded with the applied Work/Break
+    #       flags of the CURRENT day (work_hist). Without (b) a work-run could leak across
+    #       the every-15-min re-solves (rest_cap at the tail of one window + rest_cap at the
+    #       head of the next). The o=rest_cap seam is the binding one.
     rest_cap = Int(round(d.t_limit_rest / delta_T))
     rest_win = rest_cap + 1
+    Wc(e, i, k) = sum(u[e, i, a, k] for a in (B[1], B[2], B[3]))
     if length(K) >= rest_win
         rest_starts = [k0 for k0 in first(K):(last(K) - rest_win + 1)
                        if dayof(k0) == dayof(k0 + rest_win - 1)]
         @constraint(model, [i in N_c, e in E, k0 in rest_starts],
-            sum(u[e, i, a, k] for a in (B[1], B[2], B[3]), k in k0:(k0 + rest_win - 1)) <= rest_cap)
+            sum(Wc(e, i, k) for k in k0:(k0 + rest_win - 1)) <= rest_cap)
+    end
+    if work_hist !== nothing
+        for e in E
+            h = work_hist[e]; Lh = length(h)
+            for o in 1:min(rest_cap, Lh)
+                nfut = rest_win - o
+                ks = [first(K) + t for t in 0:(nfut - 1)]
+                all(k -> k in K && dayof(k) == firstday, ks) || continue
+                hsum = sum(h[(Lh - o + 1):Lh])
+                @constraint(model, [i in N_c], hsum + sum(Wc(e, i, k) for k in ks) <= rest_cap)
+            end
+        end
     end
 
     # travel pacing: keep cumulative travel ~ proportional to cumulative work (per day).

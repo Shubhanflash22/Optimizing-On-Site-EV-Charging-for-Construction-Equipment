@@ -21,9 +21,13 @@ run_scenario_1(mode = :input, input_dir = "../data/synthetic_data")
   - `i2` = a **work site**, home of excavator `e1`.
   - `i3` = a **work site**, home of excavator `e2`.
 
-## The work each site must get done (per day)
+## The work each site must get done (PER DAY)
 
-| Site | Excavator | Digging | Loading / swinging |
+Work is a **per-day schedule** (not one lumpsum): each reported day has its own quota.
+For the exported CSV set the `place.csv` quota below is used unless a `work_by_day.csv`
+is added; the built-in `:synthetic` mode ships a two-day schedule that differs by day.
+
+| Site | Excavator | Digging (default/day 1) | Loading / swinging (default/day 1) |
 |------|-----------|---------|--------------------|
 | `i2` | `e1` | 2.5 h | 1.5 h |
 | `i3` | `e2` | 1.5 h | 1.0 h |
@@ -38,10 +42,10 @@ run_scenario_1(mode = :input, input_dir = "../data/synthetic_data")
 
 ## The day (repeated across the multi-day horizon)
 
-This daily profile is reused for **every** simulated day: the controller runs a
-multi-day, cross-day receding horizon (`n_days` reported days plus one dropped buffer
-day), so the schedule below repeats with the CEV batteries and any unfinished work
-carrying over from one day to the next.
+The controller runs a multi-day, cross-day receding horizon (`n_days` reported days
+plus one dropped buffer day). Each day carries **its own** dig/load quota (from
+`work_by_day.csv` when present, otherwise the `place.csv` default repeated), and the
+CEV batteries plus any unfinished work carry over from one day to the next.
 
 - **Daytime (8:00–18:00, 40 × 15-min steps):** the excavators dig / load / travel / idle; the
   MCS drives between the grid and the sites to keep them charged. The MCS must be parked
@@ -53,7 +57,8 @@ carrying over from one day to the next.
 - The daily dig/load quota is **cumulative**: a fresh day's hours arrive each morning and
   any shortfall rolls over into the next day.
 - Electricity price and grid-carbon intensity vary across all 96 quarter-hours of
-  the day (see `time_data.csv`); the same daily profile is applied each day.
+  the day (see `time_data.csv`); the same price/carbon profile is applied each day,
+  while the **work quota can differ per day** (`work_by_day.csv`).
 
 ## Note on the numbers
 

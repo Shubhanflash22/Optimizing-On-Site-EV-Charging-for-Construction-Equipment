@@ -12,7 +12,7 @@ NCD_Peak_kW,0.0
 OPD_Peak_kW,0.0
 Missed_Work_hour,0.0
 MCS_Transit_hour,1.75
-Overnight_Recharge_kWh,50.09
-Overnight_Cost_USD,5.01
+Overnight_Recharge_kWh,49.47
+Overnight_Cost_USD,4.95
 Infeasible_windows,0
-MPC_loop_time_s,27.92
+MPC_loop_time_s,36.78

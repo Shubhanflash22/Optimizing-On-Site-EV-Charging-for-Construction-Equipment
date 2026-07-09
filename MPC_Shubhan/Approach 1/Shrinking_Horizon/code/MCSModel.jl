@@ -39,11 +39,17 @@ export build_window_model, phase2_overnight_charge
 #   mcs_node0         : node the MCS is parked at (0 if mid-drive)
 #   mcs_transit0      : nothing, or (i,j,r) = mid-drive on arc i->j, r steps left
 #   rem_dig/rem_load  : work hours still remaining at each site
-#   cum_*_e           : hours each excavator has already done (precedence/pacing)
+#   hist              : the SHARED per-CEV applied-activity history. `hist[e]` is the
+#                       chronological list of COMPLETED intervals for excavator e, each
+#                       a tuple (act, hrs): act = applied activity index (1=dig, 2=load,
+#                       3=travel, 4=idle); hrs = realized [dig,load,travel,idle] hours.
+#                       Every history-dependent rule reads from this one object:
+#                       precedence & pacing use the summed hours; the rest rule uses the
+#                       recent Work/Break pattern. (Whether a rule uses it is decided here.)
 #   peak_nc0/peak_op0 : biggest grid draw seen so far today (demand charges)
 #   pvec              : the current per-activity power estimate (est.mu)
 function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit0,
-                            rem_dig, rem_load, cum_dig_e, cum_load_e, cum_trv_e,
+                            rem_dig, rem_load, hist,
                             peak_nc0, peak_op0, pvec;
                             require_site_visit::Bool = false,
                             single_visit_per_site::Bool = false,
@@ -66,6 +72,15 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
 
     # Activity index -> its (estimated) power draw.
     p_activity = Dict(B[a] => pvec[a] for a in eachindex(B))
+
+    # ---- read the SHARED applied-activity history (Option-2 unification) ----
+    # All three history-dependent rules derive what they need from `hist`:
+    #   precedence / pacing -> summed realized hours per activity;
+    #   rest rule           -> the recent Work(1)/Break(0) pattern (travel = work).
+    cum_dig_e  = [sum((r[2][1] for r in hist[e]); init = 0.0) for e in E]
+    cum_load_e = [sum((r[2][2] for r in hist[e]); init = 0.0) for e in E]
+    cum_trv_e  = [sum((r[2][3] for r in hist[e]); init = 0.0) for e in E]
+    work_hist  = [Int[(r[1] in (1, 2, 3)) ? 1 : 0 for r in hist[e]] for e in E]
 
     # Cumulative site work already done (seeds precedence).
     cum_dig_site(i)  = sum(cum_dig_e[e]  * d.A[i, e] for e in E)
@@ -222,6 +237,41 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         else
             @constraint(model, [e in E], SOE_CEV[e, last(Tb)] >= d.SOE_CEV_ini[e] - term_tol)
         end
+
+        # ---- PROACTIVE KEEP-UP RESERVE (keeps the hard terminal recursively feasible) ----
+        # A CEV is only charged while the MCS is parked at its site; to honour the
+        # end-at-grid rule the MCS must depart `tgrid` intervals before day-end, so the
+        # LAST interval it can charge here is `Lc`. After that the CEV sits IDLE, and
+        # because the idle activity itself draws power the SOE strictly DRAINS over that
+        # tail. Two facts must therefore be respected or later windows go infeasible
+        # ("drained too late" / "topped up too late"):
+        #   * charging while plugged in is idle, so the NET gain per interval is
+        #     (max charge - idle draw), not the gross charge rate;
+        #   * the terminal target is (ini - term_tol), and the CEV must be high enough at
+        #     the start of the idle tail to still meet it after the tail drain.
+        # We build, backward from day-end, the minimum SOE at every boundary from which a
+        # feasible recovery still exists, and pin the state above it. Applied every step
+        # this makes the hard terminal recursively feasible instead of a knife-edge.
+        plug_cap = maximum(d.DCH_MCS_plug)
+        idle_a   = B[4]
+        for e in E
+            site_e = findfirst(i -> d.A[i, e] == 1, N)
+            site_e === nothing && continue
+            tgrid = minimum(travel_steps[site_e, g] for g in N_g) + 1   # +1: departure interval is transit
+            Lc    = d.n_day - tgrid                                     # last interval the MCS can charge here
+            Lc < first(K) && continue                                  # window past last charge -> terminal handles it
+            idle_drain = p_activity[idle_a] * delta_T                   # SOE lost per idle interval
+            chg_net    = max(min(d.CH_CEV[e], plug_cap) * delta_T - idle_drain, 1.0e-6)  # net gain per charge interval
+            n_tail     = d.n_day - Lc                                   # idle-only intervals after the MCS leaves
+            target_e   = d.SOE_CEV_ini[e] - term_tol
+            S_star     = target_e + idle_drain * n_tail                 # SOE needed at boundary Lc+1 (idle-tail start)
+            for t in Tb
+                lb = t <= Lc + 1 ? S_star - chg_net * ((Lc + 1) - t) :  # charging phase: ramp up to S_star
+                                   target_e + idle_drain * (d.n_day + 1 - t)   # idle tail: only drains
+                lb = min(lb, d.SOE_CEV_max[e])
+                lb > d.SOE_CEV_min[e] && @constraint(model, SOE_CEV[e, t] >= lb)
+            end
+        end
     end
 
     # ---- plugging / presence logic ----
@@ -308,12 +358,35 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         d.scale * (cum_dig_site(i) + delta_T * sum(u[e, i, B[1], tau] for tau in first(K):k, e in E)) +
         s_prec[i, k])
 
-    # rest rule: <= t_limit_rest hours of work per rolling (t_limit_rest + step) window.
+    # ---- rest rule: <= rest_cap work intervals in any (rest_cap + 1) window ----
+    # Equivalently "no (rest_cap+1)-th consecutive WORK interval" (travel counts as
+    # work). In closed loop the window has no memory of the intervals already applied,
+    # so a purely within-window rule lets work-runs leak across every re-solve. We fix
+    # that by seeding the rule from `work_hist` (the completed Work/Break flags):
+    #   (a) within-window: every (rest_cap+1)-window lying fully inside K;
+    #   (b) SEAM: windows straddling the window start k, using the last `o` applied
+    #       flags as known constants. The o = rest_cap seam (last rest_cap flags + the
+    #       current interval) is the BINDING one — it guarantees the realized trajectory
+    #       never runs a (rest_cap+1)-th consecutive work, INCLUDING at end of day.
     rest_cap = Int(round(d.t_limit_rest / delta_T))
     rest_win = rest_cap + 1
+    Wc(e, i, k) = sum(u[e, i, a, k] for a in (B[1], B[2], B[3]))
+    # (a) within-window full windows (start at k .. so it also covers the current step)
     if length(K) >= rest_win
         @constraint(model, [i in N_c, e in E, k0 in first(K):(last(K) - rest_win + 1)],
-            sum(u[e, i, a, k] for a in (B[1], B[2], B[3]), k in k0:(k0 + rest_win - 1)) <= rest_cap)
+            sum(Wc(e, i, k) for k in k0:(k0 + rest_win - 1)) <= rest_cap)
+    end
+    # (b) seam windows straddling the boundary, seeded with applied history.
+    for e in E
+        h = work_hist[e]
+        Lh = length(h)
+        for o in 1:min(rest_cap, Lh)
+            nfut = rest_win - o
+            ks = [first(K) + t for t in 0:(nfut - 1)]
+            all(k -> k in K, ks) || continue          # only enforce REAL (in-day) windows
+            hsum = sum(h[(Lh - o + 1):Lh])
+            @constraint(model, [i in N_c], hsum + sum(Wc(e, i, k) for k in ks) <= rest_cap)
+        end
     end
 
     # travel pacing: keep cumulative travel ~ proportional to cumulative work.

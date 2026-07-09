@@ -266,12 +266,15 @@ Eq.~(1). The MCS carries no Phase-1 terminal-energy term: its end-at-grid positi
 is hard (\S\ref{sec:terminal}) and its energy-neutral cycle is closed overnight in
 Phase~2.
 
-\paragraph{No closed-loop fallback.} The only hard constraint that can become
-infeasible from a drifted realised carry-in state is the CEV terminal equality (8b): a
-re-plan may be unable to bring $S^C_{e}$ back to exactly $S^{C,\mathrm{ini}}_e$ in the
-time remaining. Nothing is relaxed automatically: when a window is infeasible it is
-reported as such and the plant \emph{holds state} (no work / no charging) for that
-interval. Relaxation is available only manually, per group, via the
+\paragraph{No closed-loop fallback.} The only hard constraint that could become
+infeasible from a drifted realised carry-in state is the CEV terminal (8b): a
+re-plan might be unable to bring $S^C_{e}$ back to $S^{C,\mathrm{ini}}_e-\varepsilon$ in the
+time remaining. This is prevented by the \emph{keep-up reserve} (E7), a per-boundary lower
+bound on each CEV's SOE that keeps the terminal recursively reachable, so in practice the
+closed loop reports \emph{zero} infeasible/held windows on both datasets. Should a window
+ever still be infeasible, nothing is relaxed automatically: it is reported as such and the
+plant \emph{holds state} (no work / no charging) for that interval. Relaxation is available
+only manually, per group, via the
 \texttt{soft\_prec}/\texttt{soft\_pace}/\texttt{soft\_term} switches (all default
 \texttt{false}, i.e.\ hard).
 
@@ -379,6 +382,31 @@ S^{C}_{e,\max\set{T}} &\ge S^{C,\mathrm{ini}}_e - \varepsilon
    && \forall e \quad(\text{only if the window reaches the horizon end}).
    \label{eq:terminal-cev}
 \end{align}
+
+\paragraph{Keep-up reserve (E7, hard --- recursive feasibility of \eqref{eq:terminal-cev}).}
+A CEV is charged only while the MCS is parked at its site, but the MCS must reach a grid
+node by the horizon end (end-at-grid rule), so it must \emph{depart} $t^{\mathrm{grid}}_e$
+intervals earlier; the last interval it can still charge CEV $e$ is $L^{\mathrm c}_e=G-t^{\mathrm{grid}}_e$,
+where $G=\max\set{K}$ is the terminal interval. After $L^{\mathrm c}_e$ the CEV only idles,
+and since idling itself draws $\widehat p_4\dt$ per interval its SOE \emph{strictly drains};
+before $L^{\mathrm c}_e$ it can gain at most the \emph{net} rate
+$\chi_e=\max\{\overline{C}^{\mathrm{ch}}_e\dt-\widehat p_4\dt,\ 0^+\}$ per interval (plug charge
+minus the idle draw that persists while plugged in). Reaching the target
+$S^\star_e=S^{C,\mathrm{ini}}_e-\varepsilon$ from any boundary $t$ then requires
+\begin{align}
+S^{C}_{e,t}\ \ge\ \underline{S}^{\mathrm{keep}}_{e,t}\ =\ 
+\begin{cases}
+\big(S^\star_e+\widehat p_4\dt\,(G-L^{\mathrm c}_e)\big)-\chi_e\,(L^{\mathrm c}_e+1-t), & t\le L^{\mathrm c}_e+1,\\[2pt]
+S^\star_e+\widehat p_4\dt\,(G+1-t), & t> L^{\mathrm c}_e+1,
+\end{cases}
+\end{align}
+capped at $\overline{S}^{C}_e$ and imposed only when it exceeds the floor $\underline{S}^{C}_e$.
+The bound is applied at \emph{every} boundary in the closing window but, by construction,
+only \emph{binds in the final tail} (well inside the dropped buffer day, after the last
+night), so it never distorts the reported days. It turns the terminal from a knife-edge
+into a recursively feasible target: empirically both datasets then run with \emph{zero}
+infeasible/held windows.
+
 The \textbf{MCS} carries \emph{no} Phase-1 terminal-energy constraint: daytime grid
 charging is unrestricted (capped only by $g_{m,i,k}$ / $\overline{C}^{\mathrm{ch}}_m$),
 so --- with no terminal reward and a positive energy price --- the optimum draws from
@@ -470,17 +498,20 @@ since $R_{i,e,k}=0$ off-shift this also gates dig/load/travel to the shift; and
 are therefore natural charging windows in which the CEV is topped back up toward its
 energy-neutral target.
 
-\subsection{Work-demand completion (cumulative, rolling over)}
-Work demand is a \emph{soft, cumulative} per-day target. Each morning a fresh daily quota
-$q^{\mathrm{dig}}_i,q^{\mathrm{load}}_i$ arrives; the window-start remaining hours
-$r^{\mathrm{dig}}_i,r^{\mathrm{load}}_i$ already carry today's outstanding work plus any
-leftover from earlier days. For each day-block $d$ present in the window (in order,
-$p=1,2,\dots$), the cumulative hours done through the end of day $d$ plus a non-negative
+\subsection{Work-demand completion (per-day schedule, cumulative, rolling over)}
+Work demand is a \emph{soft, cumulative} target driven by a \emph{per-day schedule}: each
+reported day $d$ carries its \emph{own} per-site quota $q^{\mathrm{dig}}_{d,i},q^{\mathrm{load}}_{d,i}$
+(supplied by \texttt{work\_by\_day.csv}, or a single default repeated), rather than one
+lumpsum reused every day; the dropped buffer day gets no fresh work ($q_{d,i}=0$). Each
+morning that day's quota is added, and the window-start remaining hours
+$r^{\mathrm{dig}}_i,r^{\mathrm{load}}_i$ already carry the first day's outstanding work plus
+any leftover from earlier days. For each day-block $d$ present in the window (with first
+day-block $d_0$), the cumulative hours done through the end of day $d$ plus a non-negative
 slack must meet the cumulative target. Writing $\set{K}_{\le d}=\{k\in\set{K}:\mathrm{day}(k)\le d\}$:
 \begin{align}
-s^{\mathrm{miss,dig}}_{i,d} &\ge \big(\max\{r^{\mathrm{dig}}_i,0\}+(p-1)q^{\mathrm{dig}}_i\big)
+s^{\mathrm{miss,dig}}_{i,d} &\ge \Big(\max\{r^{\mathrm{dig}}_i,0\}+\!\!\sum_{d_0<d'\le d}\!\! q^{\mathrm{dig}}_{d',i}\Big)
    - \dt\!\!\sum_{e}\sum_{k\in\set{K}_{\le d}} u_{e,i,1,k} && \forall i\in\set{N}_c\\
-s^{\mathrm{miss,load}}_{i,d} &\ge \big(\max\{r^{\mathrm{load}}_i,0\}+(p-1)q^{\mathrm{load}}_i\big)
+s^{\mathrm{miss,load}}_{i,d} &\ge \Big(\max\{r^{\mathrm{load}}_i,0\}+\!\!\sum_{d_0<d'\le d}\!\! q^{\mathrm{load}}_{d',i}\Big)
    - \dt\!\!\sum_{e}\sum_{k\in\set{K}_{\le d}} u_{e,i,2,k} && \forall i\in\set{N}_c
 \end{align}
 The slacks $s^{\mathrm{miss,\cdot}}\ge0$ (penalised at $\rho_{\mathrm{miss}}$) make the
@@ -503,15 +534,28 @@ default: $s^{\mathrm{prec}}_{i,k}\equiv0$ unless the manual \texttt{soft\_prec} 
 \quad \forall i\in\set{N}_c,\,k.
 \end{align}
 
-\subsection{Rest rule (12e)}
+\subsection{Rest rule (12e), history-seeded}
 Over any rolling window of $t_{\mathrm{lim}}{+}\dt$ hours, a CEV performs at most
 $t_{\mathrm{lim}}$ hours of construction work (dig/load/travel) --- i.e.\ at least one
-idle break interval per window (the break may be used to charge):
+idle break interval per window (the break may be used to charge). Let $c=t_{\mathrm{lim}}/\dt$
+be the work cap and $w=c{+}1$ the window length, and $W_{e,i,k}=\sum_{a\in\{1,2,3\}}u_{e,i,a,k}$.
+The in-window rule covers every $w$-window lying inside one day-block:
 \begin{align}
-\sum_{a\in\{1,2,3\}}\ \sum_{\tau=k}^{k+t_{\mathrm{lim}}/\dt}\!\!\! u_{e,i,a,\tau}
-\ \le\ \tfrac{t_{\mathrm{lim}}}{\dt}
-\quad \forall i\in\set{N}_c,\,e,\ k\le n_K-\tfrac{t_{\mathrm{lim}}}{\dt}.
+\sum_{i\in\set{N}_c}\ \sum_{\tau=k}^{k+c}\ W_{e,i,\tau}\ \le\ c
+\quad \forall e,\ k\ \text{with}\ \mathrm{day}(k)=\mathrm{day}(k{+}c).
 \end{align}
+Because the controller re-solves every $\dt$ and applies only the first interval, a purely
+in-window limit would let a work-run \emph{leak across the seam} (up to $c$ at the tail of
+one window plus $c$ at the head of the next). We therefore \emph{seed} the rule with the
+current day's already-applied Work/Break flags $h_e=(h_{e,1},\dots,h_{e,L})$ (reset each
+morning, since a night is a long break; held intervals count as breaks). For each overlap
+$o=1,\dots,\min(c,L)$ with the last $o$ applied flags:
+\begin{align}
+\sum_{j=L-o+1}^{L} h_{e,j}\ +\ \sum_{i\in\set{N}_c}\ \sum_{\tau=k_0}^{k_0+w-o-1}\!\! W_{e,i,\tau}
+\ \le\ c \quad \forall e,
+\end{align}
+where $k_0=\min\set{K}$ is the window start (in the current day-block). The binding case
+$o=c$ forbids continuing a maximal work-run straight into the new window.
 
 \subsection{Travel pacing (13, hard)}
 A CEV's cumulative repositioning (traveling) is tied to its cumulative productive
@@ -536,11 +580,13 @@ By default every constraint is enforced exactly: precedence (12d), travel
 pacing (13) and the CEV terminal (8b) are \textbf{hard} (their slacks pinned to $0$),
 and the objective is exactly Eq.~(1). In closed loop the \emph{realised} activity
 durations differ from the plan (see \S\ref{sec:realized}); the cumulative constants
-seeded into a new window occasionally make a hard re-plan infeasible. Empirically,
-across both datasets the \emph{only} such offender is the CEV terminal equality (8b):
-with precedence and pacing hard, the CEV is already driven back to its start level, so
-the rare infeasibility comes from requiring \emph{exactly} $S^{C,\mathrm{ini}}_e$ when
-the realised tail is too short to recover it precisely.
+seeded into a new window could in principle make a hard re-plan infeasible. The one
+relation exposed to this is the CEV terminal (8b): with precedence and pacing hard the CEV
+is already driven back toward its start level, so the only risk is requiring
+$S^{C,\mathrm{ini}}_e-\varepsilon$ when the realised tail is too short to recover it. The
+keep-up reserve (E7) removes exactly this risk by holding each CEV at or above the least
+reachable level throughout the closing window; across both datasets the closed loop then
+reports \emph{zero} infeasible/held windows.
 
 Accordingly, there is \textbf{no automatic fallback}. When a window is infeasible under
 the hard constraints, it is reported as such and the plant \emph{holds state} (no work /
@@ -556,10 +602,12 @@ constraint $S^{C}_{e,\max\set{T}}\ge S^{C,\mathrm{ini}}_e-\varepsilon$ (the exac
 $\varepsilon=0$) that is imposed \emph{only} when the window reaches the true horizon end
 (the buffer day's $18\!:\!00$); on all earlier days the CEV battery simply carries over.
 The small default $\varepsilon=0.1$\,kWh is the least margin that keeps the closing window
-feasible under the estimator's certainty-equivalent drift. There is still no automatic
-fallback: if a realised state cannot meet even this margin the window is reported infeasible
-and the plant holds state (the terminal can also be relaxed to a penalised slack by manually
-setting \texttt{soft\_term} of \S\ref{sec:soft}). The end-at-grid rule
+feasible under the estimator's certainty-equivalent drift, and the keep-up reserve (E7,
+defined with \eqref{eq:terminal-cev}) keeps that margin recursively reachable so no closing
+window is ever infeasible in practice. There is still no automatic fallback: if a realised state could
+not meet even this margin the window would be reported infeasible and the plant would hold
+state (the terminal can also be relaxed to a penalised slack by manually setting
+\texttt{soft\_term} of \S\ref{sec:soft}). The end-at-grid rule
 $\sum_{i\in\set{N}_g}z_{m,i,k}=1,\ \forall k\in\set{K}^{\mathrm{eve}}$ is likewise
 \emph{hard} at \emph{every} evening (always satisfiable, since the planner reserves
 drive-home time).

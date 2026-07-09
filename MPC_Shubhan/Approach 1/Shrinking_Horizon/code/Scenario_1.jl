@@ -487,6 +487,10 @@ end
 function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit0,
                             rem_dig, rem_load, cum_dig_e, cum_load_e, cum_trv_e,
                             peak_nc0, peak_op0, pvec;
+                            # SHARED applied Work(1)/Break(0) flags for the day so far,
+                            # one growing list per CEV (seeds the rest-rule seam). `nothing`
+                            # => no seam (legacy within-window-only behaviour).
+                            work_hist = nothing,
                             require_site_visit::Bool = false,
                             single_visit_per_site::Bool = false,
                             peak_demand_limit = nothing,
@@ -690,6 +694,37 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         else
             @constraint(model, [e in E], SOE_CEV[e, last(Tb)] >= d.SOE_CEV_ini[e] - term_tol)
         end
+
+        # ---- PROACTIVE KEEP-UP RESERVE (keeps the hard terminal recursively feasible) ----
+        # A CEV is only charged while the MCS is parked at its site; to honour the
+        # end-at-grid rule the MCS must depart `tgrid` intervals before day-end, so the
+        # LAST interval it can charge here is `Lc`. After that the CEV sits IDLE, and
+        # because the idle activity itself draws power the SOE strictly DRAINS over that
+        # tail. So the NET gain per charge interval is (max charge - idle draw), and the
+        # CEV must be high enough at the start of the idle tail to still meet the terminal
+        # target after the tail drain. We build, backward from day-end, the minimum SOE at
+        # every boundary from which a feasible recovery still exists and pin the state
+        # above it -- making the hard terminal recursively feasible instead of a knife-edge.
+        plug_cap = maximum(d.DCH_MCS_plug)
+        idle_a   = B[4]
+        for e in E
+            site_e = findfirst(i -> d.A[i, e] == 1, N)
+            site_e === nothing && continue
+            tgrid = minimum(travel_steps[site_e, g] for g in N_g) + 1   # +1: departure interval is transit
+            Lc    = d.n_day - tgrid                                     # last interval the MCS can charge here
+            Lc < first(K) && continue                                  # window past last charge -> terminal handles it
+            idle_drain = p_activity[idle_a] * delta_T                  # SOE lost per idle interval
+            chg_net    = max(min(d.CH_CEV[e], plug_cap) * delta_T - idle_drain, 1.0e-6)  # net gain per charge interval
+            n_tail     = d.n_day - Lc                                   # idle-only intervals after the MCS leaves
+            target_e   = d.SOE_CEV_ini[e] - term_tol
+            S_star     = target_e + idle_drain * n_tail                 # SOE needed at boundary Lc+1 (idle-tail start)
+            for t in Tb
+                lb = t <= Lc + 1 ? S_star - chg_net * ((Lc + 1) - t) :  # charging phase: ramp up to S_star
+                                   target_e + idle_drain * (d.n_day + 1 - t)   # idle tail: only drains
+                lb = min(lb, d.SOE_CEV_max[e])
+                lb > d.SOE_CEV_min[e] && @constraint(model, SOE_CEV[e, t] >= lb)
+            end
+        end
     end
 
     # ---- plugging / presence logic ----
@@ -810,11 +845,33 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # Over any rolling window of (t_limit_rest + delta_T) hours, a CEV may perform
     # construction-related work (dig/load/travel) for at most t_limit_rest hours --
     # i.e. >= 1 idle break interval per window. The idle interval may be used to charge.
+    # Equivalently "no (rest_cap+1)-th consecutive WORK interval". Because the controller
+    # re-solves every step and applies only the FIRST interval, a purely within-window
+    # limit would let a work-run LEAK across the re-solves (rest_cap at the tail of one
+    # window + rest_cap at the head of the next). We close that by SEEDING the rule from
+    # the applied Work/Break flags of the day so far (work_hist):
+    #   (a) within-window: every (rest_cap+1)-window lying fully inside K;
+    #   (b) SEAM: windows straddling the window start, counting the last `o` applied flags
+    #       as known constants. The binding o = rest_cap seam guarantees the CEV never runs
+    #       a (rest_cap+1)-th consecutive work interval, INCLUDING at end of day.
     rest_cap = Int(round(d.t_limit_rest / delta_T))      # max work intervals per window
     rest_win = rest_cap + 1                               # window length in intervals
+    Wc(e, i, k) = sum(u[e, i, a, k] for a in (B[1], B[2], B[3]))
     if length(K) >= rest_win
         @constraint(model, [i in N_c, e in E, k0 in first(K):(last(K) - rest_win + 1)],
-            sum(u[e, i, a, k] for a in (B[1], B[2], B[3]), k in k0:(k0 + rest_win - 1)) <= rest_cap)
+            sum(Wc(e, i, k) for k in k0:(k0 + rest_win - 1)) <= rest_cap)
+    end
+    if work_hist !== nothing
+        for e in E
+            h = work_hist[e]; Lh = length(h)
+            for o in 1:min(rest_cap, Lh)
+                nfut = rest_win - o
+                ks = [first(K) + t for t in 0:(nfut - 1)]
+                all(k -> k in K, ks) || continue
+                hsum = sum(h[(Lh - o + 1):Lh])
+                @constraint(model, [i in N_c], hsum + sum(Wc(e, i, k) for k in ks) <= rest_cap)
+            end
+        end
     end
 
     # ---- travel pacing (Eq. 13): CEV repositioning cadence ----
@@ -1041,6 +1098,9 @@ function run_scenario_1(; mode::Symbol = :synthetic,
     cum_trv_e  = zeros(length(d.E))
     peak_nc = 0.0                                       # realized daily peak grid draw (kW)
     peak_op = 0.0                                       # realized daily on-peak grid draw
+    # SHARED applied Work(1)/Break(0) flags for the day, one growing list per CEV. Seeds
+    # the rest-rule seam so a work-run cannot leak across the 15-min re-solves.
+    work_hist = [Int[] for _ in d.E]
 
     # ---- ONLINE Bayesian estimator seeded with the offline TruncatedNormal prior ----
     est = BayesianActivityEstimator(d.prior_mu, d.prior_sigma; mcmc_samples = mcmc_samples)
@@ -1093,6 +1153,7 @@ function run_scenario_1(; mode::Symbol = :synthetic,
         model = build_window_model(d, K_win, soe_mcs, soe_cev, mcs_node, mcs_transit,
                                    rem_dig, rem_load, cum_dig_e, cum_load_e, cum_trv_e,
                                    peak_nc, peak_op, est.mu;
+                                   work_hist = work_hist,
                                    require_site_visit = require_site_visit,
                                    single_visit_per_site = single_visit_per_site,
                                    time_limit_sec = time_limit_sec,
@@ -1115,6 +1176,7 @@ function run_scenario_1(; mode::Symbol = :synthetic,
             push!(fe_time, clock_label(d, k0))
             for e in d.E
                 push!(fe_act[e], "Idle"); push!(fe_chg[e], "No")
+                push!(work_hist[e], 0)                # held interval counts as a break
             end
             push!(fe_mcs, "No")
             continue
@@ -1144,8 +1206,10 @@ function run_scenario_1(; mode::Symbol = :synthetic,
         # ---- worker-facing front-end row for the APPLIED interval ----
         push!(fe_time, clock_label(d, k0))
         for e in d.E
-            push!(fe_act[e], _planned_activity(model, d, e, k0))
+            act = _planned_activity(model, d, e, k0)
+            push!(fe_act[e], act)
             push!(fe_chg[e], _cev_should_charge(model, d, e, k0))
+            push!(work_hist[e], act in ("Digging", "Loading/Swinging", "Traveling") ? 1 : 0)
         end
         push!(fe_mcs, _mcs_should_charge(model, d, k0))
 

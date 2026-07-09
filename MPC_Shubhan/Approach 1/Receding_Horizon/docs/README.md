@@ -153,7 +153,8 @@ The **7-CSV dataset schema** (full column details further below):
 | `parameters.csv` | `Parameter,Value,Unit,Description` — `delta_T, k_trv, rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP, carbon_price_per_ton, p_digging, p_loading_swinging, p_traveling` + our extras (`p_idling, scale, kappa_wt, t_limit_rest, day_end_hour, prior_sigma_frac, obs_noise_std, co2_unit_scale`) |
 | `ev_data.csv` | `<id>,SOE_min,SOE_max,SOE_ini,ch_rate,work_cap` |
 | `mcs_data.csv` | `<id>,SOE_min,SOE_max,SOE_ini,CH_MCS,DCH_MCS,C_MCS_plug,DCH_MCS_plug,eta_ch_dch` |
-| `place.csv` | `site,<one e<i> column per CEV>,hours_digging,hours_loading_swinging` (node with no CEV = grid) |
+| `place.csv` | `site,<one e<i> column per CEV>,hours_digging,hours_loading_swinging` (node with no CEV = grid; the dig/load columns are the **default daily quota** used when `work_by_day.csv` is absent) |
+| `work_by_day.csv` *(optional)* | `site,day,hours_digging,hours_loading_swinging` — the **per-day** work schedule (one row per site per reported day). If present, each day `D` uses its own quota; if absent, the `place.csv` quota repeats every day. |
 | `travel_time.csv` | `Node,<dest cols...>` (square matrix; values in 15-min intervals) |
 | `time_data.csv` | `<time>,<t-id>,lambda_CO2,lambda_buy,intensity_tons_emissions` (96 rows; `n_int`/`t_start` derived from it) |
 | `work_flexible.csv` | `Location,EV,<one column per interval>` (per-interval kW work cap; `0` = no work) |
@@ -291,8 +292,20 @@ assigned CEV are sites.** One `e<i>` column per CEV (1 = that CEV works here).
 |--------|-------|
 | `site` | node id (e.g. `i1` = grid, `i2` = work site) |
 | `e1`, `e2`, … | 1 if that CEV is assigned to this node, else 0 |
-| `hours_digging` | total digging hours required at this site |
-| `hours_loading_swinging` | total loading/swinging hours (precedence: cumulative loading ≤ `scale` × digging) |
+| `hours_digging` | **default daily** digging hours at this site (used when `work_by_day.csv` is absent) |
+| `hours_loading_swinging` | **default daily** loading/swinging hours (precedence: cumulative loading ≤ `scale` × digging) |
+
+### `work_by_day.csv` *(optional)* — per-day work schedule
+One row per (`site`, `day`) for each reported day `1 … n_days`. Lets each day carry a
+**different** dig/load quota, so work is a genuine per-day schedule rather than one
+lumpsum repeated. If the file is missing, the `place.csv` quota is used for every day;
+the dropped buffer day always gets **no** fresh work (wind-down only).
+| Column | Notes |
+|--------|-------|
+| `site` | node id (must match `place.csv`) |
+| `day` | reported day index (`1 … n_days`) |
+| `hours_digging` | digging hours required at this site **on that day** |
+| `hours_loading_swinging` | loading/swinging hours on that day |
 
 ### `travel_time.csv` — MCS travel times (matrix)
 A square matrix: first column = origin node, remaining columns = destination nodes.
@@ -382,7 +395,11 @@ logic, routing (departure/arrival indicators, presence partition, flow
 conservation), travel energy `k_trv·Δt·y`, digging→loading precedence (12d),
 the **rest rule** (12e) and **travel pacing** (13), peak-demand trackers, and the
 optional `require_site_visit` / `single_visit_per_site` rules. Labour is a
-**per-hour MCS towing** cost (`rho_labor·Δt·Σ y_trv`).
+**per-hour MCS towing** cost (`rho_labor·Δt·Σ y_trv`). The rolling rules (rest 12e,
+precedence 12d, pacing 13) are **seeded from the current day's applied history**, so
+they hold *across* the every-15-min re-solves — a plain within-window rest limit would
+otherwise let a work-run leak over the re-solve seam (4 + 4 = 8 in a row). A **keep-up
+reserve** (E7) keeps the hard CEV terminal recursively feasible (see below).
 
 The controller is a **multi-day, cross-day receding horizon**. We simulate
 `n_days` reported days plus **one buffer day** that is dropped from all outputs (it
@@ -395,9 +412,13 @@ and any unfinished work carry straight through each night. It runs in **two phas
 - **Phase 1 — daytime MPC (08:00–18:00 per day, 40 intervals/day):** the cross-day
   window MILP. Productive work (dig/load/travel) happens 08:00–12:00 and 14:00–17:00;
   the 12:00–14:00 lunch and 17:00–18:00 wind-down are non-productive but the CEV
-  stays on-site and **may charge**. **Work quota is a daily, cumulative, soft target**:
-  each morning a fresh `daily_dig`/`daily_load` arrives, and any shortfall is penalised
-  (`rho_miss`) and **rolls over to the next day** (the target is cumulative). The
+  stays on-site and **may charge**. **Work is a PER-DAY schedule** (not a single
+  lumpsum): each reported day `D` has its *own* per-site dig/load quota
+  (`d.dig_by_day[D]` / `d.load_by_day[D]`). For the `:input` dataset this comes from an
+  optional **`work_by_day.csv`** (`site,day,hours_digging,hours_loading_swinging`); if
+  that file is absent the single `place.csv` quota is repeated each day. The quota is a
+  **cumulative, soft target**: each morning that day's fresh quota is added, and any
+  shortfall is penalised (`rho_miss`) and **rolls over to the next day**. The
   **CEV energy-neutral terminal (8b)** — `SOE_end ≥ soe_ini − term_tol` — is applied
   **only at the true horizon end** (the buffer day's 18:00), so kept days are not forced
   back to their start SOE. The MCS must be **parked at a grid node by every 18:00**
@@ -423,8 +444,10 @@ terminal (8b) are **hard constraints**. State is handed off exactly between solv
   apply boundary (`mcs_transit = (i, j, remaining)`; `advance_mcs_state`).
 - **Daily peaks** (`peak_nc` / `peak_op`) carry over so demand charges reflect
   the whole day.
-- **Completed work** enters via remaining demand `rem_*` and per-CEV cumulative
-  hours `cum_*_e` (seeding precedence).
+- **Completed work / activity pattern** enters via remaining demand `rem_*`, per-CEV
+  cumulative hours `cum_*_e` (seeding precedence & pacing), and a **per-CEV applied
+  Work/Break history for the current day** (`work_hist`, reset each morning) that seeds
+  the rest-rule seam. Held (infeasible) intervals are logged as breaks.
 
 Remaining notes (not simplifications of the model, just MPC realities):
 
@@ -434,11 +457,17 @@ Remaining notes (not simplifications of the model, just MPC realities):
   for speed. Likewise the cross-day window re-solves the MILP each step — raise
   `time_limit_sec` or lower `lookahead_days` if runtime matters.
 - The window MILP is solved with the **hard constraints only** — there is
-  **no fallback**. If a re-plan from the realized carry-in state cannot satisfy them (in
-  practice only the CEV energy-neutral terminal 8b can go infeasible, when a drifted
-  state can't be refilled to exactly `soe_ini` in the time left), that interval is
-  reported **INFEASIBLE** and the plant simply **holds state** (no work / no charging)
-  for it. The number of infeasible/held windows is reported at the end of each run.
+  **no fallback**. The one relation that could go infeasible in closed loop is the CEV
+  energy-neutral terminal (8b) at the horizon end, when a drifted state can't be refilled
+  to `soe_ini` in the time left. This is prevented by the **keep-up reserve (E7)**: a
+  per-boundary lower bound on each CEV's SOE, built backward from the buffer day's 18:00
+  using the *net* charge rate (charge minus the idle draw that persists while plugged in)
+  and the last interval the MCS can charge before it must leave for the grid. It only
+  binds in the final tail (inside the dropped buffer day), so it never distorts the
+  reported days. **Both datasets run with zero infeasible/held windows** and every
+  constraint holds on every realized interval. Should a window ever still be infeasible,
+  it is reported **INFEASIBLE** and the plant **holds state** for it; the count is
+  reported per run.
   Relaxation is available only manually via `soft_prec` / `soft_pace` / `soft_term`
   (all default `false` = hard).
 - Limiting Phase 1 to the **daytime** (≤40 intervals) keeps the heavy MILP small;
