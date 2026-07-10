@@ -1,125 +1,89 @@
 ================================================================================
- SCENARIO 1 - CONSTRAINT-BY-CONSTRAINT COMPARISON: CODE vs PDF
+ SCENARIO 1 (SHRINKING HORIZON) - CONSTRAINT-BY-CONSTRAINT: CODE vs MODEL
 ================================================================================
-This compares what the Julia code (code/Scenario_1.jl) actually enforces against
-what the source model "Optimization.pdf" specifies.
+Compares what the Julia code enforces against the formal model (math_model.tex /
+the source "Optimization.pdf"). The window MILP is built in code/4_MCSModel.jl
+(function build_window_model); the closed loop is code/5_MPCLoop.jl (run_mpc);
+the entry point is code/7_Shrinking_Horizon_main.jl. The legacy standalone
+code/Scenario_1.jl mirrors the same constraints but is NOT used by the main.
 
-Cross-checked against the actual Optimization.pdf (equation numbers verified),
-and against our plain-English/formal transcriptions
-(docs/math_model.tex + docs/constraints_explained.txt).
+Controller: SINGLE-DAY SHRINKING horizon. Each 15-min step re-solves the entire
+remaining daytime [k0 .. n_day] (or [k0 .. k0+H-1] if shrinking=false); only the
+first interval is applied and the window shrinks as the day advances. The night is
+a deterministic overnight recharge (Phase 2).
 
-Legend:  OK       = code matches the PDF exactly
-         ADAPTED  = deliberate Scenario-1 adaptation (documented)
-         ~OK      = matches up to a small, documented tolerance
-
+Legend:  OK = matches exactly   ADAPTED = deliberate, documented   ~OK = up to a tol.
 
 --------------------------------------------------------------------------------
- Eq.        | What the PDF specifies            | What the code does            | Status
+ Eq.   | Model requirement                    | Code                           | Status
 --------------------------------------------------------------------------------
- (1) Obj.   | min energy + carbon + NC/OP       | Exactly this; slacks pinned   | OK
-            | demand charges + missed-work      | to 0 so no extra tuning       |
-            | slack (rho_miss) + towing labour  | penalties (Scenario_1.jl      |
-            |                                   | ~585-591)                     |
+ (1)   | Objective = energy + carbon + NC/OP  | obj in build_window_model:     | OK
+        | demand + missed-work slack + towing  | price*P_ch + carbon + demand   |
+        |                                      | + rho_miss*s_miss + rho_labor  |
 --------------------------------------------------------------------------------
- (2)        | MCS power aggregation; charge     | Hard, as written              | OK
-            | only at grid, discharge at sites  |                               |
+ (2-5) | Power aggregation, grid-only charge, | P_ch_tot/P_dch_tot defs;       | OK
+        | site-only discharge, plug limits,    | P_MCS_CEV<=DCH_plug*rho;       |
+        | charge-only-while-idle               | mu<=u[idle] (E4)               |
 --------------------------------------------------------------------------------
- (3)        | Grid draw only where present,     | Hard                          | OK
-            | capped; one MCS per grid conn.    |                               |
+ (6)   | MCS + CEV SOE dynamics w/ efficiency  | SOE_MCS / SOE_CEV recursions   | OK
 --------------------------------------------------------------------------------
- (4)        | CEV plug caps; charge only if     | Hard                          | OK
-            | plugged & in charge mode; <=nplug |                               |
+ (7)   | SOE bounds [min,max]                  | @constraint on SOE_MCS/SOE_CEV | OK
 --------------------------------------------------------------------------------
- (5a-5e)    | Work power <= capacity R, 0 off-  | Hard; 5a with (1-mu) factor   | OK
-            | shift; one activity; work XOR     | (Scenario_1.jl ~789-796)      |
-            | charge; P_work = chosen draw      |                               |
+ (8a)  | MCS energy-neutral over cycle         | closed OVERNIGHT (Phase 2),    | ADAPTED
+        |                                       | not inside daytime MILP        | (two-phase)
+ (8b)  | CEV energy-neutral terminal           | SOE_CEV[end] >= SOE_ini -      | ~OK
+        |                                       | term_tol (hard)                | (term_tol)
 --------------------------------------------------------------------------------
- (6)        | Travel energy per in-transit      | Hard                          | OK
-            | interval                          |                               |
+ (10)  | Routing: presence partition, arrival/ | z + y partition; beta_arr/dep; | OK
+        | departure, flow conservation, travel  | flow conservation; L=k_trv;    |
+        | energy; carried-in transit            | is_carried_trv / carried_arr   |
+ (10e) | MCS parked at grid by 18:00           | z[grid, n_day] == 1            | OK
 --------------------------------------------------------------------------------
- (7)        | SOE bookkeeping (next = now +     | Hard                          | OK
-            | charge - work - travel loss)      |                               |
+ (11)  | One activity per assigned CEV; work   | sum_a u == A; work-power <=    | OK
+        | capped by availability R              | R_work*(1-mu)                  |
 --------------------------------------------------------------------------------
- (8a) MCS   | MCS energy-neutral                | SPLIT: no daytime MCS         | ADAPTED
-     energy | SOE_end = SOE_ini                 | terminal; closed OVERNIGHT    | (two-phase)
-     neutral|                                   | by deterministic Phase-2      |
-            |                                   | smart-charge                  |
+ (12c) | Finish work or pay rho_miss (SOFT),   | s_miss_dig/load per site;      | OK
+        | LUMPSUM per-site requirement          | soft lower target (no cap)     |
 --------------------------------------------------------------------------------
- (8b) CEV   | CEV energy-neutral                | SOE_end >= SOE_ini - term_tol | ~OK
-     energy | SOE_end = SOE_ini                 | term_tol = 0.1 kWh default    | (0.1 kWh
-     neutral|                                   | (= exact equality when        |  margin,
-            |                                   | term_tol = 0); kept feasible  |  + E7)
-            |                                   | by keep-up reserve E7         |
+ (12d) | Precedence: cum load <= scale*cum dig | s_prec pinned to 0 (HARD)      | OK
 --------------------------------------------------------------------------------
- (8c-8d)    | SOE within [min,max], 20% floor   | Hard                          | OK
+ (12e) | Rest rule: <= t_limit_rest work per   | <= rest_cap work per (rest_cap | OK
+        | rolling (t_limit+dt) window           | +1) window; SEEDED from applied| (history-
+        |                                       | work_hist -> holds across the  |  seeded)
+        |                                       | 15-min re-solves & at day-end  |
 --------------------------------------------------------------------------------
- (9)        | Connect only if assigned & MCS    | Hard                          | OK
-            | present                           |                               |
---------------------------------------------------------------------------------
- (10a-10d)  | No self-loop; transit flag;       | Hard; start node = realized   | OK
-            | presence partition; start at grid | position (MPC carry-in)       |
---------------------------------------------------------------------------------
- (10e)      | MCS ends horizon at a grid node   | Enforced at 18:00 (daytime    | ADAPTED
-            |                                   | end), not the 24h end         | (two-phase)
---------------------------------------------------------------------------------
- (11)       | Arrival/departure bookkeeping;    | Hard; + MPC carry-in of the   | OK
-            | arr = dep; not both in one step   | real current position         |
---------------------------------------------------------------------------------
- (12a-12b)  | One sub-activity per interval,    | Hard                          | OK
-            | only at the assigned site         |                               |
---------------------------------------------------------------------------------
- (12c)      | Finish all work or pay rho_miss   | SOFT (the PDF's own slack)    | OK
---------------------------------------------------------------------------------
- (12d)      | PRECEDENCE: cumulative loading    | HARD by default (s_prec       | OK
-            | <= scale * cumulative digging     | pinned to 0)                  |
---------------------------------------------------------------------------------
- (12e)      | REST RULE: over any rolling       | HARD, t_limit_rest = 1 h:     | OK
-            | (t_limit + 15min) window, <=      | >=1 idle break per rolling    | (history-
-            | t_limit hours of work (>=1 idle   | 5-interval window; SEEDED     |  seeded)
-            | break per window)                 | from applied history so it    |
-            |                                   | holds ACROSS re-solves &      |
-            |                                   | at day-end (MCSModel.jl seam) |
---------------------------------------------------------------------------------
- (13)       | TRAVEL PACING: cumulative travel  | HARD by default (s_pace       | OK
-            | tied to productive work, two-     | pinned to 0); kappa_wt = 4    |
-            | sided band (~1 travel per         |                               |
-            | kappa_wt productive intervals)    |                               |
+ (13)  | Travel pacing: two-sided band         | s_pace_hi/lo pinned 0 (HARD);  | OK
+        |                                       | kappa_wt band                  |
 --------------------------------------------------------------------------------
 
-
-EXTRA CONSTRAINTS IN THE CODE (not among PDF Eqs. 1-13)
+EXTRA CONSTRAINTS IN THE CODE (beyond Eqs. 1-13)
 --------------------------------------------------------------------------------
- E1  Peak-demand trackers  | NC + OP peak vars >= grid draw    | realizes the
-                           |                                   | demand terms of Eq.(1)
- E2  Grid-draw cap         | optional hard cap; OFF by default | convenience
- E3  Closed-loop carry-in  | each 15-min re-solve starts from  | MPC form of PDF
-                           | measured SOE/position/work done   | init. cond. (7,8,10d)
- E4  Charge-only-while-idle| mu <= u[idle]                     | implements (5d)
- E5  Site-visit switches   | optional; OFF by default          | original flags
- E6  No fallback           | infeasible window -> hold state,  | user decision
-                           | nothing auto-relaxed              |
- E7  CEV keep-up reserve   | per-boundary SOE floor = min SOE  | makes hard 8b
-                           | still recoverable before the MCS  | recursively
-                           | must leave for grid; net charge   | feasible
-                           | rate (charge - idle draw) + idle  | (MCSModel.jl)
-                           | tail after departure              |
+ E1  Peak-demand trackers  | P_NC/P_OP >= grid draw            | realises demand terms of (1)
+ E3  Closed-loop carry-in  | each re-solve starts from measured| MPC init. conditions
+                           | SOE / position / work done        |
+ E4  Charge-only-while-idle| mu <= u[idle]                     | implements (5)-type rule
+ E5  Site-visit switches   | require_site_visit / single_visit | optional; OFF by default
+ E6  No fallback           | infeasible window -> hold state   | user decision
+ E7  CEV keep-up reserve   | per-boundary SOE floor, built     | makes hard 8b
+                           | backward from 18:00; net charge   | recursively feasible
+                           | rate + idle-tail drain            | (4_MCSModel.jl)
 
-
-SUMMARY OF THE ONLY REAL DEVIATIONS
+THE ONLY DELIBERATE DEVIATIONS
 --------------------------------------------------------------------------------
- 1. (8a)/(10e) TWO-PHASE SPLIT - MCS energy-neutrality and "home by end" are
-    closed overnight (Phase 2) rather than inside one 24h horizon. Deliberate.
- 2. (8b) term_tol = 0.1 kWh - a tiny margin on the CEV terminal (exact at
-    term_tol = 0, but that goes infeasible under online-estimator drift).
+ 1. (8a)/(10e) TWO-PHASE SPLIT - MCS neutrality + "home by end" are closed
+    overnight (deterministic Phase 2) instead of inside one 24h MILP.
+ 2. (8b) term_tol = 0.1 kWh - a tiny margin on the CEV terminal that absorbs
+    online-estimator drift (exact at term_tol = 0, but that risks infeasibility).
 
-Everything else is enforced exactly as the PDF specifies (all HARD by default;
-only missed-work 12c is soft, which is the PDF's own slack). The rest rule (12e)
-is enabled with t_limit = 1 h.
+NOTE vs the RECEDING sibling: this Shrinking model is single-day and LUMPSUM, so it
+does NOT add the receding version's per-day schedule or the hard "no-working-ahead"
+cap. With one day + daily neutrality there is no incentive to overshoot, so it hits
+the lumpsum quota naturally.
 
-CLOSED-LOOP CORRECTNESS (Shrinking-horizon MPC, modular code MCSModel.jl / MPCLoop.jl):
- - The three rolling rules (rest 12e, precedence 12d, pacing 13) are seeded from a
-   SHARED per-CEV applied-activity history, so a within-window limit can no longer
-   "leak" work-runs across the every-15-min re-solves (the 8-in-a-row artefact).
+CLOSED-LOOP CORRECTNESS (modular code 4_MCSModel.jl / 5_MPCLoop.jl):
+ - Rolling rules (rest 12e, precedence 12d, pacing 13) are seeded from a SHARED
+   per-CEV applied-activity history, so a within-window limit can no longer "leak"
+   work-runs across the every-15-min re-solves (the 8-in-a-row artefact).
  - The keep-up reserve (E7) makes the hard CEV terminal (8b) recursively feasible.
- VERIFIED: synthetic + input Shrinking runs finish with ZERO infeasible windows and
- every constraint satisfied on every row of the realised trajectory.
+ VERIFIED: synthetic + input runs finish with ZERO infeasible/held windows and every
+ constraint satisfied on every row of the realised trajectory.

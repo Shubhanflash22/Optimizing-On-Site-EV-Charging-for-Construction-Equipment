@@ -11,31 +11,30 @@
 # MCS to full while the CEV battery and unfinished work carry over. The buffer
 # day is dropped so the CEV energy-neutral wrap-up never lands on a reported day.
 #
-# This file is only the ORCHESTRATOR. The work lives in focused modules:
-#   Common.jl            shared helpers (travel steps, clock labels, step plots)
-#   DataLoader.jl        load :synthetic / :input data; infer day_end_hour
-#   BayesianEstimator.jl the online activity-power learner
-#   MCSModel.jl          the CROSS-DAY window MILP + deterministic overnight charge
-#   MPCLoop.jl           the multi-day closed loop (optimise + learn + apply)
-#   Plotting.jl          the v4_real-style STEP figures (+ CSVs)
-#   Reporting.jl         KPI / cost CSVs, worker schedule, per-day replan grids
+# This file is only the ORCHESTRATOR (step 7). The work lives in focused modules,
+# named in include / dependency order:
+#   1_Common.jl            shared helpers (travel steps, clock labels, step plots)
+#   2_DataLoader.jl        load :synthetic / :input data; infer day_end_hour
+#   3_BayesianEstimator.jl the online activity-power learner
+#   4_MCSModel.jl          the CROSS-DAY window MILP + deterministic overnight charge
+#   5_MPCLoop.jl           the multi-day closed loop (optimise + learn + apply)
+#   6_Output.jl            ALL on-disk artefacts: v4_real-style STEP figures (+ CSVs)
+#                          PLUS KPI/cost CSVs, worker schedule, per-day replan grids
 # #############################################################################
 
 using Printf
 
 const _CODE_DIR = @__DIR__
-include(joinpath(_CODE_DIR, "Common.jl"))
-include(joinpath(_CODE_DIR, "DataLoader.jl"))
-include(joinpath(_CODE_DIR, "BayesianEstimator.jl"))
-include(joinpath(_CODE_DIR, "MCSModel.jl"))
-include(joinpath(_CODE_DIR, "MPCLoop.jl"))
-include(joinpath(_CODE_DIR, "Plotting.jl"))
-include(joinpath(_CODE_DIR, "Reporting.jl"))
+include(joinpath(_CODE_DIR, "1_Common.jl"))
+include(joinpath(_CODE_DIR, "2_DataLoader.jl"))
+include(joinpath(_CODE_DIR, "3_BayesianEstimator.jl"))
+include(joinpath(_CODE_DIR, "4_MCSModel.jl"))
+include(joinpath(_CODE_DIR, "5_MPCLoop.jl"))
+include(joinpath(_CODE_DIR, "6_Output.jl"))
 
 using .DataLoader: load_data
 using .MPCLoop: run_mpc
-using .Plotting: write_trajectory_figures
-using .Reporting: write_reports
+using .Output: write_outputs
 
 # =============================================================================
 # ENTRY POINT
@@ -72,8 +71,7 @@ function run_scenario_1(; mode::Symbol = :synthetic,
 
     _print_kpis(res)
 
-    write_trajectory_figures(res, out_dir)
-    write_reports(res, out_dir)
+    write_outputs(res, out_dir)
 
     println("\nResults written to: $(abspath(out_dir))")
     println("  Figures (v4_real style, kept days): 01..07 + mcs_<m>_power_profile + 11_power_estimate_convergence")

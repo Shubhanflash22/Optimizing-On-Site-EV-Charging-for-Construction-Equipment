@@ -144,7 +144,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @variable(model, beta_dep[M, N, K], Bin)
     @variable(model, P_peak_NC >= 0)
     @variable(model, P_peak_OP >= 0)
-    @variable(model, s_term_cev[E] >= 0)
+    @variable(model, s_term_cev[E, blockdays] >= 0)   # per (CEV, day): daily neutrality slack
 
     # ---- OBJECTIVE: total operating cost ----
     obj = @expression(model,
@@ -160,11 +160,11 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     soft_prec || @constraint(model, [i in N_c, k in K], s_prec[i, k] == 0)
     soft_pace || @constraint(model, [e in E, k in K], s_pace_hi[e, k] == 0)
     soft_pace || @constraint(model, [e in E, k in K], s_pace_lo[e, k] == 0)
-    soft_term || @constraint(model, [e in E], s_term_cev[e] == 0)
+    soft_term || @constraint(model, [e in E, dy in blockdays], s_term_cev[e, dy] == 0)
     @objective(model, Min, obj +
         (soft_prec ? W_prec * sum(s_prec[i, k] for i in N_c, k in K) : AffExpr(0.0)) +
         (soft_pace ? W_pace * sum(s_pace_hi[e, k] + s_pace_lo[e, k] for e in E, k in K) : AffExpr(0.0)) +
-        (soft_term ? W_term * sum(s_term_cev[e] for e in E) : AffExpr(0.0)))
+        (soft_term ? W_term * sum(s_term_cev[e, dy] for e in E, dy in blockdays) : AffExpr(0.0)))
 
     # ---- power aggregation & where power may flow ----
     @constraint(model, [m in M, k in K], P_ch_tot[m, k]  == sum(P_ch_MCS[m, i, k]  for i in N_g))
@@ -231,44 +231,55 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @constraint(model, [m in M, t in Tb], d.SOE_MCS_min[m] <= SOE_MCS[m, t] <= d.SOE_MCS_max[m])
     @constraint(model, [e in E, t in Tb], d.SOE_CEV_min[e] <= SOE_CEV[e, t] <= d.SOE_CEV_max[e])
 
-    # ---- CEV energy neutrality ONLY at the TRUE end of the whole horizon ----
-    if enforce_cev_terminal && is_global_terminal
-        if soft_term
-            @constraint(model, [e in E],  SOE_CEV[e, last(Tb)] - d.SOE_CEV_ini[e] <= s_term_cev[e])
-            @constraint(model, [e in E], -(SOE_CEV[e, last(Tb)] - d.SOE_CEV_ini[e]) <= s_term_cev[e])
-        else
-            @constraint(model, [e in E], SOE_CEV[e, last(Tb)] >= d.SOE_CEV_ini[e] - term_tol)
+    # ---- CEV energy neutrality at the END OF EVERY DAY (daily realignment) ----
+    # Each excavator must return to its START-OF-DAY SOE by every 18:00 present in the
+    # window (the boundary just after each evening interval). This makes each reported day
+    # ENERGY-NEUTRAL (start SOE == end SOE) instead of letting the battery drift across
+    # days. (`is_global_terminal` is no longer used to gate this; it is kept only as an
+    # accepted kwarg for API compatibility.)
+    if enforce_cev_terminal
+        for ke in eve_k
+            dy = dayof(ke)
+            if soft_term
+                @constraint(model, [e in E],  SOE_CEV[e, ke + 1] - d.SOE_CEV_ini[e] <= s_term_cev[e, dy])
+                @constraint(model, [e in E], -(SOE_CEV[e, ke + 1] - d.SOE_CEV_ini[e]) <= s_term_cev[e, dy])
+            else
+                @constraint(model, [e in E], SOE_CEV[e, ke + 1] >= d.SOE_CEV_ini[e] - term_tol)
+            end
         end
 
-        # ---- PROACTIVE KEEP-UP RESERVE (keeps the hard terminal recursively feasible) ----
-        # Built backward from the GLOBAL terminal Gterm = last(K) (the buffer day's final
-        # interval). A CEV is only charged while the MCS is parked at its site; to honour
-        # the evening end-at-grid rule the MCS must depart `tgrid` intervals before Gterm,
-        # so the LAST interval it can charge is `Lc`. After that the CEV idles and, because
-        # idling itself draws power, its SOE strictly DRAINS. We lower-bound the CEV SOE at
-        # every boundary by the least level from which the terminal is still reachable. The
-        # bound only binds in the final tail (well inside the buffer day, after the last
-        # night), so it never distorts the productive days. Applied every step, it makes the
-        # hard terminal recursively feasible instead of a knife-edge.
-        Gterm    = last(K)
+        # ---- PROACTIVE KEEP-UP RESERVE, PER DAY (keeps each daily terminal recursively
+        # feasible) ----------------------------------------------------------------------
+        # Built backward from EACH day's evening deadline Gd. A CEV is only charged while
+        # the MCS is parked at its site; to honour the evening end-at-grid rule the MCS
+        # must depart `tgrid` intervals before Gd, so the LAST interval it can charge is
+        # `Lc`. After that the CEV idles and, because idling itself draws power, its SOE
+        # strictly DRAINS. We lower-bound the CEV SOE at every boundary of that day by the
+        # least level from which the day's terminal is still reachable. The bound only
+        # binds in each day's late tail, so it never distorts productive hours; applied
+        # every step it makes the daily hard terminal recursively feasible.
         plug_cap = maximum(d.DCH_MCS_plug)
         idle_a   = B[4]
         for e in E
             site_e = findfirst(i -> d.A[i, e] == 1, N)
             site_e === nothing && continue
             tgrid = minimum(travel_steps[site_e, g] for g in N_g) + 1   # +1: departure interval is transit
-            Lc    = Gterm - tgrid                                       # last interval the MCS can charge here
-            Lc < first(K) && continue                                  # window past last charge -> terminal handles it
             idle_drain = p_activity[idle_a] * delta_T
             chg_net    = max(min(d.CH_CEV[e], plug_cap) * delta_T - idle_drain, 1.0e-6)
-            n_tail     = Gterm - Lc
             target_e   = d.SOE_CEV_ini[e] - term_tol
-            S_star     = target_e + idle_drain * n_tail
-            for t in Tb
-                lb = t <= Lc + 1 ? S_star - chg_net * ((Lc + 1) - t) :
-                                   target_e + idle_drain * (Gterm + 1 - t)
-                lb = min(lb, d.SOE_CEV_max[e])
-                lb > d.SOE_CEV_min[e] && @constraint(model, SOE_CEV[e, t] >= lb)
+            for ke in eve_k
+                Gd = ke                                          # this day's evening (deadline) interval
+                Lc = Gd - tgrid                                  # last interval the MCS can charge before leaving
+                Lc < first(K) && continue                        # can't charge in-window for this deadline; skip
+                n_tail = Gd - Lc
+                S_star = target_e + idle_drain * n_tail
+                day_lo = max(first(K), Gd - n_day + 1)           # first in-window boundary of this day-block
+                for t in day_lo:(Gd + 1)
+                    lb = t <= Lc + 1 ? S_star - chg_net * ((Lc + 1) - t) :
+                                       target_e + idle_drain * (Gd + 1 - t)
+                    lb = min(lb, d.SOE_CEV_max[e])
+                    lb > d.SOE_CEV_min[e] && @constraint(model, SOE_CEV[e, t] >= lb)
+                end
             end
         end
     end
@@ -338,12 +349,18 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @constraint(model, [i in N_c, e in E, k in K],
         P_work[i, e, k] == sum(p_activity[a] * u[e, i, a, k] for a in B))
 
-    # ---- daily work quota: soft, CUMULATIVE target that rolls over ----
+    # ---- daily work quota: CUMULATIVE target, pinned from BOTH sides ----
     # Work is a PER-DAY schedule: each morning after the window's first day adds that
     # day's own quota (dig_by_day[dd] / load_by_day[dd]). For every day-block dy in the
-    # window, the CUMULATIVE work done through the END of dy must reach the cumulative
-    # target (window-start rem_*, which already includes the first day's fresh quota,
-    # PLUS each subsequent morning's own quota). Shortfall s_miss_* >= 0 rolls over.
+    # window we bound the CUMULATIVE work done through the END of dy against the cumulative
+    # target `tgt_*` (window-start rem_*, which already holds the first day's fresh quota,
+    # PLUS each subsequent morning's own quota):
+    #   * LOWER (soft): shortfall s_miss_* >= 0 is penalised and ROLLS OVER to the next day;
+    #   * UPPER (HARD): NO working ahead -- cumulative work through end of dy may not exceed
+    #     the cumulative quota. Because the cap is per-day-cumulative, unfinished work from
+    #     an earlier day can still be CAUGHT UP later (it is inside the same cumulative
+    #     budget), but a day can never borrow work from a FUTURE day. Working-less is always
+    #     feasible, so the hard cap can never make a window infeasible.
     qd(dd, i) = dig_by_day  === nothing ? d.hours_digging[i]          :
                 (1 <= dd <= length(dig_by_day)  ? dig_by_day[dd][i]  : 0.0)
     ql(dd, i) = load_by_day === nothing ? d.hours_loading_swinging[i] :
@@ -352,12 +369,14 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         Kupto = [k for k in K if dayof(k) <= dy]
         extra_dig(i)  = sum((qd(dd, i) for dd in blockdays if firstday < dd <= dy); init = 0.0)
         extra_load(i) = sum((ql(dd, i) for dd in blockdays if firstday < dd <= dy); init = 0.0)
-        @constraint(model, [i in N_c],
-            s_miss_dig[i, dy] >= (max(rem_dig[i], 0.0) + extra_dig(i)) -
-                                 delta_T * sum(u[e, i, B[1], k] for e in E, k in Kupto))
-        @constraint(model, [i in N_c],
-            s_miss_load[i, dy] >= (max(rem_load[i], 0.0) + extra_load(i)) -
-                                  delta_T * sum(u[e, i, B[2], k] for e in E, k in Kupto))
+        tgt_dig(i)  = max(rem_dig[i], 0.0)  + extra_dig(i)
+        tgt_load(i) = max(rem_load[i], 0.0) + extra_load(i)
+        done_dig(i)  = delta_T * sum(u[e, i, B[1], k] for e in E, k in Kupto)
+        done_load(i) = delta_T * sum(u[e, i, B[2], k] for e in E, k in Kupto)
+        @constraint(model, [i in N_c], s_miss_dig[i, dy]  >= tgt_dig(i)  - done_dig(i))
+        @constraint(model, [i in N_c], s_miss_load[i, dy] >= tgt_load(i) - done_load(i))
+        @constraint(model, [i in N_c], done_dig(i)  <= tgt_dig(i))     # hard: no working ahead
+        @constraint(model, [i in N_c], done_load(i) <= tgt_load(i))
     end
 
     # precedence: cumulative loading <= scale * cumulative digging, WITHIN each day-block
