@@ -15,4 +15,4 @@ MCS_Transit_hour,0.5
 Overnight_Recharge_kWh,31.57
 Overnight_Cost_USD,8.24
 Infeasible_windows,0
-MPC_loop_time_s,7.93
+MPC_loop_time_s,8.1

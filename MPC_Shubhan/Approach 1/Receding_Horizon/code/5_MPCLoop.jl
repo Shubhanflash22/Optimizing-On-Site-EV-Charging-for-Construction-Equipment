@@ -171,7 +171,7 @@ function run_mpc(d; time_limit_sec::Float64 = 60.0,
     println("  prior power estimate : ", round.(est.mu, digits = 2), " kW")
     println("  (hidden) true power  : ", d.true_powers, " kW")
     t0 = time()
-    n_obs_total = 0; n_infeasible = 0; gstep = 0
+    n_obs_total = 0; n_infeasible = 0; n_softened = 0; gstep = 0
     missed_kept = 0.0
 
     for day in 1:D_total
@@ -223,9 +223,33 @@ function run_mpc(d; time_limit_sec::Float64 = 60.0,
             stat = string(termination_status(model))
             cur_node = mcs_node[1]
 
+            # GRACEFUL FALLBACK: a hard-infeasible tail means the daily terminal + keep-up
+            # reserve are not jointly reachable from the drifted state. Do NOT freeze the
+            # plant (holding state charges NOTHING, the worst move for a low battery).
+            # Re-solve once with the terminal made SOFT and the hard reserve dropped, so the
+            # MCS still charges as much as possible toward target; any residual shortfall
+            # then surfaces as a penalty rather than a dead interval.
+            if !has_values(model)
+                n_softened += 1
+                @warn "Hard window infeasible at day=$day k=$k0; re-solving with soft terminal + relaxed reserve." status=stat
+                model = build_window_model(d, K_win, soe_mcs, soe_cev, mcs_node, mcs_transit,
+                                           rem_dig, rem_load, cum_dig_e, cum_load_e, cum_trv_e,
+                                           peak_nc, peak_op, est.mu;
+                                           dig_by_day = d.dig_by_day, load_by_day = d.load_by_day,
+                                           work_hist = work_hist,
+                                           require_site_visit = require_site_visit,
+                                           single_visit_per_site = single_visit_per_site,
+                                           time_limit_sec = time_limit_sec,
+                                           soft_prec = soft_prec, soft_pace = soft_pace,
+                                           soft_term = true, soft_reserve = true, term_tol = term_tol,
+                                           enforce_cev_terminal = true,
+                                           is_global_terminal = is_glob_term)
+                stat = string(termination_status(model))
+            end
+
             if !has_values(model)
                 n_infeasible += 1
-                @warn "No feasible solution at day=$day k=$k0 under HARD constraints; holding state." status=stat
+                @warn "No feasible solution even under SOFT constraints at day=$day k=$k0; holding state." status=stat
                 kept && push!(solve_log, (day, k0, clk, stat, NaN, NaN, try solve_time(model) catch; NaN end))
                 push!(log, (day, gstep, k0, clk, d.lambda_whl_elec[k0], d.lambda_CO2[k0],
                             0.0, 0.0, 0.0, soe_mcs[1], safe_get(soe_cev, 1), safe_get(soe_cev, 2), cur_node,
@@ -364,7 +388,8 @@ function run_mpc(d; time_limit_sec::Float64 = 60.0,
     elapsed = time() - t0
     @printf("MPC loop done in %.1f s (%d telematics observations, %d simulated days)\n",
             elapsed, n_obs_total, D_total)
-    n_infeasible > 0 && @printf("  NOTE: %d windows were INFEASIBLE under the HARD constraints (no fallback);\n        the plant HELD state for those intervals.\n", n_infeasible)
+    n_softened > 0 && @printf("  NOTE: %d windows were hard-infeasible and recovered via the SOFT-terminal fallback\n        (charged toward target; any residual shortfall shows as a penalty).\n", n_softened)
+    n_infeasible > 0 && @printf("  NOTE: %d windows were infeasible even under SOFT constraints; the plant HELD state.\n", n_infeasible)
     println("  final power estimate : ", round.(est.mu, digits = 2), " kW")
     println("  (hidden) true power  : ", d.true_powers, " kW")
 
@@ -410,7 +435,7 @@ function run_mpc(d; time_limit_sec::Float64 = 60.0,
               total_energy, total_cost, total_co2, nc_peak, op_peak, missed,
               labour_cost, transit_intervals, overnight_energy, overnight_cost,
               soe_cev_end = copy(soe_cev), soe_mcs_end = real_SOE_MCS[:, n_kept + 1],
-              n_obs_total, n_infeasible, elapsed)
+              n_obs_total, n_infeasible, n_softened, elapsed)
 end
 
 end # module MPCLoop

@@ -372,14 +372,14 @@ function _write_kpi_metrics(res, out_dir)
                   "NC_demand_charge_USD", "OP_demand_charge_USD", "Missed_Work_Penalty_USD",
                   "Travel_Labour_USD", "Total_Grid_Energy_kWh", "Total_CO2_Emissions_kg",
                   "NCD_Peak_kW", "OPD_Peak_kW", "Missed_Work_hour", "MCS_Transit_hour",
-                  "Overnight_Recharge_kWh", "Overnight_Cost_USD", "Infeasible_windows", "MPC_loop_time_s"],
+                  "Overnight_Recharge_kWh", "Overnight_Cost_USD", "Softened_windows", "Infeasible_windows", "MPC_loop_time_s"],
         Value = Any[round(c.total, digits = 2), round(c.energy_cost, digits = 2), round(c.carbon_cost, digits = 2),
                     round(c.ncd_cost, digits = 2), round(c.opd_cost, digits = 2), round(c.missed_cost, digits = 2),
                     round(c.travel_cost, digits = 2), round(res.total_energy, digits = 2), round(res.total_co2, digits = 2),
                     round(res.nc_peak, digits = 2), round(res.op_peak, digits = 2), round(res.missed, digits = 2),
                     round(res.transit_intervals * res.d.delta_T, digits = 2),
                     round(res.overnight_energy, digits = 2), round(res.overnight_cost, digits = 2),
-                    res.n_infeasible, round(res.elapsed, digits = 2)])
+                    res.n_softened, res.n_infeasible, round(res.elapsed, digits = 2)])
     CSV.write(joinpath(out_dir, "09_cost_kpi_metrics.csv"), totals)
 
     cost_labels = ["Energy", "CO₂", "NCD", "OPD", "Missed Work", "Travel", "Total"]

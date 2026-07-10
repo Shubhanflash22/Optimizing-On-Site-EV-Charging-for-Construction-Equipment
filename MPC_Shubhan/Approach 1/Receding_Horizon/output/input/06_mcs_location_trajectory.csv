@@ -1,6 +1,6 @@
 Time_Period,Time_Start_Label,Time_End_Label,MCS_1_Location,MCS_1_Location_Type
-1,D1 08:00,D1 08:15,0,Travel
-2,D1 08:15,D1 08:30,2,Construction
+1,D1 08:00,D1 08:15,1,Grid
+2,D1 08:15,D1 08:30,0,Travel
 3,D1 08:30,D1 08:45,2,Construction
 4,D1 08:45,D1 09:00,2,Construction
 5,D1 09:00,D1 09:15,2,Construction

@@ -51,6 +51,17 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
                             soft_prec::Bool = false,
                             soft_pace::Bool = false,
                             soft_term::Bool = false,
+                            # drop the HARD keep-up reserve floor (used by the MPC-loop
+                            # fallback so a drifted tail can never freeze the plant).
+                            soft_reserve::Bool = false,
+                            # ANTI-HOARDING levers (they stop the single MCS camping at ONE
+                            # CEV and force it to SHUTTLE between both). `overcharge_frac`
+                            # caps each CEV at SOE_ini + that fraction of its headroom
+                            # (no "charging ahead"); `drawdown_kwh` floors how far a CEV may
+                            # drain BELOW SOE_ini during the day. The floor is relaxed under
+                            # `soft_reserve` (the MPC-loop fallback); the cap is always safe.
+                            overcharge_frac::Float64 = 0.5,
+                            drawdown_kwh::Float64 = 10.0,
                             enforce_cev_terminal::Bool = true,
                             # does this window reach the TRUE end of the whole horizon
                             # (the buffer day's final interval)? Only then do we force the
@@ -258,28 +269,81 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         # least level from which the day's terminal is still reachable. The bound only
         # binds in each day's late tail, so it never distorts productive hours; applied
         # every step it makes the daily hard terminal recursively feasible.
-        plug_cap = maximum(d.DCH_MCS_plug)
-        idle_a   = B[4]
-        for e in E
-            site_e = findfirst(i -> d.A[i, e] == 1, N)
-            site_e === nothing && continue
-            tgrid = minimum(travel_steps[site_e, g] for g in N_g) + 1   # +1: departure interval is transit
-            idle_drain = p_activity[idle_a] * delta_T
-            chg_net    = max(min(d.CH_CEV[e], plug_cap) * delta_T - idle_drain, 1.0e-6)
-            target_e   = d.SOE_CEV_ini[e] - term_tol
-            for ke in eve_k
-                Gd = ke                                          # this day's evening (deadline) interval
-                Lc = Gd - tgrid                                  # last interval the MCS can charge before leaving
-                Lc < first(K) && continue                        # can't charge in-window for this deadline; skip
-                n_tail = Gd - Lc
-                S_star = target_e + idle_drain * n_tail
-                day_lo = max(first(K), Gd - n_day + 1)           # first in-window boundary of this day-block
-                for t in day_lo:(Gd + 1)
-                    lb = t <= Lc + 1 ? S_star - chg_net * ((Lc + 1) - t) :
-                                       target_e + idle_drain * (Gd + 1 - t)
-                    lb = min(lb, d.SOE_CEV_max[e])
-                    lb > d.SOE_CEV_min[e] && @constraint(model, SOE_CEV[e, t] >= lb)
+        #
+        # ROBUSTNESS (certainty-equivalence gap). The reserve is planned on the ESTIMATED
+        # powers while the plant drifts on the TRUE powers. Two SELF-SCALING safety levers
+        # make it robust without disturbing datasets that were already feasible:
+        #   * RES_IDLE_FACTOR > 1 plans the floor against a HEAVIER idle draw than the mean,
+        #     giving a cushion against the true idle exceeding the estimate (this closes the
+        #     day-2 knife-edge). It is NEVER added to the end target, so a CEV that starts at
+        #     SOE_max is never asked to exceed it.
+        #   * share_derate = 1 / (# distinct CEV sites) shrinks the ASSUMED recovery rate,
+        #     because one MCS, parked at a single site at a time, cannot top every site at
+        #     full rate. The shallower ramp forces the MCS to keep the FAR CEV topped up
+        #     EARLIER rather than gambling on a last-minute blast (this closes the day-1
+        #     neglect). With a single CEV site it is exactly 1.0 (reserve unchanged); it only
+        #     relaxes the RATE, never flattens it.
+        # When `soft_reserve` is set (the MPC-loop fallback) the hard floor is dropped so the
+        # window can never freeze.
+        RES_IDLE_FACTOR = 1.5
+        if !soft_reserve
+            plug_cap = maximum(d.DCH_MCS_plug)
+            idle_a   = B[4]
+            cev_sites = unique(filter(!isnothing, [findfirst(i -> d.A[i, e] == 1, N) for e in E]))
+            share_derate = 1.0 / max(1, length(cev_sites))
+            for e in E
+                site_e = findfirst(i -> d.A[i, e] == 1, N)
+                site_e === nothing && continue
+                tgrid = minimum(travel_steps[site_e, g] for g in N_g) + 1   # +1: departure interval is transit
+                idle_drain = RES_IDLE_FACTOR * p_activity[idle_a] * delta_T
+                chg_net    = max(share_derate * min(d.CH_CEV[e], plug_cap) * delta_T - idle_drain, 1.0e-6)
+                target_e   = d.SOE_CEV_ini[e] - term_tol
+                for ke in eve_k
+                    Gd = ke                                          # this day's evening (deadline) interval
+                    Lc = Gd - tgrid                                  # last interval the MCS can charge before leaving
+                    Lc < first(K) && continue                        # can't charge in-window for this deadline; skip
+                    n_tail = Gd - Lc
+                    S_star = target_e + idle_drain * n_tail
+                    day_lo = max(first(K), Gd - n_day + 1)           # first in-window boundary of this day-block
+                    for t in day_lo:(Gd + 1)
+                        lb = t <= Lc + 1 ? S_star - chg_net * ((Lc + 1) - t) :
+                                           target_e + idle_drain * (Gd + 1 - t)
+                        lb = min(lb, d.SOE_CEV_max[e])
+                        lb > d.SOE_CEV_min[e] && @constraint(model, SOE_CEV[e, t] >= lb)
+                    end
                 end
+            end
+        end
+
+        # ---- ANTI-HOARDING over-charge cap (no charging ahead) ----------------------
+        # A CEV only needs to RETURN to SOE_ini by evening, so charging it far above its
+        # start level during the day is wasted effort that keeps the single MCS parked at
+        # the NEAR site while the FAR one is neglected (we saw CEV1 pushed to ~86 kWh while
+        # CEV2 drained to ~32). Cap each CEV at SOE_ini + a modest pre-charge buffer (enough
+        # to ride out one MCS round-trip to the other site). This is an UPPER bound and can
+        # never make the window infeasible -- the terminal target SOE_ini always lies below
+        # it -- so it is applied even under the soft-reserve fallback. Skip the fixed initial
+        # boundary (SOE_CEV[e, first(Tb)] is pinned to the carried-over state).
+        for e in E
+            buf = overcharge_frac * (d.SOE_CEV_max[e] - d.SOE_CEV_ini[e])
+            ub  = min(d.SOE_CEV_max[e], d.SOE_CEV_ini[e] + buf)
+            @constraint(model, [t in Tb; t != first(Tb)], SOE_CEV[e, t] <= ub)
+        end
+
+        # ---- DAYTIME HEALTH FLOOR (forces the MCS to SHUTTLE, not camp) -------------
+        # The keep-up reserve above only guarantees each CEV can RECOVER by its own evening
+        # deadline, which still permits a deep mid-day drain + a last-minute dash (the MCS
+        # camps at one site and neglects the other). This floor additionally forbids ANY CEV
+        # from dropping more than `drawdown_kwh` below its start-of-day level at any daytime
+        # boundary, so the single MCS must keep BOTH CEVs healthy and therefore SHUTTLE
+        # between them rather than hoard time at one. Relaxed under soft_reserve (the MPC-loop
+        # fallback) so a drifted tail can never freeze the plant; the fixed initial boundary
+        # is skipped so a state that already drifted below the floor degrades gracefully.
+        if !soft_reserve
+            for e in E
+                floor_e = max(d.SOE_CEV_min[e], d.SOE_CEV_ini[e] - drawdown_kwh)
+                floor_e > d.SOE_CEV_min[e] &&
+                    @constraint(model, [t in Tb; t != first(Tb)], SOE_CEV[e, t] >= floor_e)
             end
         end
     end

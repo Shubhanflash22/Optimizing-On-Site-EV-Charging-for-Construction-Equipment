@@ -98,12 +98,15 @@ difference is **how long the planning window is and whether it spans more than o
   from a `work_by_day.csv`); unfinished work **rolls over** to the next day (penalised).
 * Simulates the reported days **plus one dropped "buffer" day** purely to give the last
   reported day a full day of look-ahead.
-* Adds two behaviours the single-day model doesn't need:
+* Adds three behaviours the single-day model doesn't need:
   * **Daily battery realignment** — the CEV energy-neutral target fires at **every** 18:00,
     so each reported day is energy-neutral (not just the last).
   * **No working ahead** — a hard cap keeps cumulative work at each day's quota, so the
     controller can't front-load a future day's digging just because power is cheap now
     (leftover can still be *caught up*, never *borrowed forward*).
+  * **Anti-hoarding shuttle** — an over-charge cap + daytime health floor stop the single
+    MCS camping at the near excavator (over-charging it while the far one drains); they
+    force it to **shuttle** and keep both batteries healthy (Receding `docs` §8.15–8.16).
 
 ### At a glance
 
@@ -141,7 +144,39 @@ in `<subfolder>/output/<synthetic|input>/`.
 
 ---
 
-## 5. Where to read next
+## 5. Results — all four runs (final)
+
+Both horizons were run on both datasets with the default settings
+(`time_limit_sec = 60`, `mcmc_samples = 500`, `seed = 1`; Receding keeps **2 days** + a
+dropped buffer day, Shrinking is **1 day**). Every case completed **100 % of the required
+work (0 missed hours)** and returned every excavator to its start-of-day charge.
+
+| Horizon | Dataset | Scope | Digging done (h) | Loading done (h) | Missed work (h) | MCS transit (h) | Overnight recharge (kWh) | Daytime grid (kWh) | Daytime cost¹ ($) | Overnight cost ($) | Soft / Infeas windows | Loop time (s) |
+|---------|---------|-------|-----------------:|-----------------:|----------------:|----------------:|-------------------------:|-------------------:|------------------:|-------------------:|:---------------------:|--------------:|
+| **Receding**  | synthetic | 2 days, 2 CEV | 7.00 | 4.00 | 0.00 | 4.50 | 101.28 | 0.00 | 135.00 | 10.13 | 3 / 0 | 793 |
+| **Receding**  | input     | 2 days, 1 CEV | 5.50 | 2.75 | 0.00 | 1.00 | 58.39  | 0.00 | 250.00 | 15.24 | 0 / 0 | 57 |
+| **Shrinking** | synthetic | 1 day, 2 CEV  | 4.00 | 2.50 | 0.00 | 1.75 | 49.47  | 0.00 | 52.50  | 4.95  | – / 0 | 31 |
+| **Shrinking** | input     | 1 day, 1 CEV  | 3.00 | 1.50 | 0.00 | 0.50 | 31.57  | 0.00 | 125.00 | 8.24  | – / 0 | 8 |
+
+¹ *Daytime cost* here is the towing labour only — time-of-use energy, carbon and peak-demand
+charges are **$0** in these runs because the MCS serves the excavators entirely from its own
+stored battery during the day (**Daytime grid = 0 kWh**) and refills overnight in the cheapest
+hours. The towing rate differs by dataset (synthetic `$30/h`, input `$250/h`), which is why the
+`input` rows cost more per transit-hour. *Overnight cost* is billed separately (the Phase-2
+smart-charge). *Soft windows* apply only to the Receding controller's graceful fallback; the
+Shrinking KPI reports infeasible windows only (`–` = metric not emitted).
+
+**How to read it.** Receding covers **two** work days, so its digging/loading hours are
+roughly double Shrinking's single day (≈3.5 h dig + 2 h load per day either way). The extra
+Receding transit (4.5 h synthetic) is the **single MCS shuttling between the two far-apart
+excavators** across both days — the anti-hoarding cap/floor (see the Receding
+`docs/README.md` §8.15–8.16) keeps both batteries healthy instead of camping at one. The 3
+softened synthetic windows are early-day estimator-bias windows recovered by the fallback;
+they carry **no** work shortfall and every daily terminal is still met.
+
+---
+
+## 6. Where to read next
 
 * **`Shrinking_Horizon/docs/README.md`** — full single-day controller doc.
 * **`Receding_Horizon/docs/README.md`** — full multi-day controller doc.

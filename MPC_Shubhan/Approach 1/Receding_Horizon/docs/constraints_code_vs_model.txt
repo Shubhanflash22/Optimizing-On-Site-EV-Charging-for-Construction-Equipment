@@ -70,10 +70,18 @@ EXTRA CONSTRAINTS IN THE CODE (beyond Eqs. 1-13)
                            | SOE / position / work done        |
  E4  Charge-only-while-idle| mu <= u[idle]                     | implements (5)-type rule
  E5  Site-visit switches   | require_site_visit / single_visit | optional; OFF by default
- E6  No fallback           | infeasible window -> hold state   | user decision
+ E6  Graceful fallback     | hard-infeasible window -> re-solve| avoids dead hold; a
+                           | soft_term+soft_reserve (Softened);| residual shortfall shows
+                           | only then hold state (Infeasible) | as a penalty (5_MPCLoop.jl)
  E7  CEV keep-up reserve   | per-boundary SOE floor, built     | makes the DAILY hard 8b
                            | backward from EACH day's 18:00;   | recursively feasible
                            | net charge rate + idle-tail drain | (4_MCSModel.jl)
+ E8  Over-charge cap       | SOE_CEV <= SOE_ini + overcharge_  | no "charging ahead":
+                           | frac*(SOE_max-SOE_ini)            | stops the MCS hoarding
+                           | (always on; upper bound)          | time at the near CEV
+ E9  Daytime health floor  | SOE_CEV >= SOE_ini - drawdown_kwh | forces the single MCS
+                           | at every daytime boundary         | to SHUTTLE & keep BOTH
+                           | (relaxed under soft_reserve)      | CEVs healthy (4_MCSModel)
 
 THE ONLY DELIBERATE DEVIATIONS
 --------------------------------------------------------------------------------
@@ -84,20 +92,29 @@ THE ONLY DELIBERATE DEVIATIONS
     online-estimator drift (exact at term_tol=0, but that risks infeasibility).
  3. (12c) HARD "no working ahead" cap added on top of the soft cumulative target,
     so a day cannot borrow a future day's work (catch-up of leftover still allowed).
+ 4. ANTI-HOARDING pair (E8 over-charge cap + E9 daytime health floor): with ONE
+    MCS serving two far-apart CEVs, the deadline-only reserve (E7) still permitted
+    the MCS to camp at the near CEV (over-charging it toward SOE_max) while the far
+    CEV drained to near-minimum and was rescued by a last-minute dash. E8 forbids
+    charging a CEV far above its start level; E9 forbids any CEV draining more than
+    drawdown_kwh below its start level. Together they force the MCS to shuttle.
 
 CLOSED-LOOP CORRECTNESS (modular code 4_MCSModel.jl / 5_MPCLoop.jl):
  - Rolling rules (rest 12e, precedence 12d, pacing 13) are seeded from the current
    day's applied Work/Break history, so a within-window limit can no longer "leak"
    work-runs across the every-15-min re-solves (the 8-in-a-row artefact).
- - The keep-up reserve (E7) is intended to make the daily CEV terminal (8b)
-   recursively feasible.
+ - The keep-up reserve (E7) makes the daily CEV terminal (8b) recursively feasible;
+   the anti-hoarding pair (E8/E9) makes the single MCS SHUTTLE between the two CEVs
+   instead of camping at one and neglecting the other.
+ - GRACEFUL FALLBACK (5_MPCLoop.jl): if a hard window is still infeasible (early-day
+   estimator bias + single-MCS sharing), the loop re-solves ONCE with soft_term=true
+   and soft_reserve=true (E7/E9 dropped, terminal penalised) so the MCS still charges
+   toward target rather than freezing. Such windows are counted as Softened_windows.
  LATEST RUN (defaults: time_limit_sec=60, mcmc_samples=500, n_days=2 + buffer):
-   * :input     -> 0 infeasible windows; missed work 0.00 h; loop ~53 s.
-   * :synthetic -> 8 HELD/INFEASIBLE windows at the late-afternoon wind-down
-                   (day 1 & day 2, k=37-40); missed work 0.00 h; loop ~1465 s.
- So on the synthetic scenario the hard daily terminal (8b) + keep-up reserve (E7)
- are NOT simultaneously satisfiable on the wind-down tail from the drifted state,
- and those intervals hold state (no fallback). Work still matches the per-day quota
- and no productive intervals are lost; the held windows are the k=37-40 tail only.
- FIX OPTIONS: tighten/relax the E7 reserve-vs-terminal interaction on the wind-down,
- or run with soft_term=true. (The Shrinking sibling runs 0 infeasible on both modes.)
+   * :input     -> 0 softened, 0 infeasible; missed work 0.00 h; loop ~53 s.
+   * :synthetic -> 3 softened (early-day wind-down), 0 infeasible; missed work
+                   0.00 h; loop ~793 s.
+ VERIFIED per-row: rest rule, precedence, pacing, SOE bounds, MCS end-at-grid, and
+ per-day work all hold; both CEVs shuttle-served and end at/above their start SOE
+ (CEV1 no longer over-charged to ~86; CEV2 no longer drained to ~32). The 3 softened
+ windows carry NO missed work and still meet the daily terminal (graceful, not lost).

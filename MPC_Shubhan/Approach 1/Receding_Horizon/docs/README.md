@@ -77,8 +77,8 @@ a horizon parameter.
 
 **So yes: work can only happen until 5 pm; 5 pm–6 pm (k = 37…40) is a no-work window** where
 each CEV can only idle/charge and the MCS must drive home to a grid node before the overnight
-recharge. (In the current synthetic run these four tail intervals on both reported days are
-exactly where the hard daily terminal can go infeasible — see §9's note.)
+recharge. (In the current synthetic run a few early-day wind-down windows are softened by the
+graceful fallback — see §8.16 — but missed work stays 0.00 h and every daily terminal is met.)
 
 **Global vs within-day index.** Across days the controller lays each day's 40-interval block
 end to end. For a global index `g`: `wd(g) = mod(g−1, n_day)+1` is its position *within its
@@ -178,9 +178,14 @@ julia --% -e "SCENARIO1_NO_AUTORUN=true; include(\"7_Receding_Horizon_main.jl\")
 | `single_visit_per_site` | `false` | at most one visit per site |
 | `refit_every` | `8` | re-fit the Bayesian model every N applied intervals |
 | `mcmc_samples` | `500` | NUTS posterior samples |
-| `soft_prec` / `soft_pace` / `soft_term` | `false` | make precedence (12d) / pacing (13) / CEV terminal (8b) **soft** (penalised) instead of hard. All hard by default; there is **no automatic fallback**. |
+| `soft_prec` / `soft_pace` / `soft_term` | `false` | make precedence (12d) / pacing (13) / CEV terminal (8b) **soft** (penalised) instead of hard. All hard by default; a hard-infeasible window triggers the **graceful soft-terminal fallback** (§8.16), not a dead hold. |
 | `out_dir` | `../output/<mode>` | output folder |
 | `seed` | `1` | RNG seed (telematics noise + NUTS) |
+
+> **Anti-hoarding levers (internal `build_window_model` defaults, not `run_mpc` args):**
+> `overcharge_frac = 0.5` (E8 over-charge cap, §8.15) and `drawdown_kwh = 10.0` (E9 daytime
+> health floor, §8.16). Together they force the single MCS to shuttle between the two CEVs
+> instead of camping at one. Edit them in `4_MCSModel.jl` if you need looser/tighter balancing.
 
 ---
 
@@ -194,8 +199,9 @@ for day in 1 … n_days+1 (last = buffer):
     reset the per-CEV Work/Break history (a night is a long break)
     for k0 in 1 … 40:
         K_win = g0 … min(D_total, day+lookahead_days)*40        # cross-day window
-        model = build_window_model(state, estimate, …)          # solve MILP
-        if infeasible:  record INFEASIBLE, HOLD STATE, continue  # no fallback
+        model = build_window_model(state, estimate, …)          # solve MILP (hard)
+        if hard-infeasible: re-solve soft_term+soft_reserve      # graceful fallback -> Softened
+        if still infeasible: record INFEASIBLE, HOLD STATE, continue
         apply interval k0's decisions; log grid/dch/work/SOE/node
         realize the true activity mix (+noise); observe!(estimator)
         every refit_every steps: refit!(estimator)   # NUTS
@@ -416,14 +422,35 @@ drains (idle draw). The bound is the least SOE from which the terminal is still 
 the net charge rate `chg_net = min(CH_CEV, DCH_MCS_plug)·Δt − idle_drain`. It binds only in
 each day's late tail, so it never distorts productive hours.
 
-> **No fallback & the current infeasibility.** Windows use the hard constraints only. If a
-> re-plan is infeasible the interval is reported **INFEASIBLE** and the plant **holds state**.
-> In the current runs the `:input` dataset solves with **zero** infeasible windows, but the
-> `:synthetic` scenario reports **8 held windows** — the 17:00–18:00 wind-down (k=37–40) of
-> *both* reported days — where the hard daily terminal (8.13) and the keep-up reserve (8.14)
-> are not simultaneously satisfiable from the drifted state. Missed work is still 0.00 h.
-> Workarounds: run with `soft_term = true`, or a small fix to the reserve/terminal interaction
-> on the tail.
+### 8.15 Anti-hoarding over-charge cap (E8, HARD, always on)
+`SOE_CEV[e, t] ≤ SOE_CEV_ini[e] + overcharge_frac·(SOE_max − SOE_ini)` at every daytime
+boundary (the fixed initial boundary is skipped). A CEV only needs to **return** to its start
+level by 18:00, so charging it far above that is wasted effort that keeps the single MCS parked
+at the **near** CEV while the **far** one is neglected (we saw CEV1 pushed to ~86 kWh while CEV2
+drained to ~32). This is an upper bound — the terminal target `SOE_ini` always lies below it —
+so it can **never** make a window infeasible and is applied even under the soft-reserve fallback.
+Default `overcharge_frac = 0.5`.
+
+### 8.16 Daytime health floor (E9, HARD, relaxable)
+`SOE_CEV[e, t] ≥ SOE_CEV_ini[e] − drawdown_kwh` at every daytime boundary. The keep-up reserve
+(8.14) only guarantees each CEV can **recover by its own 18:00**, which still permits a deep
+mid-day drain plus a last-minute dash — i.e. the MCS camps at one site and neglects the other.
+This floor forbids any CEV from draining more than `drawdown_kwh` below its start level, so the
+single MCS must keep **both** CEVs healthy and therefore **shuttle** between them. It is relaxed
+under the soft-reserve fallback (and skips the fixed initial boundary) so a drifted state can
+never freeze the plant. Default `drawdown_kwh = 10.0`.
+
+> **Graceful fallback (no dead intervals).** Windows use the hard constraints first. If a
+> re-plan is hard-infeasible (early-day estimator bias + one MCS shared across two CEVs), the
+> loop re-solves **once** with `soft_term = true` **and** `soft_reserve = true` (the terminal
+> becomes a penalised band and the E7/E9 floors are dropped), so the MCS still charges toward
+> target instead of holding state. Such windows are counted as **`Softened_windows`**; only if
+> even that soft re-solve fails does the plant hold state (`Infeasible_windows`).
+>
+> In the current default runs the `:input` dataset solves with **0 softened / 0 infeasible**,
+> and the `:synthetic` scenario has **3 softened** windows (early-day wind-down) and **0
+> infeasible**. Missed work is **0.00 h** in both, both CEVs are shuttle-served, and every daily
+> terminal is met — the softened windows carry no shortfall.
 
 ---
 
