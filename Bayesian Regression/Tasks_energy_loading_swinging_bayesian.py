@@ -65,6 +65,33 @@ start_time = time.time()
 
 grading = "False";
 
+# Minimum cumulative |ΔSoC| (in %) per equation. Activities accumulate into a
+# bucket until cumulative SoC drop reaches this threshold, then one equation is
+# emitted for the full bucket. Set to 1 to reproduce the original behavior of
+# one equation per SoC step. Larger values trade equation count for per-equation
+# signal-to-noise (1 % steps carry ~50 % relative quantization noise; 2 % steps
+# carry ~25 %). Matches Tasks_energy_loading_swinging.py.
+MIN_DELTA_SOC = 3
+
+# Material handled. Selects which task-recording files feed the analysis, so you
+# don't have to hand-edit all_task_dfs. One of: "soil", "decomposed granite",
+# "sand", "all".
+#
+# NOTE: Data_tasks_1 .. Data_tasks_23 are 23 individual task-recording files
+# (Excel sheets), NOT 23 days. They were collected over 9 calendar days
+# (Oct 21-23 2025 and Feb 02-13 2026); several files can share the same day.
+# MATERIAL_FILES lists the 1-based file numbers for each material.
+MATERIAL = "soil"
+
+MATERIAL_FILES = {
+    "soil":               list(range(1, 13)),   # files 1-12  (Oct 21-23 2025, Feb 02-03 2026)
+    "decomposed_granite": list(range(13, 18)),  # files 13-17 (Feb 04 + Feb 11 2026, Site 1)
+    "sand":               list(range(18, 24)),  # files 18-23 (Feb 11-13 2026, Site 2)
+}
+MATERIAL_FILES["all"] = list(range(1, 24))       # every file
+
+if MATERIAL not in MATERIAL_FILES:
+    raise ValueError(f"MATERIAL must be one of {sorted(MATERIAL_FILES)}, got {MATERIAL!r}")
 
 """""""""""""""""""""""""""""""""""""""October 2025: Site 1: Soil"""""""""""""""""""""""""""""""""
 
@@ -141,7 +168,7 @@ Data_tasks_12 = pd.read_excel(
 )
 
 
-################## February 04 2026: Site 1: Concrete
+################## February 04 2026: Site 1: Decomposed Granite
 
 
 Data_tasks_13 = pd.read_excel(
@@ -159,7 +186,7 @@ Data_tasks_15 = pd.read_excel(
     sheet_name="Sheet1"
 )
 
-################## February 11 2026: Site 1: Concrete
+################## February 11 2026: Site 1: Decomposed Granite
 
 Data_tasks_16 = pd.read_excel(
     r'/Users/avikghosh/Desktop/CEV-Analysis/Analysis/Feb_11_Tasks_2.xlsx',
@@ -236,87 +263,81 @@ def prepare_task_data(df):
 
 def build_equations_from_tasks(df_clean, battery_cap, grading):
     """
-    Build A and b using 4 columns:
-    [Digging, Loading+Swinging, Travelling, Idling]
+    Walk rows accumulating activity time into a bucket. Emit one equation when
+    cumulative |ΔSoC| from the bucket's anchor row reaches MIN_DELTA_SOC, then
+    start a fresh bucket anchored at the current row.
+
+    Cumulative-bucket attribution preserves total energy when MIN_DELTA_SOC > 1:
+    1% drops that don't individually clear the threshold are merged into the
+    next equation along with their activity time, so no SoC drop is discarded.
+
+    Setting MIN_DELTA_SOC = 1 reproduces one-equation-per-step.
+
+    grading == "False": 5 columns
+        [Digging+Grading1, Loading+Swinging+Grading2, Travelling, Idling, Mixing]
+    grading == "True":  7 columns
+        [Digging, Grading1, Loading+Swinging, Grading2, Travelling, Idling, Mixing]
     """
     A_rows_all = []
     b_rows_all = []
 
-    if (grading == "False"):
-        
-        i = 0
+    if len(df_clean) == 0:
+        return A_rows_all, b_rows_all
 
-        for j in range(1, len(df_clean)):
-            soc_now  = df_clean.iloc[j]["SoC"]
-            soc_prev = df_clean.iloc[j - 1]["SoC"]
+    # Anchor the first bucket at the first valid SoC reading.
+    bucket_start = 0
+    while bucket_start < len(df_clean) and pd.isna(df_clean.iloc[bucket_start]["SoC"]):
+        bucket_start += 1
+    if bucket_start >= len(df_clean):
+        return A_rows_all, b_rows_all
+    bucket_anchor_soc = df_clean.iloc[bucket_start]["SoC"]
 
-            if pd.notna(soc_now) and pd.notna(soc_prev) and (soc_now - soc_prev != 0):
-                df_slice = df_clean.iloc[i:j+1]
+    for j in range(bucket_start + 1, len(df_clean)):
+        soc_now = df_clean.iloc[j]["SoC"]
+        if pd.isna(soc_now):
+            continue
 
-                total_s_Digging    = df_slice.loc[df_slice["Activity"] == "Digging", "duration_s"].sum()
-                total_s_Grading_1    = df_slice.loc[df_slice["Activity"] == "Grading 1", "duration_s"].sum()
-                total_s_Loading    = df_slice.loc[df_slice["Activity"] == "Loading", "duration_s"].sum()
-                total_s_Swinging   = df_slice.loc[df_slice["Activity"] == "Swinging", "duration_s"].sum()
-                total_s_Grading_2   = df_slice.loc[df_slice["Activity"] == "Grading 2", "duration_s"].sum()
-                total_s_Travelling = df_slice.loc[df_slice["Activity"] == "Travelling", "duration_s"].sum()
-                total_s_Idling     = df_slice.loc[df_slice["Activity"] == "Idling", "duration_s"].sum()
-                total_s_Mixing = df_slice.loc[df_slice["Activity"] == "Mixing", "duration_s"].sum()
+        cumulative_delta = soc_now - bucket_anchor_soc
+        if abs(cumulative_delta) < MIN_DELTA_SOC:
+            continue
 
+        df_slice = df_clean.iloc[bucket_start:j + 1]
 
-                total_energy = -(soc_now - soc_prev) * battery_cap / 100
+        total_s_Digging    = df_slice.loc[df_slice["Activity"] == "Digging",    "duration_s"].sum()
+        total_s_Grading_1  = df_slice.loc[df_slice["Activity"] == "Grading 1",  "duration_s"].sum()
+        total_s_Loading    = df_slice.loc[df_slice["Activity"] == "Loading",    "duration_s"].sum()
+        total_s_Swinging   = df_slice.loc[df_slice["Activity"] == "Swinging",   "duration_s"].sum()
+        total_s_Grading_2  = df_slice.loc[df_slice["Activity"] == "Grading 2",  "duration_s"].sum()
+        total_s_Travelling = df_slice.loc[df_slice["Activity"] == "Travelling", "duration_s"].sum()
+        total_s_Idling     = df_slice.loc[df_slice["Activity"] == "Idling",     "duration_s"].sum()
+        total_s_Mixing     = df_slice.loc[df_slice["Activity"] == "Mixing",     "duration_s"].sum()
 
-                A_row = [
-                    total_s_Digging/3600 + total_s_Grading_1/3600,
-                    total_s_Loading/3600 + total_s_Swinging/3600 + total_s_Grading_2/3600,
-                    total_s_Travelling/3600,
-                    total_s_Idling/3600,
-                    total_s_Mixing/3600
-                ]
-                b_row = [total_energy]
+        total_energy = -cumulative_delta * battery_cap / 100
 
-                A_rows_all.append(A_row)
-                b_rows_all.append(b_row)
+        if grading == "False":
+            A_row = [
+                total_s_Digging/3600 + total_s_Grading_1/3600,
+                total_s_Loading/3600 + total_s_Swinging/3600 + total_s_Grading_2/3600,
+                total_s_Travelling/3600,
+                total_s_Idling/3600,
+                total_s_Mixing/3600,
+            ]
+        else:
+            A_row = [
+                total_s_Digging/3600,
+                total_s_Grading_1/3600,
+                total_s_Loading/3600 + total_s_Swinging/3600,
+                total_s_Grading_2/3600,
+                total_s_Travelling/3600,
+                total_s_Idling/3600,
+                total_s_Mixing/3600,
+            ]
 
-                i = j + 1
-    
-    else:
-        
-         i = 0
+        A_rows_all.append(A_row)
+        b_rows_all.append([total_energy])
 
-         for j in range(1, len(df_clean)):
-             soc_now  = df_clean.iloc[j]["SoC"]
-             soc_prev = df_clean.iloc[j - 1]["SoC"]
-
-             if pd.notna(soc_now) and pd.notna(soc_prev) and (soc_now - soc_prev != 0):
-                 df_slice = df_clean.iloc[i:j+1]
-
-                 total_s_Digging    = df_slice.loc[df_slice["Activity"] == "Digging", "duration_s"].sum()
-                 total_s_Grading_1    = df_slice.loc[df_slice["Activity"] == "Grading 1", "duration_s"].sum()
-                 total_s_Loading    = df_slice.loc[df_slice["Activity"] == "Loading", "duration_s"].sum()
-                 total_s_Swinging   = df_slice.loc[df_slice["Activity"] == "Swinging", "duration_s"].sum()
-                 total_s_Grading_2   = df_slice.loc[df_slice["Activity"] == "Grading 2", "duration_s"].sum()
-                 total_s_Travelling = df_slice.loc[df_slice["Activity"] == "Travelling", "duration_s"].sum()
-                 total_s_Idling     = df_slice.loc[df_slice["Activity"] == "Idling", "duration_s"].sum()
-                 total_s_Mixing = df_slice.loc[df_slice["Activity"] == "Mixing", "duration_s"].sum()
-
-
-                 total_energy = -(soc_now - soc_prev) * battery_cap / 100
-
-                 A_row = [
-                     total_s_Digging/3600,
-                     total_s_Grading_1/3600,
-                     total_s_Loading/3600 + total_s_Swinging/3600,
-                     total_s_Grading_2/3600,
-                     total_s_Travelling/3600,
-                     total_s_Idling/3600,
-                     total_s_Mixing/3600
-                 ]
-                 b_row = [total_energy]
-
-                 A_rows_all.append(A_row)
-                 b_rows_all.append(b_row)
-
-                 i = j + 1
+        bucket_start = j + 1
+        bucket_anchor_soc = soc_now
 
     return A_rows_all, b_rows_all
 
@@ -525,26 +546,40 @@ def predictive_interval_coverage_from_trace(A_test, b_test, trace, alpha=0.05, r
     return pred_mean, lower, upper, inside, coverage, rmse, mae, avg_width
 
 
-def print_posterior_means(trace):
+def print_posterior_means(trace, col_present):
     x_post_mean = trace.posterior["x"].mean(dim=("chain", "draw")).values
     sigma_post_mean = trace.posterior["sigma"].mean(dim=("chain", "draw")).values.item()
-    
+
     if (grading == "False"):
-        print(f"Digging:            {x_post_mean[0]:.3f} kW")
-        print(f"Loading+Swinging:   {x_post_mean[1]:.3f} kW")
-        print(f"Traveling:          {x_post_mean[2]:.3f} kW")
-        print(f"Idling:             {x_post_mean[3]:.3f} kW")
-        print(f"Mixing:             {x_post_mean[4]:.3f} kW")
-        print(f"Sigma:              {sigma_post_mean:.3f}")
+        labels = ["Digging", "Loading+Swinging", "Traveling", "Idling", "Mixing"]
     else:
-        print(f"Digging:   {x_post_mean[0]:.3f} kW")
-        print(f"Grading 1:   {x_post_mean[1]:.3f} kW")
-        print(f"Loading+Swinging:   {x_post_mean[2]:.3f} kW")
-        print(f"Grading 2:   {x_post_mean[3]:.3f} kW")
-        print(f"Traveling: {x_post_mean[4]:.3f} kW")
-        print(f"Idling:    {x_post_mean[5]:.3f} kW")
-        print(f"Mixing:             {x_post_mean[6]:.3f} kW")
-        print(f"Sigma:     {sigma_post_mean:.3f}")
+        labels = ["Digging", "Grading 1", "Loading+Swinging", "Grading 2",
+                  "Traveling", "Idling", "Mixing"]
+
+    # Skip activities that never occur in the dataset.
+    for i, lab in enumerate(labels):
+        if col_present[i]:
+            print(f"{lab + ':':20s}{x_post_mean[i]:.3f} kW")
+    print(f"{'Sigma:':20s}{sigma_post_mean:.3f}")
+
+
+def label_posterior_axes(axes, ds, var_names):
+    """Set the x-label and rewrite az.plot_posterior's built-in 'mean=...' label
+    in place to 'mean ± SD = <m> ± <s> kW', so the mean and SD share the built-in
+    location/format. Axes (row-major) are matched to var_names in order."""
+    flat = [ax for ax in np.ravel(axes) if ax is not None]
+    for ax, name in zip(flat, var_names):
+        vals = np.asarray(ds[name].values)
+        m, s = vals.mean(), vals.std()
+        ax.set_xlabel("Power (kW)")
+        new_text = f"mean ± SD = {m:.2f} ± {s:.2f} kW"
+        for t in ax.texts:
+            if t.get_text().lower().startswith("mean"):
+                t.set_text(new_text)
+                break
+        else:  # fallback if the built-in label wasn't found
+            ax.text(0.5, 0.9, new_text, transform=ax.transAxes,
+                    ha="center", va="top", fontsize=8)
 
 
 """""""""""""""""""""""""""""""""""""""PREPARE DATA"""""""""""""""""""""""""""""""""
@@ -568,10 +603,10 @@ Data_tasks_clean_12 = prepare_task_data(Data_tasks_12)      # Feb 03, 2026: Soil
 
 Data_tasks_clean_13 = prepare_task_data(Data_tasks_13)
 Data_tasks_clean_14 = prepare_task_data(Data_tasks_14)
-Data_tasks_clean_15 = prepare_task_data(Data_tasks_15)      # Feb 04, 2026: Concrete
+Data_tasks_clean_15 = prepare_task_data(Data_tasks_15)      # Feb 04, 2026: Decomposed Granite
 
 Data_tasks_clean_16 = prepare_task_data(Data_tasks_16)
-Data_tasks_clean_17 = prepare_task_data(Data_tasks_17)      # Feb 11, 2026: Concrete
+Data_tasks_clean_17 = prepare_task_data(Data_tasks_17)      # Feb 11, 2026: Decomposed Granite
 
 Data_tasks_clean_18 = prepare_task_data(Data_tasks_18)      # Feb 11, 2026: Sand
 
@@ -593,38 +628,13 @@ Data_tasks_clean = [Data_tasks_clean_1,Data_tasks_clean_2, Data_tasks_clean_3, D
 Data_tasks_clean_combined = pd.concat(Data_tasks_clean, ignore_index=True)
 
 
-"""""""""""""""""""""""""""""""""""""""FORM EQUATIONS OF TASKS OF ALL DAYS"""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""FORM EQUATIONS FROM SELECTED TASK FILES"""""""""""""""""""""""""""""""""
 
-all_task_dfs = [
-    Data_tasks_clean_1,     # Oct 21, 2025: Soil
-    
-    Data_tasks_clean_2,
-    Data_tasks_clean_3,
-    Data_tasks_clean_4,
-    Data_tasks_clean_5,
-    Data_tasks_clean_6,
-    Data_tasks_clean_7,     # Oct 22-23, 2025: Soil
-    
-    Data_tasks_clean_8,
-    Data_tasks_clean_9,
-    Data_tasks_clean_10,    # Feb 02, 2026: Soil
-    
-    Data_tasks_clean_11,
-    Data_tasks_clean_12,    # Feb 03, 2026: Soil
-    
-    # Data_tasks_clean_13,
-    # Data_tasks_clean_14,
-    # Data_tasks_clean_15, 
-    # Data_tasks_clean_16,
-    # Data_tasks_clean_17,    # Feb 04 and Feb 11, 2026: Concrete
-    
-    # Data_tasks_clean_18,
-    # Data_tasks_clean_19,
-    # Data_tasks_clean_20, 
-    # Data_tasks_clean_21,
-    # Data_tasks_clean_22, 
-    # Data_tasks_clean_23,    # Feb 11-13, 2026: Sand
-    ]
+# Automatically pick the task files for the selected MATERIAL. Data_tasks_clean
+# holds all 23 task files in order, so file f (1-based) is Data_tasks_clean[f - 1].
+selected_files = MATERIAL_FILES[MATERIAL]
+all_task_dfs = [Data_tasks_clean[f - 1] for f in selected_files]
+print(f"MATERIAL = {MATERIAL!r}  ->  using task files {selected_files} ({len(all_task_dfs)} files)")
 
 A = []
 b = []
@@ -648,6 +658,11 @@ b = np.asarray(np.array(b), dtype=float).reshape(-1)
 
 m, n = A.shape
 
+# Which activities actually occur in the dataset. A column that is all-zero
+# (e.g. Mixing on soil-only days) carries no data, so its coefficient is driven
+# entirely by the prior — we suppress those activities from the printout/plots.
+col_present = A.sum(axis=0) > 1e-12
+
 # Time_Digging = np.sum(A[:, [0]], axis=0)
 # Time_Loading_Swinging = np.sum(A[:, [1]], axis=0)
 # Time_Traveling = np.sum(A[:, [2]], axis=0)
@@ -656,7 +671,7 @@ m, n = A.shape
 
 """""""""""""""""""""""""""""""""""""""SPLIT TRAINING AND TESTING"""""""""""""""""""""""""""""""""
 
-A_train, A_test, b_train, b_test = split_train_test(A, b, test_size=0.15)
+A_train, A_test, b_train, b_test = split_train_test(A, b, test_size=0.2)
 
 """""""""""""""""""""""""""""""""""""""CHOOSE PRIOR SETUP HERE"""""""""""""""""""""""""""""""""
 
@@ -672,22 +687,53 @@ A_train, A_test, b_train, b_test = split_train_test(A, b, test_size=0.15)
 #         "dist": "halfnormal",
 #         "sigma": np.array([6, 5, 4, 4, 5.9, 0.00001])
 #     }
-# ---------- Option 2: TruncatedNormal prior on x ----------
-if (grading == "False"):
+# ---------- Option 2: TruncatedNormal prior on x (per material) ----------
+# ENTER THE PRIORS HERE. Each activity power uses TruncatedNormal(mu, sigma,
+# lower=0). Values are looked up by MATERIAL (and by grading, since the number
+# of activities differs). Array order MUST match the activity columns:
+#   grading == "False": [Digging, Loading+Swinging, Traveling, Idling, Mixing]
+#   grading == "True" : [Digging, Grading 1, Loading+Swinging, Grading 2,
+#                        Traveling, Idling, Mixing]
+# Idling is kept pinned near 0 (mu=0, small sigma). Where an activity is absent
+# for a material (e.g. Mixing on soil), the data can't identify it, so its prior
+# value doesn't affect predictions.
+X_PRIOR_MU_SIGMA = {
+    "False": {   # grading == "False"   (5 activities)
+        #                       Digging  Load+Swing  Travel  Idling  Mixing
+        "soil":               {"mu":    [4.79, 3.16, 4.71, 0.00, 0.00],
+                               "sigma": [0.23, 0.23, 0.54, 0.10, 0.10]},
+        "decomposed_granite": {"mu":    [3.12, 3.25, 7.29, 0.00, 0.00],
+                               "sigma": [1.42, 0.52, 0.91, 0.10, 0.10]},
+        "sand":               {"mu":    [9.12, 4.56, 0.15, 0.00, 5.04],
+                               "sigma": [4.98, 0.87, 1.14, 0.10, 0.21]},
+        "all":                {"mu":    [4.60, 3.00, 4.50, 0.00, 4.70],
+                               "sigma": [1.00, 1.00, 1.50, 0.10, 1.00]},
+    },
+    "True": {    # grading == "True"    (7 activities)
+        #                       Digging  Grading1  Load+Swing  Grading2  Travel  Idling  Mixing
+        "soil":               {"mu":    [0.00, 5.50, 3.50, 5.40, 1.00, 0.00, 4.70],
+                               "sigma": [0.10, 1.00, 1.00, 1.00, 1.50, 0.10, 0.10]},
+        "decomposed_granite": {"mu":    [0.00, 5.50, 3.50, 5.40, 1.00, 0.00, 4.70],
+                               "sigma": [0.10, 1.00, 1.00, 1.00, 1.50, 0.10, 1.00]},
+        "sand":               {"mu":    [0.00, 5.50, 3.50, 5.40, 1.00, 0.00, 4.70],
+                               "sigma": [0.10, 1.00, 1.00, 1.00, 1.50, 0.10, 1.00]},
+        "all":                {"mu":    [0.00, 5.50, 3.50, 5.40, 1.00, 0.00, 4.70],
+                               "sigma": [0.10, 1.00, 1.00, 1.00, 1.50, 0.10, 1.00]},
+    },
+}
 
-    x_prior_config = {
-         "dist": "truncated_normal",
-         "mu": np.array([4.6, 3, 4.5, 0, 4.7]),
-         "sigma": np.array([1.0, 1.0, 1.5, 0.1, 0.1]),
-        "lower": 0.0
-    }    
-else:
-    x_prior_config = {
-         "dist": "truncated_normal",
-         "mu": np.array([0, 5.5, 3.5, 5.4, 1.0, 0, 4.7]),
-         "sigma": np.array([0.1, 1, 1.0, 1, 1.5, 0.1, 0.1]),
-        "lower": 0.0
-    }       
+if MATERIAL not in X_PRIOR_MU_SIGMA[grading]:
+    raise ValueError(f"No x-prior defined for MATERIAL={MATERIAL!r} under grading={grading!r}")
+
+_mp = X_PRIOR_MU_SIGMA[grading][MATERIAL]
+x_prior_config = {
+    "dist": "truncated_normal",
+    "mu": np.array(_mp["mu"], dtype=float),
+    "sigma": np.array(_mp["sigma"], dtype=float),
+    "lower": 0.0,
+}
+print(f"x prior (material={MATERIAL!r}, grading={grading!r}): "
+      f"mu={x_prior_config['mu'].tolist()}, sigma={x_prior_config['sigma'].tolist()}")
 
 # ---------- Option 3: LogNormal prior on x ----------
 # x_prior_config = {
@@ -706,14 +752,19 @@ else:
 #     "beta": beta_x
 # }
 
-sigma_prior_config = {
-    "dist": "halfnormal",
-    "sigma": float(np.std(b_train))
-}
+# Build the sigma prior from whichever b vector the fit actually uses, so the
+# scale matches the data being fit: the train/test fit below uses b_train, while
+# the full-data fit (Option A) uses the full b.
+def make_sigma_prior_config(b_vec):
+    return {
+        "dist": "halfnormal",
+        "sigma": float(np.std(b_vec))
+    }
+    # Alternatives:
+    # return {"dist": "exponential", "lam": 1.0 / max(float(np.std(b_vec)), 1e-6)}
+    # return {"dist": "halfstudentt", "sigma": float(np.std(b_vec)), "nu": 4}
 
-# Alternatives:
-# sigma_prior_config = {"dist": "exponential", "lam": 1.0 / max(float(np.std(b_train)), 1e-6)}
-# sigma_prior_config = {"dist": "halfstudentt", "sigma": float(np.std(b_train)), "nu": 4}
+sigma_prior_config = make_sigma_prior_config(b_train)
 
 """""""""""""""""""""""""""""""""""""""BAYESIAN REGRESSION"""""""""""""""""""""""""""""""""
 
@@ -730,63 +781,54 @@ model, trace = fit_bayesian_activity_power(grading,
 
 """""""""""""""""""""""""""""""""""""""PLOTTING"""""""""""""""""""""""""""""""""
 
-print_posterior_means(trace)
+print_posterior_means(trace, col_present)
 
 # az.plot_posterior(trace, var_names=["x", "sigma"], hdi_prob=0.95)
 
+# (display label, model 'activity' coordinate) in column order.
 if (grading == "False"):
-
-    posterior_renamed = xr.Dataset({
-        "Digging": trace.posterior["x"].sel(activity="Digging").reset_coords(drop=True),
-        "Loading+Swinging": trace.posterior["x"].sel(activity="Loading + Swinging").reset_coords(drop=True),
-        "Traveling": trace.posterior["x"].sel(activity="Traveling").reset_coords(drop=True),
-        "Idling": trace.posterior["x"].sel(activity="Idling").reset_coords(drop=True),
-        "Mixing": trace.posterior["x"].sel(activity="Mixing").reset_coords(drop=True),
-
-    })
-
-    axes = az.plot_posterior(
-        posterior_renamed,
-        var_names=["Digging", "Loading+Swinging", "Traveling", "Idling", "Mixing"],
-        hdi_prob=0.95,
-        grid=(2, 3),
-        figsize=(12, 7)
-    )
-
-    for ax in np.ravel(axes):
-        if ax is not None:
-            ax.set_xlabel("Power (kW)")
-
-    plt.tight_layout()
-    plt.show()
-    
+    label_to_coord = [
+        ("Digging", "Digging"),
+        ("Loading+Swinging", "Loading + Swinging"),
+        ("Traveling", "Traveling"),
+        ("Idling", "Idling"),
+        ("Mixing", "Mixing"),
+    ]
 else:
-    
-    posterior_renamed = xr.Dataset({
-        "Digging": trace.posterior["x"].sel(activity="Digging").reset_coords(drop=True),
-        "Grading 1": trace.posterior["x"].sel(activity="Grading 1").reset_coords(drop=True),
-        "Loading+Swinging": trace.posterior["x"].sel(activity="Loading + Swinging").reset_coords(drop=True),
-        "Grading 2": trace.posterior["x"].sel(activity="Grading 2").reset_coords(drop=True),
-        "Traveling": trace.posterior["x"].sel(activity="Traveling").reset_coords(drop=True),
-        "Idling": trace.posterior["x"].sel(activity="Idling").reset_coords(drop=True),
-        "Mixing": trace.posterior["x"].sel(activity="Mixing").reset_coords(drop=True)
+    label_to_coord = [
+        ("Digging", "Digging"),
+        ("Grading 1", "Grading 1"),
+        ("Loading+Swinging", "Loading + Swinging"),
+        ("Grading 2", "Grading 2"),
+        ("Traveling", "Traveling"),
+        ("Idling", "Idling"),
+        ("Mixing", "Mixing"),
+    ]
 
-    })
+# Keep only activities that occur in the dataset (drop all-zero columns).
+present = [lc for i, lc in enumerate(label_to_coord) if col_present[i]]
 
-    axes = az.plot_posterior(
-        posterior_renamed,
-        var_names=["Digging", "Grading 1", "Loading+Swinging", "Grading 2", "Traveling", "Idling", "Mixing"],
-        hdi_prob=0.95,
-        grid=(3, 3),
-        figsize=(12, 7)
-    )
+posterior_renamed = xr.Dataset({
+    lab: trace.posterior["x"].sel(activity=coord).reset_coords(drop=True)
+    for lab, coord in present
+})
+var_names = [lab for lab, _ in present]
 
-    for ax in np.ravel(axes):
-        if ax is not None:
-            ax.set_xlabel("Power (kW)")
+ncols = min(3, len(var_names))
+nrows = int(np.ceil(len(var_names) / ncols))
 
-    plt.tight_layout()
-    plt.show()
+axes = az.plot_posterior(
+    posterior_renamed,
+    var_names=var_names,
+    hdi_prob=0.95,
+    grid=(nrows, ncols),
+    figsize=(4 * ncols, 3.5 * nrows)
+)
+
+label_posterior_axes(axes, posterior_renamed, var_names)
+
+plt.tight_layout()
+plt.show()
 """""""""""""""""""""""""""""""""""""""POSTERIOR PREDICTIVE VALIDATION"""""""""""""""""""""""""""""""""
 
 pred_mean, lower, upper, inside, coverage, rmse, mae, avg_width = \
@@ -841,6 +883,113 @@ plt.ylabel("Energy (kWh)")
 plt.title("Posterior Predictive Intervals on Test Set")
 plt.xticks(idx)
 plt.legend()
+plt.tight_layout()
+plt.show()
+
+"""""""""""""""""""""""""""""""""""""""OPTION A: FULL-DATA FIT + PSIS-LOO"""""""""""""""""""""""""""""""""
+
+# Refit on ALL m equations (no held-out split). PSIS-LOO reuses this single
+# posterior to estimate out-of-sample error for EVERY equation via importance
+# reweighting, so the metrics below are computed over all m points instead of
+# one arbitrary 20% test fold — the Bayesian analog of the repeated K-fold CV in
+# Tasks_energy_loading_swinging.py, but from a single fit.
+# Scale the sigma prior off the full b (not b_train), matching the data fit here.
+sigma_prior_config_full = make_sigma_prior_config(b)
+model_full, trace_full = fit_bayesian_activity_power(grading,
+    A,
+    b,
+    x_prior_config=x_prior_config,
+    sigma_prior_config=sigma_prior_config_full,
+    draws=2000,
+    tune=2000,
+    random_seed=42,
+    target_accept=0.9
+)
+
+# Pointwise log-likelihood log p(b_i | theta^s) is required for LOO.
+pm.compute_log_likelihood(trace_full, model=model_full)
+
+# ---- Headline coefficients from the full-data fit (printed like the test fit) ----
+print("\n---------------- FULL-DATA POSTERIOR MEANS ----------------")
+print_posterior_means(trace_full, col_present)
+
+# ---- Posterior distributions from the full-data fit (same style/plot as the
+# test fit; reuses `present`, `nrows`, `ncols` built in the PLOTTING section) ----
+posterior_renamed_full = xr.Dataset({
+    lab: trace_full.posterior["x"].sel(activity=coord).reset_coords(drop=True)
+    for lab, coord in present
+})
+axes = az.plot_posterior(
+    posterior_renamed_full,
+    var_names=[lab for lab, _ in present],
+    hdi_prob=0.95,
+    grid=(nrows, ncols),
+    figsize=(4 * ncols, 3.5 * nrows)
+)
+label_posterior_axes(axes, posterior_renamed_full, [lab for lab, _ in present])
+plt.suptitle("Full-data posterior")
+plt.tight_layout()
+plt.show()
+
+# ---- az.loo diagnostics (elpd_loo +/- SE, p_loo, Pareto-k) ----
+loo_res = az.loo(trace_full, pointwise=True)
+print("\n---------------- PSIS-LOO DIAGNOSTICS (full-data fit, all {} equations) ----------------".format(len(b)))
+print(loo_res)
+
+khat = np.asarray(loo_res.pareto_k.values)
+bad_idx = np.where(khat > 0.7)[0]
+if bad_idx.size > 0:
+    print(f"\nWARNING: {bad_idx.size} equation(s) have Pareto k > 0.7 (indices {bad_idx.tolist()}).")
+    print("Their LOO estimate is unreliable (too influential for importance reweighting).")
+    print("Fix: refit without each flagged equation (exact LOO) via az.reloo with a")
+    print("PyMC sampling wrapper, or inspect these equations as influential points.")
+
+# ---- LOO point predictions: PSIS-weighted posterior-mean prediction for each
+# equation, i.e. what the model predicts for equation i as if it were held out ----
+log_lik = trace_full.log_likelihood["b_obs"].stack(sample=("chain", "draw"))
+obs_dim = [d for d in log_lik.dims if d != "sample"][0]
+log_lik = log_lik.transpose(obs_dim, "sample")                 # (N, S)
+log_weights, _ = az.psislw(-log_lik.values)                    # smoothed, normalized per obs
+w = np.exp(np.asarray(log_weights))
+w /= w.sum(axis=1, keepdims=True)
+
+x_samp = trace_full.posterior["x"].stack(sample=("chain", "draw")) \
+             .transpose("sample", "activity").values           # (S, n)
+mu_loo = A @ x_samp.T                                           # (N, S): predicted energy per draw
+pred_loo = np.sum(w * mu_loo, axis=1)                          # (N,): LOO predictive mean
+
+resid = b - pred_loo
+loo_rmse = np.sqrt(np.mean(resid ** 2))
+loo_mae  = np.mean(np.abs(resid))
+loo_mape = np.mean(np.abs(resid / b)) * 100      # mean |b - b_loo| / |b|
+loo_nmae = loo_mae / np.mean(np.abs(b)) * 100    # normalized MAE (MAE / mean|b|)
+
+# Reference points for interpreting the error (see LOO discussion):
+#   - posterior sigma: the model's own estimate of irreducible per-equation noise
+#   - SoC-quantization floor: irreducible noise on b from 1% SoC resolution across
+#     the two bucket endpoints, sqrt(2) * (1% / sqrt(12)) * Battery_cap / 100
+sigma_post = trace_full.posterior["sigma"].mean().item()
+sigma_quant = np.sqrt(2) * (1.0 / np.sqrt(12)) * Battery_cap / 100
+
+print("\n---------------- LOO TEST METRICS (over all {} equations) ----------------".format(len(b)))
+print(f"LOO RMSE:           {loo_rmse:.4f} kWh")
+print(f"LOO MAE:            {loo_mae:.4f} kWh")
+print(f"LOO MAPE:           {loo_mape:.2f} %   (mean |b - b_loo| / |b|)")
+print(f"LOO MAE / mean|b|:  {loo_nmae:.2f} %   (normalized MAE)")
+print(f"\nContext:")
+print(f"  Posterior sigma (model noise):   {sigma_post:.4f} kWh")
+print(f"  SoC-quantization floor on b:     {sigma_quant:.4f} kWh")
+print(f"  Mean |b|:                        {np.mean(np.abs(b)):.4f} kWh")
+
+# Observed vs LOO-predicted across ALL equations.
+plt.figure(figsize=(6, 6))
+plt.scatter(b, pred_loo)
+lo = min(np.min(b), np.min(pred_loo))
+hi = max(np.max(b), np.max(pred_loo))
+plt.plot([lo, hi], [lo, hi], '--')
+plt.xlabel("Observed energy (kWh)")
+plt.ylabel("LOO-predicted mean energy (kWh)")
+plt.title(f"Observed vs LOO-Predicted (all {len(b)} equations)")
 plt.tight_layout()
 plt.show()
 
