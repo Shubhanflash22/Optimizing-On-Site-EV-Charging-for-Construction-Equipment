@@ -152,6 +152,7 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
     plan_mcs_soe = fill(NaN, nK, nK)
     plan_cev_soe = [fill(NaN, nK, nK) for _ in d.E]
     plan_cev_act = [fill("", nK, nK)  for _ in d.E]
+    plan_mcs_act = fill("", nK, nK)   # MCS status: Idle / Charging (grid) / Serving CEV / Traveling
 
     hmode = shrinking ? "shrinking" : "fixed H=$H"
     println("Running Scenario 1 (closed-loop MPC, 15-min steps, $hmode horizon): $nK steps")
@@ -218,10 +219,25 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
                 plan_cev_soe[e][k0, k] = value(model[:SOE_CEV][e, k + 1])
                 site = findfirst(i -> d.A[i, e] == 1, d.N)
                 if site !== nothing
-                    vals = [value(model[:u][e, site, a, k]) for a in eachindex(d.B)]
-                    plan_cev_act[e][k0, k] = sum(vals) < 0.5 ? "" : ACT_NAME[d.B[argmax(vals)]]
+                    # Combined activity label. "Charging" is shown only when REAL power
+                    # is delivered into this CEV (sum_m P_MCS_CEV > 0), not merely when
+                    # the plug-in permission bit mu=1 (mu can be 1 with zero power flow).
+                    # Using delivered power keeps this grid consistent with the MCS grid
+                    # (P_dch_tot>0 <=> some CEV is being served).
+                    vals   = [value(model[:u][e, site, a, k]) for a in eachindex(d.B)]
+                    p_into = sum(value(model[:P_MCS_CEV][m, site, e, k]) for m in d.M)
+                    plan_cev_act[e][k0, k] =
+                        p_into > 1e-6 ? "Charging" :
+                        (sum(vals) < 0.5 ? "" : ACT_NAME[d.B[argmax(vals)]])
                 end
             end
+            # MCS status this interval (mutually exclusive by node/state).
+            pch  = sum(value(model[:P_ch_tot][m, k])  for m in d.M)
+            pdch = sum(value(model[:P_dch_tot][m, k]) for m in d.M)
+            parked = any(value(model[:z][m, i, k]) > 0.5 for m in d.M, i in d.N)
+            plan_mcs_act[k0, k] = pch  > 1e-6 ? "Charging (grid)" :
+                                  pdch > 1e-6 ? "Serving CEV"     :
+                                  !parked     ? "Traveling"       : "Idle"
         end
 
         # (3) SIMULATE realized activity split.
@@ -306,7 +322,7 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
     return (; d, time_labels, log,
               real_P_ch, real_P_dch, real_L_trv, real_SOE_MCS, real_SOE_CEV,
               real_P_work, real_loc,
-              plan_grid_kW, plan_mcs_soe, plan_cev_soe, plan_cev_act,
+              plan_grid_kW, plan_mcs_soe, plan_cev_soe, plan_cev_act, plan_mcs_act,
               est, nK, ACT_NAME,
               total_energy, total_cost, total_co2, nc_peak, op_peak, missed,
               labour_cost, transit_intervals,

@@ -13,4 +13,4 @@ OPD_Peak_kW,0.0
 Missed_Work_hour,0.0
 MCS_Transit_hour,0.5
 Infeasible_windows,0
-MPC_loop_time_s,72.62
+MPC_loop_time_s,72.95

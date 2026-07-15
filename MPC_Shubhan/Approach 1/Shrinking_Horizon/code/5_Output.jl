@@ -403,6 +403,7 @@ function _write_replan_grids(res, out_dir)
     grid_dir = joinpath(out_dir, "replan_grids"); mkpath(grid_dir)
     _write_replan_grid(joinpath(grid_dir, "plan_grid_kW.csv"), res.plan_grid_kW, res)
     _write_replan_grid(joinpath(grid_dir, "plan_mcs_soe.csv"), res.plan_mcs_soe, res)
+    _write_replan_grid(joinpath(grid_dir, "plan_mcs_activity.csv"), res.plan_mcs_act, res)
     for e in d.E
         _write_replan_grid(joinpath(grid_dir, "plan_cev$(e)_soe.csv"),      res.plan_cev_soe[e], res)
         _write_replan_grid(joinpath(grid_dir, "plan_cev$(e)_activity.csv"), res.plan_cev_act[e], res)

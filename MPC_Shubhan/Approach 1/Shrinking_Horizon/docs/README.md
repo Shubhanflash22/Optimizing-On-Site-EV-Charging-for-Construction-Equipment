@@ -413,11 +413,26 @@ Written by `5_Output.jl`, regenerated every run into `output/<mode>/`.
 `mcs_node` (0 = transit), `est_dig/est_load/est_trv/est_idle`, `unc_*`, `n_obs`. Held/infeasible
 intervals appear with `grid=dch=work=0`.
 
-**`replan_grids/*.csv` (+ `.html`)** — four grids: `plan_grid_kW`, `plan_mcs_soe`,
-`plan_cev<e>_soe`, `plan_cev<e>_activity`. **Rows** = the 15-min re-plan step; **columns** = the
-interval being planned. Across a row = the whole plan made at that step; down a column = how one
-interval's plan is revised as new state arrives; the diagonal is what was applied. The `.html`
-colours past (green) vs pending (yellow).
+**`replan_grids/*.csv` (+ `.html`)** — five grids: `plan_grid_kW`, `plan_mcs_soe`,
+`plan_mcs_activity`, `plan_cev<e>_soe`, `plan_cev<e>_activity`. **Rows** = the 15-min re-plan
+step; **columns** = the interval being planned. Across a row = the whole plan made at that step;
+down a column = how one interval's plan is revised as new state arrives; the diagonal is what was
+applied. The `.html` colours past (green) vs pending (yellow).
+
+*Activity labels (reporting only — derived from the solution, no model change):*
+- **`plan_cev<e>_activity`** — combined per-excavator label: `Digging` / `Loading/Swinging` /
+  `Traveling` / **`Charging`** (real power delivered, `Σ_m P_MCS_CEV > 0`) / `Idle` (a genuine
+  break). Charging is keyed off *delivered power*, not the plug-in permission bit `mu` (which the
+  MILP may leave =1 with zero flow), so it always agrees with the MCS grid. Charging is shown
+  explicitly instead of the idle slot it occupies, so the crew sees when to plug in.
+- **`plan_mcs_activity`** — MCS status: **`Charging (grid)`** (pulling from the grid) /
+  **`Serving CEV`** (discharging into an excavator) / `Traveling` (in transit) / `Idle` (parked,
+  doing nothing).
+
+The dummy stress harness (`Dummy/generate_and_run.jl`) additionally writes, per case, a
+**`comparison.html`** — the applied plan (grid diagonal) shown interval-by-interval with every
+CEV's activity beside the MCS status, so `Charging` (CEV) always lines up with `Serving CEV`
+(MCS). A compact grouped version of all cases is collected in `Dummy/comparisons_grouped.txt`.
 
 ---
 
