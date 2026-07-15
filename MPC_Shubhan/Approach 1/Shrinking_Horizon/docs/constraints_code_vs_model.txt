@@ -2,88 +2,114 @@
  SCENARIO 1 (SHRINKING HORIZON) - CONSTRAINT-BY-CONSTRAINT: CODE vs MODEL
 ================================================================================
 Compares what the Julia code enforces against the formal model (math_model.tex /
-the source "Optimization.pdf"). The window MILP is built in code/4_MCSModel.jl
-(function build_window_model); the closed loop is code/5_MPCLoop.jl (run_mpc);
-the entry point is code/7_Shrinking_Horizon_main.jl. The legacy standalone
-code/Scenario_1.jl mirrors the same constraints but is NOT used by the main.
+the source "Optimization.pdf") and Avik's reference MCS_OPTIMAL_v4_real.jl. The
+window MILP is built in code/3_MCSModel.jl (build_window_model); the closed loop
+is code/4_MPCLoop.jl (run_mpc); the entry point is code/6_Shrinking_Horizon_main.jl.
 
-Controller: SINGLE-DAY SHRINKING horizon. Each 15-min step re-solves the entire
-remaining daytime [k0 .. n_day] (or [k0 .. k0+H-1] if shrinking=false); only the
-first interval is applied and the window shrinks as the day advances. The night is
-a deterministic overnight recharge (Phase 2).
+Controller: SINGLE-DAY, FULL-24 h SHRINKING horizon. Each 15-min step re-solves the
+entire remaining day [k0 .. n_day] (or [k0 .. k0+H-1] if shrinking=false); only the
+first interval is applied and the window shrinks as the day advances. There is ONE
+optimisation per step and ONE horizon - the overnight MCS recharge is scheduled
+INSIDE the same MILP (no separate phase).
 
-Legend:  OK = matches exactly   ADAPTED = deliberate, documented   ~OK = up to a tol.
+Power model: FIXED. The activity powers are a calibrated Bayesian prior N(mu, sigma)
+(the posterior of Avik's offline Python regression). The MILP plans on mu; the plant
+(Fork B) samples per-interval powers from N(mu, sigma). No online re-fitting.
+
+Legend:  OK = matches exactly   ADAPTED = deliberate, documented (MPC or user choice)
 
 --------------------------------------------------------------------------------
  Eq.   | Model requirement                    | Code                           | Status
 --------------------------------------------------------------------------------
- (1)   | Objective = energy + carbon + NC/OP  | obj in build_window_model:     | OK
-        | demand + missed-work slack + towing  | price*P_ch + carbon + demand   |
-        |                                      | + rho_miss*s_miss + rho_labor  |
+ (1)   | Objective = energy + carbon + missed | obj in build_window_model:     | OK
+       | + NC/OP demand + towing labour       | price*P_ch + carbon + rho_miss |
+       |                                      | *s_miss + demand + rho_labor*y |
 --------------------------------------------------------------------------------
  (2-5) | Power aggregation, grid-only charge, | P_ch_tot/P_dch_tot defs;       | OK
-        | site-only discharge, plug limits,    | P_MCS_CEV<=DCH_plug*rho;       |
-        | charge-only-while-idle               | mu<=u[idle] (E4)               |
+       | site-only discharge, plug limits,    | P_MCS_CEV<=DCH_plug*rho;       |
+       | charge-only-while-idle               | mu<=u[idle]                    |
 --------------------------------------------------------------------------------
- (6)   | MCS + CEV SOE dynamics w/ efficiency  | SOE_MCS / SOE_CEV recursions   | OK
+ (5e)  | P_work = sum_a p_a * u (const power) | P_work == sum p_activity*u     | OK
 --------------------------------------------------------------------------------
- (7)   | SOE bounds [min,max]                  | @constraint on SOE_MCS/SOE_CEV | OK
+ (6)   | MCS + CEV SOE dynamics w/ efficiency | SOE_MCS / SOE_CEV recursions   | OK
 --------------------------------------------------------------------------------
- (8a)  | MCS energy-neutral over cycle         | closed OVERNIGHT (Phase 2),    | ADAPTED
-        |                                       | not inside daytime MILP        | (two-phase)
- (8b)  | CEV energy-neutral terminal           | SOE_CEV[end] >= SOE_ini -      | ~OK
-        |                                       | term_tol (hard)                | (term_tol)
+ (7)   | SOE bounds [min,max] every boundary  | @constraint on SOE_MCS/SOE_CEV | OK
 --------------------------------------------------------------------------------
- (10)  | Routing: presence partition, arrival/ | z + y partition; beta_arr/dep; | OK
-        | departure, flow conservation, travel  | flow conservation; L=k_trv;    |
-        | energy; carried-in transit            | is_carried_trv / carried_arr   |
- (10e) | MCS parked at grid by 18:00           | z[grid, n_day] == 1            | OK
+ (8a)  | MCS energy-neutral terminal EQUALITY | SOE_MCS[end] == SOE_MCS_ini,   | OK
+       | SOE_MCS[end] == SOE_ini              | inside the single 24 h MILP    |
+ (8b)  | CEV energy-neutral terminal          | SOE_CEV[end] >= SOE_CEV_ini    | ADAPTED
+       | (Avik: == SOE_ini exact)             | (FLOOR; overcharge allowed)    | (floor)
 --------------------------------------------------------------------------------
- (11)  | One activity per assigned CEV; work   | sum_a u == A; work-power <=    | OK
-        | capped by availability R              | R_work*(1-mu)                  |
+ (10)  | Routing: presence partition, arrival/| z + y partition; beta_arr/dep; | OK
+       | departure, flow conservation, travel | flow balance; L=k_trv;         |
+       | energy; carried-in transit           | is_carried_trv / carried_arr   |
+ (10e) | MCS parked at grid by day-end        | z[grid, n_day] == 1            | OK
 --------------------------------------------------------------------------------
- (12c) | Finish work or pay rho_miss (SOFT),   | s_miss_dig/load per site;      | OK
-        | LUMPSUM per-site requirement          | soft lower target (no cap)     |
+ (11)  | One activity per assigned CEV; work  | sum_a u == A; P_work <=        | OK
+       | capped by availability R             | R_work*A*(1-mu)                | (4-act.)
 --------------------------------------------------------------------------------
- (12d) | Precedence: cum load <= scale*cum dig | s_prec pinned to 0 (HARD)      | OK
+ (12c) | Finish work or pay rho_miss (SOFT),  | s_miss_work per site/activity; | OK
+       | LUMPSUM per-site requirement         | soft lower target (no cap)     |
 --------------------------------------------------------------------------------
- (12e) | Rest rule: <= t_limit_rest work per   | <= rest_cap work per (rest_cap | OK
-        | rolling (t_limit+dt) window           | +1) window; SEEDED from applied| (history-
-        |                                       | work_hist -> holds across the  |  seeded)
-        |                                       | 15-min re-solves & at day-end  |
+ (12d) | Precedence: cum load <= scale*cum dig| raw interval counts (Avik      | OK
+       |                                      | form) + MPC history seed       |
 --------------------------------------------------------------------------------
- (13)  | Travel pacing: two-sided band         | s_pace_hi/lo pinned 0 (HARD);  | OK
-        |                                       | kappa_wt band                  |
+ (12e) | Rest rule: <= t_limit_rest work per  | <= rest_cap work per (rest_cap | OK
+       | rolling (t_limit+dt) window          | +1) window; SEEDED from applied|
+       |                                      | work_hist across the re-solves |
+--------------------------------------------------------------------------------
+ (13)  | Travel pacing: two-sided band        | work_per_travel = 4 (Avik):    | OK
+       |                                      | W-4 <= 4*V <= W, per (site,CEV)|
+       |                                      | + MPC history seed             |
 --------------------------------------------------------------------------------
 
-EXTRA CONSTRAINTS IN THE CODE (beyond Eqs. 1-13)
+EXTRA CONSTRAINTS / ADAPTATIONS IN THE CODE (beyond Avik's single shot)
 --------------------------------------------------------------------------------
- E1  Peak-demand trackers  | P_NC/P_OP >= grid draw            | realises demand terms of (1)
- E3  Closed-loop carry-in  | each re-solve starts from measured| MPC init. conditions
-                           | SOE / position / work done        |
- E4  Charge-only-while-idle| mu <= u[idle]                     | implements (5)-type rule
- E5  Site-visit switches   | require_site_visit / single_visit | optional; OFF by default
- E6  No fallback           | infeasible window -> hold state   | user decision
- E7  CEV keep-up reserve   | per-boundary SOE floor, built     | makes hard 8b
-                           | backward from 18:00; net charge   | recursively feasible
-                           | rate + idle-tail drain            | (4_MCSModel.jl)
+ E1  Peak-demand trackers  | P_NC/P_OP >= grid draw (+ carried-in) | realises demand terms of (1)
+ E2  Closed-loop carry-in  | each re-solve starts from measured    | MPC initial conditions
+                           | SOE / position / work done            |
+ E3  History seeds         | precedence/pacing/rest seeded from a   | keeps rolling rules correct
+                           | shared per-CEV applied-activity hist   | across the 15-min re-solves
+ E4  Site-visit switches   | require_site_visit / single_visit     | optional; OFF by default
+ E5  No fallback           | infeasible window -> hold state        | user decision
 
-THE ONLY DELIBERATE DEVIATIONS
+THE DELIBERATE DEVIATIONS FROM AVIK'S EXACT FORMULATION
 --------------------------------------------------------------------------------
- 1. (8a)/(10e) TWO-PHASE SPLIT - MCS neutrality + "home by end" are closed
-    overnight (deterministic Phase 2) instead of inside one 24h MILP.
- 2. (8b) term_tol = 0.1 kWh - a tiny margin on the CEV terminal that absorbs
-    online-estimator drift (exact at term_tol = 0, but that risks infeasibility).
+ 1. (8b) CEV terminal is a FLOOR (>= SOE_ini), not exact equality. A CEV cannot
+    discharge, so under the stochastic plant an exact equality can become
+    unrecoverable if a CEV drifts above target; the floor keeps it feasible while
+    guaranteeing the fleet ends at least as charged as it began. (User choice.)
+ 2. Activity ENCODING: the code uses a 4th explicit "idle" activity (B=[1,2,3,4],
+    sum_a u == A, mu <= u[idle]); Avik uses the equivalent 3-activity form
+    (B=[1,2,3], sum_a u <= 1, sum_a u + mu <= 1). Functionally identical because
+    idle power = 0. (User chose to keep the 4-activity form.)
+ 3. MPC adaptations that cannot match a single-shot solve: shrinking-horizon
+    re-solves, per-window history seeds (E3), carried-in MCS start position and the
+    generalised flow balance, remaining-work targets (rem_dig/rem_load vs full
+    hours), and the carried-in demand peaks (E1).
 
 NOTE vs the RECEDING sibling: this Shrinking model is single-day and LUMPSUM, so it
 does NOT add the receding version's per-day schedule or the hard "no-working-ahead"
 cap. With one day + daily neutrality there is no incentive to overshoot, so it hits
 the lumpsum quota naturally.
 
-CLOSED-LOOP CORRECTNESS (modular code 4_MCSModel.jl / 5_MPCLoop.jl):
+DORMANT SCAFFOLDING (present but NOT used by the pipeline)
+--------------------------------------------------------------------------------
+ The Turing/NUTS learner in 1_Common.jl (activity_power_model, observe!, refit!) is
+ kept for future online-learning experiments but is NEVER called: the estimator runs
+ in calibrated-prior mode, so mu/sigma ARE the fixed prior throughout the day.
+
+CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
  - Rolling rules (rest 12e, precedence 12d, pacing 13) are seeded from a SHARED
-   per-CEV applied-activity history, so a within-window limit can no longer "leak"
-   work-runs across the every-15-min re-solves (the 8-in-a-row artefact).
- - The keep-up reserve (E7) makes the hard CEV terminal (8b) recursively feasible.
- VERIFIED: synthetic + input runs finish with ZERO infeasible/held windows and every
- constraint satisfied on every row of the realised trajectory.
+   per-CEV applied-activity history, so a within-window limit cannot "leak" work-runs
+   across the every-15-min re-solves.
+ VERIFIED (Fork B stochastic plant), both datasets solve with ZERO infeasible/held
+ windows:
+   * SYNTHETIC : MCS ends 250.0 (==250 target); CEVs end 72.4/49.07 (>= 72/48);
+                 0 infeasible; 0.5 h missed work.
+   * INPUT     : MCS ends 250.0 (==250 target); CEV ends 14.8 (>= 14.8);
+                 0 infeasible; 0.0 h missed work. Matches Avik's single-shot optimum
+                 to within ~0.2% on total cost.
+
+ NOTE: idle is a CONSTANT-power subactivity (paper Eq. 5e), pinned to 0 kW; there is
+ NO separate shutdown/off state (a time-varying idle power is not part of the model).

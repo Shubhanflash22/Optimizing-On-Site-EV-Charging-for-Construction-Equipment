@@ -149,14 +149,18 @@ in `<subfolder>/output/<synthetic|input>/`.
 Both horizons were run on both datasets with the default settings
 (`time_limit_sec = 60`, `mcmc_samples = 500`, `seed = 1`; Receding keeps **2 days** + a
 dropped buffer day, Shrinking is **1 day**). Every case completed **100 % of the required
-work (0 missed hours)** and returned every excavator to its start-of-day charge.
+work (0 missed hours)**. The Shrinking controller enforces the paper's *exact* two-sided
+energy-neutral terminal (Eq. 8b); idle is a constant-power subactivity (Eq. 5e, no shutdown
+state). Shrinking `:synthetic` lands both CEVs exactly on target (71.94/48.00 vs 72/48) with
+**0 infeasible windows**; `:input` holds its last 2 windows (its target equals full capacity
+with zero idle headroom) and finishes 0.08 kWh short — a data limitation, not a model defect.
 
 | Horizon | Dataset | Scope | Digging done (h) | Loading done (h) | Missed work (h) | MCS transit (h) | Overnight recharge (kWh) | Daytime grid (kWh) | Daytime cost¹ ($) | Overnight cost ($) | Soft / Infeas windows | Loop time (s) |
 |---------|---------|-------|-----------------:|-----------------:|----------------:|----------------:|-------------------------:|-------------------:|------------------:|-------------------:|:---------------------:|--------------:|
 | **Receding**  | synthetic | 2 days, 2 CEV | 7.00 | 4.00 | 0.00 | 4.50 | 101.28 | 0.00 | 135.00 | 10.13 | 3 / 0 | 793 |
 | **Receding**  | input     | 2 days, 1 CEV | 5.50 | 2.75 | 0.00 | 1.00 | 58.39  | 0.00 | 250.00 | 15.24 | 0 / 0 | 57 |
-| **Shrinking** | synthetic | 1 day, 2 CEV  | 4.00 | 2.50 | 0.00 | 1.75 | 49.47  | 0.00 | 52.50  | 4.95  | – / 0 | 31 |
-| **Shrinking** | input     | 1 day, 1 CEV  | 3.00 | 1.50 | 0.00 | 0.50 | 31.57  | 0.00 | 125.00 | 8.24  | – / 0 | 8 |
+| **Shrinking** | synthetic | 1 day, 2 CEV  | 4.00 | 2.50 | 0.00 | 1.75 | 48.06  | 0.00 | 52.50  | 4.81  | – / 0 | 59 |
+| **Shrinking** | input     | 1 day, 1 CEV  | 3.00 | 1.50 | 0.00 | 0.75 | 26.48  | 0.00 | 187.50 | 6.91  | – / 2 | 18 |
 
 ¹ *Daytime cost* here is the towing labour only — time-of-use energy, carbon and peak-demand
 charges are **$0** in these runs because the MCS serves the excavators entirely from its own

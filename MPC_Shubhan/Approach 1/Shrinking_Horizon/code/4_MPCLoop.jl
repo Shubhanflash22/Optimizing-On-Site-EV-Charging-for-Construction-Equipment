@@ -2,11 +2,12 @@
 # MPCLoop.jl  —  module MPCLoop
 # -----------------------------------------------------------------------------
 # The closed-loop driver that ties the OPTIMISE and LEARN halves together. For
-# every 15-min interval it: (1) solves the shrinking-horizon window MILP from the
-# current real state + current power estimate, (2) APPLIES only the first
-# interval's decisions to the "plant", (3) simulates what really happened and
-# feeds the Bayesian learner, and (4) advances the real state. After the day it
-# runs the deterministic overnight charge (Phase 2).
+# every 15-min interval it: (1) solves the shrinking-horizon window MILP over the
+# full remaining 24 h from the current real state + the FIXED (once-fitted) power
+# model, (2) APPLIES only the first interval's decisions to the "plant", (3) draws
+# the realized per-activity power from the fixed posterior (Fork B) and advances
+# the real state. The MCS overnight recharge is part of the single 24 h MILP
+# (there is no separate Phase 2), and the power model is never re-fitted online.
 #
 # Besides the analyst log it CAPTURES realized per-interval arrays (charging /
 # discharging / travel energy / work power / SOE / location) so the reporting
@@ -20,11 +21,10 @@ using DataFrames
 using Printf
 using LinearAlgebra
 using Random
-using Statistics
 
-using ..Common: in_peak, clock_label, build_time_labels, safe_get
-using ..MCSModel: build_window_model, phase2_overnight_charge
-using ..BayesianEstimator: BayesianActivityEstimator, observe!, refit!
+using ..Common: in_peak, clock_label, build_time_labels, safe_get,
+                BayesianActivityEstimator
+using ..MCSModel: build_window_model
 
 export run_mpc
 
@@ -95,21 +95,6 @@ function applied_act_index(model, d, e, k0)
     return length(d.B)   # nothing scheduled -> idle (a break)
 end
 
-# ---- worker-facing plan readouts ----
-function planned_activity(model, d, e, k0)
-    site = findfirst(i -> d.A[i, e] == 1, d.N)
-    site === nothing && return "Off (home)"
-    vals = [value(model[:u][e, site, a, k0]) for a in eachindex(d.B)]
-    sum(vals) < 0.5 && return "Off (home)"
-    return ACT_NAME[d.B[argmax(vals)]]
-end
-cev_should_charge(model, d, e, k0) =
-    (let site = findfirst(i -> d.A[i, e] == 1, d.N)
-        (site !== nothing && value(model[:mu][site, e, k0]) > 0.5) ? "Yes" : "No"
-    end)
-mcs_should_charge(model, d, k0) =
-    (sum(value(model[:P_ch_tot][m, k0]) for m in d.M) > 1e-6) ? "Yes" : "No"
-
 # =============================================================================
 # MAIN CLOSED LOOP
 # =============================================================================
@@ -118,9 +103,7 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
                     multi_activity::Bool = false,
                     require_site_visit::Bool = false,
                     single_visit_per_site::Bool = false,
-                    refit_every::Int = 8, mcmc_samples::Int = 500,
-                    soft_prec::Bool = false, soft_pace::Bool = false,
-                    soft_term::Bool = false, term_tol::Float64 = 0.1,
+                    mcmc_samples::Int = 500,
                     seed::Int = 1)
     Random.seed!(seed)
     K_all = collect(d.K)
@@ -154,10 +137,6 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
         unc_dig = Float64[], unc_load = Float64[], unc_trv = Float64[], unc_idle = Float64[],
         n_obs = Int[])
 
-    # ---- per-window solve diagnostics (for 10_mip_convergence) ----
-    solve_log = DataFrame(step = Int[], clock = String[], status = String[],
-                          objective = Float64[], gap_percent = Float64[], solve_time_s = Float64[])
-
     # ---- realized per-interval capture for the reference-style figures ----
     nM = length(d.M); nE = length(d.E); nN = length(d.N)
     real_P_ch  = zeros(nM, nK)
@@ -166,14 +145,7 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
     real_SOE_MCS = zeros(nM, nK + 1)
     real_SOE_CEV = zeros(nE, nK + 1)
     real_P_work  = zeros(nN, nE, nK)
-    real_mu      = zeros(nN, nE, nK)
     real_loc     = zeros(Int, nM, nK)
-
-    # ---- worker-facing schedule columns ----
-    fe_time = String[]
-    fe_act  = [String[] for _ in d.E]
-    fe_chg  = [String[] for _ in d.E]
-    fe_mcs  = String[]
 
     # ---- replanning grids (row = re-plan step, col = interval planned) ----
     plan_grid_kW = fill(NaN, nK, nK)
@@ -202,9 +174,7 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
                                    peak_nc, peak_op, est.mu;
                                    require_site_visit = require_site_visit,
                                    single_visit_per_site = single_visit_per_site,
-                                   time_limit_sec = time_limit_sec,
-                                   soft_prec = soft_prec, soft_pace = soft_pace,
-                                   soft_term = soft_term, term_tol = term_tol)
+                                   time_limit_sec = time_limit_sec)
         stat = string(termination_status(model))
         cur_node = mcs_node[1]
 
@@ -212,15 +182,10 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
         if !has_values(model)
             n_infeasible += 1
             @warn "No feasible solution at step k=$k0 under HARD constraints; holding state (no fallback)." status=stat
-            push!(solve_log, (k0, clock_label(d.t_start, d.delta_T, k0), stat, NaN, NaN,
-                              try solve_time(model) catch; NaN end))
             push!(log, (k0, clock_label(d.t_start, d.delta_T, k0), d.lambda_whl_elec[k0], d.lambda_CO2[k0],
                         0.0, 0.0, 0.0, soe_mcs[1], safe_get(soe_cev, 1), safe_get(soe_cev, 2), cur_node,
                         est.mu[1], est.mu[2], est.mu[3], est.mu[4],
                         est.sd[1], est.sd[2], est.sd[3], est.sd[4], n_obs_total))
-            push!(fe_time, clock_label(d.t_start, d.delta_T, k0))
-            for e in d.E; push!(fe_act[e], "Idle"); push!(fe_chg[e], "No"); end
-            push!(fe_mcs, "No")
             for m in d.M; real_loc[m, k0] = cur_node; end
             # A held (infeasible) interval is a BREAK for every CEV -> record it in
             # history so the rest rule counts it correctly on the next window.
@@ -234,10 +199,6 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
         cur_node = let nh = findfirst(i -> value(model[:z][1, i, k0]) > 0.5, d.N)
             nh === nothing ? 0 : nh
         end
-        push!(solve_log, (k0, clock_label(d.t_start, d.delta_T, k0), stat,
-                          objective_value(model),
-                          100 * (try relative_gap(model) catch; NaN end),
-                          try solve_time(model) catch; NaN end))
 
         # realized per-MCS charging / discharging / travel + location
         for m in d.M
@@ -263,36 +224,30 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
             end
         end
 
-        # Worker-facing row + realized charging indicator per CEV/site.
-        push!(fe_time, clock_label(d.t_start, d.delta_T, k0))
-        for e in d.E
-            push!(fe_act[e], planned_activity(model, d, e, k0))
-            push!(fe_chg[e], cev_should_charge(model, d, e, k0))
-            site = findfirst(i -> d.A[i, e] == 1, d.N)
-            site !== nothing && (real_mu[site, e, k0] = value(model[:mu][site, e, k0]))
-        end
-        push!(fe_mcs, mcs_should_charge(model, d, k0))
-
-        # (3) SIMULATE realized activity split + LEARN.
+        # (3) SIMULATE realized activity split.
         a_real = Dict(e => realized_activity_durations(rng, model, e, k0, d;
                                                        multi = multi_activity) for e in d.E)
+
+        # (2.5) STOCHASTIC PLANT (FORK B): the Bayesian model is fitted ONCE and its
+        # posterior (est.mu, est.sd) is held FIXED for the whole day. Each interval the
+        # real machine's per-activity power is a fresh PER-EXCAVATOR draw from that fixed
+        # curve, Normal(est.mu, est.sd) truncated at 0. Idle has est.sd = 0, so its draw
+        # collapses to 0 (no power lost while idle). The SAME p_true[e] drives the battery
+        # drain below, so the realized consumption matches what was actually sampled. The
+        # controller re-plans on the fixed mean; only the plant realization is random.
+        p_true = Dict(e => [max(est.mu[j] + est.sd[j] * randn(rng), 0.0)
+                            for j in eachindex(est.mu)] for e in d.E)
+
         for e in d.E
             row = a_real[e]
-            if sum(row) > 1e-9
-                b_obs = dot(row, d.true_powers) + d.obs_noise_std * randn(rng)
-                observe!(est, row, b_obs)
-                n_obs_total += 1
-            end
+            sum(row) > 1e-9 && (n_obs_total += 1)
             # realized work power (dig+load+travel, excluding idle) at the CEV's site
             site = findfirst(i -> d.A[i, e] == 1, d.N)
             if site !== nothing
                 real_P_work[site, e, k0] =
-                    (a_real[e][1] * d.true_powers[1] + a_real[e][2] * d.true_powers[2] +
-                     a_real[e][3] * d.true_powers[3]) / d.delta_T
+                    (a_real[e][1] * p_true[e][1] + a_real[e][2] * p_true[e][2] +
+                     a_real[e][3] * p_true[e][3]) / d.delta_T
             end
-        end
-        if n_obs_total > 0 && k0 % refit_every == 0
-            refit!(est)
         end
 
         # (4) ADVANCE the real MCS energy + position.
@@ -302,7 +257,7 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
         end
         for e in d.E
             charged   = sum(value(model[:P_MCS_CEV][m, i, e, k0]) for m in d.M, i in d.N_c) * d.delta_T
-            work_true = dot(a_real[e], d.true_powers)
+            work_true = dot(a_real[e], p_true[e])
             soe_cev[e] = clamp(soe_cev[e] + charged - work_true, d.SOE_CEV_min[e], d.SOE_CEV_max[e])
         end
 
@@ -331,12 +286,11 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
     for m in d.M; real_SOE_MCS[m, nK + 1] = soe_mcs[m]; end
     for e in d.E; real_SOE_CEV[e, nK + 1] = soe_cev[e]; end
 
-    n_obs_total > 0 && refit!(est)
     elapsed = time() - t0
-    @printf("MPC loop done in %.1f s (%d telematics observations)\n", elapsed, n_obs_total)
+    @printf("MPC loop done in %.1f s (%d stochastic-plant realizations)\n", elapsed, n_obs_total)
     n_infeasible > 0 && @printf("  NOTE: %d/%d windows were INFEASIBLE under the HARD constraints (no fallback);\n        the plant HELD state for those intervals.\n", n_infeasible, nK)
-    println("  final power estimate : ", round.(est.mu, digits = 2), " kW")
-    println("  (hidden) true power  : ", d.true_powers, " kW")
+    println("  fixed power model (mu) : ", round.(est.mu, digits = 2), " kW")
+    println("  plant sampling sd      : ", round.(est.sd, digits = 2), " kW")
 
     # ---- Phase-1 KPIs from the realized trajectory ----
     total_energy = sum(log.grid_kW) * d.delta_T
@@ -349,21 +303,13 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
     transit_intervals = count(==(0), log.mcs_node)
     labour_cost  = d.rho_labor * d.delta_T * transit_intervals
 
-    # ---- Phase 2 overnight recharge ----
-    ov_df, P_ov, ov_k = phase2_overnight_charge(d, soe_mcs)
-    overnight_energy = sum(P_ov) * d.delta_T
-    overnight_cost   = sum(P_ov[m, j] * d.lambda_whl_elec[ov_k[j]] * d.delta_T
-                           for m in 1:length(d.M), j in 1:length(ov_k); init = 0.0)
-
-    return (; d, time_labels, log, solve_log,
-              ov_df, P_ov, ov_k,
+    return (; d, time_labels, log,
               real_P_ch, real_P_dch, real_L_trv, real_SOE_MCS, real_SOE_CEV,
-              real_P_work, real_mu, real_loc,
+              real_P_work, real_loc,
               plan_grid_kW, plan_mcs_soe, plan_cev_soe, plan_cev_act,
-              fe_time, fe_act, fe_chg, fe_mcs,
               est, nK, ACT_NAME,
               total_energy, total_cost, total_co2, nc_peak, op_peak, missed,
-              labour_cost, transit_intervals, overnight_energy, overnight_cost,
+              labour_cost, transit_intervals,
               soe_cev_end = copy(soe_cev), soe_mcs_end = copy(soe_mcs),
               n_obs_total, n_infeasible, elapsed)
 end

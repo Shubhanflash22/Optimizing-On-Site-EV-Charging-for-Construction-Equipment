@@ -17,8 +17,9 @@
 #   u, mu, rho, z, g_ch, x, y_trv, beta_arr, beta_dep            (binaries)
 #   P_peak_NC, P_peak_OP, s_miss_work                             (peaks / slack)
 #
-# `phase2_overnight_charge` is the deterministic (non-MILP) overnight smart
-# charge that restores each MCS to its start level using the cheapest slots.
+# The horizon is the full 24 h, and the MCS/CEV terminal energy-neutral rule
+# (Eq. 8a/8b) is enforced inside this single MILP, so the overnight MCS recharge
+# is scheduled by the optimiser itself (no separate deterministic phase).
 # #############################################################################
 module MCSModel
 
@@ -28,7 +29,7 @@ using DataFrames
 
 using ..Common: normalize_travel_steps, in_peak, clock_label
 
-export build_window_model, phase2_overnight_charge
+export build_window_model
 
 # =============================================================================
 # WINDOW MILP
@@ -54,11 +55,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
                             require_site_visit::Bool = false,
                             single_visit_per_site::Bool = false,
                             peak_demand_limit = nothing,
-                            time_limit_sec::Float64 = 30.0, silent::Bool = true,
-                            soft_prec::Bool = false,
-                            soft_pace::Bool = false,
-                            soft_term::Bool = false,
-                            term_tol::Float64 = 0.0)
+                            time_limit_sec::Float64 = 30.0, silent::Bool = true)
     # Frequently-used sets/scalars.
     M, E, N, N_g, N_c, B = d.M, d.E, d.N, d.N_g, d.N_c, d.B
     delta_T = d.delta_T
@@ -118,10 +115,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @variable(model, P_work[N_c, E, K] >= 0)       # power an excavator spends working
     @variable(model, P_ch_tot[M, K] >= 0)          # total grid draw by the MCS
     @variable(model, P_dch_tot[M, K] >= 0)         # total discharge out of the MCS
-    @variable(model, s_miss_work[N_c, B] >= 0)     # UNFINISHED work (hours) — penalised slack
-    @variable(model, s_prec[N_c, K] >= 0)          # precedence slack (soft mode)
-    @variable(model, s_pace_hi[E, K] >= 0)         # travel-pacing upper-band slack
-    @variable(model, s_pace_lo[E, K] >= 0)         # travel-pacing lower-band slack
+    @variable(model, s_miss_work[N_c, B] >= 0)     # UNFINISHED work (hours) — penalised slack (Eq. 12c)
 
     # ---- travel energy (kWh) ----
     @variable(model, L_trv[M, N, N, K] >= 0)
@@ -143,27 +137,16 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @variable(model, beta_dep[M, N, K], Bin)       # MCS departure indicator at a node
     @variable(model, P_peak_NC >= 0)               # tracked whole-day peak grid draw
     @variable(model, P_peak_OP >= 0)               # tracked on-peak peak grid draw
-    @variable(model, s_term_cev[E] >= 0)           # CEV end-level slack (soft mode)
 
-    # ---- OBJECTIVE: total operating cost ----
-    obj = @expression(model,
+    # ---- OBJECTIVE (Eq. 1): total operating cost. All constraints are HARD;
+    # the only slack is s_miss_work (Eq. 12c), exactly as in the PDF/Avik. ----
+    @objective(model, Min,
         sum(d.lambda_whl_elec[k] * P_ch_tot[m, k] * delta_T for m in M, k in K) +
         sum((d.carbon_price_per_ton / 1000.0) * d.lambda_CO2[k] * P_ch_tot[m, k] * delta_T for m in M, k in K) +
         d.rho_miss * sum(s_miss_work[i, a] for i in N_c, a in B) +
         d.lambda_demand_NC * P_peak_NC +
         d.lambda_demand_OP * P_peak_OP +
         d.rho_labor * delta_T * sum(y_trv[m, i, j, k] for m in M, i in N, j in N, k in K))
-
-    # HARD MODE (default): pin optional slacks to zero. Soft mode penalises them.
-    W_prec = 8.0e2; W_pace = 1.0e2; W_term = 1.5e2
-    soft_prec || @constraint(model, [i in N_c, k in K], s_prec[i, k] == 0)
-    soft_pace || @constraint(model, [e in E, k in K], s_pace_hi[e, k] == 0)
-    soft_pace || @constraint(model, [e in E, k in K], s_pace_lo[e, k] == 0)
-    soft_term || @constraint(model, [e in E], s_term_cev[e] == 0)
-    @objective(model, Min, obj +
-        (soft_prec ? W_prec * sum(s_prec[i, k] for i in N_c, k in K) : AffExpr(0.0)) +
-        (soft_pace ? W_pace * sum(s_pace_hi[e, k] + s_pace_lo[e, k] for e in E, k in K) : AffExpr(0.0)) +
-        (soft_term ? W_term * sum(s_term_cev[e] for e in E) : AffExpr(0.0)))
 
     # ---- power aggregation & where power may flow ----
     @constraint(model, [m in M, k in K], P_ch_tot[m, k]  == sum(P_ch_MCS[m, i, k]  for i in N_g))
@@ -223,55 +206,23 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
             sum(P_MCS_CEV[m, i, e, k] for m in M, i in N_c) * delta_T -
             sum(P_work[i, e, k] for i in N_c) * delta_T)
 
+    # SOE operating ranges (Eq. 8c, 8d).
     @constraint(model, [m in M, t in Tb], d.SOE_MCS_min[m] <= SOE_MCS[m, t] <= d.SOE_MCS_max[m])
     @constraint(model, [e in E, t in Tb], d.SOE_CEV_min[e] <= SOE_CEV[e, t] <= d.SOE_CEV_max[e])
 
-    # NOTE: no "MCS must end the day full" rule — the MCS is refilled overnight
-    # in the cheap Phase-2 charge, not during the daytime MILP.
-
-    # ---- CEV end-of-day energy neutrality (only on the terminal window) ----
+    # ---- Terminal energy targets (Eq. 8a, 8b) ----
+    # MCS: EXACT equality to its initial SOE (Eq. 8a) so it is fully ready for the
+    # next day; because the horizon is the full 24 h, the overnight MCS recharge is
+    # scheduled inside this single MILP (no separate phase).
+    # CEV: a lower bound at its initial SOE (Eq. 8b as a FLOOR, >=). OVERCHARGING IS
+    # ALLOWED — the CEV may finish the day at or above its start level. This removes
+    # the overcharge knife-edge: since a CEV cannot discharge, a hard equality would
+    # be unrecoverable whenever the stochastic plant lets its SOE drift above the
+    # target; the floor keeps the terminal reachable while still guaranteeing the
+    # fleet ends at least as charged as it began.
     if is_terminal
-        if soft_term
-            @constraint(model, [e in E],  SOE_CEV[e, last(Tb)] - d.SOE_CEV_ini[e] <= s_term_cev[e])
-            @constraint(model, [e in E], -(SOE_CEV[e, last(Tb)] - d.SOE_CEV_ini[e]) <= s_term_cev[e])
-        else
-            @constraint(model, [e in E], SOE_CEV[e, last(Tb)] >= d.SOE_CEV_ini[e] - term_tol)
-        end
-
-        # ---- PROACTIVE KEEP-UP RESERVE (keeps the hard terminal recursively feasible) ----
-        # A CEV is only charged while the MCS is parked at its site; to honour the
-        # end-at-grid rule the MCS must depart `tgrid` intervals before day-end, so the
-        # LAST interval it can charge here is `Lc`. After that the CEV sits IDLE, and
-        # because the idle activity itself draws power the SOE strictly DRAINS over that
-        # tail. Two facts must therefore be respected or later windows go infeasible
-        # ("drained too late" / "topped up too late"):
-        #   * charging while plugged in is idle, so the NET gain per interval is
-        #     (max charge - idle draw), not the gross charge rate;
-        #   * the terminal target is (ini - term_tol), and the CEV must be high enough at
-        #     the start of the idle tail to still meet it after the tail drain.
-        # We build, backward from day-end, the minimum SOE at every boundary from which a
-        # feasible recovery still exists, and pin the state above it. Applied every step
-        # this makes the hard terminal recursively feasible instead of a knife-edge.
-        plug_cap = maximum(d.DCH_MCS_plug)
-        idle_a   = B[4]
-        for e in E
-            site_e = findfirst(i -> d.A[i, e] == 1, N)
-            site_e === nothing && continue
-            tgrid = minimum(travel_steps[site_e, g] for g in N_g) + 1   # +1: departure interval is transit
-            Lc    = d.n_day - tgrid                                     # last interval the MCS can charge here
-            Lc < first(K) && continue                                  # window past last charge -> terminal handles it
-            idle_drain = p_activity[idle_a] * delta_T                   # SOE lost per idle interval
-            chg_net    = max(min(d.CH_CEV[e], plug_cap) * delta_T - idle_drain, 1.0e-6)  # net gain per charge interval
-            n_tail     = d.n_day - Lc                                   # idle-only intervals after the MCS leaves
-            target_e   = d.SOE_CEV_ini[e] - term_tol
-            S_star     = target_e + idle_drain * n_tail                 # SOE needed at boundary Lc+1 (idle-tail start)
-            for t in Tb
-                lb = t <= Lc + 1 ? S_star - chg_net * ((Lc + 1) - t) :  # charging phase: ramp up to S_star
-                                   target_e + idle_drain * (d.n_day + 1 - t)   # idle tail: only drains
-                lb = min(lb, d.SOE_CEV_max[e])
-                lb > d.SOE_CEV_min[e] && @constraint(model, SOE_CEV[e, t] >= lb)
-            end
-        end
+        @constraint(model, [m in M], SOE_MCS[m, last(Tb)] == d.SOE_MCS_ini[m])   # Eq. 8a (exact)
+        @constraint(model, [e in E], SOE_CEV[e, last(Tb)] >= d.SOE_CEV_ini[e])   # Eq. 8b (floor; overcharge OK)
     end
 
     # ---- plugging / presence logic ----
@@ -339,10 +290,14 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @constraint(model, [i in N_c, e in E, k in K],
         sum(u[e, i, a, k] for a in B) == d.A[i, e])
     @constraint(model, [i in N_c, e in E, a in B, k in K], u[e, i, a, k] <= d.A[i, e])
+    # (5a): work power is capped by availability and forced to 0 while charging (mu=1).
     @constraint(model, [i in N_c, e in E, k in K],
-        sum(p_activity[a] * u[e, i, a, k] for a in (B[1], B[2], B[3])) <=
-        d.R_work[i, e, k] * d.A[i, e] * (1 - mu[i, e, k]))
+        P_work[i, e, k] <= d.R_work[i, e, k] * d.A[i, e] * (1 - mu[i, e, k]))
+    # A CEV may charge (mu=1) only in an idle interval (the 4-activity encoding of the
+    # PDF's work-or-charge exclusivity; idle draws 0 kW so it is a true "do nothing").
     @constraint(model, [i in N_c, e in E, k in K], mu[i, e, k] <= u[e, i, B[4], k])
+    # (5e): work power = the chosen activity's constant draw. Idle (B[4]) has p_idle = 0,
+    # so an idling CEV consumes no power (no time-varying power, no shutdown state).
     @constraint(model, [i in N_c, e in E, k in K],
         P_work[i, e, k] == sum(p_activity[a] * u[e, i, a, k] for a in B))
 
@@ -352,11 +307,14 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @constraint(model, [i in N_c],
         delta_T * sum(u[e, i, B[2], k] for e in E, k in K) + s_miss_work[i, B[2]] == max(rem_load[i], 0.0))
 
-    # precedence: cumulative loading <= scale * cumulative digging (seeded).
+    # precedence (Eq. 12d): cumulative loading <= scale * cumulative digging, in raw
+    # interval counts EXACTLY as in Avik (MCS_OPTIMAL_v4_real.jl):
+    #   sum u[B2] <= scale * sum u[B1].
+    # MPC SEAM (Avik has none, single-shot): seed with the work already APPLIED in
+    # earlier windows (cum_*_site, converted hours -> interval counts by /delta_T).
     @constraint(model, [i in N_c, k in K],
-        (cum_load_site(i) + delta_T * sum(u[e, i, B[2], tau] for tau in first(K):k, e in E)) <=
-        d.scale * (cum_dig_site(i) + delta_T * sum(u[e, i, B[1], tau] for tau in first(K):k, e in E)) +
-        s_prec[i, k])
+        cum_load_site(i) / delta_T + sum(u[e, i, B[2], tau] for tau in first(K):k, e in E) <=
+        d.scale * (cum_dig_site(i) / delta_T + sum(u[e, i, B[1], tau] for tau in first(K):k, e in E)))
 
     # ---- rest rule: <= rest_cap work intervals in any (rest_cap + 1) window ----
     # Equivalently "no (rest_cap+1)-th consecutive WORK interval" (travel counts as
@@ -389,15 +347,25 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         end
     end
 
-    # travel pacing: keep cumulative travel ~ proportional to cumulative work.
-    kappa = d.kappa_wt
-    for e in E, kk in K
-        trv_cum  = cum_trv_e[e] / delta_T +
-                   sum(u[e, i, B[3], tau] for i in N_c, tau in first(K):kk)
-        work_cum = (cum_dig_e[e] + cum_load_e[e]) / delta_T +
-                   sum(u[e, i, a, tau] for i in N_c, a in (B[1], B[2]), tau in first(K):kk)
-        @constraint(model, kappa * trv_cum <= work_cum + s_pace_hi[e, kk])
-        @constraint(model, kappa * trv_cum >= work_cum - kappa - s_pace_lo[e, kk])
+    # travel pacing (Eq. 13a, 13b): one travel per `work_per_travel` intervals of useful
+    # work (dig or load), EXACTLY as in Avik (MCS_OPTIMAL_v4_real.jl, work_per_travel = 4).
+    # Two-sided band on cumulative travel V(k) vs cumulative useful work W(k):
+    #   W(k) - work_per_travel <= work_per_travel * V(k) <= W(k).
+    # Indexed per (site, CEV) exactly like Avik. MPC SEAM (Avik has none): seed V and W
+    # with the travel/work already APPLIED earlier (cum_*_e, hours -> interval counts).
+    # The A-guard restricts to each CEV's assigned site so the nonzero seed cannot create
+    # spurious constraints on unassigned (i,e) pairs (in Avik's single shot the seeds are
+    # 0, so those rows are trivially 0 <= 0 and need no guard).
+    work_per_travel = 4
+    for i in N_c, e in E
+        d.A[i, e] == 1 || continue
+        for k in K
+            V = cum_trv_e[e] / delta_T + sum(u[e, i, B[3], tau] for tau in first(K):k)
+            W = (cum_dig_e[e] + cum_load_e[e]) / delta_T +
+                sum(u[e, i, a, tau] for a in (B[1], B[2]), tau in first(K):k)
+            @constraint(model, work_per_travel * V <= W)
+            @constraint(model, work_per_travel * V >= W - work_per_travel)
+        end
     end
 
     # Solve. HiGHS's native MIP path can, rarely and non-deterministically on
@@ -410,53 +378,6 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         @warn "MCSModel: solver threw during optimize!; treating window as no-solution (hold state)." exception = err
     end
     return model
-end
-
-# =============================================================================
-# PHASE 2 — OVERNIGHT SMART-CHARGE  (deterministic; NOT an optimisation)
-# =============================================================================
-# After the daytime horizon the MCS is parked at the grid with some energy. The
-# overnight job buys back exactly the energy it is short by, using the CHEAPEST
-# overnight 15-min slots first, capped at its charge rate and capacity. Because
-# energy only rises and the target is <= capacity, greedy "cheapest slots first"
-# is provably optimal — no MILP needed. Returns (df, P_ov, ov_k).
-function phase2_overnight_charge(d, soe_mcs_end)
-    dt   = d.delta_T
-    ov_k = (d.n_day + 1):d.n_int
-    nov  = length(ov_k)
-    P_ov = zeros(length(d.M), nov)
-    soe_path = [fill(float(soe_mcs_end[m]), nov + 1) for m in d.M]
-
-    for m in d.M
-        eta  = d.eta_ch_dch[m]
-        rate = d.CH_MCS[m]
-        deficit = d.SOE_MCS_ini[m] - soe_mcs_end[m]
-        if deficit > 1e-9
-            order = sort(collect(1:nov); by = j -> d.lambda_whl_elec[ov_k[j]])
-            remaining = deficit
-            for j in order
-                remaining <= 1e-9 && break
-                gain = min(eta * rate * dt, remaining)
-                P_ov[m, j] = gain / (eta * dt)
-                remaining -= gain
-            end
-        end
-        soe = float(soe_mcs_end[m])
-        for j in 1:nov
-            soe += eta * P_ov[m, j] * dt
-            soe_path[m][j + 1] = soe
-        end
-    end
-
-    df = DataFrame(k = collect(ov_k),
-                   clock = [clock_label(d.t_start, d.delta_T, k) for k in ov_k],
-                   price = [d.lambda_whl_elec[k] for k in ov_k])
-    for m in d.M
-        df[!, Symbol("MCS$(m)_charge_kW")] = P_ov[m, :]
-        df[!, Symbol("MCS$(m)_soe_kWh")]   = soe_path[m][2:end]
-        df[!, Symbol("MCS$(m)_charging")]  = [P_ov[m, j] > 1e-6 ? "Yes" : "No" for j in 1:nov]
-    end
-    return df, P_ov, ov_k
 end
 
 end # module MCSModel

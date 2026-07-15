@@ -4,7 +4,7 @@
 # One module that owns EVERY on-disk artefact of a run: the v4_real-style STEP
 # figures (PNG) and their data (CSV), PLUS the tabular / KPI reports (cost &
 # emissions, KPI metrics, per-window solver diagnostics, worker schedule, the
-# detailed trajectory, the overnight charge table and the replanning grids).
+# detailed trajectory and the replanning grids).
 #
 # It merges what used to live in two files (Plotting.jl + Reporting.jl) behind a
 # single entry point, `write_outputs(res, out_dir)`, called once by the main.
@@ -18,16 +18,12 @@
 #   05_electricity_prices_emissions  price (left) + CO2 factor (right)
 #   06_mcs_location_trajectory    MCS node index over time
 #   07_mcs_optimization_summary   combined multi-panel overview
-#   mcs_<m>_power_profile         per-MCS charging/discharging
-#   11_power_estimate_convergence online power estimate -> hidden truth (extra)
+#   08_kpi_metrics_summary        cost + demand-peak bar summary
+#   09_mcs_<m>_power_profile      per-MCS charging/discharging
 #
 # REPORTS:
-#   08_cost_emissions_timeseries.csv / 08_cost_emissions_summary.png
-#   09_cost_kpi_metrics.csv          / 09_kpi_metrics_summary.png
-#   10_mip_convergence.csv           (per-window solver diagnostics)
+#   08_cost_kpi_metrics.csv          (KPI totals)
 #   closed_loop_trajectory.csv       (detailed analyst log)
-#   overnight_mcs_charge.csv         (Phase-2 overnight schedule)
-#   worker_schedule.csv              (plain-words site instructions)
 #   replan_grids/*.csv + *.html      (per-step forward plans + replanning view)
 # #############################################################################
 module Output
@@ -231,24 +227,6 @@ function csv_mcs_cev_soe(res)
     return csv
 end
 
-# 11 (extra) — the LEARNING figure: each activity's online estimate + uncertainty
-# ribbon converging toward the hidden true power (dashed).
-function fig_estimate_convergence(res)
-    d = res.d; log = res.log; x = log.k
-    p = plot(xlabel = "Interval (15 min each)", ylabel = "Estimated power (kW)",
-             title = "Online power estimate -> truth", legend = :right, size = (900, 500),
-             guidefontsize = 14, tickfontsize = 12)
-    names_ = ["Digging", "Loading/Swinging", "Traveling", "Idling"]
-    ests   = [log.est_dig, log.est_load, log.est_trv, log.est_idle]
-    uncs   = [log.unc_dig, log.unc_load, log.unc_trv, log.unc_idle]
-    cols   = [:steelblue, :darkorange, :purple, :seagreen]
-    for j in 1:4
-        plot!(p, x, ests[j], ribbon = uncs[j], lw = 2, color = cols[j], label = names_[j] * " est.")
-        hline!(p, [d.true_powers[j]], lw = 1.5, ls = :dash, color = cols[j], label = names_[j] * " true")
-    end
-    return p
-end
-
 # Write every trajectory figure (PNG) + its CSV into out_dir.
 function write_trajectory_figures(res, out_dir)
     mkpath(out_dir)
@@ -285,8 +263,7 @@ function write_trajectory_figures(res, out_dir)
     Number of CEVs: $(length(res.d.E))
     Number of nodes: $(length(res.d.N)) (Grid: $(length(res.d.N_g)), Construction: $(length(res.d.N_c)))
     Time interval: $(res.d.delta_T) h
-    Number of intervals: $(res.nK)
-    Horizon end (inferred): $(res.d.day_end_hour):00
+    Number of intervals: $(res.nK) (full 24 h)
     """
     p_summary = plot(legend = false, grid = false, framestyle = :none, xticks = false, yticks = false,
                      left_margin = 16Plots.mm, right_margin = 14Plots.mm)
@@ -296,37 +273,18 @@ function write_trajectory_figures(res, out_dir)
     savefig(p_combined, joinpath(out_dir, "07_mcs_optimization_summary.png"))
     CSV.write(joinpath(out_dir, "07_mcs_cev_soe.csv"), csv_mcs_cev_soe(res))
 
-    # Per-MCS profiles.
+    # 09 — per-MCS charging/discharging power profiles.
     mcs_plots, mcs_csvs = figs_individual_mcs(res)
     for (m_idx, mp) in enumerate(mcs_plots)
-        savefig(mp, joinpath(out_dir, "mcs_$(m_idx)_power_profile.png"))
-        CSV.write(joinpath(out_dir, "mcs_$(m_idx)_power_profile.csv"), mcs_csvs[m_idx])
+        savefig(mp, joinpath(out_dir, "09_mcs_$(m_idx)_power_profile.png"))
+        CSV.write(joinpath(out_dir, "09_mcs_$(m_idx)_power_profile.csv"), mcs_csvs[m_idx])
     end
-
-    # 11 — extra learning-convergence figure (specific to the MPC pipeline).
-    savefig(fig_estimate_convergence(res), joinpath(out_dir, "11_power_estimate_convergence.png"))
     return nothing
 end
 
 # =============================================================================
 # REPORTS (tabular / KPI)
 # =============================================================================
-
-# 08 — per-interval grid energy / cost / CO2 with running cumulatives.
-function _cost_emissions_timeseries(res)
-    d = res.d; log = res.log
-    e_kwh = log.grid_kW .* d.delta_T
-    cost  = e_kwh .* log.price
-    co2   = e_kwh .* log.co2
-    return DataFrame(
-        Time_Period = log.k,
-        Time_Label  = log.clock,
-        Grid_Energy_kWh = e_kwh,
-        Energy_Cost_USD = cost,
-        CO2_Emissions_kg = co2,
-        Cumulative_Energy_Cost_USD = cumsum(cost),
-        Cumulative_CO2_Emissions_kg = cumsum(co2))
-end
 
 # The six objective cost components (same definitions as the reference).
 function _cost_components(res)
@@ -341,28 +299,7 @@ function _cost_components(res)
     return (; energy_cost, carbon_cost, ncd_cost, opd_cost, missed_cost, travel_cost, total)
 end
 
-function _write_cost_emissions(res, out_dir)
-    ts = _cost_emissions_timeseries(res)
-    CSV.write(joinpath(out_dir, "08_cost_emissions_timeseries.csv"), ts)
-
-    # 08 figure: cumulative cost (left) + cumulative CO2 (right).
-    nK = nrow(ts); x = 1:nK
-    p = plot(x, ts.Cumulative_Energy_Cost_USD, title = "", xlabel = "Interval",
-             ylabel = "Cumulative Cost (USD)", label = nothing, color = :blue, linewidth = 2,
-             size = (900, 500), guidefontsize = 16, tickfontsize = 14,
-             bottom_margin = 14Plots.mm, left_margin = 16Plots.mm, right_margin = 14Plots.mm,
-             legend = :topleft)
-    if any(ts.Cumulative_CO2_Emissions_kg .> 0)
-        pt = twinx(p)
-        plot!(pt, x, ts.Cumulative_CO2_Emissions_kg, ylabel = "Cumulative CO₂ (kg)", label = nothing,
-              color = :red, linewidth = 2, guidefontsize = 16, tickfontsize = 14)
-        plot!(p, [NaN], [NaN], color = :red, linewidth = 2, label = "Cumulative CO₂ (kg)")
-    end
-    plot!(p, [NaN], [NaN], color = :blue, linewidth = 2, label = "Cumulative Cost (USD)")
-    savefig(p, joinpath(out_dir, "08_cost_emissions_summary.png"))
-end
-
-# 09 — KPI totals CSV + a two-panel bar summary (costs + operations).
+# 08 — KPI totals CSV + a two-panel bar summary (costs + operations).
 function _write_kpi_metrics(res, out_dir)
     c = _cost_components(res)
     totals = DataFrame(
@@ -370,15 +307,14 @@ function _write_kpi_metrics(res, out_dir)
                   "NC_demand_charge_USD", "OP_demand_charge_USD", "Missed_Work_Penalty_USD",
                   "Travel_Labour_USD", "Total_Grid_Energy_kWh", "Total_CO2_Emissions_kg",
                   "NCD_Peak_kW", "OPD_Peak_kW", "Missed_Work_hour", "MCS_Transit_hour",
-                  "Overnight_Recharge_kWh", "Overnight_Cost_USD", "Infeasible_windows", "MPC_loop_time_s"],
+                  "Infeasible_windows", "MPC_loop_time_s"],
         Value = Any[round(c.total, digits = 2), round(c.energy_cost, digits = 2), round(c.carbon_cost, digits = 2),
                     round(c.ncd_cost, digits = 2), round(c.opd_cost, digits = 2), round(c.missed_cost, digits = 2),
                     round(c.travel_cost, digits = 2), round(res.total_energy, digits = 2), round(res.total_co2, digits = 2),
                     round(res.nc_peak, digits = 2), round(res.op_peak, digits = 2), round(res.missed, digits = 2),
                     round(res.transit_intervals * res.d.delta_T, digits = 2),
-                    round(res.overnight_energy, digits = 2), round(res.overnight_cost, digits = 2),
                     res.n_infeasible, round(res.elapsed, digits = 2)])
-    CSV.write(joinpath(out_dir, "09_cost_kpi_metrics.csv"), totals)
+    CSV.write(joinpath(out_dir, "08_cost_kpi_metrics.csv"), totals)
 
     cost_labels = ["Energy", "CO₂", "NCD", "OPD", "Missed Work", "Travel", "Total"]
     cost_values = [c.energy_cost, c.carbon_cost, c.ncd_cost, c.opd_cost, c.missed_cost, c.travel_cost, c.total]
@@ -405,26 +341,12 @@ function _write_kpi_metrics(res, out_dir)
     bar!(p_ops, [2], [res.op_peak], color = :purple, label = false, bar_width = 0.55)
 
     p_summary = plot(p_costs, p_ops, layout = (2, 1), size = (1200, 900), plot_title = "KPI Metrics Summary")
-    savefig(p_summary, joinpath(out_dir, "09_kpi_metrics_summary.png"))
+    savefig(p_summary, joinpath(out_dir, "08_kpi_metrics_summary.png"))
 end
 
-# 10 — per-window solver diagnostics (the MPC analogue of a single MIP log).
-_write_mip_convergence(res, out_dir) =
-    CSV.write(joinpath(out_dir, "10_mip_convergence.csv"), res.solve_log)
-
-# Worker-facing schedule (plain words) + detailed trajectory + overnight table.
-function _write_schedules(res, out_dir)
-    d = res.d
+# Master realized per-interval trajectory (the analyst log).
+_write_schedules(res, out_dir) =
     CSV.write(joinpath(out_dir, "closed_loop_trajectory.csv"), res.log)
-    CSV.write(joinpath(out_dir, "overnight_mcs_charge.csv"), res.ov_df)
-    fe = DataFrame(time = res.fe_time)
-    for e in d.E
-        fe[!, Symbol("CEV$(e)_activity")]       = res.fe_act[e]
-        fe[!, Symbol("CEV$(e)_plug_in_charge")] = res.fe_chg[e]
-    end
-    fe[!, :MCS_charge_from_grid] = res.fe_mcs
-    CSV.write(joinpath(out_dir, "worker_schedule.csv"), fe)
-end
 
 # ---- replanning-grid cell formatting + CSV/HTML writers ---------------------
 _cell(v::AbstractString) = v
@@ -489,9 +411,7 @@ end
 
 function write_reports(res, out_dir)
     mkpath(out_dir)
-    _write_cost_emissions(res, out_dir)
     _write_kpi_metrics(res, out_dir)
-    _write_mip_convergence(res, out_dir)
     _write_schedules(res, out_dir)
     _write_replan_grids(res, out_dir)
     return nothing

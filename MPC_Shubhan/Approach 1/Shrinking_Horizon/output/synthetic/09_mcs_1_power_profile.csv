@@ -1,4 +1,4 @@
-Time_Period,Time_Start_Label,Time_End_Label,Total_Charging_Power_kW,Total_Discharging_Power_kW,Net_Power_kW
+Time_Period,Time_Start_Label,Time_End_Label,Charging_Power_kW,Discharging_Power_kW,Net_Power_kW
 1,08:00,08:15,4.786814219857525e-13,0.0,4.786814219857525e-13
 2,08:15,08:30,0.0,0.0,0.0
 3,08:30,08:45,0.0,34.41963934717951,-34.41963934717951
