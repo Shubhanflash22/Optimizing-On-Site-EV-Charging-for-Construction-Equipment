@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+body{font-family:sans-serif;margin:16px}
+h2{margin:4px 0}
+table{border-collapse:collapse;font-size:12px}
+th,td{border:1px solid #ccc;padding:3px 7px;text-align:right;white-space:nowrap}
+th{background:#f4f4f4;text-align:center}
+td:first-child,th:first-child{text-align:left}
+tr:nth-child(even){background:#fafafa}
+</style></head><body>
+<h2>Receding-Horizon MPC — dummy stress cases (1 MCS, varying CEVs; 1 kept day)</h2>
+<p style="font-size:12px;color:#555">Start→end charge, energy flow, cost breakdown, and the overcharge (“charged extra”) accounting for every case. <b>Cost_if_exact</b> = total minus the estimated cost of the energy left in CEVs above target.</p>
+<table><tr>
+<th>Case</th><th>CEVs</th><th>Sites</th><th>Horizon_h</th><th>MCS_start_kWh</th><th>MCS_end_kWh</th><th>CEV_start_kWh</th><th>CEV_target_kWh</th><th>CEV_end_kWh</th><th>Overcharge_kWh</th><th>Grid_energy_kWh</th><th>Delivered_kWh</th><th>Consumed_kWh</th><th>Energy_cost</th><th>Carbon_cost</th><th>NC_charge</th><th>OP_charge</th><th>Missed_penalty</th><th>Labour_cost</th><th>Total_cost</th><th>Overcharge_cost</th><th>Cost_if_exact</th><th>Missed_work_h</th><th>Transit_h</th><th>Infeasible_wins</th><th>Loop_time_s</th></tr>
+<tr>
+<td>C01_baseline_1cev</td><td>1</td><td>1</td><td>10.0</td><td>250.0</td><td>194.4</td><td>50.0</td><td>50.0</td><td>73.7</td><td>23.72</td><td>0.0</td><td>48.1</td><td>24.38</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>125.0</td><td>125.0</td><td>0.0</td><td>125.0</td><td>0.0</td><td>0.5</td><td>0</td><td>91.9</td></tr>
+<tr>
+<td>C02_two_cev_two_sites</td><td>2</td><td>2</td><td>10.0</td><td>250.0</td><td>148.4</td><td>100.0</td><td>100.0</td><td>142.4</td><td>42.35</td><td>0.0</td><td>84.68</td><td>42.33</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>312.5</td><td>312.5</td><td>0.0</td><td>312.5</td><td>0.0</td><td>1.25</td><td>0</td><td>163.2</td></tr>
+<tr>
+<td>C03_three_cev_three_sites</td><td>3</td><td>3</td><td>10.0</td><td>250.0</td><td>136.9</td><td>150.0</td><td>150.0</td><td>163.9</td><td>13.94</td><td>0.0</td><td>78.98</td><td>65.04</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>125.0</td><td>750.0</td><td>875.0</td><td>0.0</td><td>875.0</td><td>0.25</td><td>3.0</td><td>0</td><td>364.0</td></tr>
+<tr>
+<td>C04_two_cev_shared_site</td><td>2</td><td>1</td><td>10.0</td><td>250.0</td><td>157.0</td><td>100.0</td><td>100.0</td><td>150.0</td><td>50.0</td><td>0.0</td><td>83.57</td><td>33.57</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>125.0</td><td>125.0</td><td>0.0</td><td>125.0</td><td>0.0</td><td>0.5</td><td>0</td><td>46.4</td></tr>
+<tr>
+<td>C05_heavy_work_low_batt</td><td>1</td><td>1</td><td>10.0</td><td>250.0</td><td>215.9</td><td>20.0</td><td>20.0</td><td>19.9</td><td>0.0</td><td>0.0</td><td>27.68</td><td>27.68</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>2625.0</td><td>125.0</td><td>2750.0</td><td>0.0</td><td>2750.0</td><td>5.25</td><td>0.5</td><td>0</td><td>82.7</td></tr>
+<tr>
+<td>C06_tiny_battery_shuttle</td><td>2</td><td>2</td><td>10.0</td><td>250.0</td><td>179.0</td><td>30.0</td><td>30.0</td><td>31.3</td><td>1.34</td><td>0.0</td><td>46.12</td><td>44.78</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>125.0</td><td>562.5</td><td>687.5</td><td>0.0</td><td>687.5</td><td>0.25</td><td>2.25</td><td>0</td><td>341.0</td></tr>
+<tr>
+<td>C07_long_travel</td><td>2</td><td>2</td><td>10.0</td><td>250.0</td><td>137.0</td><td>100.0</td><td>100.0</td><td>138.1</td><td>38.14</td><td>0.0</td><td>78.83</td><td>40.69</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>375.0</td><td>750.0</td><td>1125.0</td><td>0.0</td><td>1125.0</td><td>0.75</td><td>3.0</td><td>0</td><td>299.4</td></tr>
+<tr>
+<td>C08_price_spike_peak</td><td>2</td><td>2</td><td>11.0</td><td>250.0</td><td>163.2</td><td>100.0</td><td>100.0</td><td>135.5</td><td>35.48</td><td>0.0</td><td>72.94</td><td>37.46</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>750.0</td><td>250.0</td><td>1000.0</td><td>0.0</td><td>1000.0</td><td>1.5</td><td>1.0</td><td>0</td><td>297.9</td></tr>
+<tr>
+<td>C09_allday_work_reststress</td><td>2</td><td>2</td><td>11.0</td><td>250.0</td><td>124.8</td><td>100.0</td><td>100.0</td><td>105.1</td><td>5.05</td><td>0.0</td><td>85.69</td><td>80.64</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>1625.0</td><td>812.5</td><td>2437.5</td><td>0.0</td><td>2437.5</td><td>3.25</td><td>3.25</td><td>0</td><td>395.2</td></tr>
+<tr>
+<td>C10_short_day_12h</td><td>2</td><td>2</td><td>10.0</td><td>250.0</td><td>173.4</td><td>100.0</td><td>100.0</td><td>130.7</td><td>30.68</td><td>0.0</td><td>63.31</td><td>32.63</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>250.0</td><td>250.0</td><td>0.0</td><td>250.0</td><td>0.0</td><td>1.0</td><td>0</td><td>121.1</td></tr>
+<tr>
+<td>C11_cheap_flat_easy</td><td>3</td><td>3</td><td>10.0</td><td>250.0</td><td>136.3</td><td>150.0</td><td>150.0</td><td>195.2</td><td>45.17</td><td>0.0</td><td>91.35</td><td>46.18</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>437.5</td><td>437.5</td><td>0.0</td><td>437.5</td><td>0.0</td><td>1.75</td><td>0</td><td>213.9</td></tr>
+</table></body></html>

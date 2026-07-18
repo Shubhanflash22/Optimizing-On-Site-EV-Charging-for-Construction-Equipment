@@ -16,6 +16,11 @@
 # named in include / dependency order:
 #   1_Common.jl            shared helpers (travel steps, clock labels, step plots)
 #                          PLUS the Bayesian activity-power estimator
+#   0_Regression.jl        STEP 0 (pure Julia; needs Common): reads the soil .xlsx
+#                          task files, fits the Bayesian power model, and refreshes
+#                          parameters.csv (mu + per-activity sigma) BEFORE the MPC.
+#                          Runs by default in :input mode; skip via run_regression=
+#                          false. Fail-soft if XLSX.jl / the data folder is absent.
 #   2_DataLoader.jl        load :synthetic / :input data (full 24 h horizon)
 #   3_MCSModel.jl          the single 24 h window MILP (Eq. 1-13)
 #   4_MPCLoop.jl           the closed loop (optimise + fixed-model plant + apply)
@@ -28,6 +33,7 @@ using Printf
 # ---- include the modules in dependency order (Common first) ----
 const _CODE_DIR = @__DIR__
 include(joinpath(_CODE_DIR, "1_Common.jl"))
+include(joinpath(_CODE_DIR, "0_Regression.jl"))   # after Common (uses ..Common)
 include(joinpath(_CODE_DIR, "2_DataLoader.jl"))
 include(joinpath(_CODE_DIR, "3_MCSModel.jl"))
 include(joinpath(_CODE_DIR, "4_MPCLoop.jl"))
@@ -37,6 +43,9 @@ using .DataLoader: load_data
 using .MPCLoop: run_mpc
 using .Output: write_outputs
 
+# Default folder holding the soil task-recording .xlsx files (step-0 regression).
+const _DEFAULT_REGRESSION_DATA_DIR = raw"C:\Users\shubh\Desktop\Bayesian Regression"
+
 # =============================================================================
 # ENTRY POINT
 # =============================================================================
@@ -45,18 +54,36 @@ using .Output: write_outputs
 function run_scenario_1(; mode::Symbol = :synthetic,
                           input_dir::AbstractString = joinpath(dirname(_CODE_DIR), "data", "input_data"),
                           shrinking::Bool = true, H::Int = 16,
+                          # SOLVER TIME LIMIT (control point #1, the top-level knob). Seconds the
+                          # solver may spend on EACH 15-min window MILP. This flows through to
+                          # run_mpc -> build_window_model -> set_time_limit_sec (3_MCSModel.jl).
+                          #   e.g.  run_scenario_1(mode = :input, time_limit_sec = Inf)
+                          # Pass Inf to REMOVE the limit and solve every window to the MIP gap.
                           time_limit_sec::Float64 = 60.0,
                           multi_activity::Bool = false,
                           require_site_visit::Bool = false,
                           single_visit_per_site::Bool = false,
                           mcmc_samples::Int = 500,
                           out_dir::String = joinpath(dirname(_CODE_DIR), "output", String(mode)),
+                          run_regression::Bool = true,
+                          regression_data_dir::AbstractString = _DEFAULT_REGRESSION_DATA_DIR,
+                          regression_samples::Int = 2000,
+                          regression_chains::Int = 4,
                           seed::Int = 1)
     # Resolve the input folder (with a couple of legacy fallbacks).
     if mode == :input && !isdir(input_dir)
         for alt in (joinpath(_CODE_DIR, "input_data"), joinpath(dirname(_CODE_DIR), "input_data"))
             isdir(alt) && (input_dir = alt; break)
         end
+    end
+
+    # ---- STEP 0: (re)fit the Bayesian power model and refresh parameters.csv ----
+    # Pure-Julia regression over the soil .xlsx files (no Python). Only meaningful
+    # in :input mode (synthetic builds its powers in code). Runs by default; pass
+    # run_regression=false to reuse the last-fitted parameters.csv.
+    if mode == :input && run_regression
+        Regression.run_regression(regression_data_dir, joinpath(input_dir, "parameters.csv");
+                                  mcmc_samples = regression_samples, nchains = regression_chains)
     end
 
     d = load_data(mode; input_dir = input_dir)
@@ -72,7 +99,9 @@ function run_scenario_1(; mode::Symbol = :synthetic,
 
     println("\nResults written to: $(abspath(out_dir))")
     println("  Figures (v4_real style): 01..09 (09 = per-MCS power profiles)")
-    println("  Reports: 08 KPI, closed_loop_trajectory, replan_grids/*.csv+*.html")
+    println("  Reports: 08 KPI, replan_grids/*.csv+*.html,")
+    println("           plan_vs_actual.html + plan_vs_actual_costs.png  (08:00 plan vs realised, financial)")
+    println("           plan_vs_actual_activity.png, plan_vs_actual_side_by_side.html, plan_vs_actual_by_entity.html  (ACTIVITY)")
     return res.log
 end
 

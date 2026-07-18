@@ -16,4 +16,4 @@ kappa_wt,4,-,Travel-pacing: productive intervals per CEV travel (two-sided band)
 prior_sigma_frac,0.2,-,Bayesian prior std as a fraction of each activity power
 obs_noise_std,0.05,kWh,Bayesian telemetry noise std (simulation only)
 co2_unit_scale,1,-,Raw intensity_tons_emissions scale (objective divides carbon_price by 1000)
-n_days,2,days,Receding horizon: number of days to KEEP; code simulates n_days+1 and drops the last (buffer) day
+n_days,2,-,Reported work days to KEEP (a buffer day is always simulated and dropped); per-day work in work_by_day.csv

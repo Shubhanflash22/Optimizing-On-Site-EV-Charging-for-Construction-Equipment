@@ -157,9 +157,14 @@ $P^{\text{OP}}$ likewise on on-peak $k$ only.
 %======================================================================
 \section{Single horizon, fixed model}
 There is no overnight ``Phase~2'': the terminal rules (8a/8b) close the MCS energy cycle inside
-the one 24\,h MILP. The activity powers $p_a$ are the mean of a fixed calibrated estimate
-$\mathcal{N}(\mu,\sigma)$; the MILP plans on $\mu$, and the closed-loop plant draws each
-interval's realized power from $\mathcal{N}(\mu,\sigma)$ (truncated at $0$, idle pinned to $0$).
-The model is not re-fit online.
+the one 24\,h MILP. The activity powers $p_a=\mu_a$ are the posterior \emph{mean} of a Bayesian
+fit performed \textbf{offline, once, before the loop} by step~0 (\texttt{0\_Regression.jl}): it
+reads the raw task-recording data, builds cumulative-$\Delta$SoC energy-balance equations
+$A x = b$, and fits $b\sim\mathcal{N}(Ax,s)$ with $\mathrm{TruncatedNormal}(\mu_0,\sigma_0;\ge0)$
+power priors and a half-normal noise (pooled NUTS chains). It writes both the mean $\mu$ and a
+\textbf{per-activity} standard deviation $\sigma_a$ to \texttt{parameters.csv}. The MILP plans on
+$\mu$; the closed-loop plant draws each interval's realized power from
+$\mathcal{N}(\mu_a,\sigma_a)$ (truncated at $0$, idle pinned to $0$). The model is \emph{not}
+re-fit online during the day.
 
 \end{document}

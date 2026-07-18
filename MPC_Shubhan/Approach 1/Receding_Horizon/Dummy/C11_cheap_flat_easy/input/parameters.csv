@@ -1,0 +1,17 @@
+Parameter,Value
+k_trv,10
+rho_miss,500
+delta_T,0.25
+p_digging,4.79
+p_loading_swinging,3.16
+p_traveling,4.71
+lambda_demand_NC,10
+lambda_demand_OP,10
+carbon_price_per_ton,50
+rho_labor,250
+p_idling,0.0
+scale,2
+t_limit_rest,1
+prior_sigma_frac,0.2
+obs_noise_std,0.05
+co2_unit_scale,1

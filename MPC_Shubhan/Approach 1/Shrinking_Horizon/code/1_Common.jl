@@ -228,14 +228,19 @@ end
 # (mirrors the Python fit_bayesian_activity_power -> pm.sample with target_accept
 # = 0.9). Activities whose prior std is 0 (idle) are pinned to their prior mean
 # with 0 uncertainty instead of sampled, avoiding a degenerate TruncatedNormal.
-function refit!(est::BayesianActivityEstimator)
+function refit!(est::BayesianActivityEstimator; nchains::Int = 1)
     isempty(est.b_obs) && return est
     sigma_b = length(est.b_obs) > 1 ? max(std(est.b_obs), 1e-3) : 1.0
     # Floor the prior std handed to the sampler so a pinned (sigma = 0) activity
     # does not make the model degenerate; its posterior is overwritten below.
     prior_sigma_fit = [max(s, 1e-6) for s in est.prior_sigma]
     model = activity_power_model(est.A_obs, est.b_obs, est.prior_mu, prior_sigma_fit, sigma_b)
-    chain = sample(model, NUTS(0.9), est.mcmc_samples; progress = false)
+    # nchains > 1 runs several NUTS chains and POOLS their draws for the posterior
+    # summary (matches the Python reference's 4-chain fit); nchains == 1 keeps the
+    # original single-chain behaviour used by the online-learning path.
+    chain = nchains > 1 ?
+        sample(model, NUTS(0.9), MCMCThreads(), est.mcmc_samples, nchains; progress = false) :
+        sample(model, NUTS(0.9), est.mcmc_samples; progress = false)
     syms = (:x1, :x2, :x3, :x4)
     for i in 1:length(est.prior_mu)
         if est.prior_sigma[i] <= 1e-12

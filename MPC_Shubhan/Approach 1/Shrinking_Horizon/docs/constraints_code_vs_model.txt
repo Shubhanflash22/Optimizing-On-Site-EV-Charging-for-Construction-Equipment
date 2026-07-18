@@ -12,9 +12,13 @@ first interval is applied and the window shrinks as the day advances. There is O
 optimisation per step and ONE horizon - the overnight MCS recharge is scheduled
 INSIDE the same MILP (no separate phase).
 
-Power model: FIXED. The activity powers are a calibrated Bayesian prior N(mu, sigma)
-(the posterior of Avik's offline Python regression). The MILP plans on mu; the plant
-(Fork B) samples per-interval powers from N(mu, sigma). No online re-fitting.
+Power model: FIXED per run, FITTED OFFLINE by STEP 0. Before the loop, code/0_Regression.jl
+(a pure-Julia port of Avik's Python Bayesian regression) reads the soil .xlsx task files,
+builds the cumulative-dSoC energy-balance equations, and fits N(mu, sigma) with the SAME
+Turing model as 1_Common.jl (4 pooled NUTS chains). It writes the posterior MEAN (p_*) and
+the PER-ACTIVITY SD (sigma_*) into parameters.csv. The MILP then plans on mu; the plant
+(Fork B) samples per-interval powers from N(mu, sigma) - now a PER-ACTIVITY sigma vector.
+No ONLINE re-fitting (the fit is offline, once, before the loop; skippable via run_regression=false).
 
 Legend:  OK = matches exactly   ADAPTED = deliberate, documented (MPC or user choice)
 
@@ -93,11 +97,16 @@ does NOT add the receding version's per-day schedule or the hard "no-working-ahe
 cap. With one day + daily neutrality there is no incentive to overshoot, so it hits
 the lumpsum quota naturally.
 
-DORMANT SCAFFOLDING (present but NOT used by the pipeline)
+POWER-MODEL FIT (STEP 0) vs ONLINE LEARNING
 --------------------------------------------------------------------------------
- The Turing/NUTS learner in 1_Common.jl (activity_power_model, observe!, refit!) is
- kept for future online-learning experiments but is NEVER called: the estimator runs
- in calibrated-prior mode, so mu/sigma ARE the fixed prior throughout the day.
+ The Turing/NUTS learner in 1_Common.jl (activity_power_model, observe!, refit!) IS
+ now used - but OFFLINE, by step 0 (0_Regression.jl), before the loop starts. It fits
+ mu/sigma from the raw task data and writes them to parameters.csv; the loop then holds
+ them FIXED (no online re-fit). The idle activity is PINNED to 0 kW in the Julia fit
+ (deliberate deviation from the Python, which estimates a small idle power) because the
+ fleet model treats idle as no-draw. The same refit! path could run ONLINE (Fork A) but
+ is not called during the loop. Per-activity sigma_* rows in parameters.csv override the
+ old single prior_sigma_frac (kept only as a fallback when sigma_* are absent).
 
 CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
  - Rolling rules (rest 12e, precedence 12d, pacing 13) are seeded from a SHARED

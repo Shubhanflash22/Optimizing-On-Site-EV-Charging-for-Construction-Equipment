@@ -11,13 +11,6 @@
 #
 # NOMENCLATURE mirrors DataLoader_v4_real.jl (SOE_*, CH_*, DCH_*, R_work,
 # lambda_whl_elec, lambda_CO2, hours_digging, ...).
-#
-# NOTE ON day_end_hour (the end of the Phase-1 daytime horizon):
-# This is NO LONGER read from parameters.csv. It is INFERRED from the work
-# availability itself: day_end_hour = (last interval with any nonzero work
-# availability) + a 1-hour buffer for the MCS to return home / top up before
-# the overnight phase. For the shipped data the last work interval is 17:00, so
-# the inferred horizon end is 18:00 exactly as before.
 # #############################################################################
 module DataLoader
 
@@ -26,14 +19,22 @@ using DataFrames
 
 export load_data, build_default_data, load_input_data, RETURN_BUFFER_HOURS
 
-# Documented constant that REPLACES the old day_end_hour parameter: the gap kept
-# between the last work-available interval and the daytime-horizon end, so the
-# MCS can drive home and top the CEVs up before the overnight recharge.
+# RECEDING HORIZON (multi-day): each 24 h day is split into a PHASE-1 daytime
+# window of `n_day` intervals (work + opportunistic charging, solved by the
+# cross-day MILP) and an overnight remainder handled deterministically by the
+# separate phase. `n_day` is INFERRED from work availability rather than fixed
+# to the full day: n_day = (last work-available interval) + a return buffer so
+# the MCS can drive home and top the CEVs up before the overnight recharge.
+# `n_days` reported days are simulated with one extra buffer day dropped by the
+# driver. Powers/curves are fixed (fit-once prior, no online learning).
+
+# Documented constant: the gap kept between the last work-available interval and
+# the daytime-horizon end, so the MCS can return home / top up before overnight.
 const RETURN_BUFFER_HOURS = 1.0
 
 # Given a work-availability signal `available[k]` (true if any CEV may work in
-# interval k) over a full day of `n_int` intervals, infer the number of daytime
-# Phase-1 intervals: last work interval + the return/recharge buffer.
+# interval k) over a day of `n_int` intervals, infer the number of daytime
+# Phase-1 intervals: (last work interval) + the return/recharge buffer.
 function _infer_n_day(available::AbstractVector{Bool}, delta_T, n_int)
     last_work = findlast(available)
     last_work === nothing && error("DataLoader: no work availability found; cannot infer day_end_hour")
@@ -80,9 +81,11 @@ function build_default_data()
     CH_CEV      = [45.0, 30.0]
 
     # ---- activity power draws, kW (B = [dig, load, travel, idle]) ----
-    prior_mu      = [4.6, 3.3, 4.5, 0.5]
-    prior_sigma   = [1.0, 1.0, 1.5, 0.3]
-    true_powers   = [5.2, 2.8, 5.0, 0.6]
+    # Idle is pinned to 0 kW with 0 std: no power is lost while idling.
+    prior_mu      = [4.6, 3.3, 4.5, 0.0]
+    prior_sigma   = [1.0, 1.0, 1.5, 0.0]
+    true_powers   = [5.2, 2.8, 5.0, 0.0]
+    true_sigma    = [0.3, 0.2, 0.3, 0.0]    # per-interval wobble of the stochastic plant
     obs_noise_std = 0.05
     p_digging          = prior_mu[1]
     p_loading_swinging = prior_mu[2]
@@ -92,9 +95,8 @@ function build_default_data()
     # ---- required work hours per node, PER DAY (only site rows 2,3 are used) ----
     # Work is a PER-DAY schedule (not a single lumpsum): each kept day carries its
     # own digging/loading quota per site. `dig_by_day[dy]` / `load_by_day[dy]` are
-    # node-length vectors for reported day dy (1..n_days). The dropped buffer day
-    # gets NO fresh work (wind-down only). `hours_digging`/`hours_loading_swinging`
-    # remain the day-1 vectors for any legacy/default reference.
+    # node-length vectors for reported day dy (1..n_days). `hours_digging` /
+    # `hours_loading_swinging` remain the day-1 vectors as a legacy reference.
     n_days = 2                     # synthetic default (reported days KEPT)
     dig_by_day  = [[0.0, 2.5, 1.5], [0.0, 2.0, 1.0]]
     load_by_day = [[0.0, 1.5, 1.0], [0.0, 1.0, 0.5]]
@@ -125,8 +127,8 @@ function build_default_data()
         (work_start_hour <= mod(t_start + (k - 1) * delta_T, 24) < work_end_hour) &&
         !(lunch_start_hour <= mod(t_start + (k - 1) * delta_T, 24) < lunch_end_hour)
         for k in 1:n_int]
-    n_day = _infer_n_day(available_full, delta_T, n_int)
-    day_end_hour = t_start + n_day * delta_T          # e.g. 8 + 40*0.25 = 18.0
+    n_day = _infer_n_day(available_full, delta_T, n_int)  # daytime Phase-1 window
+    day_end_hour = t_start + n_day * delta_T              # e.g. 8 + 40*0.25 = 18.0
     K = 1:n_day
     T = 1:(n_day + 1)
 
@@ -153,7 +155,7 @@ function build_default_data()
               DCH_MCS_plug, C_MCS_plug, eta_ch_dch,
               SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV,
               p_digging, p_loading_swinging, p_traveling, p_idling,
-              prior_mu, prior_sigma, true_powers, obs_noise_std,
+              prior_mu, prior_sigma, true_powers, true_sigma, obs_noise_std,
               hours_digging, hours_loading_swinging, dig_by_day, load_by_day, tau_trv, k_trv,
               lambda_whl_elec, lambda_CO2, R_work,
               rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP,
@@ -229,7 +231,7 @@ function load_input_data(input_dir::AbstractString)
     ttm = _read_csv(input_dir, "travel_time.csv")
     wkf = _read_csv(input_dir, "work_flexible.csv"; required_cols = ["Location","EV"])
 
-    # ---- scalar settings (day_end_hour deliberately NOT read here) ----
+    # ---- scalar settings ----
     delta_T = _psd(par, "delta_T");  k_trv = _psd(par, "k_trv")
     rho_miss         = _psd(par, "rho_miss");          rho_labor = _psd(par, "rho_labor")
     lambda_demand_NC = _psd(par, "lambda_demand_NC");  lambda_demand_OP = _psd(par, "lambda_demand_OP")
@@ -280,8 +282,10 @@ function load_input_data(input_dir::AbstractString)
 
     # ---- activity powers: known constants seed the learner's prior ----
     prior_mu    = [_psd(par, "p_digging"), _psd(par, "p_loading_swinging"), _psd(par, "p_traveling"), p_idling]
-    prior_sigma = [max(prior_sigma_frac * prior_mu[j], 0.05) for j in 1:4]
+    # Idle (prior_mu[4] == 0) is pinned to 0 std: no power is lost while idling.
+    prior_sigma = [prior_mu[j] > 0 ? max(prior_sigma_frac * prior_mu[j], 0.05) : 0.0 for j in 1:4]
     true_powers = copy(prior_mu)
+    true_sigma  = copy(prior_sigma)          # per-interval wobble of the stochastic plant
     p_digging, p_loading_swinging, p_traveling = prior_mu[1], prior_mu[2], prior_mu[3]
 
     # ---- required work hours per node from place.csv ----
@@ -317,7 +321,7 @@ function load_input_data(input_dir::AbstractString)
         end
     end
     available_full = Bool[any(R_full[i, e, k] > 0 for i in N_c, e in E) for k in 1:n_full]
-    n_day = _infer_n_day(available_full, delta_T, n_int)
+    n_day = _infer_n_day(available_full, delta_T, n_int)   # daytime Phase-1 window
     day_end_hour = t_start + n_day * delta_T
     K = 1:n_day;  T = 1:(n_day + 1)
     R_work = R_full[:, :, 1:n_day]          # truncate the caps to the inferred daytime window
@@ -335,7 +339,6 @@ function load_input_data(input_dir::AbstractString)
         load_by_day = [copy(hours_loading_swinging) for _ in 1:n_days]
     else
         dig_by_day, load_by_day = wbd
-        # keep the day-1 vectors as the legacy default reference
         hours_digging          = copy(dig_by_day[1])
         hours_loading_swinging = copy(load_by_day[1])
     end
@@ -347,7 +350,7 @@ function load_input_data(input_dir::AbstractString)
               DCH_MCS_plug, C_MCS_plug, eta_ch_dch,
               SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV,
               p_digging, p_loading_swinging, p_traveling, p_idling,
-              prior_mu, prior_sigma, true_powers, obs_noise_std,
+              prior_mu, prior_sigma, true_powers, true_sigma, obs_noise_std,
               hours_digging, hours_loading_swinging, dig_by_day, load_by_day, tau_trv, k_trv,
               lambda_whl_elec, lambda_CO2, R_work,
               rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP,

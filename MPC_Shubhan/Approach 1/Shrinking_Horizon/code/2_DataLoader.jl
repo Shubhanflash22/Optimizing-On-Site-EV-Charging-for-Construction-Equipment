@@ -195,11 +195,14 @@ function load_input_data(input_dir::AbstractString)
     lambda_CO2      = Float64.(tdd.intensity_tons_emissions) .* co2_unit_scale
 
     # ---- id -> index maps ----
+    # String IDs from each CSV's first column (whitespace-trimmed).
     ev_ids   = strip.(string.(evd[!, 1]))
     mcs_ids  = strip.(string.(mcd[!, 1]))
     node_ids = strip.(string.(plc.site))
+    # Lowercased name -> integer index, so lookups are case-insensitive and consistent across files.
     node_idx = Dict(lowercase(id) => i for (i, id) in enumerate(node_ids))
     ev_idx   = Dict(lowercase(id) => e for (e, id) in enumerate(ev_ids))
+    # Integer index sets used everywhere downstream (nodes, excavators, MCS units).
     N = 1:length(node_ids);  E = 1:length(ev_ids);  M = 1:length(mcs_ids)
 
     # ---- assignment matrix A from place.csv (one column per excavator id) ----
@@ -212,6 +215,7 @@ function load_input_data(input_dir::AbstractString)
             Int(round(Float64(col[r]))) == 1 && (A[node_idx[lowercase(node_ids[r])], e] = 1)
         end
     end
+    # Site nodes = any node with a CEV assigned; grid nodes = all the rest.
     N_c = [i for i in N if any(A[i, e] == 1 for e in E)]
     N_g = [i for i in N if !(i in N_c)]
     isempty(N_g) && error("DataLoader: no grid node (a node with no EV assigned) found")
@@ -226,8 +230,20 @@ function load_input_data(input_dir::AbstractString)
 
     # ---- activity powers: known constants seed the learner's prior ----
     prior_mu    = [_psd(par, "p_digging"), _psd(par, "p_loading_swinging"), _psd(par, "p_traveling"), p_idling]
-    # Idle (prior_mu[4] == 0) is pinned to 0 std: no power is lost while idling.
-    prior_sigma = [prior_mu[j] > 0 ? max(prior_sigma_frac * prior_mu[j], 0.05) : 0.0 for j in 1:4]
+    # PER-ACTIVITY std: prefer explicit sigma_* rows (e.g. written by the step-0
+    # Bayesian regression = the posterior SD of each activity power). If a row is
+    # missing (NaN), fall back to the old single prior_sigma_frac * mu behaviour so
+    # older parameter files still load. Idle (prior_mu[4] == 0) is pinned to 0 std:
+    # no power is lost while idling.
+    sig_dig  = _psd_opt(par, "sigma_digging",          NaN)
+    sig_load = _psd_opt(par, "sigma_loading_swinging", NaN)
+    sig_trv  = _psd_opt(par, "sigma_traveling",        NaN)
+    _sigma_or_frac(explicit, mu) =
+        isnan(explicit) ? (mu > 0 ? max(prior_sigma_frac * mu, 0.05) : 0.0) : max(explicit, 0.0)
+    prior_sigma = [_sigma_or_frac(sig_dig,  prior_mu[1]),
+                   _sigma_or_frac(sig_load, prior_mu[2]),
+                   _sigma_or_frac(sig_trv,  prior_mu[3]),
+                   0.0]
     true_powers = copy(prior_mu)
     true_sigma  = copy(prior_sigma)          # per-interval wobble of the stochastic plant
     p_digging, p_loading_swinging, p_traveling = prior_mu[1], prior_mu[2], prior_mu[3]
@@ -249,10 +265,11 @@ function load_input_data(input_dir::AbstractString)
         tau_trv[node_idx[rn], node_idx[cn]] = Float64(ttm[ri, ci + 1])
     end
 
-    # ---- work-availability matrix over the FULL day, then INFER the horizon ----
+    # ---- work-availability matrix over the FULL 24 h horizon ----
     # Each work_flexible row is (Location, EV) followed by one column per FULL-day
-    # interval giving the kW work cap (0 = no work). We first read the whole-day
-    # caps, then infer n_day = (last interval with any work) + return buffer.
+    # interval giving the kW work cap (0 = no work). We read the whole-day caps and
+    # keep the full 24 h horizon (n_day = n_int): this is a single-day model, so
+    # there is no shift-based horizon inference and no return buffer.
     wf_time_cols = names(wkf)[3:end]
     n_full = min(n_int, length(wf_time_cols))
     R_full = zeros(length(N), length(E), n_full)
@@ -264,7 +281,6 @@ function load_input_data(input_dir::AbstractString)
             R_full[i, e, k] = Float64(wkf[r, 2 + k])
         end
     end
-    available_full = Bool[any(R_full[i, e, k] > 0 for i in N_c, e in E) for k in 1:n_full]
     n_day = n_int                            # FULL 24 h horizon (one optimisation)
     K = 1:n_day;  T = 1:(n_day + 1)
     R_work = zeros(length(N), length(E), n_day)   # pad the caps out to the full-day horizon

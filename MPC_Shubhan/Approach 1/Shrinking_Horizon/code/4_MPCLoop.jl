@@ -154,10 +154,20 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
     plan_cev_act = [fill("", nK, nK)  for _ in d.E]
     plan_mcs_act = fill("", nK, nK)   # MCS status: Idle / Charging (grid) / Serving CEV / Traveling
 
+    # ---- REALIZED (applied) activity per interval, one label per step ----
+    # This is the diagonal of the plan grids: the activity the loop ACTUALLY
+    # executed each step (vs the 08:00 forward plan). Used by the plan-vs-actual
+    # activity report to highlight where the realised day diverged from the plan.
+    real_cev_act = [fill("", nK) for _ in d.E]
+    real_mcs_act = fill("", nK)
+
     hmode = shrinking ? "shrinking" : "fixed H=$H"
     println("Running Scenario 1 (closed-loop MPC, 15-min steps, $hmode horizon): $nK steps")
     println("  prior power estimate : ", round.(est.mu, digits = 2), " kW")
     println("  (hidden) true power  : ", d.true_powers, " kW")
+    # SOLVER TIME LIMIT (control point #2 -> forwarded to build_window_model).
+    println("  solver time limit    : ",
+            isfinite(time_limit_sec) ? "$(time_limit_sec) s / window" : "none (solve each window to the MIP gap)")
     t0 = time()
     n_obs_total = 0
     n_infeasible = 0
@@ -188,15 +198,18 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
                         est.mu[1], est.mu[2], est.mu[3], est.mu[4],
                         est.sd[1], est.sd[2], est.sd[3], est.sd[4], n_obs_total))
             for m in d.M; real_loc[m, k0] = cur_node; end
-            # A held (infeasible) interval is a BREAK for every CEV -> record it in
-            # history so the rest rule counts it correctly on the next window.
+            # A held (infeasible) interval is a BREAK: idle for every CEV and the MCS.
+            for e in d.E; real_cev_act[e][k0] = "Idle"; end
+            real_mcs_act[k0] = "Idle"
+            # ... and record it in history so the rest rule counts it correctly next window.
             for e in d.E; push!(hist[e], (length(d.B), [0.0, 0.0, 0.0, d.delta_T])); end
             continue
         end
 
         # (2) APPLY interval k0's decisions.
-        grid_kW = sum(value(model[:P_ch_tot][m, k0]) for m in d.M)
-        dch_kW  = sum(value(model[:P_dch_tot][m, k0]) for m in d.M)
+        grid_kW = sum(value(model[:P_ch_tot][m, k0]) for m in d.M)   # total grid draw this step (all MCS)
+        dch_kW  = sum(value(model[:P_dch_tot][m, k0]) for m in d.M)  # total discharge to CEVs this step
+        # Node MCS 1 is parked at now (0 = in transit, i.e. no z bit set).
         cur_node = let nh = findfirst(i -> value(model[:z][1, i, k0]) > 0.5, d.N)
             nh === nothing ? 0 : nh
         end
@@ -240,6 +253,10 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
                                   !parked     ? "Traveling"       : "Idle"
         end
 
+        # The APPLIED cell (row k0, col k0) is what actually happened this step.
+        for e in d.E; real_cev_act[e][k0] = plan_cev_act[e][k0, k0]; end
+        real_mcs_act[k0] = plan_mcs_act[k0, k0]
+
         # (3) SIMULATE realized activity split.
         a_real = Dict(e => realized_activity_durations(rng, model, e, k0, d;
                                                        multi = multi_activity) for e in d.E)
@@ -268,12 +285,15 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
 
         # (4) ADVANCE the real MCS energy + position.
         for m in d.M
+            # MCS SOE follows the PLANNED trajectory (its own charge/discharge is deterministic).
             soe_mcs[m] = value(model[:SOE_MCS][m, k0 + 1])
+            # Where the MCS will be at the start of the next step (node, or mid-drive transit).
             mcs_node[m], mcs_transit[m] = advance_mcs_state(model, m, k0, nK, d)
         end
         for e in d.E
-            charged   = sum(value(model[:P_MCS_CEV][m, i, e, k0]) for m in d.M, i in d.N_c) * d.delta_T
-            work_true = dot(a_real[e], p_true[e])
+            charged   = sum(value(model[:P_MCS_CEV][m, i, e, k0]) for m in d.M, i in d.N_c) * d.delta_T  # kWh actually delivered
+            work_true = dot(a_real[e], p_true[e])   # kWh actually consumed = realized hours . sampled powers
+            # CEV SOE advances on REALIZED (stochastic) consumption, clamped to its physical range.
             soe_cev[e] = clamp(soe_cev[e] + charged - work_true, d.SOE_CEV_min[e], d.SOE_CEV_max[e])
         end
 
@@ -321,7 +341,7 @@ function run_mpc(d; shrinking::Bool = true, H::Int = 16,
 
     return (; d, time_labels, log,
               real_P_ch, real_P_dch, real_L_trv, real_SOE_MCS, real_SOE_CEV,
-              real_P_work, real_loc,
+              real_P_work, real_loc, real_cev_act, real_mcs_act,
               plan_grid_kW, plan_mcs_soe, plan_cev_soe, plan_cev_act, plan_mcs_act,
               est, nK, ACT_NAME,
               total_energy, total_cost, total_co2, nc_peak, op_peak, missed,

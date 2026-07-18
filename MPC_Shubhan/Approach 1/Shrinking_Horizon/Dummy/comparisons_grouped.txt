@@ -71,38 +71,38 @@
   5      09:00  Idle | Idle | Idle || Traveling
   6      09:15  Traveling | Digging | Loading/Swinging || Idle
   7      09:30  Digging | Traveling | Traveling || Idle
-  8      09:45  Digging | Digging | Digging || Idle
-  9      10:00  Digging | Digging | Digging || Charging (grid)
- 10      10:15  Idle | Idle | Idle || Charging (grid)
- 11      10:30  Loading/Swinging | Digging | Digging || Charging (grid)
- 12      10:45  Traveling | Loading/Swinging | Digging || Traveling
- 13      11:00  Digging | Traveling | Traveling || Idle
- 14      11:15  Digging | Charging | Digging || Serving CEV
- 15      11:30  Idle | Digging | Idle || Idle
- 16      11:45  Loading/Swinging | Idle | Digging || Idle
- 17-18   12:00  Idle | Charging | Idle || Serving CEV
- 19      12:30  Idle | Idle | Idle || Traveling
- 20-21   12:45  Idle | Idle | Idle || Idle
+  8      09:45  Digging | Loading/Swinging | Digging || Charging (grid)
+  9      10:00  Idle | Loading/Swinging | Digging || Idle
+ 10      10:15  Digging | Idle | Idle || Idle
+ 11      10:30  Digging | Digging | Digging || Idle
+ 12      10:45  Traveling | Idle | Digging || Charging (grid)
+ 13      11:00  Idle | Digging | Traveling || Idle
+ 14      11:15  Digging | Traveling | Idle || Idle
+ 15      11:30  Digging | Loading/Swinging | Digging || Idle
+ 16      11:45  Digging | Digging | Digging || Charging (grid)
+ 17-20   12:00  Idle | Idle | Idle || Charging (grid)
+ 21      13:00  Idle | Idle | Idle || Traveling
  22-24   13:15  Idle | Idle | Charging || Serving CEV
- 25      14:00  Digging | Digging | Loading/Swinging || Idle
+ 25      14:00  Loading/Swinging | Idle | Loading/Swinging || Idle
  26      14:15  Traveling | Idle | Loading/Swinging || Idle
- 27      14:30  Digging | Idle | Traveling || Idle
- 28      14:45  Loading/Swinging | Loading/Swinging | Charging || Serving CEV
- 29      15:00  Idle | Idle | Loading/Swinging || Traveling
- 30      15:15  Charging | Idle | Loading/Swinging || Serving CEV
- 31      15:30  Loading/Swinging | Loading/Swinging | Loading/Swinging || Idle
- 32      15:45  Charging | Idle | Loading/Swinging || Serving CEV
- 33      16:00  Loading/Swinging | Idle | Idle || Idle
- 34      16:15  Traveling | Idle | Traveling || Idle
- 35      16:30  Loading/Swinging | Idle | Digging || Idle
+ 27      14:30  Loading/Swinging | Idle | Charging || Serving CEV
+ 28      14:45  Idle | Idle | Traveling || Traveling
+ 29-30   15:00  Loading/Swinging | Charging | Loading/Swinging || Serving CEV
+ 31      15:30  Loading/Swinging | Idle | Digging || Idle
+ 32      15:45  Traveling | Idle | Idle || Traveling
+ 33      16:00  Charging | Digging | Loading/Swinging || Serving CEV
+ 34      16:15  Loading/Swinging | Digging | Traveling || Idle
+ 35      16:30  Charging | Idle | Loading/Swinging || Serving CEV
  36      16:45  Digging | Idle | Loading/Swinging || Idle
- 37      17:00  Idle | Idle | Idle || Idle
- 38-39   17:15  Charging | Idle | Idle || Serving CEV
- 40      17:45  Idle | Idle | Idle || Traveling
- 41      18:00  Idle | Idle | Idle || Idle
- 42      18:15  Idle | Charging | Idle || Serving CEV
- 43      18:30  Idle | Idle | Idle || Traveling
- 44-52   18:45  Idle | Idle | Idle || Idle
+ 37-38   17:00  Charging | Idle | Idle || Serving CEV
+ 39      17:30  Idle | Idle | Idle || Idle
+ 40      17:45  Charging | Idle | Idle || Serving CEV
+ 41-45   18:00  Idle | Idle | Idle || Idle
+ 46      19:15  Charging | Idle | Idle || Serving CEV
+ 47      19:30  Idle | Idle | Idle || Traveling
+ 48      19:45  Idle | Charging | Idle || Serving CEV
+ 49      20:00  Idle | Idle | Idle || Traveling
+ 50-52   20:15  Idle | Idle | Idle || Idle
  53-96   21:00  Idle | Idle | Idle || Charging (grid)
 
 #################### C04_two_cev_shared_site ####################
@@ -170,44 +170,41 @@
   #      Clock  CEV1 | CEV2 || MCS
   1      08:00  Digging | Digging || Traveling
   2-3    08:15  Digging | Digging || Idle
-  4      08:45  Idle | Idle || Idle
-  5      09:00  Digging | Loading/Swinging || Idle
+  4      08:45  Charging | Digging || Serving CEV
+  5      09:00  Digging | Idle || Traveling
   6      09:15  Traveling | Traveling || Idle
-  7      09:30  Digging | Digging || Traveling
-  8      09:45  Idle | Digging || Idle
-  9      10:00  Digging | Charging || Serving CEV
- 10      10:15  Digging | Digging || Traveling
- 11      10:30  Charging | Digging || Serving CEV
- 12      10:45  Digging | Traveling || Idle
- 13      11:00  Traveling | Idle || Idle
- 14      11:15  Charging | Idle || Serving CEV
- 15      11:30  Digging | Digging || Idle
- 16      11:45  Digging | Loading/Swinging || Idle
- 17      12:00  Idle | Idle || Idle
- 18-20   12:15  Charging | Idle || Serving CEV
+  7-8    09:30  Digging | Digging || Idle
+  9      10:00  Idle | Digging || Idle
+ 10      10:15  Digging | Charging || Serving CEV
+ 11      10:30  Digging | Digging || Idle
+ 12      10:45  Traveling | Traveling || Traveling
+ 13      11:00  Charging | Digging || Serving CEV
+ 14      11:15  Digging | Loading/Swinging || Idle
+ 15      11:30  Charging | Idle || Serving CEV
+ 16      11:45  Digging | Idle || Idle
+ 17-18   12:00  Charging | Idle || Serving CEV
+ 19      12:30  Idle | Idle || Idle
+ 20      12:45  Charging | Idle || Serving CEV
  21      13:00  Idle | Idle || Traveling
- 22-23   13:15  Idle | Charging || Serving CEV
- 24      13:45  Idle | Idle || Idle
+ 22-24   13:15  Idle | Charging || Serving CEV
  25-26   14:00  Digging | Digging || Idle
  27      14:30  Traveling | Traveling || Idle
- 28      14:45  Loading/Swinging | Charging || Serving CEV
- 29      15:00  Idle | Loading/Swinging || Idle
- 30-31   15:15  Loading/Swinging | Digging || Idle
+ 28      14:45  Loading/Swinging | Digging || Idle
+ 29      15:00  Idle | Charging || Serving CEV
+ 30-31   15:15  Loading/Swinging | Loading/Swinging || Idle
  32      15:45  Loading/Swinging | Charging || Serving CEV
- 33      16:00  Traveling | Loading/Swinging || Traveling
- 34      16:15  Charging | Traveling || Serving CEV
+ 33      16:00  Traveling | Loading/Swinging || Idle
+ 34      16:15  Idle | Traveling || Idle
  35      16:30  Loading/Swinging | Loading/Swinging || Idle
- 36      16:45  Loading/Swinging | Idle || Idle
- 37      17:00  Idle | Idle || Idle
- 38      17:15  Charging | Idle || Serving CEV
- 39-40   17:30  Idle | Idle || Idle
- 41      18:00  Charging | Idle || Serving CEV
- 42      18:15  Idle | Idle || Traveling
- 43      18:30  Idle | Idle || Idle
- 44-46   18:45  Idle | Charging || Serving CEV
- 47-50   19:30  Idle | Idle || Idle
- 51      20:30  Idle | Idle || Traveling
- 52      20:45  Idle | Idle || Idle
+ 36      16:45  Loading/Swinging | Charging || Serving CEV
+ 37-39   17:00  Idle | Idle || Idle
+ 40      17:45  Idle | Charging || Serving CEV
+ 41-45   18:00  Idle | Idle || Idle
+ 46      19:15  Idle | Charging || Serving CEV
+ 47      19:30  Idle | Idle || Traveling
+ 48      19:45  Charging | Idle || Serving CEV
+ 49      20:00  Idle | Idle || Traveling
+ 50-52   20:15  Idle | Idle || Idle
  53-96   21:00  Idle | Idle || Charging (grid)
 
 #################### C07_long_travel ####################
@@ -247,37 +244,31 @@
   #      Clock  CEV1 | CEV2 || MCS
   1-2    08:00  Idle | Idle || Idle
   3      08:30  Idle | Idle || Traveling
-  4-6    08:45  Charging | Idle || Serving CEV
+  4-6    08:45  Idle | Charging || Serving CEV
   7      09:30  Idle | Idle || Traveling
-  8-10   09:45  Idle | Charging || Serving CEV
+  8-10   09:45  Charging | Idle || Serving CEV
  11      10:30  Idle | Idle || Traveling
  12-20   10:45  Idle | Idle || Charging (grid)
- 21      13:00  Digging | Digging || Charging (grid)
- 22      13:15  Idle | Digging || Charging (grid)
- 23      13:30  Digging | Digging || Charging (grid)
- 24      13:45  Loading/Swinging | Digging || Charging (grid)
- 25      14:00  Digging | Idle || Charging (grid)
+ 21-24   13:00  Digging | Digging || Charging (grid)
+ 25      14:00  Idle | Idle || Charging (grid)
  26      14:15  Traveling | Traveling || Charging (grid)
- 27      14:30  Idle | Digging || Charging (grid)
- 28      14:45  Digging | Digging || Idle
- 29      15:00  Loading/Swinging | Digging || Idle
- 30      15:15  Digging | Idle || Idle
- 31      15:30  Idle | Loading/Swinging || Idle
- 32      15:45  Loading/Swinging | Traveling || Idle
- 33      16:00  Traveling | Loading/Swinging || Idle
- 34      16:15  Digging | Idle || Idle
- 35      16:30  Loading/Swinging | Digging || Idle
- 36      16:45  Idle | Digging || Idle
- 37      17:00  Loading/Swinging | Idle || Idle
- 38      17:15  Digging | Loading/Swinging || Idle
- 39      17:30  Idle | Traveling || Idle
- 40      17:45  Idle | Loading/Swinging || Idle
- 41-55   18:00  Idle | Idle || Idle
- 56      21:45  Idle | Idle || Charging (grid)
- 57      22:00  Idle | Idle || Idle
- 58      22:15  Idle | Idle || Charging (grid)
- 59-60   22:30  Idle | Idle || Idle
- 61-91   23:00  Idle | Idle || Charging (grid)
+ 27      14:30  Loading/Swinging | Digging || Charging (grid)
+ 28-29   14:45  Digging | Digging || Idle
+ 30      15:15  Idle | Idle || Idle
+ 31      15:30  Loading/Swinging | Digging || Idle
+ 32      15:45  Idle | Traveling || Idle
+ 33      16:00  Traveling | Idle || Idle
+ 34      16:15  Digging | Digging || Idle
+ 35      16:30  Loading/Swinging | Loading/Swinging || Idle
+ 36      16:45  Digging | Loading/Swinging || Idle
+ 37      17:00  Idle | Idle || Idle
+ 38      17:15  Idle | Loading/Swinging || Idle
+ 39      17:30  Digging | Traveling || Idle
+ 40      17:45  Idle | Digging || Idle
+ 41-52   18:00  Idle | Idle || Idle
+ 53      21:00  Idle | Idle || Charging (grid)
+ 54      21:15  Idle | Idle || Idle
+ 55-91   21:30  Idle | Idle || Charging (grid)
  92-96   06:45  Idle | Idle || Idle
 
 #################### C09_allday_work_reststress ####################
@@ -359,26 +350,33 @@
   6      09:15  Traveling | Traveling | Loading/Swinging || Traveling
   7      09:30  Digging | Loading/Swinging | Traveling || Idle
   8      09:45  Idle | Charging | Digging || Serving CEV
-  9      10:00  Digging | Loading/Swinging | Digging || Idle
+  9      10:00  Loading/Swinging | Digging | Digging || Idle
  10      10:15  Loading/Swinging | Digging | Idle || Idle
- 11      10:30  Loading/Swinging | Digging | Digging || Idle
- 12      10:45  Traveling | Charging | Digging || Serving CEV
- 13      11:00  Idle | Traveling | Traveling || Traveling
- 14      11:15  Digging | Idle | Charging || Serving CEV
- 15      11:30  Digging | Digging | Digging || Traveling
- 16      11:45  Charging | Idle | Loading/Swinging || Serving CEV
+ 11      10:30  Digging | Digging | Digging || Idle
+ 12      10:45  Traveling | Charging | Loading/Swinging || Serving CEV
+ 13      11:00  Idle | Charging | Idle || Serving CEV
+ 14      11:15  Digging | Traveling | Traveling || Traveling
+ 15      11:30  Loading/Swinging | Digging | Digging || Idle
+ 16      11:45  Charging | Loading/Swinging | Digging || Serving CEV
  17      12:00  Charging | Idle | Idle || Serving CEV
  18      12:15  Idle | Idle | Idle || Traveling
  19      12:30  Idle | Idle | Charging || Serving CEV
  20      12:45  Idle | Idle | Idle || Traveling
- 21-26   13:00  Idle | Idle | Idle || Charging (grid)
- 27      14:30  Idle | Idle | Loading/Swinging || Charging (grid)
- 28      14:45  Loading/Swinging | Idle | Idle || Charging (grid)
- 29      15:00  Idle | Digging | Idle || Charging (grid)
- 30-31   15:15  Idle | Idle | Idle || Charging (grid)
- 32      15:45  Loading/Swinging | Idle | Loading/Swinging || Charging (grid)
- 33-34   16:00  Idle | Idle | Idle || Idle
- 35      16:30  Idle | Loading/Swinging | Idle || Idle
- 36-52   16:45  Idle | Idle | Idle || Idle
+ 21      13:00  Idle | Charging | Idle || Serving CEV
+ 22      13:15  Idle | Idle | Idle || Traveling
+ 23-24   13:30  Idle | Idle | Idle || Charging (grid)
+ 25      14:00  Idle | Digging | Idle || Charging (grid)
+ 26      14:15  Digging | Idle | Idle || Charging (grid)
+ 27-28   14:30  Idle | Idle | Loading/Swinging || Charging (grid)
+ 29-32   15:00  Idle | Idle | Idle || Charging (grid)
+ 33      16:00  Loading/Swinging | Idle | Idle || Idle
+ 34      16:15  Idle | Loading/Swinging | Idle || Idle
+ 35      16:30  Idle | Idle | Idle || Traveling
+ 36      16:45  Charging | Idle | Idle || Serving CEV
+ 37      17:00  Idle | Idle | Idle || Traveling
+ 38      17:15  Idle | Charging | Idle || Serving CEV
+ 39-41   17:30  Idle | Idle | Idle || Idle
+ 42      18:15  Idle | Idle | Idle || Traveling
+ 43-52   18:30  Idle | Idle | Idle || Idle
  53-96   21:00  Idle | Idle | Idle || Charging (grid)
 

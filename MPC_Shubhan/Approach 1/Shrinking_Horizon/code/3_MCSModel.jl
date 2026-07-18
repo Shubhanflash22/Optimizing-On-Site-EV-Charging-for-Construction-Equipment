@@ -93,7 +93,12 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # ---- model + solver configuration ----
     model = Model(HiGHS.Optimizer)
     silent && set_silent(model)
-    set_time_limit_sec(model, time_limit_sec)
+    # SOLVER TIME LIMIT (control point #3, the innermost one). This caps how long
+    # HiGHS spends on EACH window MILP. Pass time_limit_sec = Inf (from run_scenario_1
+    # / run_mpc) to REMOVE the cap entirely and let HiGHS solve every window to the
+    # mip_rel_gap tolerance below. HiGHS rejects a non-finite limit, so only set it
+    # when the value is finite; Inf simply leaves HiGHS on its default (no limit).
+    isfinite(time_limit_sec) && set_time_limit_sec(model, time_limit_sec)
     # Force single-threaded, deterministic solving.
     set_attribute(model, "threads", 1)
     set_attribute(model, "parallel", "off")
@@ -141,66 +146,89 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # ---- OBJECTIVE (Eq. 1): total operating cost. All constraints are HARD;
     # the only slack is s_miss_work (Eq. 12c), exactly as in the PDF/Avik. ----
     @objective(model, Min,
-        sum(d.lambda_whl_elec[k] * P_ch_tot[m, k] * delta_T for m in M, k in K) +
-        sum((d.carbon_price_per_ton / 1000.0) * d.lambda_CO2[k] * P_ch_tot[m, k] * delta_T for m in M, k in K) +
-        d.rho_miss * sum(s_miss_work[i, a] for i in N_c, a in B) +
-        d.lambda_demand_NC * P_peak_NC +
-        d.lambda_demand_OP * P_peak_OP +
-        d.rho_labor * delta_T * sum(y_trv[m, i, j, k] for m in M, i in N, j in N, k in K))
+        sum(d.lambda_whl_elec[k] * P_ch_tot[m, k] * delta_T for m in M, k in K) +                             # energy cost: price x grid kWh
+        sum((d.carbon_price_per_ton / 1000.0) * d.lambda_CO2[k] * P_ch_tot[m, k] * delta_T for m in M, k in K) +  # carbon cost of that grid energy
+        d.rho_miss * sum(s_miss_work[i, a] for i in N_c, a in B) +                                             # SOFT penalty for unfinished work
+        d.lambda_demand_NC * P_peak_NC +                                                                      # non-coincident demand charge
+        d.lambda_demand_OP * P_peak_OP +                                                                      # on-peak demand charge
+        d.rho_labor * delta_T * sum(y_trv[m, i, j, k] for m in M, i in N, j in N, k in K))                     # towing labour: cost of time in transit
 
     # ---- power aggregation & where power may flow ----
+    # Total grid draw of an MCS = sum of its per-grid-node charge power.
     @constraint(model, [m in M, k in K], P_ch_tot[m, k]  == sum(P_ch_MCS[m, i, k]  for i in N_g))
+    # Total discharge of an MCS = sum of its per-site discharge power.
     @constraint(model, [m in M, k in K], P_dch_tot[m, k] == sum(P_dch_MCS[m, i, k] for i in N_c))
+    # No discharging at a grid node (the MCS only CHARGES from the grid) ...
     @constraint(model, [m in M, i in N_g, k in K], P_dch_MCS[m, i, k] == 0)
+    # ... and no charging at a site node (the MCS only DISCHARGES to CEVs on site).
     @constraint(model, [m in M, i in N_c, k in K], P_ch_MCS[m, i, k]  == 0)
+    # Site discharge is fully accounted for by what is delivered to the CEVs there.
     @constraint(model, [m in M, i in N_c, k in K],
         P_dch_MCS[m, i, k] == sum(P_MCS_CEV[m, i, e, k] for e in E))
+    # Discharge is only possible where the MCS is actually parked (z=1), capped by DCH_MCS.
     @constraint(model, [m in M, i in N_c, k in K],
         P_dch_MCS[m, i, k] <= d.DCH_MCS[m] * z[m, i, k])
 
     # grid-connection exclusivity
+    # Charge power is capped by CH_MCS and only flows when actively grid-charging (g_ch=1).
     @constraint(model, [m in M, i in N_g, k in K], P_ch_MCS[m, i, k] <= d.CH_MCS[m] * g_ch[m, i, k])
+    # Can only grid-charge at a node where the MCS is parked (z=1).
     @constraint(model, [m in M, i in N_g, k in K], g_ch[m, i, k] <= z[m, i, k])
+    # At most one MCS may occupy a given grid connection per interval.
     @constraint(model, [i in N_g, k in K], sum(g_ch[m, i, k] for m in M) <= 1)
 
     # plug-level and excavator-acceptance limits
+    # Power into one CEV via one plug is capped by the per-plug rate and needs rho=1 (plugged in).
     @constraint(model, [m in M, i in N_c, e in E, k in K],
         P_MCS_CEV[m, i, e, k] <= d.DCH_MCS_plug[m] * rho[m, i, e, k])
+    # Total power a CEV accepts is capped by its own charge rate and needs mu=1 (charging).
     @constraint(model, [i in N_c, e in E, k in K],
         sum(P_MCS_CEV[m, i, e, k] for m in M) <= d.CH_CEV[e] * mu[i, e, k])
 
     # peak-demand trackers (carry the peak already seen earlier today)
+    # Whole-day peak is at least the biggest grid draw already realised before this window.
     @constraint(model, P_peak_NC >= peak_nc0)
+    # On-peak peak likewise carries in the biggest on-peak draw seen so far.
     @constraint(model, P_peak_OP >= peak_op0)
+    # ... and is at least the total grid draw in EVERY interval of this window.
     @constraint(model, [k in K], P_peak_NC >= sum(P_ch_tot[m, k] for m in M))
+    # On-peak tracker only bounds the on-peak intervals (K_peak).
     @constraint(model, [k in K_peak], P_peak_OP >= sum(P_ch_tot[m, k] for m in M))
     if peak_demand_limit !== nothing
         @constraint(model, [k in K], sum(P_ch_tot[m, k] for m in M) <= peak_demand_limit)
     end
 
     # ---- travel energy bookkeeping ----
+    # y_trv[m,i,j,k] = 1 iff MCS m is in transit on arc i->j during interval k. A trip
+    # launched at tau (x=1) occupies the next travel_steps[i,j] intervals, so y at k is
+    # the OR of departures within that look-back window (or forced 1 for a carried-in drive).
     for m in M, i in N, j in N, k in K
         i == j && continue
         if is_carried_trv(m, i, j, k)
-            @constraint(model, y_trv[m, i, j, k] == 1)
+            @constraint(model, y_trv[m, i, j, k] == 1)                     # drive already underway at window start
         else
             @constraint(model, y_trv[m, i, j, k] == sum(x[m, i, j, tau]
                 for tau in max(first(K), k - travel_steps[i, j] + 1):k if tau in K))
         end
     end
+    # Each in-transit interval burns k_trv kWh (per Delta_t) off the MCS battery.
     @constraint(model, [m in M, i in N, j in N, k in K],
         L_trv[m, i, j, k] == d.k_trv * delta_T * y_trv[m, i, j, k])
+    # Total travel loss this interval = sum over all arcs.
     @constraint(model, [m in M, k in K],
         L_trv_tot[m, k] == sum(L_trv[m, i, j, k] for i in N, j in N))
 
     # ---- battery dynamics ----
+    # Pin the first boundary of each battery to the measured carried-in SOE (MPC initial condition).
     @constraint(model, [m in M], SOE_MCS[m, first(Tb)] == soe_mcs0[m])
     @constraint(model, [e in E], SOE_CEV[e, first(Tb)] == soe_cev0[e])
+    # MCS SOE recursion: previous + charge*(eta) - discharge/(eta) - travel energy lost this step.
     @constraint(model, [m in M, k in K],
         SOE_MCS[m, k + 1] == SOE_MCS[m, k] +
             d.eta_ch_dch[m] * P_ch_tot[m, k] * delta_T -
             (P_dch_tot[m, k] * delta_T) / d.eta_ch_dch[m] -
             L_trv_tot[m, k])
+    # CEV SOE recursion: previous + energy received from the MCS - energy spent working this step.
     @constraint(model, [e in E, k in K],
         SOE_CEV[e, k + 1] == SOE_CEV[e, k] +
             sum(P_MCS_CEV[m, i, e, k] for m in M, i in N_c) * delta_T -
@@ -226,9 +254,13 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     end
 
     # ---- plugging / presence logic ----
+    # No more plugged-in CEVs than the MCS has plugs (C_MCS_plug) at any site/interval.
     @constraint(model, [m in M, i in N_c, k in K], sum(rho[m, i, e, k] for e in E) <= d.C_MCS_plug[m])
+    # A CEV can only be plugged into the MCS at ITS OWN assigned site (A[i,e]=1).
     @constraint(model, [m in M, i in N, e in E, k in K], rho[m, i, e, k] <= d.A[i, e])
+    # ... and only when the MCS is actually parked there (z=1).
     @constraint(model, [m in M, i in N, e in E, k in K], rho[m, i, e, k] <= z[m, i, k])
+    # Forbid a self-loop "trip" i -> i.
     @constraint(model, [m in M, i in N, k in K], x[m, i, i, k] == 0)
 
     # presence partition: parked at exactly one node OR in transit on one arc.
@@ -244,6 +276,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     end
 
     # departures / arrivals
+    # beta_dep[m,i,k] = 1 iff the MCS departs node i this interval (any outgoing trip x).
     @constraint(model, [m in M, i in N, k in K],
         beta_dep[m, i, k] == sum(x[m, i, j, k] for j in N if j != i))
     for m in M, j in N, k in K
@@ -259,8 +292,10 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
             @constraint(model, beta_arr[m, j, k] == (isempty(terms) ? 0 : sum(terms)))
         end
     end
+    # Presence bookkeeping: arriving minus departing = change in "parked here" between steps.
     @constraint(model, [m in M, i in N, k in K[2:end]],
         beta_arr[m, i, k] - beta_dep[m, i, k] == z[m, i, k] - z[m, i, k - 1])
+    # Cannot arrive and depart the same node in the same interval.
     @constraint(model, [m in M, i in N, k in K],
         beta_arr[m, i, k] + beta_dep[m, i, k] <= 1)
 
@@ -287,8 +322,10 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     end
 
     # ---- activity scheduling ----
+    # Each assigned CEV does EXACTLY one activity per interval (dig/load/travel/idle).
     @constraint(model, [i in N_c, e in E, k in K],
         sum(u[e, i, a, k] for a in B) == d.A[i, e])
+    # An activity bit can only be set at the CEV's own site.
     @constraint(model, [i in N_c, e in E, a in B, k in K], u[e, i, a, k] <= d.A[i, e])
     # (5a): work power is capped by availability and forced to 0 while charging (mu=1).
     @constraint(model, [i in N_c, e in E, k in K],
@@ -302,8 +339,11 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         P_work[i, e, k] == sum(p_activity[a] * u[e, i, a, k] for a in B))
 
     # ---- required work (or the miss penalty) ----
+    # Digging done this window (hours) + unfinished slack == remaining digging requirement.
+    # The slack s_miss_work is penalised in the objective, so any shortfall costs rho_miss.
     @constraint(model, [i in N_c],
         delta_T * sum(u[e, i, B[1], k] for e in E, k in K) + s_miss_work[i, B[1]] == max(rem_dig[i], 0.0))
+    # Same balance for loading/swinging.
     @constraint(model, [i in N_c],
         delta_T * sum(u[e, i, B[2], k] for e in E, k in K) + s_miss_work[i, B[2]] == max(rem_load[i], 0.0))
 

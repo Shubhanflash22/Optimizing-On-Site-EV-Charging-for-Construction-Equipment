@@ -1,120 +1,161 @@
 ================================================================================
- SCENARIO 1 (RECEDING HORIZON) - CONSTRAINT-BY-CONSTRAINT: CODE vs MODEL
+ SCENARIO 1 - CONSTRAINT-BY-CONSTRAINT: CODE vs MODEL  (MULTI-DAY RECEDING)
 ================================================================================
 Compares what the Julia code enforces against the formal model (math_model.tex /
-the source "Optimization.pdf"). The window MILP is built in code/4_MCSModel.jl
-(function build_window_model); the closed loop is code/5_MPCLoop.jl (run_mpc);
-the entry point is code/7_Receding_Horizon_main.jl. The legacy standalone
-code/Scenario_1.jl mirrors the same constraints but is NOT used by the main.
+the source "Optimization.pdf") and Avik's reference MCS_OPTIMAL_v4_real.jl. The
+cross-day window MILP is built in code/3_MCSModel.jl (build_window_model); the
+deterministic overnight recharge is phase2_overnight_charge in the same file; the
+multi-day closed loop is code/4_MPCLoop.jl (run_mpc); the entry point is
+code/6_Receding_Horizon_main.jl.
 
-Controller: MULTI-DAY, CROSS-DAY receding horizon. Each 15-min window spans the
-rest of today + `lookahead_days` future daytime blocks (global index
-k = (day-1)*n_day + w). `n_days` reported days are simulated PLUS one dropped
-BUFFER day. Nights link day-blocks: MCS reset to full + parked at grid; CEV SOE
-and unfinished work carry over.
+Controller: MULTI-DAY, CROSS-DAY RECEDING horizon. The loop simulates D_total =
+n_days + 1 days (n_days reported + 1 dropped BUFFER day) at 15-min steps. Each step
+re-solves a CROSS-DAY window MILP over K_win = [global k0 .. end of daytime block
+min(D_total, day + lookahead_days)] laid end to end; only the FIRST interval is
+applied and the window recedes. Each DAY is a daytime block of n_day intervals
+(n_day INFERRED = last work-available interval + RETURN_BUFFER_HOURS, capped at
+n_int=96). NIGHTS are not intervals: the MCS battery is bridged to full at each
+evening boundary inside the MILP and the realized overnight recharge is scheduled
+deterministically by phase2_overnight_charge (cheapest night hours); the CEV
+battery and unfinished work carry over. The buffer day is DROPPED from all outputs.
 
-Legend:  OK = matches exactly   ADAPTED = deliberate, documented   ~OK = up to a tol.
+Power model: FIXED (Fork B). The activity powers are a calibrated Bayesian prior
+N(mu, sigma) (the posterior of Avik's offline Python regression). The MILP plans on
+mu; the plant samples per-interval powers from N(mu, sigma) truncated at 0 (idle
+sigma=0). No online re-fitting (observe!/refit! are dormant).
+
+WINDOW GEOMETRY: for a global interval index k, wd(k) = mod(k-1,n_day)+1 is its
+position WITHIN its day; dayof(k) = div(k-1,n_day)+1 is which day it belongs to.
+Daily profiles (price lambda_whl_elec, carbon lambda_CO2, work-avail R_work) repeat
+each day and are indexed by wd(k). "Evening" = the last daytime interval of each
+day in the window (wd(k)==n_day).
+
+Legend:  OK = matches exactly   ADAPTED = deliberate, documented (MPC or user choice)
 
 --------------------------------------------------------------------------------
  Eq.   | Model requirement                    | Code                           | Status
 --------------------------------------------------------------------------------
- (1)   | Objective = energy + carbon + NC/OP  | obj in build_window_model:     | OK
-        | demand + missed-work slack + towing  | price*P_ch + carbon + demand   |
-        | labour                               | + rho_miss*s_miss + rho_labor  |
+ (1)   | Objective = energy + carbon + missed | obj in build_window_model:     | OK
+       | + NC/OP demand + towing labour       | price*P_ch + carbon + rho_miss |
+       |                                      | *s_miss + demand + rho_labor*y |
 --------------------------------------------------------------------------------
  (2-5) | Power aggregation, grid-only charge, | P_ch_tot/P_dch_tot defs;       | OK
-        | site-only discharge, plug limits,    | P_MCS_CEV<=DCH_plug*rho;       |
-        | charge-only-while-idle               | mu<=u[idle] (E4)               |
+       | site-only discharge, plug limits,    | P_MCS_CEV<=DCH_plug*rho;       |
+       | charge-only-while-idle               | mu<=u[idle]                    |
 --------------------------------------------------------------------------------
- (6)   | MCS SOE dynamics w/ efficiency        | SOE_MCS recursion + eta        | OK
-        | CEV SOE dynamics                      | SOE_CEV recursion              |
-        | NIGHT: MCS reset full; CEV carries    | night_eve reset; CEV single    | ADAPTED
-        |                                       | continuous link                | (two-phase)
+ (5e)  | P_work = sum_a p_a * u (const power) | P_work == sum p_activity*u     | OK
 --------------------------------------------------------------------------------
- (7)   | SOE bounds [min,max]                  | @constraint on SOE_MCS/SOE_CEV | OK
+ (6)   | MCS + CEV SOE dynamics w/ efficiency | SOE_MCS / SOE_CEV recursions   | OK
 --------------------------------------------------------------------------------
- (8a)  | MCS energy-neutral over cycle         | closed OVERNIGHT (Phase 2),    | ADAPTED
-        |                                       | not inside daytime MILP        | (deliberate)
- (8b)  | CEV energy-neutral terminal           | DAILY: SOE_CEV[eve+1] >=       | ADAPTED
-        |                                       | SOE_ini - term_tol at EVERY    | (daily
-        |                                       | 18:00 (not just horizon end)   | realignment)
+ (7)   | SOE bounds [min,max] every boundary  | @constraint on SOE_MCS/SOE_CEV | OK
 --------------------------------------------------------------------------------
- (10)  | Routing: presence partition, arrival/ | z + y partition; beta_arr/dep; | OK
-        | departure, flow conservation, travel  | flow conservation; L=k_trv;    |
-        | energy; carried-in transit            | is_carried_trv / carried_arr   |
- (10e) | MCS parked at grid by day-end         | z[grid, eve] == 1 (every 18:00)| OK
+ (6')  | MCS overnight energy-neutral         | night bridge SOE_MCS[eve+1] == | ADAPTED
+       | (Avik: == SOE_ini, in one MILP)      | SOE_MCS_ini at each interior   | (bridge +
+       |                                      | evening; realized recharge by  | Phase 2)
+       |                                      | phase2_overnight_charge        |
+ (8b)  | CEV energy-neutral terminal, EVERY   | SOE_CEV[eve+1] >= SOE_CEV_ini  | ADAPTED
+       | day-end (Avik: == SOE_ini exact)     | (FLOOR) at each evening; soft   | (daily
+       |                                      | 2-sided slack under soft_term  | floor)
 --------------------------------------------------------------------------------
- (11)  | One activity per assigned CEV; work   | sum_a u == A; work-power <=    | OK
-        | capped by availability R              | R_work*(1-mu)                  |
+ (10)  | Routing: presence partition, arrival/| z + y partition; beta_arr/dep; | OK
+       | departure, flow conservation, travel | flow balance; L=k_trv;         |
+       | energy; carried-in transit           | is_carried_trv / carried_arr   |
+ (10e) | MCS parked at grid by day-end        | z[grid, k]==1 for EVERY evening| OK
+       |                                      | (each day-block's end-of-shift)|
 --------------------------------------------------------------------------------
- (12c) | Finish work or pay rho_miss (SOFT)    | s_miss_dig/load per (site,day),| OK +
-        |                                       | CUMULATIVE (rolls over) LOWER; | HARD CAP
-        | NO WORKING AHEAD (added)              | + HARD upper cap done<=quota   | (added)
+ (11)  | One activity per assigned CEV; work  | sum_a u == A; P_work <=        | OK
+       | capped by availability R             | R_work*A*(1-mu)                | (4-act.)
 --------------------------------------------------------------------------------
- (12d) | Precedence: cum load <= scale*cum dig | s_prec pinned to 0 (HARD);     | OK
-        |                                       | within-day; seeded by cum_*_e  |
+ (12c) | Finish work or pay rho_miss (SOFT)   | s_miss_dig/s_miss_load per      | ADAPTED
+       |                                      | (site, day-block); CUMULATIVE   | (per-day
+       |                                      | lower (soft, ROLLS OVER) +      | 2-sided)
+       |                                      | HARD upper cap (no work-ahead)  |
 --------------------------------------------------------------------------------
- (12e) | Rest rule: <= t_limit_rest work per   | <= rest_cap work per (rest_cap | OK
-        | rolling (t_limit+dt) window           | +1) window; SEEDED from applied| (history-
-        |                                       | work_hist -> holds across the  |  seeded)
-        |                                       | 15-min re-solves & at day-end  |
+ (12d) | Precedence: cum load <= scale*cum dig| raw interval counts (Avik      | OK
+       |                                      | form), PER day-block + history | (per-day)
+       |                                      | seed on day 1; soft s_prec      |
 --------------------------------------------------------------------------------
- (13)  | Travel pacing: cum travel tied to     | s_pace_hi/lo pinned 0 (HARD);  | OK
-        | cum productive work, two-sided band   | kappa_wt band, seeded by cum_* |
+ (12e) | Rest rule: <= t_limit_rest work per  | <= rest_cap per (rest_cap+1)    | OK
+       | rolling (t_limit+dt) window          | window, PER day-block; SEEDED   | (per-day)
+       |                                      | from applied work_hist (seam)   |
+--------------------------------------------------------------------------------
+ (13)  | Travel pacing: two-sided band        | kappa_wt=4 (Avik): W-kappa <=  | OK
+       |                                      | kappa*V <= W, per (site,CEV),   | (per-day)
+       |                                      | PER day-block + history seed;   |
+       |                                      | soft s_pace_hi/lo               |
 --------------------------------------------------------------------------------
 
-EXTRA CONSTRAINTS IN THE CODE (beyond Eqs. 1-13)
+EXTRA CONSTRAINTS / ADAPTATIONS IN THE CODE (beyond Avik's single shot)
 --------------------------------------------------------------------------------
- E1  Peak-demand trackers  | P_NC/P_OP >= grid draw            | realises demand terms of (1)
- E3  Closed-loop carry-in  | each re-solve starts from measured| MPC init. conditions
-                           | SOE / position / work done        |
- E4  Charge-only-while-idle| mu <= u[idle]                     | implements (5)-type rule
- E5  Site-visit switches   | require_site_visit / single_visit | optional; OFF by default
- E6  Graceful fallback     | hard-infeasible window -> re-solve| avoids dead hold; a
-                           | soft_term+soft_reserve (Softened);| residual shortfall shows
-                           | only then hold state (Infeasible) | as a penalty (5_MPCLoop.jl)
- E7  CEV keep-up reserve   | per-boundary SOE floor, built     | makes the DAILY hard 8b
-                           | backward from EACH day's 18:00;   | recursively feasible
-                           | net charge rate + idle-tail drain | (4_MCSModel.jl)
- E8  Over-charge cap       | SOE_CEV <= SOE_ini + overcharge_  | no "charging ahead":
-                           | frac*(SOE_max-SOE_ini)            | stops the MCS hoarding
-                           | (always on; upper bound)          | time at the near CEV
- E9  Daytime health floor  | SOE_CEV >= SOE_ini - drawdown_kwh | forces the single MCS
-                           | at every daytime boundary         | to SHUTTLE & keep BOTH
-                           | (relaxed under soft_reserve)      | CEVs healthy (4_MCSModel)
+ E1  Peak-demand trackers  | P_NC/P_OP >= grid draw (+ carried-in) | realises demand terms of (1)
+ E2  Closed-loop carry-in  | each re-solve starts from measured    | MPC initial conditions
+                           | SOE / position / work done            |
+ E3  History seeds         | precedence/pacing/rest seeded from a   | keeps rolling rules correct
+                           | shared per-CEV applied-activity hist   | across the 15-min re-solves
+ E4  Site-visit switches   | require_site_visit / single_visit     | optional; OFF by default
+ E5  Graceful fallback     | hard-infeasible window -> re-solve    | never freeze a low battery
+                           | ONCE with soft_term + soft_reserve;   | (counts: n_softened);
+                           | still infeasible -> HOLD (idle, break)| last resort (n_infeasible)
+ E6  Overnight Phase 2     | phase2_overnight_charge refills each  | deterministic; cheapest
+                           | MCS from end-of-day SOE to SOE_ini    | night hours; per night
+ E7  Keep-up reserve       | per-day backward-built SOE_CEV lower  | keeps each daily terminal
+                           | bound (share_derate, idle factor)     | recursively feasible; HARD,
+                           |                                       | dropped under soft_reserve
+ E8  Anti-hoarding cap     | SOE_CEV <= SOE_ini + overcharge_frac  | stop MCS camping at the
+                           | *(SOE_max-SOE_ini) (no charging ahead)| near CEV; HARD, always safe
+ E9  Daytime health floor  | SOE_CEV >= SOE_ini - drawdown_kwh at  | forces the MCS to SHUTTLE;
+                           | daytime boundaries                    | HARD, dropped under soft_reserve
 
-THE ONLY DELIBERATE DEVIATIONS
+THE DELIBERATE DEVIATIONS FROM AVIK'S EXACT FORMULATION
 --------------------------------------------------------------------------------
- 1. (8a)/(10e) TWO-PHASE SPLIT - MCS neutrality + "home by end" are closed
-    overnight (deterministic Phase 2) instead of inside one 24h MILP.
- 2. (8b) DAILY REALIGNMENT + term_tol=0.1 kWh - the CEV terminal fires at every
-    18:00 (each reported day energy-neutral), with a tiny margin that absorbs
-    online-estimator drift (exact at term_tol=0, but that risks infeasibility).
- 3. (12c) HARD "no working ahead" cap added on top of the soft cumulative target,
-    so a day cannot borrow a future day's work (catch-up of leftover still allowed).
- 4. ANTI-HOARDING pair (E8 over-charge cap + E9 daytime health floor): with ONE
-    MCS serving two far-apart CEVs, the deadline-only reserve (E7) still permitted
-    the MCS to camp at the near CEV (over-charging it toward SOE_max) while the far
-    CEV drained to near-minimum and was rescued by a last-minute dash. E8 forbids
-    charging a CEV far above its start level; E9 forbids any CEV draining more than
-    drawdown_kwh below its start level. Together they force the MCS to shuttle.
+ 1. (8b) CEV terminal is a per-day FLOOR (>= SOE_ini at EVERY evening), not an exact
+    end-of-horizon equality. A CEV cannot discharge, so under the stochastic plant an
+    exact equality can become unrecoverable if a CEV drifts above target; the floor
+    keeps it feasible while guaranteeing each reported day ends at least as charged as
+    it began. Made a soft two-sided slack under soft_term. (User choice.)
+ 2. (6') MCS is NOT closed inside one MILP. Instead the MILP bridges SOE_MCS to
+    SOE_MCS_ini at each interior evening, and the deterministic Phase 2 schedules the
+    realized overnight recharge at the cheapest night prices. The final overnight
+    (after the last block) is Phase 2 only. Keeps the daytime MILP small and the
+    overnight recharge optimal against the night curve.
+ 3. (12c) Work is a PER-DAY schedule (dig_by_day/load_by_day), not a single lumpsum.
+    Cumulative-through-end-of-day targets are pinned BOTH sides: soft lower (rolls
+    over) + HARD upper (no working ahead). This receding-only cap prevents a day from
+    borrowing tomorrow's quota when it can see the future block.
+ 4. Activity ENCODING: the code uses a 4th explicit "idle" activity (B=[1,2,3,4],
+    sum_a u == A, mu <= u[idle]); Avik uses the equivalent 3-activity form
+    (B=[1,2,3], sum_a u <= 1, sum_a u + mu <= 1). Functionally identical because
+    idle power = 0. (User chose to keep the 4-activity form.)
+ 5. MPC adaptations that cannot match a single-shot solve: cross-day receding
+    re-solves, per-window history seeds (E3), carried-in MCS start position and the
+    generalised flow balance, remaining-work targets (rem_dig/rem_load), the
+    carried-in demand peaks (E1), and the per-day counter restarts (a night is a
+    long break, so precedence/pacing/rest all reset each morning).
 
-CLOSED-LOOP CORRECTNESS (modular code 4_MCSModel.jl / 5_MPCLoop.jl):
- - Rolling rules (rest 12e, precedence 12d, pacing 13) are seeded from the current
-   day's applied Work/Break history, so a within-window limit can no longer "leak"
-   work-runs across the every-15-min re-solves (the 8-in-a-row artefact).
- - The keep-up reserve (E7) makes the daily CEV terminal (8b) recursively feasible;
-   the anti-hoarding pair (E8/E9) makes the single MCS SHUTTLE between the two CEVs
-   instead of camping at one and neglecting the other.
- - GRACEFUL FALLBACK (5_MPCLoop.jl): if a hard window is still infeasible (early-day
-   estimator bias + single-MCS sharing), the loop re-solves ONCE with soft_term=true
-   and soft_reserve=true (E7/E9 dropped, terminal penalised) so the MCS still charges
-   toward target rather than freezing. Such windows are counted as Softened_windows.
- LATEST RUN (defaults: time_limit_sec=60, mcmc_samples=500, n_days=2 + buffer):
-   * :input     -> 0 softened, 0 infeasible; missed work 0.00 h; loop ~53 s.
-   * :synthetic -> 3 softened (early-day wind-down), 0 infeasible; missed work
-                   0.00 h; loop ~793 s.
- VERIFIED per-row: rest rule, precedence, pacing, SOE bounds, MCS end-at-grid, and
- per-day work all hold; both CEVs shuttle-served and end at/above their start SOE
- (CEV1 no longer over-charged to ~86; CEV2 no longer drained to ~32). The 3 softened
- windows carry NO missed work and still meet the daily terminal (graceful, not lost).
+NOTE vs the SHRINKING sibling: the shrinking model is single-day and LUMPSUM, so it
+does NOT add this receding version's per-day schedule, the hard "no-working-ahead"
+cap, the daily (per-evening) neutrality, the overnight Phase 2, or the buffer day.
+On a conflict the shrinking base is ground truth; the receding build only ADDS the
+multi-day machinery on top.
+
+DORMANT SCAFFOLDING (present but NOT used by the pipeline)
+--------------------------------------------------------------------------------
+ The Turing/NUTS learner in 1_Common.jl (activity_power_model, observe!, refit!) is
+ kept for future online-learning experiments but is NEVER called: the estimator runs
+ in calibrated-prior mode, so mu/sigma ARE the fixed prior throughout the run.
+
+CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
+ - Rolling rules (rest 12e, precedence 12d, pacing 13) are seeded from a SHARED
+   per-CEV applied-activity history for the CURRENT day, so a within-window limit
+   cannot "leak" work-runs across the every-15-min re-solves; counters restart each
+   morning (a night is a long break).
+ - The buffer day (day D_total) absorbs the CEV energy-neutral wrap-up so it never
+   lands on a reported day; KPIs and all figures use ONLY days 1..n_days.
+ VERIFIED (Fork B stochastic plant) end-to-end via Dummy/generate_and_run.jl: the
+ 11-case multi-day stress harness solves all cases with per-day replan grids,
+ per-day overnight_mcs_charge CSVs, worker schedule, and comparison views; hard
+ windows recover via the E5 soft-terminal fallback (never a hard freeze on both
+ bundled datasets at time_limit_sec >= 30 s).
+
+ NOTE: idle is a CONSTANT-power subactivity (paper Eq. 5e), pinned to 0 kW; there is
+ NO separate shutdown/off state (a time-varying idle power is not part of the model).
