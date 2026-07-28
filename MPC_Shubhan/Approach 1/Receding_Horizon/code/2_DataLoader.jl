@@ -17,8 +17,7 @@ module DataLoader
 using CSV
 using DataFrames
 
-export load_data, build_default_data, load_input_data, RETURN_BUFFER_HOURS
-
+export load_data, build_default_data, load_input_data
 # RECEDING HORIZON (multi-day): each 24 h day is split into a PHASE-1 daytime
 # window of `n_day` intervals (work + opportunistic charging, solved by the
 # cross-day MILP) and an overnight remainder handled deterministically by the
@@ -27,20 +26,6 @@ export load_data, build_default_data, load_input_data, RETURN_BUFFER_HOURS
 # the MCS can drive home and top the CEVs up before the overnight recharge.
 # `n_days` reported days are simulated with one extra buffer day dropped by the
 # driver. Powers/curves are fixed (fit-once prior, no online learning).
-
-# Documented constant: the gap kept between the last work-available interval and
-# the daytime-horizon end, so the MCS can return home / top up before overnight.
-const RETURN_BUFFER_HOURS = 1.0
-
-# Given a work-availability signal `available[k]` (true if any CEV may work in
-# interval k) over a day of `n_int` intervals, infer the number of daytime
-# Phase-1 intervals: (last work interval) + the return/recharge buffer.
-function _infer_n_day(available::AbstractVector{Bool}, delta_T, n_int)
-    last_work = findlast(available)
-    last_work === nothing && error("DataLoader: no work availability found; cannot infer day_end_hour")
-    buffer_intervals = max(0, Int(round(RETURN_BUFFER_HOURS / delta_T)))
-    return min(n_int, last_work + buffer_intervals)
-end
 
 # =============================================================================
 # SYNTHETIC MODE  (the built-in example)
@@ -53,7 +38,6 @@ function build_default_data()
     work_start_hour = 8; work_end_hour = 17        # productive shift 08:00-17:00 ...
     lunch_start_hour = 12; lunch_end_hour = 14     # ... minus a 12:00-14:00 lunch
     t_limit_rest = 1.0             # rest rule: <=1 h work per rolling (1 h + step) window
-    kappa_wt = 4                   # travel-pacing: ~1 travel per 4 productive steps
 
     # ---- nodes: 1 = grid, 2.. = construction sites ----
     N   = 1:3
@@ -121,14 +105,13 @@ function build_default_data()
         push!(lambda_CO2, max(co2, 0.05))
     end
 
-    # ---- INFER the daytime horizon from work availability (no day_end_hour param) ----
-    # Build the full-day productive mask, then take (last productive interval) + buffer.
+    # ---- FULL 24 h horizon (one optimisation over the whole day) ----
+    # Build the full-day productive mask (drives R_work below).
     available_full = Bool[
         (work_start_hour <= mod(t_start + (k - 1) * delta_T, 24) < work_end_hour) &&
         !(lunch_start_hour <= mod(t_start + (k - 1) * delta_T, 24) < lunch_end_hour)
         for k in 1:n_int]
-    n_day = _infer_n_day(available_full, delta_T, n_int)  # daytime Phase-1 window
-    day_end_hour = t_start + n_day * delta_T              # e.g. 8 + 40*0.25 = 18.0
+    n_day = n_int                                     # FULL 24 h horizon (one optimisation)
     K = 1:n_day
     T = 1:(n_day + 1)
 
@@ -148,7 +131,7 @@ function build_default_data()
     scale = 2
     B = [1, 2, 3, 4]
 
-    return (; delta_T, K, T, t_start, n_int, n_day, day_end_hour, t_limit_rest, kappa_wt,
+    return (; delta_T, K, T, t_start, n_int, n_day, t_limit_rest,
               n_days,
               N, N_g, N_c, M, E, A,
               SOE_MCS_ini, SOE_MCS_max, SOE_MCS_min, CH_MCS, DCH_MCS,
@@ -239,7 +222,6 @@ function load_input_data(input_dir::AbstractString)
     p_idling     = _psd_opt(par, "p_idling", 0.0)
     scale        = Int(round(_psd_opt(par, "scale", 2.0)))
     t_limit_rest = _psd_opt(par, "t_limit_rest", 1.0)
-    kappa_wt     = Int(round(_psd_opt(par, "kappa_wt", 4.0)))
     prior_sigma_frac = _psd_opt(par, "prior_sigma_frac", 0.2)
     obs_noise_std    = _psd_opt(par, "obs_noise_std", 0.05)
     co2_unit_scale   = _psd_opt(par, "co2_unit_scale", 1.0)
@@ -251,11 +233,14 @@ function load_input_data(input_dir::AbstractString)
     lambda_CO2      = Float64.(tdd.intensity_tons_emissions) .* co2_unit_scale
 
     # ---- id -> index maps ----
+    # String IDs from each CSV's first column (whitespace-trimmed).
     ev_ids   = strip.(string.(evd[!, 1]))
     mcs_ids  = strip.(string.(mcd[!, 1]))
     node_ids = strip.(string.(plc.site))
+     # Lowercased name -> integer index, so lookups are case-insensitive and consistent across files.
     node_idx = Dict(lowercase(id) => i for (i, id) in enumerate(node_ids))
     ev_idx   = Dict(lowercase(id) => e for (e, id) in enumerate(ev_ids))
+        # Integer index sets used everywhere downstream (nodes, excavators, MCS units).
     N = 1:length(node_ids);  E = 1:length(ev_ids);  M = 1:length(mcs_ids)
 
     # ---- assignment matrix A from place.csv (one column per excavator id) ----
@@ -268,6 +253,7 @@ function load_input_data(input_dir::AbstractString)
             Int(round(Float64(col[r]))) == 1 && (A[node_idx[lowercase(node_ids[r])], e] = 1)
         end
     end
+    # Site nodes = any node with a CEV assigned; grid nodes = all the rest.
     N_c = [i for i in N if any(A[i, e] == 1 for e in E)]
     N_g = [i for i in N if !(i in N_c)]
     isempty(N_g) && error("DataLoader: no grid node (a node with no EV assigned) found")
@@ -282,8 +268,20 @@ function load_input_data(input_dir::AbstractString)
 
     # ---- activity powers: known constants seed the learner's prior ----
     prior_mu    = [_psd(par, "p_digging"), _psd(par, "p_loading_swinging"), _psd(par, "p_traveling"), p_idling]
-    # Idle (prior_mu[4] == 0) is pinned to 0 std: no power is lost while idling.
-    prior_sigma = [prior_mu[j] > 0 ? max(prior_sigma_frac * prior_mu[j], 0.05) : 0.0 for j in 1:4]
+    # PER-ACTIVITY std: prefer explicit sigma_* rows (e.g. written by the step-0
+    # Bayesian regression = the posterior SD of each activity power). If a row is
+    # missing (NaN), fall back to the old single prior_sigma_frac * mu behaviour so
+    # older parameter files still load. Idle (prior_mu[4] == 0) is pinned to 0 std:
+    # no power is lost while idling.
+    sig_dig  = _psd_opt(par, "sigma_digging",          NaN)
+    sig_load = _psd_opt(par, "sigma_loading_swinging", NaN)
+    sig_trv  = _psd_opt(par, "sigma_traveling",        NaN)
+    _sigma_or_frac(explicit, mu) =
+        isnan(explicit) ? (mu > 0 ? max(prior_sigma_frac * mu, 0.05) : 0.0) : max(explicit, 0.0)
+    prior_sigma = [_sigma_or_frac(sig_dig,  prior_mu[1]),
+                   _sigma_or_frac(sig_load, prior_mu[2]),
+                   _sigma_or_frac(sig_trv,  prior_mu[3]),
+                   0.0]
     true_powers = copy(prior_mu)
     true_sigma  = copy(prior_sigma)          # per-interval wobble of the stochastic plant
     p_digging, p_loading_swinging, p_traveling = prior_mu[1], prior_mu[2], prior_mu[3]
@@ -305,10 +303,11 @@ function load_input_data(input_dir::AbstractString)
         tau_trv[node_idx[rn], node_idx[cn]] = Float64(ttm[ri, ci + 1])
     end
 
-    # ---- work-availability matrix over the FULL day, then INFER the horizon ----
+    # ---- work-availability matrix over the FULL 24 h horizon ----
     # Each work_flexible row is (Location, EV) followed by one column per FULL-day
-    # interval giving the kW work cap (0 = no work). We first read the whole-day
-    # caps, then infer n_day = (last interval with any work) + return buffer.
+    # interval giving the kW work cap (0 = no work). We read the whole-day caps and
+    # keep the full 24 h horizon (n_day = n_int): this is a single-day model, so
+    # there is no shift-based horizon inference and no return buffer.
     wf_time_cols = names(wkf)[3:end]
     n_full = min(n_int, length(wf_time_cols))
     R_full = zeros(length(N), length(E), n_full)
@@ -320,19 +319,17 @@ function load_input_data(input_dir::AbstractString)
             R_full[i, e, k] = Float64(wkf[r, 2 + k])
         end
     end
-    available_full = Bool[any(R_full[i, e, k] > 0 for i in N_c, e in E) for k in 1:n_full]
-    n_day = _infer_n_day(available_full, delta_T, n_int)   # daytime Phase-1 window
-    day_end_hour = t_start + n_day * delta_T
+    n_day = n_int                            # FULL 24 h horizon (one optimisation)
     K = 1:n_day;  T = 1:(n_day + 1)
-    R_work = R_full[:, :, 1:n_day]          # truncate the caps to the inferred daytime window
+    R_work = zeros(length(N), length(E), n_day)   # pad the caps out to the full-day horizon
+    nfill = min(n_full, n_day)
+    R_work[:, :, 1:nfill] = R_full[:, :, 1:nfill]
 
     B = [1, 2, 3, 4]
-    # Receding horizon: days to KEEP (driver simulates n_days + 1, drops the buffer day).
+    
+    # ---- Receding horizon multi-day schedule ----
     n_days = max(1, Int(round(_psd_opt(par, "n_days", 2.0))))
 
-    # ---- PER-DAY work schedule ----
-    # If work_by_day.csv exists, each reported day gets its own per-site quota;
-    # otherwise the single place.csv quota is repeated for all n_days days.
     wbd = _read_work_by_day(input_dir, node_ids, node_idx, n_days)
     if wbd === nothing
         dig_by_day  = [copy(hours_digging)          for _ in 1:n_days]
@@ -343,7 +340,7 @@ function load_input_data(input_dir::AbstractString)
         hours_loading_swinging = copy(load_by_day[1])
     end
 
-    return (; delta_T, K, T, t_start, n_int, n_day, day_end_hour, t_limit_rest, kappa_wt,
+    return (; delta_T, K, T, t_start, n_int, n_day, t_limit_rest,
               n_days,
               N, N_g, N_c, M, E, A,
               SOE_MCS_ini, SOE_MCS_max, SOE_MCS_min, CH_MCS, DCH_MCS,

@@ -276,7 +276,7 @@ for c in cases
     outdir = joinpath(_HERE, c.name, "output")
     println("\n#################### $(c.name) ####################")
     d   = load_data(:input; input_dir = indir)
-    res = run_mpc(d; n_days = 1, time_limit_sec = 8.0, seed = 1)
+    res = run_mpc(d; n_days = 1, time_limit_sec = Inf, seed = 1)
     html_outputs(res, outdir)
     write_comparison(res, outdir, c.name, cmp_io)
 
