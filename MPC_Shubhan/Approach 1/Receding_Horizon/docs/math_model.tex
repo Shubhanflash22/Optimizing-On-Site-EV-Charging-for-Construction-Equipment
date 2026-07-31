@@ -20,7 +20,11 @@ window MILP is built in \texttt{3\_MCSModel.jl} (\texttt{build\_window\_model});
 deterministic overnight recharge is \texttt{phase2\_overnight\_charge}; the multi-day
 closed loop is in \texttt{4\_MPCLoop.jl} (\texttt{run\_mpc}). Plain-English descriptions
 and the data schema are in \texttt{README.md}; a line-by-line code audit is in
-\texttt{constraints\_code\_vs\_model.txt}.
+\texttt{constraints\_code\_vs\_model.txt}. The model below is solved every 15 minutes by
+Approach~1 (this document's subject) and solved \emph{once per day}, then replayed
+open-loop for that day, by Approach~0, the one-shot-per-day baseline used only to
+measure the value of re-planning; the daytime window MILP itself is identical either
+way.
 
 The controller is a \textbf{multi-day, cross-day RECEDING horizon}. The loop simulates
 $D_{\text{tot}} = n_{\text{days}}+1$ days ($n_{\text{days}}$ reported plus one dropped
@@ -34,24 +38,25 @@ capped at the full day $n_{\text{int}}=96$). Every 15-min step re-solves a MILP 
 \]
 with lookahead $\ell = \texttt{lookahead\_days}$, laying the remaining part of today and
 the next $\ell$ daytime blocks end to end; only the first interval is applied and the
-window recedes. \textbf{Nights are not intervals}: the MCS battery is bridged to full at
-each evening boundary inside the MILP, and the realized overnight recharge is scheduled
-separately by the deterministic \texttt{phase2\_overnight\_charge}; the CEV battery and
-any unfinished work carry over. The buffer day absorbs the CEV energy-neutral wrap-up so
-it never lands on a reported day.
+window recedes. \textbf{Nights ARE intervals}: the day-block is the full 24\,h
+($n_{\text{day}}=n_{\text{int}}=96$), so the overnight MCS recharge is scheduled by the MILP
+itself, driven by the time-of-use price. There is no reset bridge and no separate deterministic
+recharge phase. Battery state and any unfinished work carry over continuously. The buffer day
+absorbs the energy-neutral wrap-up so it never lands on a reported day.
 
 The activity powers are a \textbf{fixed} calibrated estimate (Fork B); the MILP plans on
-the mean $\mu$, and the stochastic plant samples per-interval powers from
-$\mathcal{N}(\mu,\sigma)$ truncated at $0$ (idle $\sigma=0$). The model is not re-fit
-online.
+the mean $\mu$, and the stochastic plant draws realized powers from a pool pre-sampled from
+$\mathcal{N}(\mu,\sigma)$, one draw per (excavator, activity) occurrence (shared across every
+approach that simulates the plant, so their realizations are comparable), truncated at $0$
+(idle $\sigma=0$). The model is not re-fit online.
 
 \paragraph{Window geometry.} For a global interval index $k$, let
 $\mathrm{wd}(k)=((k-1)\bmod n_{\text{day}})+1$ be its position \emph{within} its day and
 $\mathrm{dayof}(k)=\lfloor(k-1)/n_{\text{day}}\rfloor+1$ its day. Daily profiles (price,
 carbon, work availability) repeat each day and are indexed by $\mathrm{wd}(k)$. The
-\emph{evening} set $\mathcal{K}^{\text{eve}}=\{k\in K_{\text{win}}:\mathrm{wd}(k)=
-n_{\text{day}}\}$ collects each day's end-of-shift interval; interior evenings
-$\mathcal{K}^{\text{eve}}\setminus\{\max K_{\text{win}}\}$ carry the overnight MCS reset.
+day-boundary index $k_{\text{term}}=d_0\,n_{\text{day}}$ (for a window whose first day is $d_0$)
+is the last interval before the next day-start; $b_{\text{term}}=k_{\text{term}}+1$ is the boundary
+where both terminal targets are pinned. The window may see a short tail past $k_{\text{term}}$.
 
 %======================================================================
 \section{Sets and indices}
@@ -62,15 +67,14 @@ $i,j \in \mathcal{N}$ & nodes; $\mathcal{N}_g$ grid, $\mathcal{N}_c$ sites \\
 $a \in \mathcal{B}$ & activities $=\{\text{dig},\text{load},\text{trv},\text{idle}\}$ \\
 $k$ & global interval in the cross-day window $K_{\text{win}}$ \\
 $\mathrm{wd}(k),\mathrm{dayof}(k)$ & within-day index / day of $k$ \\
-$\mathcal{K}^{\text{eve}}$ & evening (end-of-shift) intervals in the window \\
+$k_{\text{term}},b_{\text{term}}$ & last interval before / boundary at the next day-start \\
 $\mathcal{D}$ & day-blocks present in the window \\
 $\mathcal{T}_b$ & interval boundaries of the window \\
 \end{tabular}
 
 \medskip
-$n_{\text{day}}\le n_{\text{int}}=96$ is the \textbf{daytime block} at $\dt=0.25$\,h,
-inferred from work availability (e.g.\ $40$ intervals, 08:00$\to$18:00); the overnight
-remainder $[n_{\text{day}}{+}1,\dots,n_{\text{int}}]$ is handled by Phase~2. $A_{i,e}=1$
+$n_{\text{day}}=n_{\text{int}}=96$ is the \textbf{full 24\,h day-block} at $\dt=0.25$\,h;
+the overnight hours are ordinary intervals of the same MILP. $A_{i,e}=1$
 iff CEV $e$ works at site $i$. Work availability $R_{i,e,k}=R^{\text{day}}_{i,e,\mathrm{wd}(k)}$
 is $0$ outside the shift, but the MCS/CEVs may charge and the MCS may travel at any
 daytime interval.
@@ -88,7 +92,6 @@ $r^{\text{dig}}_i,r^{\text{load}}_i$ & work still remaining at site $i$ carried 
 $\tau_{i,j},k_{\text{trv}},R_{i,e,k}$ & travel time / energy / work availability \\
 $\rho_{\text{miss}},\rho_{\text{lab}},\lambda^{\text{NC}},\lambda^{\text{OP}}$ & penalties \\
 $\text{scale},\kappa=4,r$ & precedence ratio / travels-per-work ($\kappa_{\text{wt}}$) / rest cap \\
-$f_{\text{oc}},\Delta_{\text{dd}},\epsilon$ & overcharge frac / drawdown floor (kWh) / terminal tol \\
 \end{tabular}
 
 %======================================================================
@@ -97,9 +100,11 @@ $f_{\text{oc}},\Delta_{\text{dd}},\epsilon$ & overcharge frac / drawdown floor (
 $P^{\text{MCS-CEV}}_{m,i,e,k}$, $P^{\text{work}}_{i,e,k}$, totals
 $P^{\text{ch,tot}}_{m,k},P^{\text{dch,tot}}_{m,k}$, travel energy $L_{m,i,j,k}$, state
 $SOE^{\text{MCS}}_{m,t},SOE^{\text{CEV}}_{e,t}$, peaks $P^{\text{NC}},P^{\text{OP}}$, and slacks
-$s^{\text{miss,dig}}_{i,d},s^{\text{miss,load}}_{i,d}$ (per site \& day-block) plus the soft-fallback
-slacks $s^{\text{prec}}_{i,k},s^{\text{pace}\pm}_{e,k},s^{\text{term}}_{e,d}$ (active only under the
-matching \texttt{soft\_*} lever).
+$s^{\text{miss}}_{i,a}$ (per site \& activity --- \emph{not} per day-block). This is the only slack
+in the model: every other constraint is hard, and there are no \texttt{soft\_*} levers.
+The objective sums $s^{\text{miss}}$ over all four activities although only dig and load appear in
+a balance; the travel/idle entries are free $\ge0$ variables carrying positive cost, so they are
+driven to $0$ (the source PDF's objective has the same quirk).
 
 \smallskip
 \textbf{Binary:} $u_{e,i,a,k}$, $\mu_{i,e,k}$, $\rho_{m,i,e,k}$, $z_{m,i,k}$,
@@ -117,10 +122,9 @@ $g^{\text{ch}}_{m,i,k}$, $x_{m,i,j,k}$, $y_{m,i,j,k}$, $\beta^{\text{arr}},\beta
       + W_{\text{c}}\!\sum_{e,k}\!(s^{\text{pace}+}_{e,k}{+}s^{\text{pace}-}_{e,k})
       + W_{\text{t}}\!\sum_{e,d}\! s^{\text{term}}_{e,d}.
 \end{align}
-Price/carbon use the within-day index $\mathrm{wd}(k)$. The soft-fallback penalties
-$(W_{\text{p}},W_{\text{c}},W_{\text{t}})=(800,100,150)$ are inert unless the matching lever is
-set (the slacks are otherwise pinned to $0$). The overnight recharge cost is reported
-separately by Phase~2 and is \emph{not} in this objective.
+Price/carbon use the within-day index $\mathrm{wd}(k)$. The overnight recharge is scheduled
+\emph{inside} this MILP, so its cost is already carried by the first two terms; there is no
+separate overnight accounting.
 
 %======================================================================
 \section{Constraints}
@@ -136,44 +140,27 @@ $g^{\text{ch}}\le z$, $\sum_m g^{\text{ch}}_{m,i,k}\le 1$.
 
 \paragraph{State of energy (HARD).}
 \begin{align}
-SOE^{\text{MCS}}_{m,k+1}&=SOE^{\text{MCS}}_{m,k}+\eta_m P^{\text{ch,tot}}_{m,k}\dt-\tfrac{1}{\eta_m}P^{\text{dch,tot}}_{m,k}\dt-L^{\text{tot}}_{m,k}, && k\notin\mathcal{K}^{\text{eve,int}},\\
-SOE^{\text{MCS}}_{m,k+1}&=SOE^{\text{MCS,ini}}_m, && k\in\mathcal{K}^{\text{eve,int}}\ \text{(overnight reset)},\\
-SOE^{\text{CEV}}_{e,k+1}&=SOE^{\text{CEV}}_{e,k}+\textstyle\sum_{m,i}P^{\text{MCS-CEV}}_{m,i,e,k}\dt-\sum_i P^{\text{work}}_{i,e,k}\dt, && \text{(carries across nights)}\\
+SOE^{\text{MCS}}_{m,k+1}&=SOE^{\text{MCS}}_{m,k}+\eta_m P^{\text{ch,tot}}_{m,k}\dt-\tfrac{1}{\eta_m}P^{\text{dch,tot}}_{m,k}\dt-L^{\text{tot}}_{m,k},\\
+SOE^{\text{CEV}}_{e,k+1}&=SOE^{\text{CEV}}_{e,k}+\textstyle\sum_{m,i}P^{\text{MCS-CEV}}_{m,i,e,k}\dt-\sum_i P^{\text{work}}_{i,e,k}\dt,\\
 \underline{SOE}_\bullet&\le SOE_\bullet\le\overline{SOE}_\bullet .
 \end{align}
-Here $\mathcal{K}^{\text{eve,int}}=\mathcal{K}^{\text{eve}}\setminus\{\max K_{\text{win}}\}$ are the
-interior evenings. The MCS flow recursion is \emph{skipped} across each night and replaced by
-the reset bridge (the realized recharge is Phase~2); the CEV battery carries over unchanged.
+Both recursions run \emph{unbroken} across the whole window, nights included. There is no
+overnight reset bridge and no separate deterministic recharge phase: because the day-block is the
+full 24\,h ($n_{\text{day}}=n_{\text{int}}=96$), the overnight recharge is scheduled by the MILP
+itself, driven by the time-of-use price in the objective.
 
-\paragraph{Daily CEV neutrality \& health (Eq.\ 8b, HARD; soft under \texttt{soft\_term}).}
-At \emph{every} evening boundary $k\in\mathcal{K}^{\text{eve}}$ each CEV must return to (at least)
-its start-of-day level, so each reported day is energy-neutral:
-\begin{equation}
-SOE^{\text{CEV}}_{e,k+1}\ \ge\ SOE^{\text{CEV,ini}}_e-\epsilon,\qquad k\in\mathcal{K}^{\text{eve}}.
-\end{equation}
-A \emph{floor} (not Avik's exact equality) because a CEV cannot discharge: under the stochastic
-plant an equality can become unrecoverable once a CEV drifts high. Under \texttt{soft\_term} this
-becomes a penalised two-sided slack $|SOE^{\text{CEV}}_{e,k+1}-SOE^{\text{CEV,ini}}_e|\le
-s^{\text{term}}_{e,\mathrm{dayof}(k)}$. The MCS has \emph{no} in-MILP terminal equality --- the
-overnight bridge above plus Phase~2 close its cycle.
-
-\paragraph{Keep-up reserve, anti-hoarding cap \& health floor (per day).}
-Three state bounds keep the single MCS shuttling and each daily terminal recursively reachable:
-\begin{itemize}
-\item \textbf{Keep-up reserve (HARD, relaxable):} for each day a backward-built lower bound on
-  $SOE^{\text{CEV}}_{e,t}$ from that day's evening deadline (accounting for the intervals the MCS
-  must leave early to park at the grid, a share-derated recovery rate, and an idle-drain factor),
-  so the terminal is always still reachable.
-\item \textbf{Anti-hoarding cap (HARD, always safe):}
-  $SOE^{\text{CEV}}_{e,t}\le SOE^{\text{CEV,ini}}_e+f_{\text{oc}}(\overline{SOE}^{\text{CEV}}_e-
-  SOE^{\text{CEV,ini}}_e)$ for $t\ne$ start --- no charging far ahead, so the MCS cannot camp at
-  the near CEV. An upper bound below $\overline{SOE}$, so it never causes infeasibility.
-\item \textbf{Daytime health floor (HARD, relaxable):}
-  $SOE^{\text{CEV}}_{e,t}\ge SOE^{\text{CEV,ini}}_e-\Delta_{\text{dd}}$ at daytime boundaries ---
-  forbids any CEV draining too far, forcing the MCS to keep both healthy.
-\end{itemize}
-The reserve and health floor are dropped when the loop re-solves with \texttt{soft\_reserve}
-after a hard infeasibility.
+\paragraph{Terminal energy targets (Eq.\ 8a / 8b, HARD).}
+Both are pinned to $b_{\text{term}}=k_{\text{term}}+1$, the boundary at the \emph{next} day-start
+($k_{\text{term}}=d_0\,n_{\text{day}}$ for a window whose first day is $d_0$). They are applied
+unconditionally --- the window is one day-block long, so that boundary always lies inside it:
+\begin{align}
+SOE^{\text{MCS}}_{m,b_{\text{term}}}&= SOE^{\text{MCS,ini}}_m && \text{(8a, exact; recharge scheduled inside this MILP)},\\
+SOE^{\text{CEV}}_{e,b_{\text{term}}}&\ge SOE^{\text{CEV,ini}}_e && \text{(8b, floor; overcharging allowed)}.
+\end{align}
+The CEV target is a \emph{floor} rather than Avik's exact equality: a CEV cannot discharge, so
+under the stochastic plant an equality can become unrecoverable once a CEV drifts high; the floor
+keeps the terminal reachable while guaranteeing the fleet ends at least as charged as it began.
+Both constraints are \textbf{hard}, with no tolerance band and no soft variant.
 
 \paragraph{Plugging, presence \& routing (Eq.\ 10, HARD).}
 $\rho\le A$, $\rho\le z$, $\sum_e \rho_{m,i,e,k}\le C^{\text{plug}}_m$. Presence partition
@@ -181,8 +168,8 @@ $\sum_i z_{m,i,k}+\sum_{i\ne j}y_{m,i,j,k}=1$; $\beta^{\text{dep}}_{m,i,k}=\sum_
 $\beta^{\text{arr}}$ from finishing trips (or a carried-in arrival);
 $\beta^{\text{arr}}-\beta^{\text{dep}}=z_k-z_{k-1}$; $\beta^{\text{arr}}+\beta^{\text{dep}}\le1$;
 flow balance (generalised for the carried-in start). Trip on $i\!\to\!j$ lasts $\tau_{i,j}$ and
-costs $L=k_{\text{trv}}\dt\,y$. \textbf{(10e)} MCS parked at a grid node at \emph{every} evening
-(each day's end-of-shift): $\sum_{i\in\mathcal{N}_g}z_{m,i,k}=1,\ k\in\mathcal{K}^{\text{eve}}$.
+costs $L=k_{\text{trv}}\dt\,y$. \textbf{(10e)} MCS parked at a grid node at the day-boundary:
+$\sum_{i\in\mathcal{N}_g}z_{m,i,k_{\text{term}}}=1$.
 
 \paragraph{Activity scheduling (Eq.\ 11, HARD).}
 $\sum_a u_{e,i,a,k}=A_{i,e}$; $u\le A$; $\mu_{i,e,k}\le u_{e,i,\text{idle},k}$;
@@ -191,39 +178,57 @@ $P^{\text{work}}_{i,e,k}=\sum_a p_a u_{e,i,a,k}$ (Eq.\ 5e), with $p_{\text{idle}
 (The code uses this 4-activity encoding; Avik's equivalent 3-activity form is
 $\sum_a u\le1$, $\sum_a u+\mu\le1$.)
 
-\paragraph{Work quota (Eq.\ 12c) --- per-day, cumulative, two-sided.}
-Work is a \textbf{per-day} schedule. For each day-block $d\in\mathcal{D}$ let
-$K_{\le d}=\{k\in K_{\text{win}}:\mathrm{dayof}(k)\le d\}$ and let the cumulative target
-$T^{\text{dig}}_{i,d}=r^{\text{dig}}_i+\sum_{d'\in\mathcal{D},\,d_0<d'\le d}H^{\text{dig}}_{i,d'}$
-(likewise load), where $r^{\text{dig}}_i$ carries in the current day's remaining requirement and
-$d_0$ is the window's first day. With $D^{\text{dig}}_{i,d}=\dt\sum_{e,k\in K_{\le d}}
-u_{e,i,\text{dig},k}$:
-\begin{align}
-s^{\text{miss,dig}}_{i,d}&\ge T^{\text{dig}}_{i,d}-D^{\text{dig}}_{i,d}, &&\text{(SOFT lower; shortfall rolls over)}\\
-D^{\text{dig}}_{i,d}&\le T^{\text{dig}}_{i,d}, &&\text{(HARD upper; \emph{no working ahead})}
-\end{align}
-and identically for loading. The hard upper cap stops a day from borrowing a future day's quota
-now that the window sees tomorrow; unfinished earlier work can still be caught up (same
-cumulative budget).
+\paragraph{Work quota (Eq.\ 12c, SOFT shortfall + implicit HARD cap).}
+Work is issued as a \textbf{per-day} schedule ($H^{\text{dig}}_{i,d}$, $H^{\text{load}}_{i,d}$),
+but the roll-over is handled \emph{outside} the MILP: the closed loop adds each morning's quota to
+a running backlog, $r^{\bullet}_i \mathrel{+}= H^{\bullet}_{i,d}$, and subtracts realized work as it
+is applied. The MILP therefore sees only that backlog, and enforces one balance per site over the
+intervals up to the day-boundary $k_{\text{term}}$:
+\begin{equation}
+\dt\!\!\sum_{e,\;k\in K_{\text{win}},\,k\le k_{\text{term}}}\!\!u_{e,i,\text{dig},k}
+\;+\;s^{\text{miss}}_{i,\text{dig}}\;=\;\max(r^{\text{dig}}_i,0),
+\end{equation}
+and identically for loading. There is a \textbf{single} slack per (site, activity) --- it is
+\emph{not} indexed by day-block --- and a \textbf{single} constraint per site, not one per day.
 
-\paragraph{Precedence (Eq.\ 12d, HARD; soft under \texttt{soft\_prec}).}
-Raw interval counts, \emph{per day-block} (counters restart each morning; carried realized work
-seeds only the current day): for $k$ in day $d=\mathrm{dayof}(k)$ with day-start $b(k)$,
-$\sum_{e,\,b(k)\le\tau\le k}u_{e,i,\text{load},\tau}\le\text{scale}\sum_{e,\,b(k)\le\tau\le k}
-u_{e,i,\text{dig},\tau}+s^{\text{prec}}_{i,k}$ (with the day-1 seed added on both sides).
+The shortfall $s^{\text{miss}}$ is soft (priced at $\rho_{\text{miss}}$ in Eq.~1), but since
+$s^{\text{miss}}\ge0$ the equality also implies the \textbf{hard} upper bound
+$\dt\sum u\le\max(r^{\bullet}_i,0)$: a CEV cannot do more work than the backlog still outstanding,
+which is how ``no working ahead'' is obtained --- implicitly, and only up to $k_{\text{term}}$.
+Intervals in the window's tail beyond $k_{\text{term}}$ are excluded from this balance entirely and
+carry no quota accounting; they are unconstrained rather than budgeted (benign in practice, since
+work costs energy and earns nothing until the following day's backlog is issued).
+
+\paragraph{Precedence (Eq.\ 12d, HARD).}
+Raw interval counts, \textbf{cumulative over the whole run} --- the counters do \emph{not} restart
+each morning. The seed $C^{\text{load}}_i,C^{\text{dig}}_i$ is the realized work applied in every
+earlier interval since the run began (the shared history is never reset), converted hours
+$\to$ interval counts:
+\begin{equation}
+\frac{C^{\text{load}}_i}{\dt}+\!\!\sum_{e,\,\min K_{\text{win}}\le\tau\le k}\!\!u_{e,i,\text{load},\tau}
+\ \le\ \text{scale}\left(\frac{C^{\text{dig}}_i}{\dt}+\!\!\sum_{e,\,\min K_{\text{win}}\le\tau\le k}\!\!u_{e,i,\text{dig},\tau}\right).
+\end{equation}
+Hard; there is no precedence slack. The seed aggregates \emph{per site}, whereas travel pacing
+below seeds \emph{per CEV}; the two agree while $A_{i,e}$ is a one-to-one assignment.
 
 \paragraph{Rest rule (Eq.\ 12e, HARD).}
-With $r=\lceil t_{\text{rest}}/\dt\rceil$ (=4), over any $(r{+}1)$-window lying inside one day-block
+With $r=\mathrm{round}(t_{\text{rest}}/\dt)$ (=4 at the defaults $t_{\text{rest}}=1$\,h,
+$\dt=0.25$\,h; the code rounds, it does not take a ceiling), over any $(r{+}1)$-window inside
+$K_{\text{win}}$,
 $\sum_{k'=k}^{k+r}\sum_{a\in\{\text{dig,load,trv}\}}u_{e,i,a,k'}\le r$, \emph{plus a seam} seeded
-from the current day's applied Work/Break history so a work-run cannot leak across the every-
-15-min re-solves. Counters restart each morning (a night is a long break).
+from the applied Work/Break history so a work-run cannot leak across the every-15-min re-solves.
+The counters do \emph{not} restart each morning; the history runs continuously. Because the
+day-block is the full 24\,h, the overnight intervals sit in that history as idle, so a night
+supplies its own break and the seam is harmless in practice.
 
-\paragraph{Travel pacing (Eq.\ 13, HARD; soft under \texttt{soft\_pace}).}
-With $\kappa=\kappa_{\text{wt}}=4$, \emph{per day-block} for each $(i,e)$, on cumulative travel $V$
-vs cumulative useful work $W$ (dig+load, seeded with the current day's applied counts):
+\paragraph{Travel pacing (Eq.\ 13, HARD).}
+With $\kappa=\kappa_{\text{wt}}=4$, for each assigned $(i,e)$, on cumulative travel $V$ vs
+cumulative useful work $W$ (dig+load) --- both seeded with the applied counts accumulated over the
+whole run, not the current day:
 \begin{equation}
-W(k)-\kappa-s^{\text{pace}-}_{e,k}\ \le\ \kappa\,V(k)\ \le\ W(k)+s^{\text{pace}+}_{e,k}.
+W(k)-\kappa\ \le\ \kappa\,V(k)\ \le\ W(k).
 \end{equation}
+Hard; there are no pacing slacks.
 
 \paragraph{Demand peaks (E1, HARD).}
 $P^{\text{NC}}\ge$ carried-in peak and $\ge\sum_m P^{\text{ch,tot}}_{m,k}$ for all $k$;
@@ -235,22 +240,63 @@ The MILP above is re-solved every 15 minutes over the receding cross-day window;
 $k_0$ is applied, then the real state (SOE, MCS position including mid-drive trips, per-site
 remaining work, demand peaks, and the current day's applied-activity history) is advanced and the
 window slides. The activity powers $p_a$ are the mean of a \emph{fixed} calibrated estimate
-$\mathcal{N}(\mu,\sigma)$; the plant draws each interval's realized power from
-$\mathcal{N}(\mu,\sigma)$ (truncated at $0$, idle pinned to $0$); the model is not re-fit online.
+$\mathcal{N}(\mu,\sigma)$; the plant draws each realized power from a pool pre-sampled from
+$\mathcal{N}(\mu,\sigma)$ (truncated at $0$, idle pinned to $0$) once, before the run, and
+consumes the next unused sample for a $(\text{CEV},a)$ pair each time that pair actually occurs
+--- not a fresh draw every interval; the model is not re-fit online.
 
-\paragraph{Overnight Phase 2 (deterministic).} After each daytime block the MCS is refilled from
-its end-of-day $SOE^{\text{MCS}}$ back to $SOE^{\text{MCS,ini}}_m$ over the overnight intervals
-$[n_{\text{day}}{+}1,\dots,n_{\text{int}}]$, greedily choosing the cheapest overnight prices first
-(subject to $\eta_m CH_m$ per interval). This is a closed-form schedule, not part of the MILP.
+\paragraph{No overnight phase.} The day-block is the full 24\,h, so the overnight recharge is an
+ordinary part of the window MILP, scheduled against the time-of-use price and pinned by the
+terminal equality $SOE^{\text{MCS}}_{m,b_{\text{term}}}=SOE^{\text{MCS,ini}}_m$. There is no
+separate closed-form recharge routine.
 
-\paragraph{Graceful fallback.} If a window is hard-infeasible (the daily terminal and keep-up
-reserve are jointly unreachable from a drifted state), it is re-solved \emph{once} with the
-terminal made soft ($s^{\text{term}}$) and the reserve/health floor dropped
-(\texttt{soft\_reserve}), so the MCS still charges toward target rather than freezing; any residual
-shortfall surfaces as a penalty. Only if that also fails does the plant \emph{hold} (idle break).
+\paragraph{No graceful fallback.} Every constraint except $s^{\text{miss}}$ is hard and there is no
+soft re-solve. If a window is infeasible the plant simply \emph{holds} state for that interval and
+the event is counted (\texttt{n\_infeasible}); nothing is relaxed and no second solve is attempted.
 
 \paragraph{Buffer day.} The loop simulates $D_{\text{tot}}=n_{\text{days}}+1$ days and drops the
 last; KPIs and figures use only days $1,\dots,n_{\text{days}}$, so the terminal wrap-up never lands
 on a reported day.
+
+%======================================================================
+\section{Plant modes: what the disturbance actually is}
+\label{sec:plant}
+The MILP is identical in every mode; only what the \emph{plant} does with the applied plan
+differs. Both \texttt{run\_mpc} (Approach~1) and \texttt{run\_one\_shot} (Approach~0) take a
+\texttt{plant} switch:
+
+\medskip
+\begin{tabular}{ll}
+\texttt{:sampled} & realized power $\hat p_{e,a}$ = the next unused draw from the pre-sampled\\
+                  & pool; the within-interval activity split may be randomised. Realized\\
+                  & $\ne$ planned, so the day drifts. \emph{(default)}\\[4pt]
+\texttt{:mean}    & realized power $\hat p_{e,a}=\mu_a$, the same mean the MILP planned on, and\\
+                  & each interval realizes its single planned activity in full. Realized\\
+                  & $=$ planned \emph{exactly} within each day. No pool sample is consumed\\
+                  & and no cursor advances, so a \texttt{:mean} run cannot perturb a\\
+                  & \texttt{:sampled} run sharing the same pool, and needs no seed.\\
+\end{tabular}
+
+\medskip
+Approach~0 under \texttt{:mean} is therefore the per-day MILPs' \emph{own optima}, chained through
+the real end-of-day carry-over --- the deterministic reference. Exactly one mode runs per call
+(\texttt{approach0\_plant}); Approach~1 is always \texttt{:sampled}. Which one is selected decides
+what the reported gap means:
+\begin{align*}
+\text{A0}(\texttt{:sampled})\to\text{A1}\ &=\ \text{value of intra-day re-planning (like-for-like plant)},\\
+\text{A0}(\texttt{:mean})\to\text{A1}\ &=\ \text{drift and re-planning together}.
+\end{align*}
+
+\paragraph{Scope of the disturbance.} Only the CEV side is stochastic. The MCS state is advanced
+by the \emph{planned} value $SOE^{\text{MCS}}_{m,g_0+1}$ from the solved window, so grid draw,
+travel loss and hence every cost term follow the plan exactly; the disturbance enters through CEV
+depletion and reaches the objective only indirectly, through what the next re-solve decides to do
+about it.
+
+\paragraph{State guard.} The realized CEV balance is clamped to
+$[\underline{SOE}_e,\overline{SOE}_e]$. The clamp is a numerical guard, not physics: when it binds,
+energy is created (low side) or discarded (high side) and the reported SOE trajectory ceases to be
+the integral of the reported power. Clamp events are counted and reported per run, because they are
+invisible to the MILP's own feasibility status.
 
 \end{document}

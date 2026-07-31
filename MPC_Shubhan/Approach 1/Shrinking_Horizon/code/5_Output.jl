@@ -40,7 +40,7 @@ using ..Common: create_fixed_2hour_xticks, stepify_interval_values,
                   stepify_boundary_values, interval_time_dataframe,
                   clock_label, in_peak
 
-export write_outputs
+export write_outputs, write_approach_comparison
 
 gr()
 
@@ -805,6 +805,261 @@ function _write_by_entity_html(path, res, times, cev_plan, cev_act, mcs_plan, mc
     end
     println(io, "</table></body></html>")
     write(path, String(take!(io)))
+end
+
+# =============================================================================
+# 10 — SIDE-BY-SIDE TIMELINE COMPARISON (Approach 0 vs Approach 1), styled after
+# the reference 3-row figure:
+#   (a) MCS power     — charging(+)/discharging(-), with NCDP & OPDP annotated
+#   (b) CEV state of energy — one line per CEV, dashed min/max guide lines
+#   (c) CEV work power — bars coloured by activity (Digging / Traveling /
+#                         Loading+Swinging), zero-power intervals left blank
+# The on-peak window is shaded gray in every panel. Two columns: Approach 0
+# (one-shot, left) and Approach 1 (closed-loop, right), sharing the row axes.
+# =============================================================================
+
+const _WORK_ACT_COLORS = Dict(
+    "Digging"          => :steelblue,
+    "Traveling"        => :sandybrown,
+    "Loading/Swinging" => :mediumseagreen,
+)
+
+# Shade the on-peak window(s) behind whatever is already on the panel. Must be
+# called AFTER ylims are fixed on `p` so the rectangle spans the full height.
+function _shade_on_peak!(p, res)
+    d = res.d; nK = res.nK; dt = d.delta_T
+    peak_idx = [k for k in 1:nK if in_peak(k, dt, d.t_start)]
+    isempty(peak_idx) && return p
+    ylo, yhi = Plots.ylims(p)
+    lo, hi = minimum(peak_idx), maximum(peak_idx) + 1
+    plot!(p, Shape([lo, hi, hi, lo], [ylo, yhi, yhi, ylo]);
+          fillalpha = 0.15, fillcolor = :gray, linealpha = 0, label = "")
+    ylims!(p, (ylo, yhi))
+    return p
+end
+
+# (a) MCS power: charging(+)/discharging(-), NCDP & OPDP annotated as text +
+# dotted guide lines (the peaks res.nc_peak / res.op_peak are already the
+# realised non-coincident / on-peak demand peaks for this run).
+function _panel_mcs_power(res, title)
+    d = res.d; K = 1:res.nK; Tplot = 1:(res.nK + 1)
+    rT, rL = create_fixed_2hour_xticks(Tplot, d.t_start)
+    charging    = [sum(res.real_P_ch[m, k]  for m in d.M) for k in K]
+    discharging = [sum(res.real_P_dch[m, k] for m in d.M) for k in K]
+    ymax = max(maximum(charging; init = 0.0), maximum(discharging; init = 0.0),
+               res.nc_peak, res.op_peak, 1.0)
+    p = _base_plot(title = title, titlefontsize = 16, xlabel = "Time of day",
+                   ylabel = "MCS power (kW)", xticks = (rT, rL),
+                   xlims = (first(Tplot), last(Tplot)), ylims = (-1.2 * ymax, 1.35 * ymax),
+                   legend = :bottomright, legendfontsize = 9)
+    _shade_on_peak!(p, res)
+    xc, yc = stepify_interval_values(K, charging)
+    xd, yd = stepify_interval_values(K, -discharging)
+    plot!(p, xc, yc, label = "MCS charge", color = :darkorange, linewidth = 2)
+    plot!(p, xd, yd, label = "MCS discharge", color = :magenta, linewidth = 2)
+    hline!(p, [res.nc_peak], color = :darkorange, linestyle = :dot, linewidth = 2, label = "NCDP")
+    hline!(p, [res.op_peak], color = :firebrick,  linestyle = :dot, linewidth = 2, label = "OPDP")
+    total_grid_kwh = sum(charging) * d.delta_T
+    xa = first(Tplot) + 0.62 * (last(Tplot) - first(Tplot))
+    annotate!(p, xa, 1.18 * ymax,
+              text("NCDP $(round(res.nc_peak, digits = 2)) kW", :darkorange, 11, :left))
+    annotate!(p, xa, 1.00 * ymax,
+              text("OPDP $(round(res.op_peak, digits = 2)) kW", :firebrick, 11, :left))
+    annotate!(p, xa, 0.82 * ymax,
+              text("Total grid charging = $(round(total_grid_kwh, digits = 2)) kWh", :black, 11, :left))
+    return p
+end
+
+# (b) CEV state of energy — one line per CEV, dashed min/max guide lines.
+function _panel_cev_soe(res, title)
+    d = res.d; T = 1:(res.nK + 1)
+    rT, rL = create_fixed_2hour_xticks(T, d.t_start)
+    ymax = maximum(values(d.SOE_CEV_max); init = 1.0)
+    p = _base_plot(title = title, titlefontsize = 16, xlabel = "Time of day",
+                   ylabel = "CEV state of energy (kWh)", xticks = (rT, rL),
+                   xlims = (first(T), last(T)), ylims = (0, 1.1 * ymax),
+                   legend = :bottomright, legendfontsize = 9)
+    _shade_on_peak!(p, res)
+    for (idx, e) in enumerate(d.E)
+        vals = [res.real_SOE_CEV[e, t] for t in T]
+        plot!(p, collect(T), vals, label = "CEV $e", color = COLORS[mod1(idx, length(COLORS))], linewidth = 2)
+    end
+    hline!(p, [d.SOE_CEV_max[e] for e in d.E], color = :black, linestyle = :dash, linewidth = 1, label = "SOE limits")
+    hline!(p, [d.SOE_CEV_min[e] for e in d.E], color = :black, linestyle = :dash, linewidth = 1, label = "")
+    return p
+end
+
+# Realised missed work, split by activity, converted from hours to kWh using
+# each activity's power rate (same site/activity accounting as _planned_kpis,
+# but read off the REALISED per-CEV activity trace instead of the 08:00 plan).
+function _realised_missed_kwh(res)
+    d = res.d; nK = res.nK; dt = d.delta_T
+    rdig = zeros(length(d.N)); rload = zeros(length(d.N))
+    for e in d.E
+        site = findfirst(i -> d.A[i, e] == 1, d.N); site === nothing && continue
+        for k in 1:nK
+            lab = res.real_cev_act[e][k]
+            lab == res.ACT_NAME[1] && (rdig[site]  += dt)   # Digging
+            lab == res.ACT_NAME[2] && (rload[site] += dt)   # Loading/Swinging
+        end
+    end
+    miss_dig_h  = sum((max(d.hours_digging[i]          - rdig[i],  0.0) for i in d.N_c); init = 0.0)
+    miss_load_h = sum((max(d.hours_loading_swinging[i] - rload[i], 0.0) for i in d.N_c); init = 0.0)
+    return miss_dig_h * d.p_digging, miss_load_h * d.p_loading_swinging
+end
+
+# (c) CEV work power — bars coloured by activity (Digging / Traveling /
+# Loading+Swinging); zero-power intervals are left blank. When several CEVs
+# are present, each gets its own narrower bar within the interval so they
+# don't overlap.
+function _panel_cev_work(res, title)
+    d = res.d; K = 1:res.nK; Tplot = 1:(res.nK + 1)
+    rT, rL = create_fixed_2hour_xticks(Tplot, d.t_start)
+    nE = max(length(d.E), 1)
+    work = Dict(e => [sum(res.real_P_work[i, e, k] for i in d.N_c) for k in K] for e in d.E)
+    ymax = maximum(vcat(0.0, values(work)...); init = 0.0)
+    ymax = ymax > 0 ? ymax : 1.0
+    p = _base_plot(title = title, titlefontsize = 16, xlabel = "Time of day",
+                   ylabel = "CEV work power (kW)", xticks = (rT, rL),
+                   xlims = (first(Tplot), last(Tplot)), ylims = (0, 1.3 * ymax),
+                   legend = :topright, legendfontsize = 9)
+    _shade_on_peak!(p, res)
+    seen = Set{String}()
+    bw = 0.85 / nE
+    for (idx, e) in enumerate(d.E)
+        for k in K
+            pw = work[e][k]
+            pw <= 1e-9 && continue
+            lab = res.real_cev_act[e][k]
+            col = get(_WORK_ACT_COLORS, lab, :gray)
+            lbl = lab in seen ? "" : lab
+            push!(seen, lab)
+            x0 = k - 0.85 / 2 + (idx - 1) * bw
+            bar!(p, [x0 + bw / 2], [pw]; bar_width = bw, color = col, linecolor = col, label = lbl)
+        end
+    end
+    miss_dig_kwh, miss_load_kwh = _realised_missed_kwh(res)
+    miss_txt = (miss_dig_kwh <= 1e-9 && miss_load_kwh <= 1e-9) ?
+        "Missed work = 0 kWh" :
+        "Missed work = " * join(
+            filter(!isempty, [
+                miss_dig_kwh  > 1e-9 ? "$(round(miss_dig_kwh,  digits = 2)) kWh digging" : "",
+                miss_load_kwh > 1e-9 ? "$(round(miss_load_kwh, digits = 2)) kWh loading+swinging" : "",
+            ]), " + ")
+    xa = first(Tplot) + 0.02 * (last(Tplot) - first(Tplot))
+    annotate!(p, xa, 1.22 * ymax, text(miss_txt, :firebrick, 11, :left))
+    return p
+end
+
+# Build the full 3-row x 2-col comparison figure: Approach 0 (left column) vs
+# Approach 1 (right column), rows = MCS power / CEV SOE / CEV work power.
+function fig_approach_timeline_comparison(res0, res1)
+    p_a0 = _panel_mcs_power(res0, "Approach 0 (one-shot)")
+    p_a1 = _panel_mcs_power(res1, "Approach 1 (closed-loop)")
+    p_b0 = _panel_cev_soe(res0, "")
+    p_b1 = _panel_cev_soe(res1, "")
+    p_c0 = _panel_cev_work(res0, "")
+    p_c1 = _panel_cev_work(res1, "")
+    combined = plot(p_a0, p_a1, p_b0, p_b1, p_c0, p_c1, layout = (3, 2),
+                    size = (1700, 1500), left_margin = 16Plots.mm, bottom_margin = 16Plots.mm)
+    return combined
+end
+
+# =============================================================================
+# APPROACH 0 (one-shot 8:00 plan, executed open-loop) vs APPROACH 1 (existing
+# closed-loop MPC). Unlike plan_vs_actual.html (which compares the DETERMINISTIC
+# 8:00 forecast to Approach 1's realised trajectory), both columns here are
+# FULLY REALISED outcomes over 08:00 -> next-day 08:00, built from the SAME
+# shared ActivityPowerPool, so the gap reflects only the value of re-planning.
+# Additive-only: does not modify or replace any existing report.
+# =============================================================================
+# Every headline KPI of ONE realized run, as an ordered (label, value) list. Used to
+# build each column of the comparison table, so adding a metric adds it everywhere.
+function _approach_kpi_rows(res)
+    c = _cost_components(res)
+    return [
+        ("Grid energy (kWh)",         res.total_energy),
+        ("Energy cost (USD)",         c.energy_cost),
+        ("CO2 emissions (kg)",        res.total_co2),
+        ("CO2 cost (USD)",            c.carbon_cost),
+        ("NCD peak (kW)",             res.nc_peak),
+        ("NCD charge (USD)",          c.ncd_cost),
+        ("OPD peak (kW)",             res.op_peak),
+        ("OPD charge (USD)",          c.opd_cost),
+        ("Missed work (h)",           res.missed),
+        ("Missed work penalty (USD)", c.missed_cost),
+        ("MCS transit (h)",           res.transit_intervals * res.d.delta_T),
+        ("Travel labour (USD)",       c.travel_cost),
+        ("TOTAL cost (USD)",          c.total),
+    ]
+end
+
+# res0 : Approach 0 -- the whole-day MILP solved ONCE at 08:00 and replayed open-loop.
+#        Which baseline it is depends on the plant mode it was run under (res0.plant):
+#          :mean     realized == planned exactly, so the column IS the whole-day MILP's
+#                    own optimum (deterministic reference, nothing sampled anywhere).
+#          :sampled  the same fixed plan drifting under the stochastic pool with no
+#                    feedback -- what re-planning is being credited against.
+#        Exactly one of the two runs per call; the header and the delta label below
+#        adapt so the report always says which comparison it is actually showing.
+# res1 : Approach 1, the closed loop (always :sampled).
+function write_approach_comparison(res0, res1, out_dir)
+    mkpath(out_dir)
+
+    # 10 — side-by-side timeline figure (MCS power / CEV SOE / CEV work power)
+    p_timeline = fig_approach_timeline_comparison(res0, res1)
+    savefig(p_timeline, joinpath(out_dir, "10_approach0_vs_approach1_timeline.png"))
+    CSV.write(joinpath(out_dir, "10_approach0_timeline.csv"), csv_mcs_cev_soe(res0))
+    CSV.write(joinpath(out_dir, "10_approach1_timeline.csv"), csv_mcs_cev_soe(res1))
+
+    r0 = _approach_kpi_rows(res0)
+    r1 = _approach_kpi_rows(res1)
+    is_mean = res0.plant === :mean
+    a0_head = is_mean ? "Approach 0 &mdash; mean plant<br>(whole-day MILP optimum)" :
+                        "Approach 0 &mdash; sampled plant<br>(one-shot, open loop)"
+    blurb = is_mean ?
+        string("<b>Approach 0</b> was replayed under the <b>deterministic</b> plant: realized power ",
+               "is pinned to the planning mean &mu; and each interval realizes its single planned ",
+               "activity in full, so realized equals planned exactly and the column is the whole-day ",
+               "MILP's own optimum. <b>Approach 1</b> re-plans every 15 min against the stochastic ",
+               "pool. The &Delta; therefore mixes TWO effects &mdash; the drift the stochastic plant ",
+               "introduces, and the value of re-planning against it. Re-run with ",
+               "<code>approach0_plant = :sampled</code> to isolate the second.") :
+        string("Both columns are fully realized over 08:00 &rarr; next-day 08:00 and draw from the ",
+               "SAME pre-generated per-(excavator, activity) power samples, so the &Delta; reflects ",
+               "only the value of re-planning, not different randomness. Re-run with ",
+               "<code>approach0_plant = :mean</code> to see the deterministic MILP optimum instead.")
+
+    io = IOBuffer()
+    println(io, "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><style>")
+    println(io, "body{font-family:sans-serif}")
+    println(io, "table{border-collapse:collapse;font-size:13px}")
+    println(io, "th,td{border:1px solid #ccc;padding:4px 10px;text-align:right}")
+    println(io, "th{background:#f4f4f4}")
+    println(io, "td:first-child,th:first-child{text-align:left}")
+    println(io, "tr:last-child td{font-weight:bold;background:#fafafa}")
+    println(io, "</style></head><body>")
+    println(io, "<h2>Approach 0 (one-shot 8:00 plan) vs Approach 1 (closed-loop MPC)</h2>")
+    println(io, "<p>", blurb, "</p>")
+    println(io, "<table><tr><th>Metric</th><th>", a0_head,
+                "</th><th>Approach 1 &mdash; closed loop</th><th>&Delta; (A1 &minus; A0)</th></tr>")
+    for idx in eachindex(r0)
+        name = r0[idx][1]; v0 = r0[idx][2]; v1 = r1[idx][2]
+        println(io, "<tr><td>", name, "</td><td>", @sprintf("%.3f", v0), "</td><td>",
+                    @sprintf("%.3f", v1), "</td><td>", @sprintf("%+.3f", v1 - v0), "</td></tr>")
+    end
+    println(io, "</table>")
+    # Diagnostics that qualify the numbers above rather than being costs themselves.
+    println(io, "<h3>Run diagnostics</h3><table><tr><th>Run</th><th>Plant</th>",
+                "<th>Infeasible windows</th><th>CEV SOE clamps</th><th>Solve time (s)</th></tr>")
+    for (lbl, r) in [("Approach 0 (one-shot)", res0), ("Approach 1 (closed loop)", res1)]
+        println(io, "<tr><td>", lbl, "</td><td>:", r.plant, "</td><td>",
+                    r.n_infeasible, "</td><td>", r.n_clamped, "</td><td>",
+                    @sprintf("%.1f", r.elapsed), "</td></tr>")
+    end
+    println(io, "</table></body></html>")
+    write(joinpath(out_dir, "approach0_vs_approach1.html"), String(take!(io)))
+    return nothing
 end
 
 function write_reports(res, out_dir)

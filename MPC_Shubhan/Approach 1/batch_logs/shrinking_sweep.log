@@ -1,0 +1,208 @@
+[ Info: [Turing]: progress logging is disabled globally
+==============================================================================
+INITIAL-SOE SWEEP (:input)  —  10 runs, SOE_CEV_ini in [2.96, 14.8] kWh
+  each window solved to the MIP gap (time_limit_sec = Inf), seed = 1
+==============================================================================
+
+#################### run01_SOE_02.96 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 2.9 s (96 plant realizations)
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 21.3 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=2.96  realised $1177.93 (plan $1175.65)  changed: CEV1=17 MCS=13 /96  feas=true
+             A0(:sampled) $1175.65 -> A1 $1177.93 (+2.28)
+
+#################### run02_SOE_04.28 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 3.9 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 47.8 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=4.28  realised $1313.05 (plan $690.53)  changed: CEV1=26 MCS=25 /96  feas=true
+             A0(:sampled) $690.53 -> A1 $1313.05 (+622.53)
+
+#################### run03_SOE_05.59 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 6.4 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 48.1 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=5.59  realised $824.01 (plan $691.50)  changed: CEV1=22 MCS=21 /96  feas=true
+             A0(:sampled) $691.50 -> A1 $824.01 (+132.50)
+
+#################### run04_SOE_06.91 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 3.2 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 38.7 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=6.91  realised $690.10 (plan $193.39)  changed: CEV1=24 MCS=20 /96  feas=true
+             A0(:sampled) $193.39 -> A1 $690.10 (+496.70)
+
+#################### run05_SOE_08.22 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 2.1 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 31.0 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=8.22  realised $193.18 (plan $193.39)  changed: CEV1=26 MCS=18 /96  feas=true
+             A0(:sampled) $193.39 -> A1 $193.18 (-0.21)
+
+#################### run06_SOE_09.54 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 3.2 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 33.0 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=9.54  realised $193.19 (plan $193.39)  changed: CEV1=26 MCS=19 /96  feas=true
+             A0(:sampled) $193.39 -> A1 $193.19 (-0.20)
+
+#################### run07_SOE_10.85 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 3.4 s (96 plant realizations)
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 32.1 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=10.85  realised $193.14 (plan $193.39)  changed: CEV1=18 MCS=10 /96  feas=true
+             A0(:sampled) $193.39 -> A1 $193.14 (-0.26)
+
+#################### run08_SOE_12.17 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 3.3 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 30.1 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=12.17  realised $193.19 (plan $193.39)  changed: CEV1=22 MCS=18 /96  feas=true
+             A0(:sampled) $193.39 -> A1 $193.19 (-0.20)
+
+#################### run09_SOE_13.48 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 3.1 s (96 plant realizations)
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 40.3 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=13.48  realised $193.19 (plan $193.39)  changed: CEV1=24 MCS=18 /96  feas=true
+             A0(:sampled) $193.39 -> A1 $193.19 (-0.20)
+
+#################### run10_SOE_14.80 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 4.1 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 32.2 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  SOE_ini=14.80  realised $193.19 (plan $193.39)  changed: CEV1=22 MCS=21 /96  feas=true
+             A0(:sampled) $193.39 -> A1 $193.19 (-0.20)
+
+==============================================================================
+SWEEP COMPLETE. Wrote 10 run folders + summary.html to:
+  C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\output\input_testing
+==============================================================================

@@ -29,6 +29,7 @@
 # #############################################################################
 
 using Printf
+using Random
 
 # ---- include the modules in dependency order (Common first) ----
 const _CODE_DIR = @__DIR__
@@ -40,12 +41,51 @@ include(joinpath(_CODE_DIR, "4_MPCLoop.jl"))
 include(joinpath(_CODE_DIR, "5_Output.jl"))
 
 using .DataLoader: load_data
-using .MPCLoop: run_mpc
-using .Output: write_outputs
+using .Common: draw_activity_power_pool
+using .MPCLoop: run_mpc, run_one_shot
+using .Output: write_outputs, write_approach_comparison
 
 # Default folder holding the soil task-recording .xlsx files (step-0 regression).
 const _DEFAULT_REGRESSION_DATA_DIR = raw"C:\Users\shubh\Desktop\Bayesian Regression"
 
+# -----------------------------------------------------------------------------
+# CONSOLE LOG CAPTURE: mirror everything printed (println/@printf to stdout,
+# @warn to stderr) to a run_log.txt file under out_dir, in ADDITION to the
+# terminal -- nothing currently printed changes, it's just also saved.
+# -----------------------------------------------------------------------------
+function _with_console_log(f, out_dir)
+    mkpath(out_dir)
+    log_path = joinpath(out_dir, "run_log.txt")
+    
+    open(log_path, "w") do logfile
+        pipe = Pipe()
+        orig_stdout = stdout
+        orig_stderr = stderr
+        
+        # Asynchronously read from the pipe and write to both console and file
+        tee_task = @async begin
+            while !eof(pipe)
+                data = readavailable(pipe)
+                write(orig_stdout, data)
+                write(logfile, data)
+                flush(orig_stdout)
+                flush(logfile)
+            end
+        end
+        
+        try
+            redirect_stdout(pipe) do
+                redirect_stderr(pipe) do
+                    f()
+                end
+            end
+        finally
+            # Close the writing end of the pipe and wait for the tee task to finish
+            close(pipe.in)
+            wait(tee_task)
+        end
+    end
+end
 # =============================================================================
 # ENTRY POINT
 # =============================================================================
@@ -55,14 +95,29 @@ function run_scenario_1(; mode::Symbol = :synthetic,
                           input_dir::AbstractString = joinpath(dirname(_CODE_DIR), "data", "input_data"),
                           shrinking::Bool = true, H::Int = 16,
                           # SOLVER TIME LIMIT (control point #1, the top-level knob). Seconds the
-                          # solver may spend on EACH 15-min window MILP. This flows through to
-                          # run_mpc -> build_window_model -> set_time_limit_sec (3_MCSModel.jl).
-                          #   e.g.  run_scenario_1(mode = :input, time_limit_sec = Inf)
-                          # Pass Inf to REMOVE the limit and solve every window to the MIP gap.
-                          time_limit_sec::Float64 = 60.0,
+                          # solver may spend on EACH window MILP (every 15-min window for
+                          # Approach 1, the single whole-day window for Approach 0). This flows
+                          # through to run_mpc / run_one_shot -> build_window_model ->
+                          # set_time_limit_sec (3_MCSModel.jl). Defaults to NO LIMIT (solve to the
+                          # MIP gap); pass a finite value to shorten it, e.g.
+                          #   run_scenario_1(mode = :input, time_limit_sec = 60.0)
+                          time_limit_sec::Float64 = Inf,
                           multi_activity::Bool = false,
                           require_site_visit::Bool = false,
                           single_visit_per_site::Bool = false,
+                          # APPROACH 0 PLANT MODE. Approach 0 solves the whole-day MILP
+                          # once at 08:00 and replays it open-loop under ONE plant:
+                          #   :sampled  realized power = the next unused draw from the
+                          #             shared pool, so the fixed plan drifts with no
+                          #             feedback to correct it (stochastic baseline).
+                          #   :mean     realized power pinned to the same mu the MILP
+                          #             planned on, single planned activity per interval,
+                          #             so realized == planned EXACTLY and the KPIs are
+                          #             the whole-day MILP's own optimum (deterministic
+                          #             baseline; consumes no pool samples, needs no seed).
+                          # Exactly one runs per call -- pick the baseline you want to
+                          # compare Approach 1 against.
+                          approach0_plant::Symbol = :sampled,
                           mcmc_samples::Int = 500,
                           out_dir::String = joinpath(dirname(_CODE_DIR), "output", String(mode)),
                           run_regression::Bool = true,
@@ -88,21 +143,75 @@ function run_scenario_1(; mode::Symbol = :synthetic,
 
     d = load_data(mode; input_dir = input_dir)
 
-    res = run_mpc(d; shrinking = shrinking, H = H, time_limit_sec = time_limit_sec,
-                     multi_activity = multi_activity, require_site_visit = require_site_visit,
-                     single_visit_per_site = single_visit_per_site,
-                     mcmc_samples = mcmc_samples, seed = seed)
+    return _with_console_log(out_dir) do
+        # ---- SHARED power-sample pool (Common.jl): generated ONCE, from the
+        # frozen d.prior_mu/d.prior_sigma, so Approach 0 and Approach 1 draw
+        # their realized plant power from the exact same underlying samples.
+        pool = draw_activity_power_pool(d.E, d.prior_mu, d.prior_sigma;
+                                        n_samples = 20, rng = MersenneTwister(seed))
 
-    _print_kpis(res)
+        # ---- APPROACH 0: one-shot 8:00 plan, replayed open-loop under ONE plant ----
+        # approach0_plant picks WHICH baseline this is:
+        #   :mean     -> realized == planned exactly; the KPIs ARE the whole-day MILP
+        #                optimum (deterministic reference, no sampling anywhere).
+        #   :sampled  -> the same fixed plan drifting under the stochastic pool, with
+        #                no feedback (what re-planning is being credited against).
+        approach0_plant in (:sampled, :mean) ||
+            error("run_scenario_1: approach0_plant must be :sampled or :mean, got :$approach0_plant")
+        res0 = run_one_shot(d, pool; time_limit_sec = time_limit_sec,
+                            multi_activity = multi_activity, require_site_visit = require_site_visit,
+                            single_visit_per_site = single_visit_per_site,
+                            plant = approach0_plant, seed = seed)
 
-    write_outputs(res, out_dir)
+        # ---- APPROACH 1: closed-loop MPC against the stochastic pool ----
+        res = run_mpc(d, pool; shrinking = shrinking, H = H, time_limit_sec = time_limit_sec,
+                         multi_activity = multi_activity, require_site_visit = require_site_visit,
+                         single_visit_per_site = single_visit_per_site,
+                         mcmc_samples = mcmc_samples, plant = :sampled, seed = seed)
 
-    println("\nResults written to: $(abspath(out_dir))")
-    println("  Figures (v4_real style): 01..09 (09 = per-MCS power profiles)")
-    println("  Reports: 08 KPI, replan_grids/*.csv+*.html,")
-    println("           plan_vs_actual.html + plan_vs_actual_costs.png  (08:00 plan vs realised, financial)")
-    println("           plan_vs_actual_activity.png, plan_vs_actual_side_by_side.html, plan_vs_actual_by_entity.html  (ACTIVITY)")
-    return res.log
+        _print_kpis(res)
+        _print_approach_summary(res0, res)
+
+        write_outputs(res, out_dir)
+        write_approach_comparison(res0, res, out_dir)
+
+        println("\nResults written to: $(abspath(out_dir))")
+        println("  Figures (v4_real style): 01..09 (09 = per-MCS power profiles)")
+        println("  Reports: 08 KPI, replan_grids/*.csv+*.html,")
+        println("           plan_vs_actual.html + plan_vs_actual_costs.png  (08:00 plan vs realised, financial)")
+        println("           plan_vs_actual_activity.png, plan_vs_actual_side_by_side.html, plan_vs_actual_by_entity.html  (ACTIVITY)")
+        println("           approach0_vs_approach1.html  (Approach 0 one-shot vs Approach 1 closed-loop, both fully")
+        println("                                         realised; the A0 column is labelled by its plant mode, and a")
+        println("                                         run-diagnostics table reports infeasible windows + SOE clamps)")
+        println("  Console log: run_log.txt")
+        res.log
+    end
+end
+
+# Three-way console summary: the deterministic MILP optimum, the same plan drifting
+# under the stochastic plant with no feedback, and the closed loop correcting it.
+# Splits the headline A1-vs-A0 gap into "cost of drift" and "value of re-planning".
+function _print_approach_summary(res0, res1)
+    # TOTAL operating cost (energy + carbon + demand + missed + labour), not just the
+    # energy term that res.total_cost holds -- same decomposition the HTML report uses.
+    tot(r) = Output._cost_components(r).total
+    a0_lbl = res0.plant === :mean ?
+        "A0 one-shot, mean plant (MILP optimum) " :
+        "A0 one-shot, sampled plant (open loop) "
+    gap_lbl = res0.plant === :mean ?
+        "  A1 - A0 (drift + re-planning, net)   " :
+        "  A1 - A0 (value of re-planning)       "
+    println("\n==== Approach comparison (both fully realised) ====")
+    @printf("%s : \$%.2f  (%.2f h transit, %.2f h missed)\n",
+            a0_lbl, tot(res0), res0.transit_intervals * res0.d.delta_T, res0.missed)
+    @printf("A1 closed loop (re-planning)            : \$%.2f  (%.2f h transit, %.2f h missed)\n",
+            tot(res1), res1.transit_intervals * res1.d.delta_T, res1.missed)
+    @printf("%s: %+.2f  (negative = A1 cheaper)\n", gap_lbl, tot(res1) - tot(res0))
+    res0.plant === :mean && println("  NOTE: A0 is DETERMINISTIC here, so this gap mixes plan drift with the",
+                                    "\n        value of re-planning. Re-run with approach0_plant = :sampled to",
+                                    "\n        separate the two.")
+    nclamp = res0.n_clamped + res1.n_clamped
+    nclamp > 0 && @printf("  WARNING: %d CEV SOE clamp events -- the SOE traces are not exactly\n           integrable on those steps.\n", nclamp)
 end
 
 # Human-readable KPI block (mirrors the previous summary).

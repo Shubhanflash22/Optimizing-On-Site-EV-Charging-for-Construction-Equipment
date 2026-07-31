@@ -25,7 +25,8 @@ export normalize_travel_steps, in_peak,
        create_fixed_2hour_xticks, multiday_xticks,
        stepify_interval_values, stepify_boundary_values,
        interval_time_dataframe, safe_get,
-       BayesianActivityEstimator, observe!, refit!
+       BayesianActivityEstimator, observe!, refit!,
+       ActivityPowerPool, draw_activity_power_pool, new_cursor, next_power!
 
 # Silence Turing's sampling progress bar at load time.
 Turing.setprogress!(false)
@@ -288,6 +289,75 @@ function refit!(est::BayesianActivityEstimator; nchains::Int = 1)
         end
     end
     return est
+end
+
+# #############################################################################
+# ACTIVITY POWER SAMPLE POOL  (shared "plant" randomness for every approach)
+# -----------------------------------------------------------------------------
+# Every approach that simulates the plant (Approach 1's closed-loop MPC,
+# Approach 0's one-shot-per-day plan executed open-loop, and any future approach)
+# needs to draw a REALIZED stochastic power for "excavator e doing activity a".
+# For a fair comparison across approaches, those draws must come from the SAME
+# underlying random numbers -- otherwise a difference in outcome could just be
+# different randomness, not a difference in control strategy.
+#
+# The pool is generated ONCE, up front, from the FROZEN posterior (mu, sd):
+# `n_samples` (20 by default) pre-drawn samples per (entity, activity) pair --
+# comfortably more than the number of times any one CEV will switch onto that
+# activity in a single day. `draw_activity_power_pool` is the ONLY place the
+# generation method lives (Normal(mu,sd) truncated at 0, today), so it can be
+# swapped later (e.g. real posterior/MCMC draws) without touching any consumer.
+#
+# Consumption is by OCCURRENCE, not by interval: each call to `next_power!`
+# hands out the NEXT unused sample for that (entity, activity) pair and
+# advances a cursor. The pool's `samples` are immutable data, shared read-only
+# across approaches; each approach keeps its OWN cursor (via `new_cursor`), so
+# two approaches walking through the same occurrence sequence draw the exact
+# same numbers, but one approach's consumption never disturbs another's.
+#
+# Idle (or any activity pinned with sd = 0) is deterministic by construction,
+# so next_power! returns `mu[a]` directly for it without consuming a slot --
+# idle would otherwise occur far more than `n_samples` times in a day.
+# #############################################################################
+struct ActivityPowerPool
+    mu::Vector{Float64}
+    sd::Vector{Float64}
+    samples::Dict{Tuple{Int,Int}, Vector{Float64}}   # (entity, activity) -> n_samples draws
+end
+
+# Generate the pool. `entities` is the collection of entity indices (e.g. d.E);
+# `mu`/`sd` is the frozen per-activity power estimate (e.g. d.prior_mu /
+# d.prior_sigma). Pass a dedicated `rng` so this generation step is reproducible
+# and independent of any other randomness used later in a run.
+function draw_activity_power_pool(entities, mu, sd; n_samples::Int = 20, rng = Random.GLOBAL_RNG)
+    samples = Dict{Tuple{Int,Int}, Vector{Float64}}()
+    for e in entities, a in eachindex(mu)
+        samples[(e, a)] = [max(mu[a] + sd[a] * randn(rng), 0.0) for _ in 1:n_samples]
+    end
+    return ActivityPowerPool(collect(float.(mu)), collect(float.(sd)), samples)
+end
+
+# A fresh, independent cursor over `pool`'s (entity, activity) pairs, starting
+# every pair at its first sample. Each simulating approach should call this
+# once at the start of its own run and pass the SAME `pool` alongside its OWN
+# cursor into `next_power!`.
+new_cursor(pool::ActivityPowerPool) = Dict{Tuple{Int,Int}, Int}(k => 1 for k in keys(pool.samples))
+
+# Hand out the next realized power for entity `e` doing activity `a`, advancing
+# `cursor` in place. Deterministic (sd <= 0) activities short-circuit to `mu[a]`
+# without touching the cursor. Errors loudly (rather than wrapping around) if
+# an (entity, activity) pair's pool is exhausted, since that signals the
+# n_samples assumption ("no more work than that in a day") no longer holds.
+function next_power!(pool::ActivityPowerPool, cursor::Dict{Tuple{Int,Int}, Int}, e::Int, a::Int)
+    pool.sd[a] <= 1e-12 && return pool.mu[a]
+    key = (e, a)
+    c    = cursor[key]
+    vals = pool.samples[key]
+    c > length(vals) && error("ActivityPowerPool exhausted for entity=$e, activity=$a ",
+                               "(only $(length(vals)) pre-drawn samples); increase n_samples ",
+                               "in draw_activity_power_pool.")
+    cursor[key] = c + 1
+    return vals[c]
 end
 
 end # module Common

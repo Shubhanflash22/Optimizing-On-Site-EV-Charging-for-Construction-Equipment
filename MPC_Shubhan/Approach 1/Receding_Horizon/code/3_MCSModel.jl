@@ -77,9 +77,6 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     K = collect(K_win)
     Tb = vcat(K, last(K) + 1)                                   # boundary indices
     K_peak = [k for k in K if in_peak(k, delta_T, d.t_start)]   # on-peak subset
-    # productive_k = Dict(k => any(d.R_work[i, e, k] > 0 for i in N_c, e in E) for k in K)
-    productive_k = Dict(k => any(d.R_work[i, e, wd(k)] > 0 for i in N_c, e in E) for k in K)
-    blockdays  = sort(unique(dayof.(K)))
     firstday   = dayof(first(K))
     # ---- FIXED recovery deadline: the next calendar day-boundary (t_start, e.g. 8am) ----
     # The window is always exactly one day-block (n_day intervals) long, so it always

@@ -1,0 +1,56 @@
+[ Info: [Turing]: progress logging is disabled globally
+==============================================================================
+STEP 0  Bayesian activity-power regression (pure Julia; NUTS 4 chains x 2000 draws)
+  data folder : C:\\Users\\shubh\\Desktop\\Bayesian Regression
+  writing     : C:\Users\shubh\Desktop\MPC\Approach 1\Receding_Horizon\data\input_data\parameters.csv
+==============================================================================
+  built 25 equations from 12 file(s)
+┌ Warning: Only a single thread available: MCMC chains are not sampled in parallel
+└ @ AbstractMCMC C:\Users\shubh\.julia\packages\AbstractMCMC\C1aKp\src\sample.jl:544
+┌ Info: Found initial step size
+└   ϵ = 7.62939453125e-7
+┌ Info: Found initial step size
+└   ϵ = 6.103515625e-6
+┌ Info: Found initial step size
+└   ϵ = 6.103515625e-6
+┌ Info: Found initial step size
+└   ϵ = 3.814697265625e-7
+STEP 0 done in 10.9 s; parameters.csv refreshed.
+  fitted means : dig=4.793 load=3.158 trv=4.709 kW
+  fitted sds   : dig=0.206 load=0.179 trv=0.381 kW
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit      : none (solve each day to the MIP gap)
+Approach 0 one-shot-per-day (plant = :sampled) done in 5.2 s (96 plant realizations, 1 day-solves)
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 92.0 s (192 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+
+==== Scenario 1 RECEDING-horizon KPIs (kept days 1..1; buffer day dropped) ====
+Total grid energy   : 31.92 kWh
+Total energy cost   : $10.16
+Total CO2 emissions : 8.67 kg
+NC peak demand      : 2.90 kW
+On-peak demand      : 0.00 kW
+Missed work (hours) : 0.00
+Labour (towing)     : $125.00  (0.50 h in transit @ $250.00/h)
+
+==== Approach comparison (both fully realised, kept days) ====
+A0 one-shot/day, sampled plant (open loop) : $193.42  (0.50 h transit, 0.00 h missed)
+A1 closed loop (re-planning)              : $193.98  (0.50 h transit, 0.00 h missed)
+  A1 - A0 (value of intra-day re-planning): +0.56  (negative = A1 cheaper)
+
+Results written to: C:\Users\shubh\Desktop\MPC\Approach 1\Receding_Horizon\output\input
+  Figures (v4_real style, kept days): 01..07 + mcs_<m>_power_profile + 11_power_estimate_convergence
+  Reports: 08 cost/emissions, 09 KPI, 10 mip-convergence, closed_loop_trajectory,
+           worker_schedule, replan_grids/day*/*.csv+*.html
+           approach0_vs_approach1.html  (Approach 0 one-shot/day vs Approach 1 closed-loop, totals + per-day;
+                                         column labelled by A0's plant mode, plus run diagnostics)
+  Console log: run_log.txt

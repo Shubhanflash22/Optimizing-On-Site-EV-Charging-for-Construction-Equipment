@@ -29,6 +29,7 @@ and which excavator to top up*, at minimum operating cost.
 9. [Outputs — every file & column](#9-outputs--every-file--column)
 10. [Adapting to real data](#10-adapting-to-real-data)
 11. [Relation to Avik's reference & Scenario 2](#11-relation-to-aviks-reference--scenario-2)
+12. [Corrections & open items](#12-corrections--open-items)
 
 ---
 
@@ -48,14 +49,22 @@ draw differs from the **planned** draw.
 Bayesian regression** (`0_Regression.jl`, step 0) reads the soil task-recording `.xlsx` files,
 fits `N(μ, σ)` per activity, and writes the posterior **mean** (`p_*`) and **per-activity SD**
 (`sigma_*`) into `parameters.csv` (see §6.4). The MILP then plans on the mean `μ`
-(certainty-equivalent). The **stochastic plant** draws a fresh per-excavator power sample from
-`N(μ, σ)` each interval, so realized consumption wobbles around the plan. The model is **not**
-re-fit *during* the day (the fit is offline; step 0 can be skipped with `run_regression=false`).
+(certainty-equivalent). The **stochastic plant** draws each excavator's realized power from a
+pool of samples pre-drawn from `N(μ, σ)` (§6.0), one draw per (excavator, activity) occurrence,
+so realized consumption wobbles around the plan. The model is **not** re-fit *during* the day
+(the fit is offline; step 0 can be skipped with `run_regression=false`).
 
 **Shrinking horizon over the full day.** Each 15-min re-solve plans the **entire remaining
 24 h** `[k0 … 08:00 next day]`, so the window **shrinks** as the day progresses (96 intervals
 at 08:00, 1 interval at 07:45 next day). There is **one** optimisation per step and **one**
 horizon — the overnight MCS recharge is scheduled *inside* the same MILP (no separate phase).
+
+**A one-shot baseline to measure against.** Every run also solves the whole day **once** at
+08:00 and replays that fixed plan open-loop, under a plant you choose: **deterministic**
+(realized power = the planning mean, so realized equals planned exactly — the MILP's own
+optimum) or **stochastic** (the same plan drifting with no feedback). Which you pick decides
+whether the reported gap is the value of re-planning alone or drift and re-planning combined
+(§6.6).
 
 ---
 
@@ -88,7 +97,8 @@ Shrinking_Horizon/
 │   ├── 3_MCSModel.jl
 │   ├── 4_MPCLoop.jl
 │   ├── 5_Output.jl
-│   └── 6_Shrinking_Horizon_main.jl
+│   ├── 6_Shrinking_Horizon_main.jl
+│   └── run_soe_sweep.jl         (harness: sweeps SOE_CEV_ini, writes summary.html)
 ├── data/input_data/            (7-CSV real dataset; :input mode)
 ├── Dummy/                      (multi-case stress harness: generate_and_run.jl + C01..C11 cases + summaries)
 ├── output/{input, synthetic}/  (regenerated every run)
@@ -111,9 +121,10 @@ unchanged (`module Common`, `module Regression`, …), so `using .Common` etc. s
 | `1_Common.jl` | `Common` | Pure helpers: `normalize_travel_steps`, `in_peak`, `clock_label`/`build_time_labels`, STEP-plot builders — **plus** the `BayesianActivityEstimator` (a `TruncatedNormal(≥0)` Turing model with `observe!`/`refit!`/NUTS; `refit!` takes `nchains` for pooled multi-chain sampling). **Step 0 calls this to fit the powers offline** (§6.3); it is not re-fit *online* during the loop. |
 | `2_DataLoader.jl` | `DataLoader` | Loads the whole scenario into one immutable `NamedTuple d`. `build_default_data()` (`:synthetic`) and `load_input_data(dir)` (`:input`, 7 CSVs) behind `load_data(mode)`. Full 24 h horizon (`n_day = n_int`), lumpsum work, idle power pinned to 0. |
 | `3_MCSModel.jl` | `MCSModel` | The optimise half. `build_window_model(...)` builds & solves the **single 24 h window MILP** over `[k0 … n_day]`. Nomenclature matches Avik's `MCS_OPTIMAL_v4_real.jl`. HiGHS is configured crash-tolerant (see §6.5). |
-| `4_MPCLoop.jl` | `MPCLoop` | The closed loop `run_mpc(d; shrinking, H, …)`: for each 15-min step solve the (shrinking) window, apply the first interval, draw the stochastic plant's realized power, advance the real state. Returns one `res` NamedTuple. |
-| `5_Output.jl` | `Output` | Every artefact from `res` via `write_outputs(res, out_dir)`: STEP figures (PNG) + CSVs, the KPI report, the replanning grids, and the plan-vs-actual **financial** + **activity** reports. |
-| `6_Shrinking_Horizon_main.jl` | — | Thin orchestrator. `run_scenario_1(; mode, …)` = load → `run_mpc` → `write_outputs` → print summary. **Auto-runs `:synthetic` on `include`** unless `SCENARIO1_NO_AUTORUN = true`. |
+| `4_MPCLoop.jl` | `MPCLoop` | `run_mpc(d, pool; shrinking, H, …)`: the closed loop (Approach 1) — for each 15-min step solve the (shrinking) window, apply the first interval, draw the stochastic plant's realized power, advance the real state. **Plus** `run_one_shot(d, pool; …)`: Approach 0 — solve the full-day window **once** and replay it open-loop (no re-solves). Both take a `plant` switch (`:sampled` / `:mean`, §6.6) and share the apply/simulate/advance logic (`apply_and_simulate!`), so they're directly comparable. Each returns one `res` NamedTuple carrying `approach`, `plant`, `n_infeasible` and `n_clamped`. |
+| `5_Output.jl` | `Output` | Every artefact from `res` via `write_outputs(res, out_dir)`: STEP figures (PNG) + CSVs, the KPI report, the replanning grids, and the plan-vs-actual **financial** + **activity** reports. **Plus** `write_approach_comparison(res0, res1, out_dir; res0_mean = nothing)`: an additive, numbers-only report comparing the fully-realized outcomes of Approach 0 (both plant modes) and Approach 1, plus a per-run diagnostics table; not called from `write_outputs`, so it never changes the existing artefact set. |
+| `run_soe_sweep.jl` | — | Sensitivity harness (not part of the controller). Sweeps `SOE_CEV_ini` across `NRUNS = 10` points from `SOE_min` to `SOE_max` at a fixed seed, re-running all three approach/plant combinations per point, keeping a subset of artefacts per run and writing `output/input_testing/summary.html`. Sets `SCENARIO1_NO_AUTORUN` before including the driver. |
+| `6_Shrinking_Horizon_main.jl` | — | Thin orchestrator. `run_scenario_1(; mode, …)` = load → generate the shared `ActivityPowerPool` → `run_one_shot` twice (Approach 0 with `plant = :mean`, then `plant = :sampled`) → `run_mpc` (Approach 1) → `write_outputs` + `write_approach_comparison` → print the KPI block and the three-way approach summary. Also mirrors console output to `run_log.txt` in `out_dir`. **Auto-runs `:synthetic` on `include`** unless `SCENARIO1_NO_AUTORUN = true`. |
 
 ---
 
@@ -153,8 +164,10 @@ run_scenario_1(mode = :input, run_regression = false)   # skip step 0, reuse las
 > never runs step 0 (it builds its powers in code).
 
 > Red `[ Info: [Turing] … ]` text is **not** an error — PowerShell colours Julia's stderr
-> info logs red. If the KPI summary prints, the run succeeded. The full-24 h MILP re-solved
-> 96 times takes roughly ~3 min (synthetic) / ~1 min (input) at defaults.
+> info logs red. If the KPI summary prints, the run succeeded. Each run now does the single
+> whole-day solve for Approach 0 **plus** the full-24 h MILP re-solved 96 times for Approach 1.
+> `time_limit_sec` now defaults to `Inf` (solve every window to the MIP gap, not a wall-clock
+> cap), so total runtime depends on solve difficulty — pass a finite `time_limit_sec` to bound it.
 
 ---
 
@@ -164,9 +177,10 @@ run_scenario_1(mode = :input, run_regression = false)   # skip step 0, reuse las
 |-------|---------|---------|
 | `mode` | `:synthetic` | `:synthetic` (built-in) or `:input` (CSV dataset) |
 | `input_dir` | `../data/input_data` | dataset folder (relative to `code/`) |
-| `shrinking` | `true` | `true` = shrinking horizon (each step solves `[k0 … n_day]`); `false` = fixed lookahead of `H` intervals |
+| `shrinking` | `true` | `true` = shrinking horizon (each step solves `[k0 … n_day]`); `false` = fixed lookahead of `H` intervals. **`false` is experimental** — the terminal rules 8a/8b/10e are gated on the window reaching day-end, so under a fixed `H` they vanish from all but the last `H` windows with nothing replacing them (§8.7) |
 | `H` | `16` | fixed lookahead length in intervals (only used when `shrinking = false`) |
-| `time_limit_sec` | `60.0` | HiGHS seconds per window solve |
+| `approach0_plant` | `:sampled` | which plant Approach 0's one-shot 08:00 plan is replayed under — `:sampled` (the plan drifting under the stochastic pool, no feedback) or `:mean` (deterministic; realized equals planned, so the KPIs are the whole-day MILP's own optimum). **Exactly one runs per call** (§6.6) |
+| `time_limit_sec` | `Inf` | HiGHS seconds per solve — each window solve for Approach 1, the single whole-day solve for Approach 0. `Inf` = no limit (solve to the MIP gap); pass a finite value to cap it |
 | `multi_activity` | `false` | if `true`, a 15-min interval realizes a **mix** (planned activity for a 60–100 % random fraction, idle for the rest); if `false`, the whole interval realizes the single planned activity |
 | `require_site_visit` | `false` | force the MCS to visit at least one site |
 | `single_visit_per_site` | `false` | at most one visit per site |
@@ -181,6 +195,10 @@ run_scenario_1(mode = :input, run_regression = false)   # skip step 0, reuse las
 There are **no** `soft_*`, `term_tol`, or `refit_every` options — the model is fully hard and
 the power model is fixed.
 
+`run_mpc` and `run_one_shot` additionally take `plant = :sampled | :mean` directly (§6.6).
+`run_scenario_1` fixes Approach 1 to `:sampled`; call `run_mpc` yourself for a deterministic
+closed loop, which is the first diagnostic to reach for when the two approaches disagree.
+
 ---
 
 ## 6. How the controller works
@@ -188,8 +206,9 @@ the power model is fixed.
 ### 6.0 Architecture — one feedback loop, a stochastic plant
 
 Two deliberately separated "worlds": a hidden **PLANT** (reality) and the **CONTROLLER** (the
-brain). The brain plans on its fixed best guess `μ`; the plant reacts using a **sampled**
-power `p_true`. The realized power drives both the battery drain and the analyst log.
+brain). The brain plans on its fixed best guess `μ`; the plant reacts using a realized power
+`p_true` that is either **sampled** from the pool or **pinned to `μ`**, depending on the plant
+mode (§6.6). The realized power drives both the CEV battery drain and the analyst log.
 
 ```
                      ┌──────────────────────────────────────────────────┐
@@ -202,20 +221,30 @@ power `p_true`. The realized power drives both the battery drain and the analyst
         │ measured state             ▼                       │ (calibrated prior)
         │ (SOE, position,   ┌──────────────────────────┐     │
         │  work, peaks)     │       PLANT (reality)     │     │
-        └───────────────────┤ each step DRAW per CEV:   │─────┘
-                            │   p_true ~ N(μ, σ)        │
+        └───────────────────┤ per occurrence, DRAW next:│─────┘
+                            │   p_true ~ pool(μ, σ)     │
                             │ batteries drain @ p_true  │
                             └──────────────────────────┘
   STATE-FEEDBACK loop : plant state after applying k0 ──► next MILP re-solve (k0+1)
 ```
 
-**Fork B (fixed-curve plant).** The plant samples `p_true[e] = max.(μ + σ .* randn, 0)` from
-the **fixed** calibrated model each interval. Idle has `σ = 0`, so its draw collapses to 0 (no
-power lost while idling). The same `p_true[e]` drives the CEV battery drain, so reported energy
-matches energy actually spent. (A "Fork A" against a separate hidden truth `N(true_powers,
-true_sigma)` is a one-line edit in `4_MPCLoop.jl` step 2.5, kept for experimentation.)
+**Fork B (fixed-curve plant, shared sample pool).** Before either approach runs, `1_Common.jl`
+generates an `ActivityPowerPool`: `n_samples` (20) pre-drawn samples per **(CEV, activity)**
+pair from the fixed calibrated `N(μ, σ)`, truncated at 0. Each interval, a CEV realizing
+activity `a` consumes the **next unused** sample for that `(e, a)` pair (`next_power!`) instead
+of drawing a fresh random number — so the sample consumed depends on *how many times that CEV
+has done that activity so far*, not on the interval index. Idle (`σ = 0`) is deterministic and
+never consumes a slot. Both Approach 1 (`run_mpc`) and Approach 0 (`run_one_shot`, §6.6) draw
+from the **same pool**, each with its **own** cursor (`new_cursor`), so identical occurrence
+sequences draw identical numbers and any KPI gap between the two approaches reflects the control
+strategy, not different randomness. The same drawn sample drives the CEV battery drain **and** the logged
+work power, so the two agree. Two caveats on how far that goes: the MCS side follows the plan,
+not the plant, and the CEV balance is clamped at its SOE bounds — see §6.7. (A "Fork A" against a separate hidden truth
+`N(true_powers, true_sigma)` is a one-line edit in `4_MPCLoop.jl`'s `apply_and_simulate!`, kept
+for experimentation.)
 
-**Low-level design — one 15-min step of `run_mpc`** (line numbers into `4_MPCLoop.jl`):
+**Low-level design — one 15-min step of `run_mpc`** (line numbers into `4_MPCLoop.jl`; steps
+(2)–(4) live in the shared `apply_and_simulate!`, also called by `run_one_shot`, §6.6):
 
 ```
  STEP k0  (one 15-min interval)                                   4_MPCLoop.jl
@@ -226,12 +255,16 @@ true_sigma)` is a one-line edit in `4_MPCLoop.jl` step 2.5, kept for experimenta
         └─ infeasible under HARD constraints → hold state, continue (no fallback)
  (2) APPLY interval k0 only:  grid draw, MCS discharge, route, plug decisions;
         write the forward plan into the replan grids
- (2.5) DRAW plant power PER EXCAVATOR (Fork B, fixed curve):
-        p_true[e] = max.(μ + σ .* randn, 0)
- (3) SIMULATE realized activity split (60–100% planned, rest idle in multi mode)
+ (2.5) DRAW plant power PER EXCAVATOR — depends on the plant mode (§6.6):
+        :sampled → p_true[e][a] = next_power!(pool, cursor, e, a)  -- one
+                   draw per (CEV, activity) OCCURRENCE, not a fresh randn
+        :mean    → p_true[e][a] = mu[a]        -- no draw, cursor untouched
+ (3) SIMULATE realized activity split (60–100% planned, rest idle in multi
+        mode; forced to the single planned activity in full under :mean)
  (4) ADVANCE plant:
-        soe_mcs ← model SOE_MCS[k0+1]            (planned)
-        soe_cev ← soe_cev + charged − dot(a_real, p_true[e])
+        soe_mcs ← model SOE_MCS[k0+1]     (PLANNED, not stochastic — §6.7)
+        soe_cev ← clamp(soe_cev + charged − dot(a_real, p_true[e]), min, max)
+                                          (clamp events counted — §6.7)
         rem_dig / rem_load −= realized;  push a_real onto hist
  ──────────────────────────────────────────────────────────────────────────────
 ```
@@ -273,6 +306,68 @@ HiGHS is pinned to `threads = 1`, `parallel = off`, `mip_heuristic_effort = 0`,
 `mip_detect_symmetry = false`, `mip_rel_gap = 1e-2` (the parallel/heuristic sub-solvers were
 disabled because they intermittently segfault on Windows). `optimize!` is wrapped in
 `try/catch` so a rare native fault degrades to "no solution → hold state".
+
+### 6.6 Plant modes, Approach 0's two baselines & the comparison report
+
+**The `plant` switch.** `run_mpc` and `run_one_shot` both take `plant = :sampled | :mean`. The
+MILP is *identical* either way; only what the plant does with the applied plan changes.
+
+| `plant` | Realized power | Activity split | Consumes pool samples? |
+|---------|----------------|----------------|------------------------|
+| `:sampled` (default) | next unused draw from the shared pool | may be randomised (`multi_activity`) | yes — advances the cursor |
+| `:mean` | pinned to the planning mean `μ` | forced to the single planned activity, full interval | **no** — cursor untouched |
+
+Under `:mean` nothing is stochastic, so **realized == planned exactly** and the run needs no
+seed to reproduce. Because it consumes no samples it cannot perturb a `:sampled` run sharing
+the same pool, so the two can be run back to back off one pool.
+
+**Two runs per call, and you choose the baseline.** `run_scenario_1` solves the whole day once
+at 08:00, replays it open-loop under **one** plant mode selected by `approach0_plant`, and then
+runs the closed loop:
+
+* **Approach 0** (`run_one_shot(…, plant = approach0_plant)`) — either the **deterministic**
+  baseline (`:mean`), whose KPIs *are* the whole-day MILP's own optimum and which is the clean
+  reproduction of Avik's single-shot model; or the **stochastic** baseline (`:sampled`), the same
+  fixed plan drifting with no feedback.
+* **Approach 1** (`run_mpc`, always `:sampled`) re-plans every 15 min against the pool.
+
+Which one you pick decides what the reported Δ *means*, so the report labels itself accordingly:
+
+```
+  A0(:sampled) ──► A1   =  value of re-planning against drift   (like-for-like plant)
+  A0(:mean)    ──► A1   =  drift AND re-planning together       (the net figure)
+```
+
+Run it both ways if you want the two separated; the difference between the two A0 numbers is the
+cost of plan drift alone. Neither replay re-solves the MILP, so a second run is cheap.
+
+**Diagnostic order when the approaches disagree.** Run `run_mpc(d, pool; plant = :mean)` first.
+With `shrinking = true`, a deterministic closed loop should reproduce `A0(:mean)` *exactly*;
+if it does not, the cause is a closed-loop seam or carry-in bug (§6.1) rather than anything to
+do with randomness, and the sampled numbers are not worth interpreting until it is found.
+
+`write_approach_comparison(res0, res1, out_dir; res0_mean)` writes all of this as a numbers-only
+`approach0_vs_approach1.html` (§9.2), with a **run-diagnostics table** underneath (plant mode,
+infeasible windows, CEV SOE clamp count, solve time). It is **additive** and never alters the
+existing figure or report set. Approach 0 has no fallback: if the single 08:00 MILP itself is
+infeasible, it errors rather than holding state.
+
+### 6.7 What is *not* stochastic, and where the SOE trace is not exact
+Two scope limits worth stating plainly, because "the stochastic plant" over-promises:
+
+* **Only the CEV side is stochastic.** `apply_and_simulate!` advances the MCS with
+  `soe_mcs[m] = value(SOE_MCS[m, k0+1])` — the *planned* value. MCS energy, grid draw and travel
+  loss therefore follow the plan exactly, and so does every cost term. The disturbance enters
+  only through CEV depletion, reaching the objective indirectly via what the next re-solve does
+  about it.
+* **The CEV balance is clamped.** The realized update ends in
+  `clamp(soe_cev + charged − work_true, SOE_min, SOE_max)`. The clamp is a guard, not physics:
+  when a sampled over-draw would breach `SOE_min` it silently restores the battery, and the
+  reported SOE stops being the integral of the reported power. This is invisible to the MILP's
+  feasibility status, so a run can report **0 infeasible windows** and still be physically
+  inconsistent. The behaviour is unchanged, but every event is now counted (`res.n_clamped`),
+  printed at the end of the run, and shown per run in the comparison report and the sweep
+  summary. **A non-zero clamp count qualifies that run's SOE numbers.**
 
 ---
 
@@ -343,7 +438,15 @@ Every rule is **HARD** unless marked **SOFT**. Variable names match Avik's
 ### 8.1 Decision variables
 **Continuous (≥ 0):** `P_ch_MCS`, `P_dch_MCS`, `P_MCS_CEV`, `P_work`, totals
 `P_ch_tot`/`P_dch_tot`, travel energy `L_trv`/`L_trv_tot`, state `SOE_MCS[m,t]`/`SOE_CEV[e,t]`,
-peaks `P_peak_NC`/`P_peak_OP`, and the single slack `s_miss_work[i,a]` (per site/activity).
+peaks `P_peak_NC`/`P_peak_OP`, and the slack `s_miss_work[i,a]`.
+
+> `s_miss_work` is declared over all four activities and the objective sums all four, but only
+> `B[1]` (dig) and `B[2]` (load) appear in a balance (§8.10). `s_miss_work[i,trv]` and
+> `s_miss_work[i,idle]` are free `≥0` variables carrying a positive cost, so the minimisation
+> drives them to 0 and the result is unaffected — they are dead variables, not a missing
+> travel/idle quota. Likewise `y_trv[m,i,i,k]` is never defined (the defining loop skips
+> `i == j`) yet is summed into `L_trv` and the labour term; it only ever costs, so presolve
+> fixes it to 0.
 
 **Binary:** `u[e,i,a,k]`, `mu[i,e,k]`, `rho[m,i,e,k]`, `z[m,i,k]`, `g_ch[m,i,k]`, `x[m,i,j,k]`,
 `y_trv[m,i,j,k]`, `beta_arr`/`beta_dep`.
@@ -375,7 +478,14 @@ in-transit trip. `L_trv = k_trv·Δt·y_trv`; `L_trv_tot = Σ L_trv`.
 * **Bounds:** every boundary clamped to `[SOE_min, SOE_max]` for MCS and CEV.
 
 ### 8.7 Terminal energy targets (Eq. 8a / 8b, HARD)
-Applied at the final window boundary (the window always reaches day-end):
+Applied at the final window boundary **only when that boundary is the end of the day** — the
+code gates all three terminal rules (8a, 8b and 10e) on
+`is_terminal = last(K) == d.n_day`. On the shrinking horizon every window reaches day-end, so
+they always bind. Under the experimental fixed-`H` lookahead (`shrinking = false`) they are
+absent from all but the last `H` windows and **nothing replaces them** — there is no terminal
+cost and no value-function approximation standing in for the discarded tail, so that mode is a
+myopic controller that will drain the MCS early with no obligation to restore it. Add a
+terminal cost before using fixed-`H` for reported results.
 * **MCS (8a, exact):** `SOE_MCS[end] == SOE_MCS_ini` — energy-neutral, ready for the next day;
   the overnight refill is scheduled inside this MILP.
 * **CEV (8b, floor):** `SOE_CEV[end] ≥ SOE_CEV_ini` — **overcharging is allowed**. Because a CEV
@@ -399,17 +509,35 @@ Applied at the final window boundary (the window always reaches day-end):
   draws no power. (The MILP uses the 4-activity encoding `B = [dig, load, trv, idle]`; Avik's
   reference uses the equivalent 3-activity form with `Σu ≤ 1`, `Σu + mu ≤ 1`.)
 
-### 8.10 Work quota (Eq. 12c, SOFT) — lumpsum
-A single dig/load requirement per site (`hours_digging`/`hours_loading_swinging`). Shortfall
-`s_miss_work ≥ requirement − done` is penalised (`rho_miss`). No hard "no-working-ahead" cap:
-with a single day there is no incentive to overshoot.
+### 8.10 Work quota (Eq. 12c, SOFT shortfall + implicit HARD cap) — lumpsum
+A single dig/load requirement per site (`hours_digging`/`hours_loading_swinging`). The code
+writes this as a **balance equality** against the work still outstanding:
+
+```julia
+delta_T * sum(u[e, i, B[1], k] for e in E, k in K) + s_miss_work[i, B[1]] == max(rem_dig[i], 0.0)
+```
+
+The shortfall `s_miss_work` is soft (priced at `rho_miss` in the objective) — but since
+`s_miss_work ≥ 0`, the equality **also implies the hard bound** `delta_T·Σu ≤ rem_dig[i]`. A CEV
+cannot dig or load more than the requirement still outstanding, and because `rem_*` is recomputed
+from realized work at every step, the cap is re-imposed against the *remaining* requirement on
+every re-solve.
+
+> **Correction.** Earlier revisions of this README, `math_model.tex` and
+> `constraints_code_vs_model.txt` all described this as an inequality with "no hard
+> no-working-ahead cap". That was wrong. The cap is real; it is simply reached implicitly through
+> the equality rather than written as a separate rule the way the receding sibling writes it.
+> With a single day and daily neutrality there is little incentive to overshoot anyway, so the
+> cap is rarely the binding reason work stops — but it *is* in the model.
 
 ### 8.11 Precedence (Eq. 12d, HARD)
 Cumulative loading `≤ scale ·` cumulative digging, in raw interval counts exactly as in Avik,
 seeded by the realized work carried in from earlier windows.
 
 ### 8.12 Rest rule (Eq. 12e, HARD)
-With `rest_cap = round(t_limit_rest/Δt)` (=4) and `rest_win = 5`: over any 5 consecutive
+With `rest_cap = round(t_limit_rest/Δt)` (=4 at the defaults; the code **rounds**, it does not
+take a ceiling, so the two differ for any `t_limit_rest` that is not a whole multiple of `Δt`)
+and `rest_win = 5`: over any 5 consecutive
 intervals a CEV does **at most 4** work intervals (≥ 1 idle break). Two parts: within-window
 5-windows, **plus a seam** seeded with the applied Work/Break history so a work-run cannot leak
 across the every-15-min re-solves.
@@ -421,8 +549,13 @@ seeded with the travel/work already applied in earlier windows.
 
 > **No fallback.** Windows use the hard constraints only; an infeasible re-plan is reported
 > **INFEASIBLE** and the plant **holds state**. Under the Fork B stochastic plant **both**
-> `:synthetic` and `:input` currently solve with **zero** infeasible windows: the MCS returns
+> `:synthetic` and `:input` previously solved with **zero** infeasible windows: the MCS returns
 > to its exact initial SOE and every CEV finishes at or above its start-of-day level.
+>
+> Read that alongside the **clamp count** (§6.7). Zero infeasible windows means the *optimiser*
+> never failed; it does not mean the realized trajectory was physical, because the CEV SOE guard
+> can silently absorb an over-draw without any window becoming infeasible. Both numbers appear
+> in the run diagnostics table of `approach0_vs_approach1.html`.
 
 ---
 
@@ -489,16 +622,35 @@ The dummy stress harness (`Dummy/generate_and_run.jl`) additionally writes, per 
 CEV's activity beside the MCS status, so `Charging` (CEV) always lines up with `Serving CEV`
 (MCS). A compact grouped version of all cases is collected in `Dummy/comparisons_grouped.txt`.
 
+**`approach0_vs_approach1.html`** — **Approach 0** (one-shot 08:00 plan, open-loop) vs
+**Approach 1** (closed loop), both fully realized over 08:00 → next-day 08:00. Same metric rows
+as the KPI report (grid energy, energy/CO₂/demand/missed-work/travel costs, total) plus the Δ.
+The column header and the explanatory blurb **adapt to `res0.plant`**, so the report always
+states whether the Δ is a like-for-like re-planning gap (`:sampled`) or the combined
+drift-plus-re-planning figure (`:mean`), and points at the other mode (§6.6). Underneath, a
+**run-diagnostics table**: plant mode, infeasible windows, CEV SOE clamp count and solve time per
+run. Written by `write_approach_comparison(res0, res1, out_dir)`; additive only. Companion CSVs:
+`10_approach0_timeline.csv`, `10_approach1_timeline.csv`.
+
+**`run_log.txt`** — everything printed to the console during the run (progress, KPI summary,
+`@warn`s), mirrored to this file in addition to the terminal.
+
 ---
 
 ## 10. Adapting to real data
 
 1. **Dataset** — use `mode = :input` and fill `data/input_data/` with the CSVs in §7.
-2. **Power model** — set `p_digging`/`p_loading_swinging`/`p_traveling`/`p_idling` and
-   `prior_sigma_frac` in `parameters.csv` to your calibrated values.
-3. **Telemetry** — in `4_MPCLoop.jl`, replace the simulated `realized_activity_durations` and
-   the `p_true` sampling block at step (2.5) with the actual per-activity seconds + measured
-   interval energy from your pipeline. The `p_true` / `true_powers` machinery only generates
+2. **Power model** — the normal path is to let **step 0** fit it: point `regression_data_dir` at
+   your task recordings and it overwrites `p_*` and the per-activity `sigma_*` in
+   `parameters.csv` on every `:input` run. To supply the model by hand instead, run with
+   `run_regression = false` and set `p_digging`/`p_loading_swinging`/`p_traveling`/`p_idling`
+   **and the per-activity `sigma_digging`/`sigma_loading_swinging`/`sigma_traveling`** rows.
+   `prior_sigma_frac` is only a **fallback** for datasets predating the `sigma_*` rows (§7) —
+   prefer the explicit per-activity values.
+3. **Telemetry** — in `4_MPCLoop.jl`'s `apply_and_simulate!`, replace the simulated
+   `realized_activity_durations` call and the `next_power!` draw from the shared
+   `ActivityPowerPool` (`1_Common.jl`) with the actual per-activity seconds + measured interval
+   energy from your pipeline. The `ActivityPowerPool` / `true_powers` machinery only generates
    ground truth for the demo and disappears at go-live.
 
 ---
@@ -510,7 +662,51 @@ CEV's activity beside the MCS status, so `Charging` (CEV) always lines up with `
   of the same formulation: identical variable names, objective, routing, battery, precedence
   (raw-count) and travel-pacing (`work_per_travel = 4`); the differences are the shrinking-horizon
   re-solves, per-window history seeds, the carried-in MCS start position, and the CEV terminal
-  **floor** (`≥`, overcharge allowed) instead of exact equality. On the real data the closed loop
-  reproduces Avik's single-shot optimum to within ~0.2 %.
+  **floor** (`≥`, overcharge allowed) instead of exact equality. **Approach 0** (`run_one_shot`,
+  §6.6) *is* this codebase's reproduction of Avik's single-shot model — same MILP, solved once —
+  with the stochastic plant executed on top of it, so it's the direct apples-to-apples baseline
+  for Approach 1 — and **Approach 0 under `plant = :mean`** (§6.6) is the sharper reproduction
+  still, since nothing is stochastic and realized equals planned exactly.
+
+  **Last measured (now stale):** on **input**, Approach 1 reproduced Approach 0 (sampled) to
+  within **~0.02 %** ($193.36 vs $193.40); on **synthetic** the two diverged by **~28 %**
+  ($114.82 vs $82.50, Approach 1 higher, mostly extra MCS transit — 2.75 h vs 1.75 h). That gap
+  is **still unexplained**. These figures pre-date the `work_kW` fix, the clamp counter and the
+  `:mean` mode, so **regenerate before quoting them**, and work the diagnostic order in §6.6:
+  compare `A1(:mean)` against `A0(:mean)` first — if a *deterministic* closed loop does not
+  reproduce the one-shot optimum exactly, the cause is a seam or carry-in bug, not randomness,
+  and the sampled numbers are not yet worth interpreting.
 * **Scenario 1 vs 2.** Scenario 1 (this code) is certainty-equivalent (plans on the mean `μ`).
   Scenario 2 would sample multiple power scenarios from `N(μ, σ)` — the fixed `σ` is the hook.
+
+---
+
+## 12. Corrections & open items
+
+Documented so a reviewer is not surprised by them. Full detail, with the code lines, is in
+`constraints_code_vs_model.txt` (section **KNOWN DISCREPANCIES AND MODELLING CAVEATS**, D1–D10).
+
+**Corrected in the docs (the code was always right):**
+* **D1** — Eq. 12c is an **equality**, so there *is* an implicit hard no-overshoot cap on work.
+  All three documents previously said the opposite (§8.10).
+* **D4** — the terminal rules 8a/8b/10e are gated on the window reaching day-end, so they vanish
+  under `shrinking = false` (§8.7).
+* **D6** — `rest_cap` uses `round`, not `ceil` (§8.12).
+
+**Fixed in the code:**
+* **D2** — the analyst log's `work_kW` was computed from `d.true_powers` (a Fork-A hidden-truth
+  curve) while the batteries drained on the Fork-B pool draw `p_true`; in `:synthetic` those
+  vectors differ, so the column contradicted the batteries it described. Now computed from
+  `p_true`. Figures and KPI CSVs never read the column, so only `run_log.txt` was affected.
+
+**Open / instrumented, not resolved:**
+* **D3** — the CEV SOE clamp creates or destroys energy when it bites. Behaviour unchanged;
+  events are now counted and reported (§6.7). Whether the right fix is to let the CEV go
+  infeasible instead is still an open call.
+* **D5** — only the CEV side of the plant is stochastic (§6.7).
+* **D7/D8** — two never-constrained slacks and the undefined `y_trv[m,i,i,k]`; both are driven
+  to zero by the objective, so harmless, but they are dead variables (§8.1).
+* **D9** — precedence seeds per **site**, travel pacing seeds per **CEV**. Equivalent while
+  `A[i,e]` is a one-to-one assignment, which it is in both datasets; latent if a site ever gets
+  two CEVs.
+* **D10** — the synthetic A0-vs-A1 gap (above).

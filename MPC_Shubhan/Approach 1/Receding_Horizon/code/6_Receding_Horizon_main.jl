@@ -37,6 +37,7 @@
 # #############################################################################
 
 using Printf
+using Random
 
 # ---- include the modules in dependency order (Common first) ----
 const _CODE_DIR = @__DIR__
@@ -48,11 +49,51 @@ include(joinpath(_CODE_DIR, "4_MPCLoop.jl"))
 include(joinpath(_CODE_DIR, "5_Output.jl"))
 
 using .DataLoader: load_data
-using .MPCLoop: run_mpc
-using .Output: write_outputs
+using .Common: draw_activity_power_pool
+using .MPCLoop: run_mpc, run_one_shot
+using .Output: write_outputs, write_approach_comparison
 
 # Default folder holding the soil task-recording .xlsx files (step-0 regression).
 const _DEFAULT_REGRESSION_DATA_DIR = raw"C:\Users\shubh\Desktop\Bayesian Regression"
+
+# -----------------------------------------------------------------------------
+# CONSOLE LOG CAPTURE: mirror everything printed (println/@printf to stdout,
+# @warn to stderr) to a run_log.txt file under out_dir, in ADDITION to the
+# terminal -- nothing currently printed changes, it's just also saved.
+# -----------------------------------------------------------------------------
+function _with_console_log(f, out_dir)
+    mkpath(out_dir)
+    log_path = joinpath(out_dir, "run_log.txt")
+
+    open(log_path, "w") do logfile
+        pipe = Pipe()
+        orig_stdout = stdout
+        orig_stderr = stderr
+
+        # Asynchronously read from the pipe and write to both console and file
+        tee_task = @async begin
+            while !eof(pipe)
+                data = readavailable(pipe)
+                write(orig_stdout, data)
+                write(logfile, data)
+                flush(orig_stdout)
+                flush(logfile)
+            end
+        end
+
+        try
+            redirect_stdout(pipe) do
+                redirect_stderr(pipe) do
+                    f()
+                end
+            end
+        finally
+            # Close the writing end of the pipe and wait for the tee task to finish
+            close(pipe.in)
+            wait(tee_task)
+        end
+    end
+end
 
 # =============================================================================
 # ENTRY POINT
@@ -61,10 +102,27 @@ const _DEFAULT_REGRESSION_DATA_DIR = raw"C:\Users\shubh\Desktop\Bayesian Regress
 # KPI summary (kept days only), and write the full figure + report set.
 function run_scenario_1(; mode::Symbol = :synthetic,
                           input_dir::AbstractString = joinpath(dirname(_CODE_DIR), "data", "input_data"),
-                          time_limit_sec::Float64 = 60.0,
+                          time_limit_sec::Float64 = Inf,
                           multi_activity::Bool = false,
                           require_site_visit::Bool = false,
                           single_visit_per_site::Bool = false,
+                          # APPROACH 0 PLANT MODE. Approach 0 solves each kept day's
+                          # 24 h window once at that day's 08:00 and replays it
+                          # open-loop under ONE plant:
+                          #   :sampled  realized power = the next unused draw from the
+                          #             shared pool, so each day's fixed plan drifts
+                          #             with no feedback until the next day's solve
+                          #             picks up the real state (stochastic baseline).
+                          #   :mean     realized power pinned to the same mu the MILP
+                          #             planned on, single planned activity per
+                          #             interval, so realized == planned EXACTLY within
+                          #             each day and the KPIs are the per-day MILPs' own
+                          #             optima chained through the real carry-over
+                          #             (deterministic baseline; consumes no pool
+                          #             samples, needs no seed).
+                          # Exactly one runs per call -- pick the baseline you want to
+                          # compare Approach 1 against. Approach 1 is always :sampled.
+                          approach0_plant::Symbol = :sampled,
                           mcmc_samples::Int = 500,
                           out_dir::String = joinpath(dirname(_CODE_DIR), "output", String(mode)),
                           n_days::Union{Nothing, Int} = nothing,   # days to KEEP in the results
@@ -91,23 +149,85 @@ function run_scenario_1(; mode::Symbol = :synthetic,
 
     d = load_data(mode; input_dir = input_dir)
 
-    res = run_mpc(d; time_limit_sec = time_limit_sec, multi_activity = multi_activity,
-                     require_site_visit = require_site_visit, single_visit_per_site = single_visit_per_site,
-                     mcmc_samples = mcmc_samples,
-                     n_days = n_days, seed = seed)
+    return _with_console_log(out_dir) do
+        # Resolve how many days Approach 1 will actually keep (mirrors the same
+        # resolution inside run_mpc/run_one_shot) so the SHARED pool is sized
+        # generously enough: Approach 1 also runs one dropped BUFFER day, so it
+        # needs one more day's worth of occurrences than the kept-day count.
+        n_days_keep_resolved = n_days === nothing ? d.n_days : max(1, n_days)
 
-    _print_kpis(res)
+        # ---- SHARED power-sample pool (Common.jl): generated ONCE, from the
+        # frozen d.prior_mu/d.prior_sigma, so Approach 0 and Approach 1 draw
+        # their realized plant power from the exact same underlying samples.
+        # n_samples scales with the number of days in play (20/day/activity is
+        # the single-day rule of thumb; the buffer day means Approach 1 needs
+        # up to n_days_keep+1 days' worth).
+        pool = draw_activity_power_pool(d.E, d.prior_mu, d.prior_sigma;
+                                        n_samples = 20 * (n_days_keep_resolved + 1),
+                                        rng = MersenneTwister(seed))
 
-    write_outputs(res, out_dir)
+        # ---- APPROACH 0: one-shot PER DAY, executed open-loop for that day ----
+        # approach0_plant picks WHICH baseline this is:
+        #   :mean     -> realized == planned within each day; the KPIs ARE the per-day
+        #                MILP optima (deterministic reference, no sampling anywhere).
+        #   :sampled  -> the same per-day plans drifting under the stochastic pool,
+        #                with no intra-day feedback.
+        approach0_plant in (:sampled, :mean) ||
+            error("run_scenario_1: approach0_plant must be :sampled or :mean, got :$approach0_plant")
+        res0 = run_one_shot(d, pool; plant = approach0_plant, time_limit_sec = time_limit_sec,
+                            multi_activity = multi_activity, require_site_visit = require_site_visit,
+                            single_visit_per_site = single_visit_per_site,
+                            n_days = n_days, seed = seed)
 
-    println("\nResults written to: $(abspath(out_dir))")
-    println("  Figures (v4_real style, kept days): 01..07 + mcs_<m>_power_profile + 11_power_estimate_convergence")
-    println("  Reports: 08 cost/emissions, 09 KPI, 10 mip-convergence, closed_loop_trajectory,")
-    println("           worker_schedule, replan_grids/day*/*.csv+*.html")
-    return res.log
+        # ---- APPROACH 1: closed-loop MPC against the stochastic pool ----
+        res = run_mpc(d, pool; plant = :sampled, time_limit_sec = time_limit_sec, multi_activity = multi_activity,
+                         require_site_visit = require_site_visit, single_visit_per_site = single_visit_per_site,
+                         mcmc_samples = mcmc_samples,
+                         n_days = n_days, seed = seed)
+
+        _print_kpis(res)
+        _print_approach_summary(res0, res)
+
+        write_outputs(res, out_dir)
+        write_approach_comparison(res0, res, out_dir)
+
+        println("\nResults written to: $(abspath(out_dir))")
+        println("  Figures (v4_real style, kept days): 01..07 + mcs_<m>_power_profile + 11_power_estimate_convergence")
+        println("  Reports: 08 cost/emissions, 09 KPI, 10 mip-convergence, closed_loop_trajectory,")
+        println("           worker_schedule, replan_grids/day*/*.csv+*.html")
+        println("           approach0_vs_approach1.html  (Approach 0 one-shot/day vs Approach 1 closed-loop, totals + per-day;")
+        println("                                         column labelled by A0's plant mode, plus run diagnostics)")
+        println("  Console log: run_log.txt")
+        res.log
+    end
 end
 
 # Human-readable KPI block (kept days only).
+# Two-run console summary. The label adapts to which baseline Approach 0 was run as,
+# because that decides what the gap actually measures.
+function _print_approach_summary(res0, res1)
+    # TOTAL operating cost (energy + carbon + demand + missed + labour), not just the
+    # energy term that res.total_cost holds -- same decomposition the HTML report uses.
+    tot(r) = Output._cost_components(r).total
+    a0_lbl = res0.plant === :mean ?
+        "A0 one-shot/day, mean plant (MILP optima)" :
+        "A0 one-shot/day, sampled plant (open loop)"
+    gap_lbl = res0.plant === :mean ?
+        "  A1 - A0 (drift + re-planning, net)      " :
+        "  A1 - A0 (value of intra-day re-planning)"
+    println("\n==== Approach comparison (both fully realised, kept days) ====")
+    @printf("%s : \$%.2f  (%.2f h transit, %.2f h missed)\n",
+            a0_lbl, tot(res0), res0.transit_intervals * res0.d.delta_T, res0.missed)
+    @printf("A1 closed loop (re-planning)              : \$%.2f  (%.2f h transit, %.2f h missed)\n",
+            tot(res1), res1.transit_intervals * res1.d.delta_T, res1.missed)
+    @printf("%s: %+.2f  (negative = A1 cheaper)\n", gap_lbl, tot(res1) - tot(res0))
+    res0.plant === :mean && println("  NOTE: A0 is DETERMINISTIC here, so this gap mixes plan drift with the",
+                                    "\n        value of re-planning. Re-run with approach0_plant = :sampled to",
+                                    "\n        separate the two.")
+    nclamp = res0.n_clamped + res1.n_clamped
+    nclamp > 0 && @printf("  WARNING: %d CEV SOE clamp events -- the SOE traces are not exactly\n           integrable on those steps.\n", nclamp)
+end
+
 function _print_kpis(res)
     d = res.d
     println("\n==== Scenario 1 RECEDING-horizon KPIs (kept days 1..$(res.n_days_keep); buffer day dropped) ====")

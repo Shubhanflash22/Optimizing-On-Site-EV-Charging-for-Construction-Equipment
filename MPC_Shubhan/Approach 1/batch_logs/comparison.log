@@ -1,0 +1,79 @@
+[ Info: [Turing]: progress logging is disabled globally
+==============================================================================
+STEP 0  Bayesian activity-power regression (pure Julia; NUTS 4 chains x 2000 draws)
+  data folder : C:\\Users\\shubh\\Desktop\\Bayesian Regression
+  writing     : C:\Users\shubh\Desktop\MPC\Approach 1\Comparison\Input\parameters.csv
+==============================================================================
+  built 25 equations from 12 file(s)
+┌ Warning: Only a single thread available: MCMC chains are not sampled in parallel
+└ @ AbstractMCMC C:\Users\shubh\.julia\packages\AbstractMCMC\C1aKp\src\sample.jl:544
+┌ Info: Found initial step size
+└   ϵ = 3.814697265625e-7
+┌ Info: Found initial step size
+└   ϵ = 1.9073486328125e-7
+┌ Info: Found initial step size
+└   ϵ = 3.814697265625e-7
+┌ Info: Found initial step size
+└   ϵ = 3.814697265625e-7
+STEP 0 done in 10.9 s; parameters.csv refreshed.
+  fitted means : dig=4.792 load=3.159 trv=4.7 kW
+  fitted sds   : dig=0.206 load=0.183 trv=0.388 kW
+==============================================================================
+3-WAY COMPARISON — Approach 0 vs Shrinking Horizon vs Receding Horizon
+Receding code : C:\Users\shubh\Desktop\MPC\Approach 1\Receding_Horizon\code
+Shrinking code: C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\code
+Input         : C:\Users\shubh\Desktop\MPC\Approach 1\Comparison\Input
+Output        : C:\Users\shubh\Desktop\MPC\Approach 1\Comparison\Output
+==============================================================================
+
+Shared power pool: n_samples=197 per (entity, activity) (96 intervals/day x 2 days incl. the Receding buffer day, + 5); mu=[4.79, 3.16, 4.7, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+
+--- Approach 0 (one-shot, plant = :sampled) ---
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 10.7 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+
+--- Approach 1a (Shrinking Horizon) ---
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 51.8 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+
+--- Approach 1b (Receding Horizon) ---
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 137.3 s (192 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+
+--- Writing 3-way comparison outputs ---
+
+==============================================================================
+KPI SUMMARY
+Metric                            Approach0      Shrinking       Receding
+Grid energy (kWh)                     31.65          31.85          31.85
+Energy cost (USD)                     10.07          10.14          10.14
+CO2 (kg)                               8.60           8.65           8.65
+NCD peak (kW)                          2.88           2.90           2.90
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+==============================================================================
+
+Results written to: C:\Users\shubh\Desktop\MPC\Approach 1\Comparison\Output
+  01_total_grid_power_profile.png/.csv … 09_mcs_<m>_power_profile.png/.csv
+  08_kpi_metrics_summary.png
+  08_cost_kpi_metrics.csv
+  approach0_vs_shrinking_vs_receding.html
+  run_log.txt  (this console log)
