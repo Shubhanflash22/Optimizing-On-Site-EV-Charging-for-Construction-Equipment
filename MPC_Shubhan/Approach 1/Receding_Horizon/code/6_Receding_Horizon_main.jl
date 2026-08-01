@@ -224,8 +224,8 @@ function _print_approach_summary(res0, res1)
     res0.plant === :mean && println("  NOTE: A0 is DETERMINISTIC here, so this gap mixes plan drift with the",
                                     "\n        value of re-planning. Re-run with approach0_plant = :sampled to",
                                     "\n        separate the two.")
-    nclamp = res0.n_clamped + res1.n_clamped
-    nclamp > 0 && @printf("  WARNING: %d CEV SOE clamp events -- the SOE traces are not exactly\n           integrable on those steps.\n", nclamp)
+    nclamp = res0.n_capped + res1.n_capped
+    nclamp > 0 && @printf("  NOTE: %d interval(s) had work capped by available CEV energy -- the\n           shortfall is reflected honestly in rem_dig/rem_load, not hidden.\n", nclamp)
 end
 
 function _print_kpis(res)

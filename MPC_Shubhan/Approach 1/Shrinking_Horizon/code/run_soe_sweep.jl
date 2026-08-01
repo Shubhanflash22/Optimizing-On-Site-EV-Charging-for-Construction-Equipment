@@ -129,7 +129,7 @@ for (idx, soe) in enumerate(soe_vals)
 
         (; idx, tag, soe, cev_end, mcs_end, feasible,
            infeasible = res.n_infeasible,
-           clamps = res.n_clamped + res0.n_clamped,
+           clamps = res.n_capped + res0.n_capped,
            a0_total,
            planned_total = p.total, realized_total = c.total,
            energy = res.total_energy, ecost = c.energy_cost,

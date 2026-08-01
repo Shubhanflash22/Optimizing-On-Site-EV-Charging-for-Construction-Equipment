@@ -2,9 +2,9 @@ Parameter,Value,Unit,Description
 k_trv,10.0,kWh/hour,MCS Average enegy consumption per hour
 rho_miss,2000.0,-,Large  constant
 delta_T,0.25,h,Time step duration
-p_digging,4.7917,kW,Power of digging
-p_loading_swinging,3.1591,kW,Power of loading+swinging
-p_traveling,4.7001,kW,Power of traveling
+p_digging,4.7922,kW,Power of digging
+p_loading_swinging,3.1579,kW,Power of loading+swinging
+p_traveling,4.71,kW,Power of traveling
 lambda_demand_NC,20.12,$/kW,NCDC rate
 lambda_demand_OP,20.58,$/kW,OPDC rate
 carbon_price_per_ton,50.0,$/tonneCO2,carbon
@@ -14,8 +14,8 @@ scale,2.0,-,Precedence multiple kappa_seq (loading <= scale*digging)
 t_limit_rest,1.0,h,Eq. 12e rest rule ENABLED: >=1 idle break per rolling (t_limit+15min) window
 kappa_wt,4.0,-,Travel-pacing: productive intervals per CEV travel (two-sided band)
 prior_sigma_frac,0.2,-,Fallback Bayesian prior std as a fraction of each power (used only if the per-activity sigma_* rows are absent)
-sigma_digging,0.2064,kW,Per-activity std of digging power (posterior SD; overwritten by step-0 regression)
-sigma_loading_swinging,0.1833,kW,Per-activity std of loading+swinging power (posterior SD; overwritten by step-0 regression)
-sigma_traveling,0.3878,kW,Per-activity std of traveling power (posterior SD; overwritten by step-0 regression)
+sigma_digging,0.2055,kW,Per-activity std of digging power (posterior SD; overwritten by step-0 regression)
+sigma_loading_swinging,0.1819,kW,Per-activity std of loading+swinging power (posterior SD; overwritten by step-0 regression)
+sigma_traveling,0.3913,kW,Per-activity std of traveling power (posterior SD; overwritten by step-0 regression)
 obs_noise_std,0.05,kWh,Bayesian telemetry noise std (simulation only)
 co2_unit_scale,1.0,-,Raw intensity_tons_emissions scale (objective divides carbon_price by 1000)

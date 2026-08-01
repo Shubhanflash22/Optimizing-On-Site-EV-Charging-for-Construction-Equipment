@@ -8,37 +8,37 @@ STEP 0  Bayesian activity-power regression (pure Julia; NUTS 4 chains x 2000 dra
 ┌ Warning: Only a single thread available: MCMC chains are not sampled in parallel
 └ @ AbstractMCMC C:\Users\shubh\.julia\packages\AbstractMCMC\C1aKp\src\sample.jl:544
 ┌ Info: Found initial step size
-└   ϵ = 7.62939453125e-7
-┌ Info: Found initial step size
-└   ϵ = 7.62939453125e-7
-┌ Info: Found initial step size
-└   ϵ = 1.52587890625e-6
-┌ Info: Found initial step size
 └   ϵ = 3.814697265625e-7
-STEP 0 done in 11.1 s; parameters.csv refreshed.
-  fitted means : dig=4.789 load=3.159 trv=4.707 kW
-  fitted sds   : dig=0.203 load=0.186 trv=0.393 kW
+┌ Info: Found initial step size
+└   ϵ = 1.9073486328125e-7
+┌ Info: Found initial step size
+└   ϵ = 7.62939453125e-7
+┌ Info: Found initial step size
+└   ϵ = 6.103515625e-6
+STEP 0 done in 15.1 s; parameters.csv refreshed.
+  fitted means : dig=4.793 load=3.159 trv=4.704 kW
+  fitted sds   : dig=0.207 load=0.181 trv=0.384 kW
 Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  planning power (mu)    : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
   solver time limit      : none (solve to the MIP gap)
-Approach 0 one-shot (plant = :sampled) done in 5.5 s (96 plant realizations)
-  NOTE: the CEV SOE guard CLAMPED 2 times; energy was silently created or
+Approach 0 one-shot (plant = :sampled) done in 6.6 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
         discarded on those steps, so the SOE trace is not exactly integrable.
 Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  planning power (mu)  : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 1 (plant = :sampled) done in 31.4 s (96 plant realizations)
-  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+Approach 1 (plant = :sampled) done in 45.7 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
 
 ==== Scenario 1 closed-loop KPIs (full 24 h horizon: 08:00 -> 08:00 next day) ====
-Total grid energy   : 31.63 kWh
+Total grid energy   : 31.64 kWh
 Total energy cost   : $10.07
-Total CO2 emissions : 8.59 kg
+Total CO2 emissions : 8.60 kg
 NC peak demand      : 2.88 kW
 On-peak demand      : 0.00 kW
 Missed work (hours) : 0.00
@@ -47,10 +47,10 @@ CEV SOE at horizon  : [14.8] kWh (target [14.8])
 MCS SOE at horizon  : [250.0] kWh (target [250.0])
 
 ==== Approach comparison (both fully realised) ====
-A0 one-shot, sampled plant (open loop)  : $193.39  (0.50 h transit, 0.00 h missed)
-A1 closed loop (re-planning)            : $193.35  (0.50 h transit, 0.00 h missed)
-  A1 - A0 (value of re-planning)       : -0.04  (negative = A1 cheaper)
-  WARNING: 2 CEV SOE clamp events -- the SOE traces are not exactly
+A0 one-shot, sampled plant (open loop)  : $198.68  (0.50 h transit, 0.00 h missed)
+A1 closed loop (re-planning)            : $193.38  (0.50 h transit, 0.00 h missed)
+  A1 - A0 (value of re-planning)       : -5.30  (negative = A1 cheaper)
+  WARNING: 1 CEV SOE clamp events -- the SOE traces are not exactly
            integrable on those steps.
 
 Results written to: C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\output\input

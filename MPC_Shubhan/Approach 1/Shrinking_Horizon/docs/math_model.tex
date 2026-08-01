@@ -163,13 +163,19 @@ $\dt=0.25$\,h; the code rounds, it does not take a ceiling),
 $\sum_{k'=k}^{k+r}\sum_{a\in\{\text{dig,load,trv}\}}u_{e,i,a,k'}\le r$, \emph{seeded from the
 applied Work/Break history} so a work-run cannot leak across the every-15-min re-solves.
 
-\paragraph{Travel pacing (Eq.\ 13, HARD).}
+\paragraph{Travel pacing (Eq.\ 13, HARD, with a small tolerance on the lower side).}
 With $w_{\text{pt}}=4$, for each $(i,e)$ and $k$, on cumulative travel $V$ vs cumulative
 useful work $W$ (dig+load):
 \begin{equation}
-W(k)-w_{\text{pt}}\ \le\ w_{\text{pt}}\,V(k)\ \le\ W(k),
+W(k)-w_{\text{pt}}\ \le\ w_{\text{pt}}\,V(k)\ \le\ W(k) + \tau,
 \end{equation}
-seeded with the travel/work already applied in earlier windows.
+seeded with the travel/work already applied in earlier windows, where $\tau =
+\texttt{pacing\_tol} = 0.05$ (interval-units) absorbs the sub-interval rounding residue that the
+energy-capping guard above can leave in \texttt{cum\_dig\_e}/\texttt{cum\_load\_e} — without $\tau$,
+that residue can strand the two-sided band on either side of an integer boundary with no reachable
+whole-interval solution in between, making a schedule spuriously infeasible for reasons unrelated
+to the pacing rule's intent. $\tau$ is small relative to one full interval (1.0) and is not enough
+to let a CEV travel a genuine interval "early."
 
 \paragraph{Demand peaks (E1, HARD).}
 $P^{\text{NC}}\ge$ carried-in peak and $\ge\sum_m P^{\text{ch,tot}}_{m,k}$ for all $k$;
@@ -223,11 +229,16 @@ grid draw, travel loss and hence every cost term follow the plan exactly; the di
 enters through CEV depletion and reaches the objective only indirectly, through what the next
 re-solve decides to do about it.
 
-\paragraph{State guard.} The realized CEV balance is clamped to
-$[\underline{SOE}_e,\overline{SOE}_e]$. The clamp is a numerical guard, not physics: when it
-binds, energy is created (low side) or discarded (high side) and the reported SOE trajectory
-ceases to be the integral of the reported power. Clamp events are counted and reported per run,
-because they are invisible to the MILP's own feasibility status.
+\paragraph{State guard.} The realized dig/load/travel duration for each CEV is capped by the
+energy actually available before hitting $\underline{SOE}_e$: if the sampled draw would push the
+balance below the floor, the executed duration is scaled down to exactly what the floor allows,
+crediting only the affordable fraction of that interval's work (the remainder becomes idle) before
+the SOE update is applied. This is a physical correction, not a numerical guard — no energy is
+created or destroyed, and \texttt{rem\_dig}/\texttt{rem\_load} are only reduced by what was truly
+completed. A residual \texttt{clamp} to $[\underline{SOE}_e,\overline{SOE}_e]$ remains afterward as
+a pure safety net and should not bind under normal operation. Capping events are counted and
+reported per run ($\texttt{n\_capped}$), because they are invisible to the MILP's own feasibility
+status.
 
 %======================================================================
 \section{The fixed-\texorpdfstring{$H$}{H} lookahead is not this controller}

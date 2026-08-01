@@ -1,8 +1,8 @@
 Time_Period,Time_Start_Label,Time_End_Label,MCS_1_Location,MCS_1_Location_Type
 1,D1 08:00,D1 08:15,1,Grid
 2,D1 08:15,D1 08:30,1,Grid
-3,D1 08:30,D1 08:45,0,Travel
-4,D1 08:45,D1 09:00,2,Construction
+3,D1 08:30,D1 08:45,1,Grid
+4,D1 08:45,D1 09:00,0,Travel
 5,D1 09:00,D1 09:15,2,Construction
 6,D1 09:15,D1 09:30,2,Construction
 7,D1 09:30,D1 09:45,2,Construction
@@ -46,9 +46,9 @@ Time_Period,Time_Start_Label,Time_End_Label,MCS_1_Location,MCS_1_Location_Type
 45,D1 19:00,D1 19:15,2,Construction
 46,D1 19:15,D1 19:30,2,Construction
 47,D1 19:30,D1 19:45,2,Construction
-48,D1 19:45,D1 20:00,2,Construction
-49,D1 20:00,D1 20:15,2,Construction
-50,D1 20:15,D1 20:30,0,Travel
+48,D1 19:45,D1 20:00,0,Travel
+49,D1 20:00,D1 20:15,1,Grid
+50,D1 20:15,D1 20:30,1,Grid
 51,D1 20:30,D1 20:45,1,Grid
 52,D1 20:45,D1 21:00,1,Grid
 53,D1 21:00,D1 21:15,1,Grid

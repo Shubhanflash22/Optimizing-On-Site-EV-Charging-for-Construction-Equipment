@@ -89,10 +89,12 @@ Legend:  OK = matches exactly   ADAPTED = deliberate, documented (MPC or user ch
        | rolling (t_limit+dt) window          | window, PER day-block; SEEDED   | (per-day)
        |                                      | from applied work_hist (seam)   |
 --------------------------------------------------------------------------------
- (13)  | Travel pacing: two-sided band        | kappa_wt=4 (Avik): W-kappa <=  | OK
-       |                                      | kappa*V <= W, per (site,CEV),   | (per-day)
-       |                                      | PER day-block + history seed;   |
-       |                                      | soft s_pace_hi/lo               |
+ (13)  | Travel pacing: two-sided band        | kappa_wt=4 (Avik): W-kappa <=  | OK, see below
+       |                                      | kappa*V <= W + pacing_tol,      | (per-day)
+       |                                      | PER day-block + history seed.   |
+       |                                      | HARD (no soft slack exists in  |
+       |                                      | the code — s_pace_hi/lo below   |
+       |                                      | was aspirational, never built) |
 --------------------------------------------------------------------------------
 
 EXTRA CONSTRAINTS / ADAPTATIONS IN THE CODE (beyond Avik's single shot)
@@ -215,7 +217,7 @@ CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
  (Both runs: run_scenario_1 default time_limit_sec = Inf, seed = 1.)
 
  NOTE: the above re-verifies single-run input/synthetic behavior only, and it PRE-DATES
- the work_kW fix (A1) and the clamp counter (A2); no clamp count was recorded for those
+ the work_kW fix (A1) and the capping fix (A2); no capped count was recorded for those
  runs. Re-run before quoting. The 11-case Dummy/generate_and_run.jl stress harness has
  NOT been re-run against this refactor; do that before trusting it again.
 
@@ -249,7 +251,7 @@ CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
  and the difference between the two A0 numbers, if you run it both ways, is the cost of
  plan drift alone. approach0_vs_approach1.html labels its own column and blurb from
  res0.plant, so a report always states which comparison it is showing, and carries a
- run-diagnostics table (plant mode, infeasible windows, SOE clamps, solve time).
+ run-diagnostics table (plant mode, infeasible windows, SOE caps, solve time).
 
  run_mpc accepts `plant` too, so a fully deterministic closed loop is available for
  debugging. That is the first check to run against the UNEXPLAINED synthetic transit
@@ -268,17 +270,36 @@ CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
      to describe. Now computed from p_true. 5_Output.jl never consumed this column, so
      figures and KPI CSVs were unaffected; only run_log.txt / the analyst DataFrame.
 
- A2  THE CEV SOE BALANCE IS CLAMPED, AND THE CLAMP CREATES OR DESTROYS ENERGY.
-     apply_and_simulate! ends with
+ A2  THE CEV SOE BALANCE USED TO BE CLAMPED, AND THE CLAMP CREATED OR DESTROYED ENERGY (FIXED).
+     apply_and_simulate! used to end with
          soe_cev[e] = clamp(soe_cev[e] + charged - work_true, SOE_min, SOE_max)
-     If a sampled over-draw would push a CEV below SOE_min, the clamp silently raises it
-     back -- energy out of nowhere -- and the reported SOE trace stops being the integral
-     of the reported power. This is invisible in the MILP's own feasibility count, so a
-     run can report "0 infeasible windows" while still being physically inconsistent.
-     The clamp behaviour is UNCHANGED, but the events are now COUNTED (res.n_clamped),
-     printed at the end of each run, and shown per-run in approach0_vs_approach1.html and
-     the sweep summary. Open question: whether the right fix is to let the CEV go
-     infeasible instead of clamping.
+     crediting the FULL realized activity duration to rem_dig/rem_load before this clamp ran.
+     If a sampled over-draw would push a CEV below SOE_min, the clamp silently raised it back --
+     energy out of nowhere -- and the reported SOE trace stopped being the integral of the
+     reported power, while rem_dig/rem_load falsely showed the work as fully done. This was
+     invisible in the MILP's own feasibility count, so a run could report "0 infeasible windows"
+     while still being physically inconsistent.
+     FIXED: the realized dig/load/travel duration is now capped by the energy actually
+     available (headroom = soe_cev + charged - SOE_min) BEFORE it is credited -- only the
+     affordable fraction of the interval counts toward rem_dig/rem_load, and the SOE trajectory
+     never actually needs to be clamped below the floor in normal operation (a clamp() call
+     remains only as a safety net). Events are counted as res.n_capped (renamed from
+     res.n_clamped), printed at the end of each run, and shown per-run in
+     approach0_vs_approach1.html and the sweep summary.
+
+ A3  THE TRAVEL-PACING TWO-SIDED BAND COULD BECOME SPURIOUSLY INFEASIBLE FROM A2's OWN FIX (FIXED).
+     A2's fix can leave a small fractional residue in cum_dig_e/cum_load_e (e.g. one interval
+     credited as 0.246h instead of a clean 0.25h). The pacing band (13) checks these cumulative
+     totals with exact arithmetic and no tolerance, so this residue can land the band's floor
+     (kappa*V <= W) and ceiling (W <= kappa*V+kappa) on opposite sides of an integer boundary with
+     no whole-interval solution reachable in between -- e.g. needing "between 11.996 and 12.246"
+     buckets of work when only whole 0.25h steps are allowed. This permanently blocks further
+     travel/work for that CEV, even though the shortfall is physically meaningless (~1 minute).
+     Root-caused via HiGHS IIS on the run10_SOE_14.80 sweep point (isolated with a standalone
+     repro script + a constraint-bisection harness). FIXED: added pacing_tol = 0.05
+     (interval-units) to the floor side only (`kappa*V <= W + pacing_tol`) -- large enough to
+     absorb realistic capping residue (~0.02 typical), small enough (5% of one interval) that it
+     cannot be mistaken for a free extra work unit or meaningfully weaken the rule's intent.
 
  A3  ONLY THE CEV SIDE OF THE PLANT IS STOCHASTIC.
      apply_and_simulate! advances the MCS by soe_mcs[m] = value(SOE_MCS[m, g0+1]) -- the

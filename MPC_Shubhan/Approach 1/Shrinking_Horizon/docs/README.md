@@ -121,7 +121,7 @@ unchanged (`module Common`, `module Regression`, …), so `using .Common` etc. s
 | `1_Common.jl` | `Common` | Pure helpers: `normalize_travel_steps`, `in_peak`, `clock_label`/`build_time_labels`, STEP-plot builders — **plus** the `BayesianActivityEstimator` (a `TruncatedNormal(≥0)` Turing model with `observe!`/`refit!`/NUTS; `refit!` takes `nchains` for pooled multi-chain sampling). **Step 0 calls this to fit the powers offline** (§6.3); it is not re-fit *online* during the loop. |
 | `2_DataLoader.jl` | `DataLoader` | Loads the whole scenario into one immutable `NamedTuple d`. `build_default_data()` (`:synthetic`) and `load_input_data(dir)` (`:input`, 7 CSVs) behind `load_data(mode)`. Full 24 h horizon (`n_day = n_int`), lumpsum work, idle power pinned to 0. |
 | `3_MCSModel.jl` | `MCSModel` | The optimise half. `build_window_model(...)` builds & solves the **single 24 h window MILP** over `[k0 … n_day]`. Nomenclature matches Avik's `MCS_OPTIMAL_v4_real.jl`. HiGHS is configured crash-tolerant (see §6.5). |
-| `4_MPCLoop.jl` | `MPCLoop` | `run_mpc(d, pool; shrinking, H, …)`: the closed loop (Approach 1) — for each 15-min step solve the (shrinking) window, apply the first interval, draw the stochastic plant's realized power, advance the real state. **Plus** `run_one_shot(d, pool; …)`: Approach 0 — solve the full-day window **once** and replay it open-loop (no re-solves). Both take a `plant` switch (`:sampled` / `:mean`, §6.6) and share the apply/simulate/advance logic (`apply_and_simulate!`), so they're directly comparable. Each returns one `res` NamedTuple carrying `approach`, `plant`, `n_infeasible` and `n_clamped`. |
+| `4_MPCLoop.jl` | `MPCLoop` | `run_mpc(d, pool; shrinking, H, …)`: the closed loop (Approach 1) — for each 15-min step solve the (shrinking) window, apply the first interval, draw the stochastic plant's realized power, advance the real state. **Plus** `run_one_shot(d, pool; …)`: Approach 0 — solve the full-day window **once** and replay it open-loop (no re-solves). Both take a `plant` switch (`:sampled` / `:mean`, §6.6) and share the apply/simulate/advance logic (`apply_and_simulate!`), so they're directly comparable. Each returns one `res` NamedTuple carrying `approach`, `plant`, `n_infeasible` and `n_capped`. |
 | `5_Output.jl` | `Output` | Every artefact from `res` via `write_outputs(res, out_dir)`: STEP figures (PNG) + CSVs, the KPI report, the replanning grids, and the plan-vs-actual **financial** + **activity** reports. **Plus** `write_approach_comparison(res0, res1, out_dir; res0_mean = nothing)`: an additive, numbers-only report comparing the fully-realized outcomes of Approach 0 (both plant modes) and Approach 1, plus a per-run diagnostics table; not called from `write_outputs`, so it never changes the existing artefact set. |
 | `run_soe_sweep.jl` | — | Sensitivity harness (not part of the controller). Sweeps `SOE_CEV_ini` across `NRUNS = 10` points from `SOE_min` to `SOE_max` at a fixed seed, re-running all three approach/plant combinations per point, keeping a subset of artefacts per run and writing `output/input_testing/summary.html`. Sets `SCENARIO1_NO_AUTORUN` before including the driver. |
 | `6_Shrinking_Horizon_main.jl` | — | Thin orchestrator. `run_scenario_1(; mode, …)` = load → generate the shared `ActivityPowerPool` → `run_one_shot` twice (Approach 0 with `plant = :mean`, then `plant = :sampled`) → `run_mpc` (Approach 1) → `write_outputs` + `write_approach_comparison` → print the KPI block and the three-way approach summary. Also mirrors console output to `run_log.txt` in `out_dir`. **Auto-runs `:synthetic` on `include`** unless `SCENARIO1_NO_AUTORUN = true`. |
@@ -239,7 +239,7 @@ from the **same pool**, each with its **own** cursor (`new_cursor`), so identica
 sequences draw identical numbers and any KPI gap between the two approaches reflects the control
 strategy, not different randomness. The same drawn sample drives the CEV battery drain **and** the logged
 work power, so the two agree. Two caveats on how far that goes: the MCS side follows the plan,
-not the plant, and the CEV balance is clamped at its SOE bounds — see §6.7. (A "Fork A" against a separate hidden truth
+not the plant, and the CEV balance is energy-capped at its SOE floor — see §6.7. (A "Fork A" against a separate hidden truth
 `N(true_powers, true_sigma)` is a one-line edit in `4_MPCLoop.jl`'s `apply_and_simulate!`, kept
 for experimentation.)
 
@@ -263,9 +263,10 @@ for experimentation.)
         mode; forced to the single planned activity in full under :mean)
  (4) ADVANCE plant:
         soe_mcs ← model SOE_MCS[k0+1]     (PLANNED, not stochastic — §6.7)
-        soe_cev ← clamp(soe_cev + charged − dot(a_real, p_true[e]), min, max)
-                                          (clamp events counted — §6.7)
-        rem_dig / rem_load −= realized;  push a_real onto hist
+        a_real  ← capped by headroom = soe_cev + charged − SOE_min, if draw exceeds it
+                                          (capping events counted — §6.7)
+        soe_cev ← soe_cev + charged − dot(a_real, p_true[e]), then clamp(·, min, max) as a safety net
+        rem_dig / rem_load −= realized (capped) amount;  push a_real onto hist
  ──────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -348,7 +349,7 @@ do with randomness, and the sampled numbers are not worth interpreting until it 
 
 `write_approach_comparison(res0, res1, out_dir; res0_mean)` writes all of this as a numbers-only
 `approach0_vs_approach1.html` (§9.2), with a **run-diagnostics table** underneath (plant mode,
-infeasible windows, CEV SOE clamp count, solve time). It is **additive** and never alters the
+infeasible windows, CEV SOE capped count, solve time). It is **additive** and never alters the
 existing figure or report set. Approach 0 has no fallback: if the single 08:00 MILP itself is
 infeasible, it errors rather than holding state.
 
@@ -360,14 +361,20 @@ Two scope limits worth stating plainly, because "the stochastic plant" over-prom
   loss therefore follow the plan exactly, and so does every cost term. The disturbance enters
   only through CEV depletion, reaching the objective indirectly via what the next re-solve does
   about it.
-* **The CEV balance is clamped.** The realized update ends in
-  `clamp(soe_cev + charged − work_true, SOE_min, SOE_max)`. The clamp is a guard, not physics:
-  when a sampled over-draw would breach `SOE_min` it silently restores the battery, and the
-  reported SOE stops being the integral of the reported power. This is invisible to the MILP's
-  feasibility status, so a run can report **0 infeasible windows** and still be physically
-  inconsistent. The behaviour is unchanged, but every event is now counted (`res.n_clamped`),
-  printed at the end of the run, and shown per run in the comparison report and the sweep
-  summary. **A non-zero clamp count qualifies that run's SOE numbers.**
+* **The CEV balance is energy-capped.** Before crediting any realized dig/load/travel duration,
+  `apply_and_simulate!` checks the energy actually available before `SOE_min` (`headroom = soe_cev +
+  charged − SOE_min`) against what the sampled draw would cost. If the draw exceeds headroom, the
+  realized duration is scaled down to exactly what's affordable — crediting only the completed
+  fraction to `rem_dig`/`rem_load`, with the remainder of that interval becoming idle — *before* the
+  SOE update is applied. This is a physical correction, not a numerical guard: no energy is created
+  or destroyed, and `rem_dig`/`rem_load` honestly reflect what could actually be done. A residual
+  `clamp(soe_cev, SOE_min, SOE_max)` remains afterward purely as a safety net and should not bind in
+  normal operation. This is invisible to the MILP's feasibility status, so a run can report **0
+  infeasible windows** and still have hit an energy shortfall mid-interval. Every capping event is
+  counted (`res.n_capped`), printed at the end of the run, and shown per run in the comparison report
+  and the sweep summary. **A non-zero capped count means some realized work was cut short by
+  available charge that interval** — check `rem_dig`/`rem_load` at day's end for the resulting
+  shortfall.
 
 ---
 
@@ -475,7 +482,9 @@ in-transit trip. `L_trv = k_trv·Δt·y_trv`; `L_trv_tot = Σ L_trv`.
 * Initial: `SOE_MCS[first] = soe_mcs0`, `SOE_CEV[first] = soe_cev0` (measured carry-in).
 * **MCS:** `SOE_MCS[k+1] = SOE_MCS[k] + η·P_ch_tot·Δt − P_dch_tot·Δt/η − L_trv_tot`.
 * **CEV:** `SOE_CEV[k+1] = SOE_CEV[k] + Σ P_MCS_CEV·Δt − Σ P_work·Δt`.
-* **Bounds:** every boundary clamped to `[SOE_min, SOE_max]` for MCS and CEV.
+* **Bounds:** every boundary clamped to `[SOE_min, SOE_max]` for MCS and CEV (a safety net; the
+  realized CEV work duration is capped by available energy *before* this bound is ever reached — see
+  §6.7).
 
 ### 8.7 Terminal energy targets (Eq. 8a / 8b, HARD)
 Applied at the final window boundary **only when that boundary is the end of the day** — the
@@ -552,7 +561,7 @@ seeded with the travel/work already applied in earlier windows.
 > `:synthetic` and `:input` previously solved with **zero** infeasible windows: the MCS returns
 > to its exact initial SOE and every CEV finishes at or above its start-of-day level.
 >
-> Read that alongside the **clamp count** (§6.7). Zero infeasible windows means the *optimiser*
+> Read that alongside the **capped count** (§6.7). Zero infeasible windows means the *optimiser*
 > never failed; it does not mean the realized trajectory was physical, because the CEV SOE guard
 > can silently absorb an over-draw without any window becoming infeasible. Both numbers appear
 > in the run diagnostics table of `approach0_vs_approach1.html`.
@@ -628,7 +637,7 @@ as the KPI report (grid energy, energy/CO₂/demand/missed-work/travel costs, to
 The column header and the explanatory blurb **adapt to `res0.plant`**, so the report always
 states whether the Δ is a like-for-like re-planning gap (`:sampled`) or the combined
 drift-plus-re-planning figure (`:mean`), and points at the other mode (§6.6). Underneath, a
-**run-diagnostics table**: plant mode, infeasible windows, CEV SOE clamp count and solve time per
+**run-diagnostics table**: plant mode, infeasible windows, CEV SOE capped count and solve time per
 run. Written by `write_approach_comparison(res0, res1, out_dir)`; additive only. Companion CSVs:
 `10_approach0_timeline.csv`, `10_approach1_timeline.csv`.
 
@@ -671,7 +680,8 @@ run. Written by `write_approach_comparison(res0, res1, out_dir)`; additive only.
   **Last measured (now stale):** on **input**, Approach 1 reproduced Approach 0 (sampled) to
   within **~0.02 %** ($193.36 vs $193.40); on **synthetic** the two diverged by **~28 %**
   ($114.82 vs $82.50, Approach 1 higher, mostly extra MCS transit — 2.75 h vs 1.75 h). That gap
-  is **still unexplained**. These figures pre-date the `work_kW` fix, the clamp counter and the
+  is **still unexplained**. These figures pre-date the `work_kW` fix, the capping fix, the pacing
+  tolerance and the
   `:mean` mode, so **regenerate before quoting them**, and work the diagnostic order in §6.6:
   compare `A1(:mean)` against `A0(:mean)` first — if a *deterministic* closed loop does not
   reproduce the one-shot optimum exactly, the cause is a seam or carry-in bug, not randomness,
@@ -698,11 +708,21 @@ Documented so a reviewer is not surprised by them. Full detail, with the code li
   curve) while the batteries drained on the Fork-B pool draw `p_true`; in `:synthetic` those
   vectors differ, so the column contradicted the batteries it described. Now computed from
   `p_true`. Figures and KPI CSVs never read the column, so only `run_log.txt` was affected.
+* **D3** — the CEV SOE clamp used to silently create or destroy energy when it bit, because
+  `apply_and_simulate!` credited the full realized activity duration before clamping the resulting
+  SOE. Fixed: realized dig/load/travel duration is now capped by available headroom *before* it is
+  credited (§6.7), so `rem_dig`/`rem_load` and the SOE trajectory stay physically honest. Events are
+  counted as `n_capped` (renamed from `n_clamped`). The residual `clamp()` call is now only a
+  never-should-bind safety net.
+* **D11** — the two-sided travel-pacing band (Eq. 13) could become spuriously infeasible: the
+  sub-interval residue D3's fix leaves in `cum_dig_e`/`cum_load_e` could land the band's floor and
+  ceiling on opposite sides of an integer boundary with no whole-interval solution in between,
+  permanently blocking further travel/work for a CEV even though the shortfall was physically
+  meaningless (traced in detail via IIS on `run10_SOE_14.80`, §12). Fixed by adding
+  `pacing_tol = 0.05` to the floor side only (§8.13) — large enough to absorb realistic capping
+  residue, small enough (5% of one interval) that it cannot be mistaken for a free extra work unit.
 
 **Open / instrumented, not resolved:**
-* **D3** — the CEV SOE clamp creates or destroys energy when it bites. Behaviour unchanged;
-  events are now counted and reported (§6.7). Whether the right fix is to let the CEV go
-  infeasible instead is still an open call.
 * **D5** — only the CEV side of the plant is stochastic (§6.7).
 * **D7/D8** — two never-constrained slacks and the undefined `y_trv[m,i,i,k]`; both are driven
   to zero by the objective, so harmless, but they are dead variables (§8.1).

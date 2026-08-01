@@ -1136,10 +1136,10 @@ function write_approach_comparison(res0, res1, out_dir)
     # Diagnostics that qualify the numbers above rather than being costs themselves.
     println(io, "<h3>Run diagnostics</h3>")
     println(io, "<table><tr><th>Run</th><th>Plant</th><th>Infeasible windows</th>",
-                "<th>CEV SOE clamps</th><th>Solve time (s)</th></tr>")
+                "<th>Energy caps</th><th>Solve time (s)</th></tr>")
     for (lbl, r) in [("Approach 0 (one-shot/day)", res0), ("Approach 1 (closed loop)", res1)]
         println(io, "<tr><td>", lbl, "</td><td>:", r.plant, "</td><td>",
-                    r.n_infeasible, "</td><td>", r.n_clamped, "</td><td>",
+                    r.n_infeasible, "</td><td>", r.n_capped, "</td><td>",
                     @sprintf("%.1f", r.elapsed), "</td></tr>")
     end
     println(io, "</table>")

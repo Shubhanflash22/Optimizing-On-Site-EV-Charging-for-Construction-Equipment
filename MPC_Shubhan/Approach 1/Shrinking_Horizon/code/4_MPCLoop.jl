@@ -201,19 +201,42 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
         soe_mcs[m] = value(model[:SOE_MCS][m, k0 + 1])
         mcs_node[m], mcs_transit[m] = advance_mcs_state(model, m, k0, nK, d)
     end
-    # The CEV balance is CLAMPED to [SOE_min, SOE_max]. The clamp is a guard, not
-    # physics: whenever it bites, energy is silently created (low side) or discarded
-    # (high side) and the reported SOE stops matching the integrated power. It can
-    # only bite in :sampled mode (in :mean mode the realized balance equals the MILP's
-    # own, which already respects the bounds), so we COUNT the events and report them
-    # rather than letting a "0 infeasible windows" run hide them.
-    n_clamped = 0
+    # # The CEV balance is CLAMPED to [SOE_min, SOE_max]. The clamp is a guard, not
+    # # physics: whenever it bites, energy is silently created (low side) or discarded
+    # # (high side) and the reported SOE stops matching the integrated power. It can
+    # # only bite in :sampled mode (in :mean mode the realized balance equals the MILP's
+    # # own, which already respects the bounds), so we COUNT the events and report them
+    # # rather than letting a "0 infeasible windows" run hide them.
+    # n_clamped = 0
+    # for e in d.E
+    #     charged   = sum(value(model[:P_MCS_CEV][m, i, e, k0]) for m in d.M, i in d.N_c) * d.delta_T
+    #     work_true = dot(a_real[e], p_true[e])
+    #     raw       = soe_cev[e] + charged - work_true
+    #     soe_cev[e] = clamp(raw, d.SOE_CEV_min[e], d.SOE_CEV_max[e])
+    #     abs(raw - soe_cev[e]) > 1e-9 && (n_clamped += 1)
+    # end
+    # CAP each CEV's realized dig/load hours by what its available energy could
+    # actually pay for, BEFORE crediting rem_dig/rem_load or logging hist. This
+    # replaces the old after-the-fact SOE clamp, which silently created/discarded
+    # energy instead of reflecting that the machine ran out of charge mid-task.
+    n_capped = 0
     for e in d.E
         charged   = sum(value(model[:P_MCS_CEV][m, i, e, k0]) for m in d.M, i in d.N_c) * d.delta_T
-        work_true = dot(a_real[e], p_true[e])
-        raw       = soe_cev[e] + charged - work_true
-        soe_cev[e] = clamp(raw, d.SOE_CEV_min[e], d.SOE_CEV_max[e])
-        abs(raw - soe_cev[e]) > 1e-9 && (n_clamped += 1)
+        headroom  = soe_cev[e] + charged - d.SOE_CEV_min[e]      # energy available before hitting the floor
+        work_true = dot(a_real[e], p_true[e])                    # energy the sampled draw would actually cost
+
+        if work_true > headroom && work_true > 1e-9
+            scale = max(headroom, 0.0) / work_true                # fraction of the task actually affordable
+            a_real[e][1] *= scale                                 # dig hours, capped
+            a_real[e][2] *= scale                                 # load hours, capped
+            a_real[e][3] *= scale                                 # travel hours, capped (same treatment)
+            a_real[e][4] += d.delta_T - sum(a_real[e][1:3])       # remainder of the interval becomes idle
+            work_true = dot(a_real[e], p_true[e])                 # recompute cost against the capped hours
+            n_capped += 1
+        end
+
+        soe_cev[e] = soe_cev[e] + charged - work_true
+        soe_cev[e] = clamp(soe_cev[e], d.SOE_CEV_min[e], d.SOE_CEV_max[e])  # safety net only; should not bite now
     end
 
     # Update remaining work + append this interval to the SHARED history.
@@ -233,7 +256,8 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
     # batteries and with real_P_work.)
     work_kW = sum(dot(a_real[e], p_true[e]) for e in d.E) / d.delta_T
 
-    return (; grid_kW, dch_kW, cur_node, a_real, p_true, n_obs_added, work_kW, n_clamped)
+    # return (; grid_kW, dch_kW, cur_node, a_real, p_true, n_obs_added, work_kW, n_clamped)
+    return (; grid_kW, dch_kW, cur_node, a_real, p_true, n_obs_added, work_kW, n_capped)
 end
 
 # =============================================================================
@@ -321,7 +345,7 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
     t0 = time()
     n_obs_total = 0
     n_infeasible = 0
-    n_clamped_total = 0
+    n_capped_total = 0
 
     for k0 in 1:nK
         # record start-of-interval MCS/CEV SOE (boundary k0)
@@ -383,7 +407,7 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
                                    real_P_ch, real_P_dch, real_L_trv, real_loc, real_P_work;
                                    plant_mode = plant)
         n_obs_total += step.n_obs_added
-        n_clamped_total += step.n_clamped
+        n_capped_total += step.n_capped
 
         peak_nc = max(peak_nc, step.grid_kW)
         in_peak(k0, d.delta_T, d.t_start) && (peak_op = max(peak_op, step.grid_kW))
@@ -403,7 +427,7 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
     @printf("Approach 1 (plant = :%s) done in %.1f s (%d plant realizations)\n",
             plant, elapsed, n_obs_total)
     n_infeasible > 0 && @printf("  NOTE: %d/%d windows were INFEASIBLE under the HARD constraints (no fallback);\n        the plant HELD state for those intervals.\n", n_infeasible, nK)
-    n_clamped_total > 0 && @printf("  NOTE: the CEV SOE guard CLAMPED %d times; energy was silently created or\n        discarded on those steps, so the SOE trace is not exactly integrable.\n", n_clamped_total)
+    n_capped_total > 0 && @printf("  NOTE: %d intervals had work CAPPED by available CEV energy (task could not fully\n        complete before hitting the SOE floor); the shortfall is reflected honestly in\n        rem_dig/rem_load.\n", n_capped_total)
     println("  fixed power model (mu) : ", round.(est.mu, digits = 2), " kW")
     plant === :sampled && println("  plant sampling sd      : ", round.(pool.sd, digits = 2), " kW")
 
@@ -427,7 +451,7 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
               labour_cost, transit_intervals,
               soe_cev_end = copy(soe_cev), soe_mcs_end = copy(soe_mcs),
               n_obs_total, n_infeasible, elapsed,
-              approach = 1, plant, n_clamped = n_clamped_total)
+              approach = 1, plant, n_capped = n_capped_total)
 end
 
 # =============================================================================
@@ -517,7 +541,7 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
             isfinite(time_limit_sec) ? "$(time_limit_sec) s" : "none (solve to the MIP gap)")
     t0 = time()
     n_obs_total = 0
-    n_clamped_total = 0
+    n_capped_total = 0
 
     # (1) OPTIMISE -- ONCE, over the whole day. No fallback: if the 8:00
     # whole-day plan itself is infeasible there is nothing to execute.
@@ -542,7 +566,7 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
                                    real_P_ch, real_P_dch, real_L_trv, real_loc, real_P_work;
                                    plant_mode = plant)
         n_obs_total += step.n_obs_added
-        n_clamped_total += step.n_clamped
+        n_capped_total += step.n_capped
 
         for e in d.E
             site = findfirst(i -> d.A[i, e] == 1, d.N)
@@ -566,7 +590,7 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
     elapsed = time() - t0
     @printf("Approach 0 one-shot (plant = :%s) done in %.1f s (%d plant realizations)\n",
             plant, elapsed, n_obs_total)
-    n_clamped_total > 0 && @printf("  NOTE: the CEV SOE guard CLAMPED %d times; energy was silently created or\n        discarded on those steps, so the SOE trace is not exactly integrable.\n", n_clamped_total)
+    n_capped_total > 0 && @printf("  NOTE: %d intervals had work CAPPED by available CEV energy (task could not fully\n        complete before hitting the SOE floor); the shortfall is reflected honestly in\n        rem_dig/rem_load.\n", n_capped_total)
 
     total_energy = sum(log.grid_kW) * d.delta_T
     total_cost   = sum(log.grid_kW .* log.price) * d.delta_T
@@ -586,7 +610,7 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
               labour_cost, transit_intervals,
               soe_cev_end = copy(soe_cev), soe_mcs_end = copy(soe_mcs),
               n_obs_total, n_infeasible = 0, elapsed,
-              approach = 0, plant, n_clamped = n_clamped_total)
+              approach = 0, plant, n_capped = n_capped_total)
 end
 
 end # module MPCLoop

@@ -9,21 +9,21 @@ tr:last-child td{font-weight:bold;background:#fafafa}
 <h2>Approach 0 (one-shot 8:00 plan) vs Approach 1 (closed-loop MPC)</h2>
 <p>Both columns are fully realized over 08:00 &rarr; next-day 08:00 and draw from the SAME pre-generated per-(excavator, activity) power samples, so the &Delta; reflects only the value of re-planning, not different randomness. Re-run with <code>approach0_plant = :mean</code> to see the deterministic MILP optimum instead.</p>
 <table><tr><th>Metric</th><th>Approach 0 &mdash; sampled plant<br>(one-shot, open loop)</th><th>Approach 1 &mdash; closed loop</th><th>&Delta; (A1 &minus; A0)</th></tr>
-<tr><td>Grid energy (kWh)</td><td>31.650</td><td>31.550</td><td>-0.099</td></tr>
-<tr><td>Energy cost (USD)</td><td>10.073</td><td>10.042</td><td>-0.032</td></tr>
-<tr><td>CO2 emissions (kg)</td><td>8.599</td><td>8.572</td><td>-0.027</td></tr>
-<tr><td>CO2 cost (USD)</td><td>0.430</td><td>0.429</td><td>-0.001</td></tr>
-<tr><td>NCD peak (kW)</td><td>2.877</td><td>2.868</td><td>-0.009</td></tr>
-<tr><td>NCD charge (USD)</td><td>57.890</td><td>57.708</td><td>-0.182</td></tr>
+<tr><td>Grid energy (kWh)</td><td>31.659</td><td>20.923</td><td>-10.736</td></tr>
+<tr><td>Energy cost (USD)</td><td>10.076</td><td>6.512</td><td>-3.564</td></tr>
+<tr><td>CO2 emissions (kg)</td><td>8.602</td><td>4.997</td><td>-3.605</td></tr>
+<tr><td>CO2 cost (USD)</td><td>0.430</td><td>0.250</td><td>-0.180</td></tr>
+<tr><td>NCD peak (kW)</td><td>2.878</td><td>2.031</td><td>-0.847</td></tr>
+<tr><td>NCD charge (USD)</td><td>57.907</td><td>40.856</td><td>-17.051</td></tr>
 <tr><td>OPD peak (kW)</td><td>-0.000</td><td>0.000</td><td>+0.000</td></tr>
 <tr><td>OPD charge (USD)</td><td>-0.000</td><td>0.000</td><td>+0.000</td></tr>
-<tr><td>Missed work (h)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
-<tr><td>Missed work penalty (USD)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
+<tr><td>Missed work (h)</td><td>0.016</td><td>1.513</td><td>+1.498</td></tr>
+<tr><td>Missed work penalty (USD)</td><td>31.169</td><td>3026.687</td><td>+2995.518</td></tr>
 <tr><td>MCS transit (h)</td><td>0.500</td><td>0.500</td><td>+0.000</td></tr>
 <tr><td>Travel labour (USD)</td><td>125.000</td><td>125.000</td><td>+0.000</td></tr>
-<tr><td>TOTAL cost (USD)</td><td>193.393</td><td>193.178</td><td>-0.215</td></tr>
+<tr><td>TOTAL cost (USD)</td><td>224.582</td><td>3199.306</td><td>+2974.723</td></tr>
 </table>
 <h3>Run diagnostics</h3><table><tr><th>Run</th><th>Plant</th><th>Infeasible windows</th><th>CEV SOE clamps</th><th>Solve time (s)</th></tr>
-<tr><td>Approach 0 (one-shot)</td><td>:sampled</td><td>0</td><td>1</td><td>2.1</td></tr>
-<tr><td>Approach 1 (closed loop)</td><td>:sampled</td><td>0</td><td>1</td><td>31.0</td></tr>
+<tr><td>Approach 0 (one-shot)</td><td>:sampled</td><td>0</td><td>1</td><td>4.1</td></tr>
+<tr><td>Approach 1 (closed loop)</td><td>:sampled</td><td>0</td><td>1</td><td>54.5</td></tr>
 </table></body></html>
