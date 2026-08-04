@@ -9,21 +9,21 @@ tr:last-child td{font-weight:bold;background:#fafafa}
 <h2>Approach 0 (one-shot 8:00 plan) vs Approach 1 (closed-loop MPC)</h2>
 <p>Both columns are fully realized over 08:00 &rarr; next-day 08:00 and draw from the SAME pre-generated per-(excavator, activity) power samples, so the &Delta; reflects only the value of re-planning, not different randomness. Re-run with <code>approach0_plant = :mean</code> to see the deterministic MILP optimum instead.</p>
 <table><tr><th>Metric</th><th>Approach 0 &mdash; sampled plant<br>(one-shot, open loop)</th><th>Approach 1 &mdash; closed loop</th><th>&Delta; (A1 &minus; A0)</th></tr>
-<tr><td>Grid energy (kWh)</td><td>31.659</td><td>31.569</td><td>-0.090</td></tr>
-<tr><td>Energy cost (USD)</td><td>10.076</td><td>10.048</td><td>-0.029</td></tr>
-<tr><td>CO2 emissions (kg)</td><td>8.602</td><td>8.578</td><td>-0.024</td></tr>
+<tr><td>Grid energy (kWh)</td><td>31.656</td><td>31.565</td><td>-0.090</td></tr>
+<tr><td>Energy cost (USD)</td><td>10.075</td><td>10.046</td><td>-0.029</td></tr>
+<tr><td>CO2 emissions (kg)</td><td>8.601</td><td>8.577</td><td>-0.025</td></tr>
 <tr><td>CO2 cost (USD)</td><td>0.430</td><td>0.429</td><td>-0.001</td></tr>
 <tr><td>NCD peak (kW)</td><td>2.878</td><td>2.870</td><td>-0.008</td></tr>
-<tr><td>NCD charge (USD)</td><td>57.907</td><td>57.743</td><td>-0.164</td></tr>
+<tr><td>NCD charge (USD)</td><td>57.901</td><td>57.736</td><td>-0.165</td></tr>
 <tr><td>OPD peak (kW)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
 <tr><td>OPD charge (USD)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
 <tr><td>Missed work (h)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
 <tr><td>Missed work penalty (USD)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
 <tr><td>MCS transit (h)</td><td>0.500</td><td>0.500</td><td>+0.000</td></tr>
 <tr><td>Travel labour (USD)</td><td>125.000</td><td>125.000</td><td>+0.000</td></tr>
-<tr><td>TOTAL cost (USD)</td><td>193.413</td><td>193.219</td><td>-0.194</td></tr>
+<tr><td>TOTAL cost (USD)</td><td>193.406</td><td>193.211</td><td>-0.195</td></tr>
 </table>
-<h3>Run diagnostics</h3><table><tr><th>Run</th><th>Plant</th><th>Infeasible windows</th><th>CEV SOE clamps</th><th>Solve time (s)</th></tr>
-<tr><td>Approach 0 (one-shot)</td><td>:sampled</td><td>0</td><td>0</td><td>3.1</td></tr>
-<tr><td>Approach 1 (closed loop)</td><td>:sampled</td><td>0</td><td>0</td><td>32.9</td></tr>
+<h3>Run diagnostics</h3><table><tr><th>Run</th><th>Plant</th><th>Infeasible windows</th><th>Energy caps</th><th>Solve time (s)</th></tr>
+<tr><td>Approach 0 (one-shot)</td><td>:sampled</td><td>0</td><td>0</td><td>4.0</td></tr>
+<tr><td>Approach 1 (closed loop)</td><td>:sampled</td><td>0</td><td>0</td><td>26.6</td></tr>
 </table></body></html>

@@ -397,7 +397,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # spurious constraints on unassigned (i,e) pairs (in Avik's single shot the seeds are
     # 0, so those rows are trivially 0 <= 0 and need no guard).
     work_per_travel = 4
-    pacing_tol = 0.05
+    pacing_tol = 0.25
     for i in N_c, e in E
         d.A[i, e] == 1 || continue
         for k in K

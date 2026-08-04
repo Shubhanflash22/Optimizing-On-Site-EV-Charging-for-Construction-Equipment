@@ -6,36 +6,37 @@ Input         : C:\Users\shubh\Desktop\MPC\Approach 1\Comparison\Input
 Output        : C:\Users\shubh\Desktop\MPC\Approach 1\Comparison\Output
 ==============================================================================
 
-Shared power pool: n_samples=197 per (entity, activity) (96 intervals/day x 2 days incl. the Receding buffer day, + 5); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+Shared power pool: n_samples=197 per (entity, activity) (96 intervals/day x 2 days incl. the Receding buffer day, + 5); mu=[4.79, 3.16, 4.7, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
 
 --- Approach 0 (one-shot, plant = :sampled) ---
 Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  planning power (mu)    : [4.79, 3.16, 4.7, 0.0] kW
   plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
   solver time limit      : none (solve to the MIP gap)
-Approach 0 one-shot (plant = :sampled) done in 5.2 s (96 plant realizations)
+Approach 0 one-shot (plant = :sampled) done in 7.0 s (96 plant realizations)
 
 --- Approach 1a (Shrinking Horizon) ---
 Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  planning power (mu)  : [4.79, 3.16, 4.7, 0.0] kW
   plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 1 (plant = :sampled) done in 29.2 s (96 plant realizations)
-  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+Approach 1 (plant = :sampled) done in 35.5 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.7, 0.0] kW
   plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
 
 --- Approach 1b (Receding Horizon) ---
 Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  planning power (mu)  : [4.79, 3.16, 4.7, 0.0] kW
   plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 1 (plant = :sampled) done in 108.2 s (192 plant realizations)
-  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
-        discarded on those steps, so the SOE trace is not exactly integrable.
-  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+Approach 1 (plant = :sampled) done in 109.3 s (192 plant realizations)
+  NOTE: 1 intervals had work CAPPED by available CEV energy (task could not fully
+        complete before hitting the SOE floor); the shortfall is reflected honestly in
+        rem_dig/rem_load.
+  fixed power model (mu) : [4.79, 3.16, 4.7, 0.0] kW
   plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
 
 --- Writing 3-way comparison outputs ---
@@ -43,12 +44,12 @@ Approach 1 (plant = :sampled) done in 108.2 s (192 plant realizations)
 ==============================================================================
 KPI SUMMARY
 Metric                            Approach0      Shrinking       Receding
-Grid energy (kWh)                     31.66          30.95          31.86
-Energy cost (USD)                     10.08           9.85          10.14
-CO2 (kg)                               8.60           8.41           8.66
-NCD peak (kW)                          2.88           2.81           2.90
+Grid energy (kWh)                     31.64          31.85          31.85
+Energy cost (USD)                     10.07          10.14          10.14
+CO2 (kg)                               8.60           8.65           8.65
+NCD peak (kW)                          2.88           2.90           2.90
 OPD peak (kW)                         -0.00           0.00           0.00
-Missed work (h)                        0.00           0.25           0.00
+Missed work (h)                        0.00           0.00           0.00
 ==============================================================================
 
 Results written to: C:\Users\shubh\Desktop\MPC\Approach 1\Comparison\Output

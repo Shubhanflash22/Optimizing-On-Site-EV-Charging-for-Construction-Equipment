@@ -1,0 +1,44 @@
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 6.6 s (96 plant realizations)
+  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
+        discarded on those steps, so the SOE trace is not exactly integrable.
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 45.7 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+
+==== Scenario 1 closed-loop KPIs (full 24 h horizon: 08:00 -> 08:00 next day) ====
+Total grid energy   : 31.64 kWh
+Total energy cost   : $10.07
+Total CO2 emissions : 8.60 kg
+NC peak demand      : 2.88 kW
+On-peak demand      : 0.00 kW
+Missed work (hours) : 0.00
+Labour (towing)     : $125.00  (0.50 h in transit @ $250.00/h)
+CEV SOE at horizon  : [14.8] kWh (target [14.8])
+MCS SOE at horizon  : [250.0] kWh (target [250.0])
+
+==== Approach comparison (both fully realised) ====
+A0 one-shot, sampled plant (open loop)  : $198.68  (0.50 h transit, 0.00 h missed)
+A1 closed loop (re-planning)            : $193.38  (0.50 h transit, 0.00 h missed)
+  A1 - A0 (value of re-planning)       : -5.30  (negative = A1 cheaper)
+  WARNING: 1 CEV SOE clamp events -- the SOE traces are not exactly
+           integrable on those steps.
+
+Results written to: C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\output\input
+  Figures (v4_real style): 01..09 (09 = per-MCS power profiles)
+  Reports: 08 KPI, replan_grids/*.csv+*.html,
+           plan_vs_actual.html + plan_vs_actual_costs.png  (08:00 plan vs realised, financial)
+           plan_vs_actual_activity.png, plan_vs_actual_side_by_side.html, plan_vs_actual_by_entity.html  (ACTIVITY)
+           approach0_vs_approach1.html  (Approach 0 one-shot vs Approach 1 closed-loop, both fully
+                                         realised; the A0 column is labelled by its plant mode, and a
+                                         run-diagnostics table reports infeasible windows + SOE clamps)
+  Console log: run_log.txt

@@ -2,21 +2,17 @@
 #################### run05_SOE_08.22 ####################
 Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.7, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.38, 0.0] kW
   solver time limit      : none (solve to the MIP gap)
-Approach 0 one-shot (plant = :sampled) done in 4.1 s (96 plant realizations)
-  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
-        discarded on those steps, so the SOE trace is not exactly integrable.
+Approach 0 one-shot (plant = :sampled) done in 1.5 s (96 plant realizations)
 Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)  : [4.79, 3.16, 4.7, 0.0] kW
-  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.2, 0.19, 0.38, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 1 (plant = :sampled) done in 54.5 s (96 plant realizations)
-  NOTE: the CEV SOE guard CLAMPED 1 times; energy was silently created or
-        discarded on those steps, so the SOE trace is not exactly integrable.
-  fixed power model (mu) : [4.79, 3.16, 4.7, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
-  SOE_ini=8.22  realised $3199.31 (plan $193.41)  changed: CEV1=25 MCS=32 /96  feas=true
-             A0(:sampled) $224.58 -> A1 $3199.31 (+2974.72)
+Approach 1 (plant = :sampled) done in 25.4 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.19, 0.38, 0.0] kW
+  SOE_ini=8.22  realised $193.21 (plan $193.41)  changed: CEV1=16 MCS=14 /96  feas=true
+             A0(:sampled) $193.41 -> A1 $193.21 (-0.19)
