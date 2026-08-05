@@ -1,0 +1,197 @@
+Dataset mean=[0.26402357 0.305944   0.3008286 ]  std=[0.19088298 0.17936464 0.1828951 ]
+
+======================================================================
+[1/5] EXPERIMENT: baseline_d3p6  (P0)
+  Trial-5 best single knobs locked in: dedup3 + ce loss + patience=6 (re-anchor point for Trial 6, comparable to Trial-5 baseline=63.14%)
+======================================================================
+  Fold 1/1 [fixed]: train=87579 val=44001
+    [baseline_d3p6_fixed|s42] epoch 1: train_acc=73.92% val_acc=51.51%
+    [baseline_d3p6_fixed|s42] epoch 2: train_acc=87.94% val_acc=53.08%
+    [baseline_d3p6_fixed|s42] epoch 3: train_acc=92.04% val_acc=58.31%
+    [baseline_d3p6_fixed|s42] epoch 4: train_acc=94.26% val_acc=61.94%
+    [baseline_d3p6_fixed|s42] epoch 5: train_acc=95.40% val_acc=65.93%
+    [baseline_d3p6_fixed|s42] epoch 6: train_acc=96.27% val_acc=61.99%
+    [baseline_d3p6_fixed|s42] epoch 7: train_acc=96.92% val_acc=60.76%
+    [baseline_d3p6_fixed|s42] epoch 8: train_acc=97.40% val_acc=61.88%
+    [baseline_d3p6_fixed|s42] epoch 9: train_acc=97.83% val_acc=61.63%
+    [baseline_d3p6_fixed|s42] epoch 10: train_acc=98.09% val_acc=62.26%
+    [baseline_d3p6_fixed|s42] epoch 11: train_acc=98.39% val_acc=61.99%
+    [baseline_d3p6_fixed|s42] early stop at epoch 11
+  Fold 1 [fixed] acc=65.93%
+  => baseline_d3p6: val_acc=65.93 +/- 0.00%  (152.4 min)
+
+======================================================================
+[2/5] EXPERIMENT: p6_flow_dedup3  (P6)
+  Optical-flow-only, NOW with dedup3+patience6 (Trial-5 p3_flow_only never had dedup applied)
+======================================================================
+  Fold 1/1 [fixed]: train=87579 val=44001
+    [p6_flow_dedup3_fixed|s42] epoch 1: train_acc=58.46% val_acc=61.26%
+    [p6_flow_dedup3_fixed|s42] epoch 2: train_acc=74.77% val_acc=62.91%
+    [p6_flow_dedup3_fixed|s42] epoch 3: train_acc=81.97% val_acc=68.16%
+    [p6_flow_dedup3_fixed|s42] epoch 4: train_acc=86.70% val_acc=67.76%
+    [p6_flow_dedup3_fixed|s42] epoch 5: train_acc=89.50% val_acc=69.56%
+    [p6_flow_dedup3_fixed|s42] epoch 6: train_acc=91.68% val_acc=67.48%
+    [p6_flow_dedup3_fixed|s42] epoch 7: train_acc=93.45% val_acc=68.61%
+    [p6_flow_dedup3_fixed|s42] epoch 8: train_acc=94.59% val_acc=68.29%
+    [p6_flow_dedup3_fixed|s42] epoch 9: train_acc=95.57% val_acc=67.23%
+    [p6_flow_dedup3_fixed|s42] epoch 10: train_acc=96.27% val_acc=66.02%
+    [p6_flow_dedup3_fixed|s42] epoch 11: train_acc=97.01% val_acc=68.47%
+    [p6_flow_dedup3_fixed|s42] early stop at epoch 11
+  Fold 1 [fixed] acc=69.56%
+  => p6_flow_dedup3: val_acc=69.56 +/- 0.00%  (183.4 min)
+
+======================================================================
+[3/5] EXPERIMENT: p6_two_stream_dedup3  (P6)
+  RGB+flow two-stream, NOW with dedup3+patience6 (Trial-5 p3_two_stream never had dedup applied)
+======================================================================
+  Fold 1/1 [fixed]: train=87579 val=44001
+    [p6_two_stream_dedup3_fixed|s42] epoch 1: train_acc=77.09% val_acc=66.63%
+    [p6_two_stream_dedup3_fixed|s42] epoch 2: train_acc=90.04% val_acc=62.26%
+    [p6_two_stream_dedup3_fixed|s42] epoch 3: train_acc=93.65% val_acc=59.80%
+    [p6_two_stream_dedup3_fixed|s42] epoch 4: train_acc=95.43% val_acc=61.25%
+    [p6_two_stream_dedup3_fixed|s42] epoch 5: train_acc=96.68% val_acc=67.60%
+    [p6_two_stream_dedup3_fixed|s42] epoch 6: train_acc=97.37% val_acc=61.55%
+    [p6_two_stream_dedup3_fixed|s42] epoch 7: train_acc=98.01% val_acc=62.28%
+    [p6_two_stream_dedup3_fixed|s42] epoch 8: train_acc=98.23% val_acc=66.61%
+    [p6_two_stream_dedup3_fixed|s42] epoch 9: train_acc=98.68% val_acc=68.34%
+    [p6_two_stream_dedup3_fixed|s42] epoch 10: train_acc=98.87% val_acc=65.16%
+    [p6_two_stream_dedup3_fixed|s42] epoch 11: train_acc=99.07% val_acc=68.60%
+    [p6_two_stream_dedup3_fixed|s42] epoch 12: train_acc=99.27% val_acc=67.10%
+    [p6_two_stream_dedup3_fixed|s42] epoch 13: train_acc=99.33% val_acc=67.55%
+    [p6_two_stream_dedup3_fixed|s42] epoch 14: train_acc=99.47% val_acc=68.21%
+    [p6_two_stream_dedup3_fixed|s42] epoch 15: train_acc=99.54% val_acc=68.58%
+    [p6_two_stream_dedup3_fixed|s42] epoch 16: train_acc=99.59% val_acc=67.44%
+    [p6_two_stream_dedup3_fixed|s42] epoch 17: train_acc=99.65% val_acc=66.17%
+    [p6_two_stream_dedup3_fixed|s42] early stop at epoch 17
+  Fold 1 [fixed] acc=68.60%
+  => p6_two_stream_dedup3: val_acc=68.60 +/- 0.00%  (511.3 min)
+
+======================================================================
+[4/5] EXPERIMENT: p6_final_combined  (P6)
+  Trial-5's best recipe (dedup3+erase+mixup+ce+two-stream+tta, 3-seed ensemble), patience=6 so no seed gets cut off mid-climb
+======================================================================
+  Fold 1/1 [fixed]: train=87579 val=44001
+    [p6_final_combined_fixed|s42] epoch 1: train_acc=77.09% val_acc=67.09%
+    [p6_final_combined_fixed|s42] epoch 2: train_acc=90.04% val_acc=62.63%
+    [p6_final_combined_fixed|s42] epoch 3: train_acc=93.65% val_acc=59.99%
+    [p6_final_combined_fixed|s42] epoch 4: train_acc=95.43% val_acc=61.90%
+    [p6_final_combined_fixed|s42] epoch 5: train_acc=96.68% val_acc=68.38%
+    [p6_final_combined_fixed|s42] epoch 6: train_acc=97.37% val_acc=62.46%
+    [p6_final_combined_fixed|s42] epoch 7: train_acc=98.01% val_acc=63.53%
+    [p6_final_combined_fixed|s42] epoch 8: train_acc=98.23% val_acc=66.61%
+    [p6_final_combined_fixed|s42] epoch 9: train_acc=98.68% val_acc=69.25%
+    [p6_final_combined_fixed|s42] epoch 10: train_acc=98.87% val_acc=65.54%
+    [p6_final_combined_fixed|s42] epoch 11: train_acc=99.07% val_acc=69.22%
+    [p6_final_combined_fixed|s42] epoch 12: train_acc=99.27% val_acc=66.95%
+    [p6_final_combined_fixed|s42] epoch 13: train_acc=99.33% val_acc=68.14%
+    [p6_final_combined_fixed|s42] epoch 14: train_acc=99.47% val_acc=67.66%
+    [p6_final_combined_fixed|s42] epoch 15: train_acc=99.54% val_acc=68.61%
+    [p6_final_combined_fixed|s42] early stop at epoch 15
+    [p6_final_combined_fixed|s43] epoch 1: train_acc=76.96% val_acc=60.42%
+    [p6_final_combined_fixed|s43] epoch 2: train_acc=89.89% val_acc=66.14%
+    [p6_final_combined_fixed|s43] epoch 3: train_acc=93.73% val_acc=62.21%
+    [p6_final_combined_fixed|s43] epoch 4: train_acc=95.51% val_acc=69.84%
+    [p6_final_combined_fixed|s43] epoch 5: train_acc=96.68% val_acc=69.36%
+    [p6_final_combined_fixed|s43] epoch 6: train_acc=97.39% val_acc=68.83%
+    [p6_final_combined_fixed|s43] epoch 7: train_acc=97.99% val_acc=68.31%
+    [p6_final_combined_fixed|s43] epoch 8: train_acc=98.24% val_acc=65.14%
+    [p6_final_combined_fixed|s43] epoch 9: train_acc=98.67% val_acc=69.18%
+    [p6_final_combined_fixed|s43] epoch 10: train_acc=98.92% val_acc=68.36%
+    [p6_final_combined_fixed|s43] early stop at epoch 10
+    [p6_final_combined_fixed|s44] epoch 1: train_acc=76.67% val_acc=61.66%
+    [p6_final_combined_fixed|s44] epoch 2: train_acc=90.07% val_acc=61.39%
+    [p6_final_combined_fixed|s44] epoch 3: train_acc=93.67% val_acc=65.84%
+    [p6_final_combined_fixed|s44] epoch 4: train_acc=95.52% val_acc=62.83%
+    [p6_final_combined_fixed|s44] epoch 5: train_acc=96.61% val_acc=64.24%
+    [p6_final_combined_fixed|s44] epoch 6: train_acc=97.43% val_acc=62.59%
+    [p6_final_combined_fixed|s44] epoch 7: train_acc=97.97% val_acc=64.66%
+    [p6_final_combined_fixed|s44] epoch 8: train_acc=98.31% val_acc=68.26%
+    [p6_final_combined_fixed|s44] epoch 9: train_acc=98.68% val_acc=66.97%
+    [p6_final_combined_fixed|s44] epoch 10: train_acc=98.81% val_acc=67.05%
+    [p6_final_combined_fixed|s44] epoch 11: train_acc=99.08% val_acc=67.91%
+    [p6_final_combined_fixed|s44] epoch 12: train_acc=99.22% val_acc=66.56%
+    [p6_final_combined_fixed|s44] epoch 13: train_acc=99.36% val_acc=66.30%
+    [p6_final_combined_fixed|s44] epoch 14: train_acc=99.41% val_acc=65.78%
+    [p6_final_combined_fixed|s44] early stop at epoch 14
+  Fold 1 [fixed] acc=70.66%
+  => p6_final_combined: val_acc=70.66 +/- 0.00%  (1245.0 min)
+
+======================================================================
+[5/5] EXPERIMENT: p6_final_ensemble5  (FINAL)
+  Same as p6_final_combined but 5-seed ensemble instead of 3 (most expensive run in the study - only justified if p6_final_combined confirms the recipe is still improving with patience=6)
+======================================================================
+  Fold 1/1 [fixed]: train=87579 val=44001
+    [p6_final_ensemble5_fixed|s42] epoch 1: train_acc=77.09% val_acc=67.09%
+    [p6_final_ensemble5_fixed|s42] epoch 2: train_acc=90.04% val_acc=62.63%
+    [p6_final_ensemble5_fixed|s42] epoch 3: train_acc=93.65% val_acc=59.99%
+    [p6_final_ensemble5_fixed|s42] epoch 4: train_acc=95.43% val_acc=61.90%
+    [p6_final_ensemble5_fixed|s42] epoch 5: train_acc=96.68% val_acc=68.38%
+    [p6_final_ensemble5_fixed|s42] epoch 6: train_acc=97.37% val_acc=62.46%
+    [p6_final_ensemble5_fixed|s42] epoch 7: train_acc=98.01% val_acc=63.53%
+    [p6_final_ensemble5_fixed|s42] epoch 8: train_acc=98.23% val_acc=66.61%
+    [p6_final_ensemble5_fixed|s42] epoch 9: train_acc=98.68% val_acc=69.25%
+    [p6_final_ensemble5_fixed|s42] epoch 10: train_acc=98.87% val_acc=65.54%
+    [p6_final_ensemble5_fixed|s42] epoch 11: train_acc=99.07% val_acc=69.22%
+    [p6_final_ensemble5_fixed|s42] epoch 12: train_acc=99.27% val_acc=66.95%
+    [p6_final_ensemble5_fixed|s42] epoch 13: train_acc=99.33% val_acc=68.14%
+    [p6_final_ensemble5_fixed|s42] epoch 14: train_acc=99.47% val_acc=67.66%
+    [p6_final_ensemble5_fixed|s42] epoch 15: train_acc=99.54% val_acc=68.61%
+    [p6_final_ensemble5_fixed|s42] early stop at epoch 15
+    [p6_final_ensemble5_fixed|s43] epoch 1: train_acc=76.96% val_acc=60.42%
+    [p6_final_ensemble5_fixed|s43] epoch 2: train_acc=89.89% val_acc=66.14%
+    [p6_final_ensemble5_fixed|s43] epoch 3: train_acc=93.73% val_acc=62.21%
+    [p6_final_ensemble5_fixed|s43] epoch 4: train_acc=95.51% val_acc=69.84%
+    [p6_final_ensemble5_fixed|s43] epoch 5: train_acc=96.68% val_acc=69.36%
+    [p6_final_ensemble5_fixed|s43] epoch 6: train_acc=97.39% val_acc=68.83%
+    [p6_final_ensemble5_fixed|s43] epoch 7: train_acc=97.99% val_acc=68.31%
+    [p6_final_ensemble5_fixed|s43] epoch 8: train_acc=98.24% val_acc=65.14%
+    [p6_final_ensemble5_fixed|s43] epoch 9: train_acc=98.67% val_acc=69.18%
+    [p6_final_ensemble5_fixed|s43] epoch 10: train_acc=98.92% val_acc=68.36%
+    [p6_final_ensemble5_fixed|s43] early stop at epoch 10
+    [p6_final_ensemble5_fixed|s44] epoch 1: train_acc=76.67% val_acc=61.66%
+    [p6_final_ensemble5_fixed|s44] epoch 2: train_acc=90.07% val_acc=61.39%
+    [p6_final_ensemble5_fixed|s44] epoch 3: train_acc=93.67% val_acc=65.84%
+    [p6_final_ensemble5_fixed|s44] epoch 4: train_acc=95.52% val_acc=62.83%
+    [p6_final_ensemble5_fixed|s44] epoch 5: train_acc=96.61% val_acc=64.24%
+    [p6_final_ensemble5_fixed|s44] epoch 6: train_acc=97.43% val_acc=62.59%
+    [p6_final_ensemble5_fixed|s44] epoch 7: train_acc=97.97% val_acc=64.66%
+    [p6_final_ensemble5_fixed|s44] epoch 8: train_acc=98.31% val_acc=68.26%
+    [p6_final_ensemble5_fixed|s44] epoch 9: train_acc=98.68% val_acc=66.97%
+    [p6_final_ensemble5_fixed|s44] epoch 10: train_acc=98.81% val_acc=67.05%
+    [p6_final_ensemble5_fixed|s44] epoch 11: train_acc=99.08% val_acc=67.91%
+    [p6_final_ensemble5_fixed|s44] epoch 12: train_acc=99.22% val_acc=66.56%
+    [p6_final_ensemble5_fixed|s44] epoch 13: train_acc=99.36% val_acc=66.30%
+    [p6_final_ensemble5_fixed|s44] epoch 14: train_acc=99.41% val_acc=65.78%
+    [p6_final_ensemble5_fixed|s44] early stop at epoch 14
+    [p6_final_ensemble5_fixed|s45] epoch 1: train_acc=76.68% val_acc=65.32%
+    [p6_final_ensemble5_fixed|s45] epoch 2: train_acc=89.91% val_acc=65.90%
+    [p6_final_ensemble5_fixed|s45] epoch 3: train_acc=93.80% val_acc=67.32%
+    [p6_final_ensemble5_fixed|s45] epoch 4: train_acc=95.45% val_acc=68.31%
+    [p6_final_ensemble5_fixed|s45] epoch 5: train_acc=96.66% val_acc=65.24%
+    [p6_final_ensemble5_fixed|s45] epoch 6: train_acc=97.46% val_acc=61.26%
+    [p6_final_ensemble5_fixed|s45] epoch 7: train_acc=98.04% val_acc=66.58%
+    [p6_final_ensemble5_fixed|s45] epoch 8: train_acc=98.32% val_acc=64.36%
+    [p6_final_ensemble5_fixed|s45] epoch 9: train_acc=98.68% val_acc=62.84%
+    [p6_final_ensemble5_fixed|s45] epoch 10: train_acc=98.84% val_acc=62.73%
+    [p6_final_ensemble5_fixed|s45] early stop at epoch 10
+    [p6_final_ensemble5_fixed|s46] epoch 1: train_acc=76.84% val_acc=61.74%
+    [p6_final_ensemble5_fixed|s46] epoch 2: train_acc=89.76% val_acc=67.76%
+    [p6_final_ensemble5_fixed|s46] epoch 3: train_acc=93.69% val_acc=60.53%
+    [p6_final_ensemble5_fixed|s46] epoch 4: train_acc=95.50% val_acc=61.27%
+    [p6_final_ensemble5_fixed|s46] epoch 5: train_acc=96.72% val_acc=67.51%
+    [p6_final_ensemble5_fixed|s46] epoch 6: train_acc=97.51% val_acc=64.93%
+    [p6_final_ensemble5_fixed|s46] epoch 7: train_acc=97.88% val_acc=65.66%
+    [p6_final_ensemble5_fixed|s46] epoch 8: train_acc=98.32% val_acc=65.25%
+    [p6_final_ensemble5_fixed|s46] early stop at epoch 8
+  Fold 1 [fixed] acc=70.68%
+  => p6_final_ensemble5: val_acc=70.68 +/- 0.00%  (2453.0 min)
+
+====================================================================================================
+TRIAL 6 COMPARISON  (baseline = 65.93%)  sorted best-first
+====================================================================================================
+                name phase  val_acc_mean  val_acc_std  delta_vs_baseline helped  recall_loading  minutes
+  p6_final_ensemble5 FINAL     70.680212          0.0           4.752165    YES           31.22   2453.0
+   p6_final_combined    P6     70.659758          0.0           4.731711    YES           30.99   1245.0
+      p6_flow_dedup3    P6     69.557510          0.0           3.629463    YES           27.84    183.4
+p6_two_stream_dedup3    P6     68.602986          0.0           2.674939    YES           28.02    511.3
+       baseline_d3p6    P0     65.928047          0.0           0.000000      ~           15.42    152.4

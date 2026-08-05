@@ -1,0 +1,33 @@
+STEP 8 — Dataset Builder (continuous 15% test split)
+Output : /data/shubhan_avik_work/Targeted_run_3/Dataset_Ten_days
+Videos : 11
+Per-video split (continuous 15% test window):
+  Day_2.mp4      window=0-498s  train=20152  val=3152  dropped(straddle)=5
+  Day_3.mp4      window=0-1485s  train=64992  val=10811  dropped(straddle)=5
+  Day_4_1.mp4    window=38-143s  train=4597  val=811  dropped(straddle)=5
+  TC_00011.mp4   window=56-98s  train=10254  val=296  dropped(straddle)=5
+  TC_00012.mp4   window=0-968s  train=40517  val=6349  dropped(straddle)=5
+  TC_00013.mp4   window=0-9s  train=331  val=61  dropped(straddle)=5
+  TC_00014.mp4   window=812-1391s  train=25086  val=4593  dropped(straddle)=5
+  TC_00015.mp4   window=135-164s  train=1351  val=220  dropped(straddle)=5
+  TC_00016.mp4   window=0-1126s  train=37478  val=7621  dropped(straddle)=5
+  TC_00019.mp4   window=398-1475s  train=31576  val=3577  dropped(straddle)=0
+  TC_00021.mp4   window=0-882s  train=26395  val=6510  dropped(straddle)=5
+
+FINAL DATASET SUMMARY
+TRAIN  (262729 clips):
+  digging             : 27944 clips
+  idling              : 133594 clips
+  loading             : 10372 clips
+  swinging            : 63418 clips
+  travelling          : 27401 clips
+VAL  (44001 clips):
+  digging             : 10024 clips
+  idling              : 14798 clips
+  loading             :  2159 clips
+  swinging            :  9314 clips
+  travelling          :  7706 clips
+Total clips : 306730
+Total val clips recorded : 44001
+Total unique val frames  : 142637
+Dataset root: /data/shubhan_avik_work/Targeted_run_3/Dataset_Ten_days

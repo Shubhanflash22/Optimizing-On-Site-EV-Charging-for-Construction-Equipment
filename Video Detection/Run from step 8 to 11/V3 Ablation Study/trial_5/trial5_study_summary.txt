@@ -1,0 +1,132 @@
+Dataset mean=[0.26993316 0.31687066 0.2971483 ]  std=[0.19258265 0.17985995 0.18147026]
+Resume: 10 experiment(s) already in trial5_comparison.csv -> will skip them.
+[1/14] SKIP baseline (already done)
+[2/14] SKIP p1_dedup2 (already done)
+[3/14] SKIP p1_dedup3 (already done)
+[4/14] SKIP p1_random_erase (already done)
+[5/14] SKIP p1_mixup (already done)
+[6/14] SKIP p1_cutmix (already done)
+[7/14] SKIP p1_focal (already done)
+[8/14] SKIP p2_r3d18 (already done)
+[9/14] SKIP p2_mc3_18 (already done)
+[10/14] SKIP p2_tta (already done)
+
+======================================================================
+[11/14] EXPERIMENT: p2_ensemble3  (P2)
+  3-seed logit ensemble
+======================================================================
+  Fold 1/1 [fixed]: train=262729 val=44001
+    [p2_ensemble3_fixed|s42] epoch 1: train_acc=84.46% val_acc=58.91%
+    [p2_ensemble3_fixed|s42] epoch 2: train_acc=95.12% val_acc=58.70%
+    [p2_ensemble3_fixed|s42] epoch 3: train_acc=97.15% val_acc=63.14%
+    [p2_ensemble3_fixed|s42] epoch 4: train_acc=97.99% val_acc=61.95%
+    [p2_ensemble3_fixed|s42] epoch 5: train_acc=98.52% val_acc=62.46%
+    [p2_ensemble3_fixed|s42] epoch 6: train_acc=98.76% val_acc=62.56%
+    [p2_ensemble3_fixed|s42] early stop at epoch 6
+    [p2_ensemble3_fixed|s43] epoch 1: train_acc=84.50% val_acc=62.27%
+    [p2_ensemble3_fixed|s43] epoch 2: train_acc=95.10% val_acc=62.69%
+    [p2_ensemble3_fixed|s43] epoch 3: train_acc=97.11% val_acc=62.69%
+    [p2_ensemble3_fixed|s43] epoch 4: train_acc=97.95% val_acc=61.66%
+    [p2_ensemble3_fixed|s43] epoch 5: train_acc=98.46% val_acc=63.86%
+    [p2_ensemble3_fixed|s43] epoch 6: train_acc=98.77% val_acc=62.62%
+    [p2_ensemble3_fixed|s43] epoch 7: train_acc=99.00% val_acc=61.31%
+    [p2_ensemble3_fixed|s43] epoch 8: train_acc=99.14% val_acc=61.07%
+    [p2_ensemble3_fixed|s43] early stop at epoch 8
+    [p2_ensemble3_fixed|s44] epoch 1: train_acc=84.43% val_acc=61.94%
+    [p2_ensemble3_fixed|s44] epoch 2: train_acc=95.00% val_acc=56.69%
+    [p2_ensemble3_fixed|s44] epoch 3: train_acc=97.08% val_acc=63.41%
+    [p2_ensemble3_fixed|s44] epoch 4: train_acc=97.99% val_acc=62.31%
+    [p2_ensemble3_fixed|s44] epoch 5: train_acc=98.53% val_acc=60.66%
+    [p2_ensemble3_fixed|s44] epoch 6: train_acc=98.80% val_acc=64.77%
+    [p2_ensemble3_fixed|s44] epoch 7: train_acc=99.01% val_acc=60.96%
+    [p2_ensemble3_fixed|s44] epoch 8: train_acc=99.15% val_acc=63.41%
+    [p2_ensemble3_fixed|s44] epoch 9: train_acc=99.28% val_acc=64.91%
+    [p2_ensemble3_fixed|s44] epoch 10: train_acc=99.39% val_acc=66.93%
+    [p2_ensemble3_fixed|s44] epoch 11: train_acc=99.46% val_acc=63.69%
+    [p2_ensemble3_fixed|s44] epoch 12: train_acc=99.55% val_acc=63.61%
+    [p2_ensemble3_fixed|s44] epoch 13: train_acc=99.61% val_acc=60.81%
+    [p2_ensemble3_fixed|s44] early stop at epoch 13
+  Fold 1 [fixed] acc=68.08%
+  => p2_ensemble3: val_acc=68.08 +/- 0.00%  (1616.2 min)
+
+======================================================================
+[12/14] EXPERIMENT: p3_flow_only  (P3)
+  Single ResNet on optical flow only
+======================================================================
+  Fold 1/1 [fixed]: train=262729 val=44001
+    [p3_flow_only_fixed|s42] epoch 1: train_acc=71.12% val_acc=68.79%
+    [p3_flow_only_fixed|s42] epoch 2: train_acc=88.29% val_acc=67.73%
+    [p3_flow_only_fixed|s42] epoch 3: train_acc=93.56% val_acc=66.09%
+    [p3_flow_only_fixed|s42] epoch 4: train_acc=96.02% val_acc=66.21%
+    [p3_flow_only_fixed|s42] early stop at epoch 4
+  Fold 1 [fixed] acc=68.79%
+  => p3_flow_only: val_acc=68.79 +/- 0.00%  (319.1 min)
+
+======================================================================
+[13/14] EXPERIMENT: p3_two_stream  (P3)
+  RGB + optical-flow two-stream fusion
+======================================================================
+  Fold 1/1 [fixed]: train=262729 val=44001
+    [p3_two_stream_fixed|s42] epoch 1: train_acc=86.70% val_acc=60.25%
+    [p3_two_stream_fixed|s42] epoch 2: train_acc=96.14% val_acc=59.64%
+    [p3_two_stream_fixed|s42] epoch 3: train_acc=97.91% val_acc=69.44%
+    [p3_two_stream_fixed|s42] epoch 4: train_acc=98.62% val_acc=67.03%
+    [p3_two_stream_fixed|s42] epoch 5: train_acc=98.94% val_acc=66.43%
+    [p3_two_stream_fixed|s42] epoch 6: train_acc=99.18% val_acc=68.30%
+    [p3_two_stream_fixed|s42] early stop at epoch 6
+  Fold 1 [fixed] acc=69.44%
+  => p3_two_stream: val_acc=69.44 +/- 0.00%  (937.9 min)
+
+======================================================================
+[14/14] EXPERIMENT: final_combined  (FINAL)
+  Combined best-guess recipe (tune from the deltas above)
+======================================================================
+  Fold 1/1 [fixed]: train=131365 val=44001
+    [final_combined_fixed|s42] epoch 1: train_acc=78.63% val_acc=66.40%
+    [final_combined_fixed|s42] epoch 2: train_acc=89.99% val_acc=61.41%
+    [final_combined_fixed|s42] epoch 3: train_acc=93.17% val_acc=62.71%
+    [final_combined_fixed|s42] epoch 4: train_acc=94.58% val_acc=64.68%
+    [final_combined_fixed|s42] early stop at epoch 4
+    [final_combined_fixed|s43] epoch 1: train_acc=78.54% val_acc=65.57%
+    [final_combined_fixed|s43] epoch 2: train_acc=89.86% val_acc=67.64%
+    [final_combined_fixed|s43] epoch 3: train_acc=93.19% val_acc=67.51%
+    [final_combined_fixed|s43] epoch 4: train_acc=94.51% val_acc=69.26%
+    [final_combined_fixed|s43] epoch 5: train_acc=95.59% val_acc=65.86%
+    [final_combined_fixed|s43] epoch 6: train_acc=96.44% val_acc=69.35%
+    [final_combined_fixed|s43] epoch 7: train_acc=96.97% val_acc=68.75%
+    [final_combined_fixed|s43] epoch 8: train_acc=97.39% val_acc=66.44%
+    [final_combined_fixed|s43] epoch 9: train_acc=97.77% val_acc=67.99%
+    [final_combined_fixed|s43] early stop at epoch 9
+    [final_combined_fixed|s44] epoch 1: train_acc=78.24% val_acc=61.75%
+    [final_combined_fixed|s44] epoch 2: train_acc=89.89% val_acc=63.37%
+    [final_combined_fixed|s44] epoch 3: train_acc=92.96% val_acc=62.56%
+    [final_combined_fixed|s44] epoch 4: train_acc=94.65% val_acc=65.48%
+    [final_combined_fixed|s44] epoch 5: train_acc=95.56% val_acc=63.11%
+    [final_combined_fixed|s44] epoch 6: train_acc=96.32% val_acc=61.00%
+    [final_combined_fixed|s44] epoch 7: train_acc=97.02% val_acc=65.56%
+    [final_combined_fixed|s44] epoch 8: train_acc=97.28% val_acc=66.96%
+    [final_combined_fixed|s44] epoch 9: train_acc=97.77% val_acc=64.63%
+    [final_combined_fixed|s44] epoch 10: train_acc=98.11% val_acc=59.74%
+    [final_combined_fixed|s44] epoch 11: train_acc=98.31% val_acc=62.92%
+    [final_combined_fixed|s44] early stop at epoch 11
+  Fold 1 [fixed] acc=70.98%
+  => final_combined: val_acc=70.98 +/- 0.00%  (2005.0 min)
+
+====================================================================================================
+TRIAL 5 COMPARISON  (baseline = 63.14%)  sorted best-first
+====================================================================================================
+           name phase  val_acc_mean  val_acc_std  delta_vs_baseline helped  recall_loading  minutes
+ final_combined FINAL     70.980205          0.0           7.838458    YES           31.96   2005.0
+  p3_two_stream    P3     69.441604          0.0           6.299857    YES           26.12    937.9
+   p3_flow_only    P3     68.791618          0.0           5.649872    YES           46.83    319.1
+   p2_ensemble3    P2     68.080271          0.0           4.938524    YES           24.32   1616.2
+      p1_dedup3    P1     66.389400          0.0           3.247653    YES           14.31    112.0
+      p2_mc3_18    P2     65.839413          0.0           2.697666    YES           19.73    171.4
+         p2_tta    P2     65.566692          0.0           2.424945    YES           25.61    317.7
+p1_random_erase    P1     65.400786          0.0           2.259040    YES           23.58    340.7
+      p1_dedup2    P1     64.868980          0.0           1.727233    YES           20.38    318.2
+       p1_mixup    P1     64.450808          0.0           1.309061    YES           25.66    151.7
+       p2_r3d18    P2     64.434899          0.0           1.293152    YES           17.74    155.5
+       baseline    P0     63.141747          0.0           0.000000      ~           25.75    250.1
+       p1_focal    P1     60.480444          0.0          -2.661303     no           18.90    302.8
+      p1_cutmix    P1     60.159996          0.0          -2.981750     no           22.65    151.7

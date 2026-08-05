@@ -1,0 +1,29 @@
+Day_2.mp4      val_frames= 10457  acc=48.79%
+Day_3.mp4      val_frames= 35553  acc=36.03%
+Day_4_1.mp4    val_frames=  2589  acc=53.73%
+TC_00011.mp4   val_frames=  1018  acc=40.86%
+TC_00012.mp4   val_frames= 19632  acc=53.70%
+TC_00013.mp4   val_frames=   209  acc=100.00%
+TC_00014.mp4   val_frames= 14247  acc=53.96%
+TC_00015.mp4   val_frames=   712  acc=54.63%
+TC_00016.mp4   val_frames= 24566  acc=57.48%
+TC_00019.mp4   val_frames= 12785  acc=75.01%
+TC_00021.mp4   val_frames= 20869  acc=73.96%
+
+STEP 10 — FINAL VAL-ONLY EVALUATION (15% continuous test block)
+Overall Accuracy : 54.47%  (77691/142637 frames)
+
+Classification report:
+              precision    recall  f1-score   support
+
+     digging     0.5650    0.2837    0.3777     31346
+      idling     0.7592    0.6937    0.7250     46305
+     loading     0.1661    0.4007    0.2348      7842
+    swinging     0.6954    0.4149    0.5197     31621
+  travelling     0.4362    0.7998    0.5645     25523
+
+    accuracy                         0.5447    142637
+   macro avg     0.5244    0.5186    0.4844    142637
+weighted avg     0.6120    0.5447    0.5475    142637
+
+Plots saved in: /data/shubhan_avik_work/Targeted_run_3/plots

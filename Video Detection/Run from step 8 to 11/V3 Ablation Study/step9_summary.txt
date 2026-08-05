@@ -1,0 +1,28 @@
+STEP 9 — 3D ResNet Training
+Train clips: 262729  |  Val clips: 44001
+Config: clip=16 crop=112 fps=25 batch=16 lr=0.001 epochs=20
+Epoch 1/20: train_loss=0.3853 train_acc=86.00% | val_loss=1.4618 val_acc=54.10%
+Epoch 2/20: train_loss=0.1836 train_acc=93.57% | val_loss=1.6148 val_acc=53.41%
+Epoch 3/20: train_loss=0.1336 train_acc=95.33% | val_loss=1.6820 val_acc=57.63%
+Epoch 4/20: train_loss=0.1075 train_acc=96.19% | val_loss=1.7416 val_acc=55.24%
+Epoch 5/20: train_loss=0.0919 train_acc=96.75% | val_loss=1.5838 val_acc=59.91%
+Epoch 6/20: train_loss=0.0596 train_acc=97.88% | val_loss=2.1635 val_acc=55.39%
+Epoch 7/20: train_loss=0.0509 train_acc=98.17% | val_loss=2.2951 val_acc=55.22%
+Epoch 8/20: train_loss=0.0463 train_acc=98.34% | val_loss=2.4223 val_acc=56.50%
+Epoch 9/20: train_loss=0.0425 train_acc=98.49% | val_loss=2.2715 val_acc=58.11%
+Epoch 10/20: train_loss=0.0319 train_acc=98.82% | val_loss=2.4691 val_acc=59.35%
+Epoch 11/20: train_loss=0.0280 train_acc=98.97% | val_loss=2.5552 val_acc=57.30%
+Epoch 12/20: train_loss=0.0260 train_acc=99.07% | val_loss=2.5516 val_acc=56.54%
+Epoch 13/20: train_loss=0.0251 train_acc=99.09% | val_loss=2.7907 val_acc=57.99%
+Epoch 14/20: train_loss=0.0212 train_acc=99.20% | val_loss=2.8525 val_acc=57.90%
+Epoch 15/20: train_loss=0.0190 train_acc=99.32% | val_loss=2.9561 val_acc=56.48%
+Epoch 16/20: train_loss=0.0191 train_acc=99.31% | val_loss=2.6882 val_acc=58.70%
+Epoch 17/20: train_loss=0.0174 train_acc=99.37% | val_loss=2.8004 val_acc=58.63%
+Epoch 18/20: train_loss=0.0158 train_acc=99.42% | val_loss=2.8180 val_acc=58.06%
+Epoch 19/20: train_loss=0.0148 train_acc=99.46% | val_loss=3.0107 val_acc=57.73%
+Epoch 20/20: train_loss=0.0146 train_acc=99.47% | val_loss=3.0807 val_acc=55.76%
+
+TRAINING COMPLETE
+Best Validation Loss : 1.4618
+Best Validation Acc  : 54.10%
+Best model saved to  : /data/shubhan_avik_work/Targeted_run_3/resnet3d_best_ten_days.pth
