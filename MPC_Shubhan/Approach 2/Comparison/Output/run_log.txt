@@ -1,0 +1,64 @@
+==============================================================================
+3-WAY COMPARISON — Approach 0 (deterministic) vs Shrinking (stochastic) vs Receding (stochastic)
+Scenarios/re-solve: 5
+Receding code : c:\Users\shubh\Desktop\MPC\Approach 2\Receding_Horizon\code
+Shrinking code: c:\Users\shubh\Desktop\MPC\Approach 2\Shrinking_Horizon\code
+Input         : c:\Users\shubh\Desktop\MPC\Approach 2\Comparison\Input
+Output        : c:\Users\shubh\Desktop\MPC\Approach 2\Comparison\Output
+==============================================================================
+
+Shared power pool: n_samples=197 per (entity, activity) (96 intervals/day x 2 days incl. the Receding buffer day, + 5); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.2, 0.18, 0.38, 0.0] kW
+
+--- Approach 0 (one-shot, plant = :sampled) ---
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.38, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 8.3 s (96 plant realizations)
+
+--- Approach 2a (Shrinking Horizon, stochastic, 5 scenarios) ---
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.38, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.38, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1005.2 s (96 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.38, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.38, 0.0] kW
+
+--- Approach 2b (Receding Horizon, stochastic, 5 scenarios) ---
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.38, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.38, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 2415.1 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.38, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.38, 0.0] kW
+
+--- Writing 3-way comparison outputs ---
+
+==============================================================================
+KPI SUMMARY
+Metric                            Approach0      Shrinking       Receding
+Grid energy (kWh)                     31.65          31.85          31.85
+Energy cost (USD)                     10.07          10.14          10.14
+CO2 (kg)                               8.60           8.65           8.65
+NCD peak (kW)                          2.88           2.90           2.90
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+==============================================================================
+
+Results written to: c:\Users\shubh\Desktop\MPC\Approach 2\Comparison\Output
+  01_total_grid_power_profile.png/.csv … 09_mcs_<m>_power_profile.png/.csv
+  08_kpi_metrics_summary.png
+  08_cost_kpi_metrics.csv
+  approach0_vs_shrinking_vs_receding.html
+  run_log.txt  (this console log)

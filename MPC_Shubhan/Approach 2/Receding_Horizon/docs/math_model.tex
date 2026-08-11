@@ -226,20 +226,23 @@ The counters do \emph{not} restart each morning; the history runs continuously. 
 day-block is the full 24\,h, the overnight intervals sit in that history as idle, so a night
 supplies its own break and the seam is harmless in practice.
 
-\paragraph{Travel pacing (Eq.\ 13, HARD, with a small tolerance on the lower side).}
+\paragraph{Travel pacing (Eq.\ 13, HARD, no tolerance).}
 With $\kappa=\kappa_{\text{wt}}=4$, for each assigned $(i,e)$, on cumulative travel $V$ vs
-cumulative useful work $W$ (dig+load) --- both seeded with the applied counts accumulated over the
-whole run, not the current day:
+cumulative useful work $W$ (dig+load) --- both raw \emph{applied interval counts} off the $u$
+indicator, not hours, seeded from \texttt{cum\_trv\_cnt\_e}/\texttt{cum\_work\_cnt\_e}:
 \begin{equation}
-W(k)-\kappa\ \le\ \kappa\,V(k)\ \le\ W(k) + \tau.
+W(k)-\kappa\ \le\ \kappa\,V(k)\ \le\ W(k).
 \end{equation}
-Hard; there are no pacing slacks, but $\tau = \texttt{pacing\_tol} = 0.05$ (interval-units) is
-added to the upper side to absorb the sub-interval rounding residue the energy-capping guard
-(state guard, above) can leave in the cumulative dig/load totals. Without $\tau$ that residue can
-strand the band on opposite sides of an integer boundary with no whole-interval solution in
-between, permanently and spuriously blocking further travel/work for a CEV over a shortfall as
-small as a minute (traced via IIS on the `run10_SOE_14.80` sweep point). $\tau$ is small relative
-to one full interval (1.0) and cannot be used to buy a genuine extra work unit.
+Hard; there are no pacing slacks and no tolerance is needed --- a battery-shortage-capped interval
+(e.g.\ 14 of 15 minutes realized) still counts as one full travel/work interval, so the fractional
+rounding residue that used to strand the band on an integer boundary (the old $\tau =
+\texttt{pacing\_tol} = 0.05$ fix) cannot occur here.
+
+Unlike precedence and the rest rule, the pacing seed is \textbf{scoped to the current calendar day
+only}: \texttt{hist} is never reset across days, so the count is taken from
+\texttt{today\_start} $= (\text{firstday}-1)\cdot n_{\text{day}} + 1$ onward --- only intervals
+applied since this calendar day's boundary. A CEV's travel/work balance resets fresh every
+morning. Applies to both the deterministic and scenario-linked stochastic builder.
 
 \paragraph{Demand peaks (E1, HARD).}
 $P^{\text{NC}}\ge$ carried-in peak and $\ge\sum_m P^{\text{ch,tot}}_{m,k}$ for all $k$;

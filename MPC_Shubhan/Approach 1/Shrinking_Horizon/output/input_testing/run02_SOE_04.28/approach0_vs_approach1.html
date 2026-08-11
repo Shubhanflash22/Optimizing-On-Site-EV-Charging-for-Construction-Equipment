@@ -9,21 +9,21 @@ tr:last-child td{font-weight:bold;background:#fafafa}
 <h2>Approach 0 (one-shot 8:00 plan) vs Approach 1 (closed-loop MPC)</h2>
 <p>Both columns are fully realized over 08:00 &rarr; next-day 08:00 and draw from the SAME pre-generated per-(excavator, activity) power samples, so the &Delta; reflects only the value of re-planning, not different randomness. Re-run with <code>approach0_plant = :mean</code> to see the deterministic MILP optimum instead.</p>
 <table><tr><th>Metric</th><th>Approach 0 &mdash; sampled plant<br>(one-shot, open loop)</th><th>Approach 1 &mdash; closed loop</th><th>&Delta; (A1 &minus; A0)</th></tr>
-<tr><td>Grid energy (kWh)</td><td>30.329</td><td>27.655</td><td>-2.674</td></tr>
-<tr><td>Energy cost (USD)</td><td>9.653</td><td>8.691</td><td>-0.962</td></tr>
-<tr><td>CO2 emissions (kg)</td><td>8.241</td><td>6.899</td><td>-1.342</td></tr>
-<tr><td>CO2 cost (USD)</td><td>0.412</td><td>0.345</td><td>-0.067</td></tr>
-<tr><td>NCD peak (kW)</td><td>2.757</td><td>2.661</td><td>-0.096</td></tr>
-<tr><td>NCD charge (USD)</td><td>55.475</td><td>53.534</td><td>-1.940</td></tr>
+<tr><td>Grid energy (kWh)</td><td>30.335</td><td>30.295</td><td>-0.040</td></tr>
+<tr><td>Energy cost (USD)</td><td>9.829</td><td>9.775</td><td>-0.053</td></tr>
+<tr><td>CO2 emissions (kg)</td><td>7.880</td><td>7.957</td><td>+0.076</td></tr>
+<tr><td>CO2 cost (USD)</td><td>0.394</td><td>0.398</td><td>+0.004</td></tr>
+<tr><td>NCD peak (kW)</td><td>2.528</td><td>2.578</td><td>+0.050</td></tr>
+<tr><td>NCD charge (USD)</td><td>50.862</td><td>51.876</td><td>+1.014</td></tr>
 <tr><td>OPD peak (kW)</td><td>-0.000</td><td>0.000</td><td>+0.000</td></tr>
 <tr><td>OPD charge (USD)</td><td>-0.000</td><td>0.000</td><td>+0.000</td></tr>
-<tr><td>Missed work (h)</td><td>0.250</td><td>0.500</td><td>+0.250</td></tr>
-<tr><td>Missed work penalty (USD)</td><td>500.000</td><td>1000.000</td><td>+500.000</td></tr>
+<tr><td>Missed work (h)</td><td>0.250</td><td>0.250</td><td>+0.000</td></tr>
+<tr><td>Missed work penalty (USD)</td><td>500.000</td><td>500.000</td><td>+0.000</td></tr>
 <tr><td>MCS transit (h)</td><td>0.500</td><td>0.500</td><td>+0.000</td></tr>
 <tr><td>Travel labour (USD)</td><td>125.000</td><td>125.000</td><td>+0.000</td></tr>
-<tr><td>TOTAL cost (USD)</td><td>690.540</td><td>1187.570</td><td>+497.031</td></tr>
+<tr><td>TOTAL cost (USD)</td><td>686.084</td><td>687.049</td><td>+0.964</td></tr>
 </table>
 <h3>Run diagnostics</h3><table><tr><th>Run</th><th>Plant</th><th>Infeasible windows</th><th>Energy caps</th><th>Solve time (s)</th></tr>
-<tr><td>Approach 0 (one-shot)</td><td>:sampled</td><td>0</td><td>0</td><td>7.2</td></tr>
-<tr><td>Approach 1 (closed loop)</td><td>:sampled</td><td>0</td><td>0</td><td>39.3</td></tr>
+<tr><td>Approach 0 (one-shot)</td><td>:sampled</td><td>0</td><td>0</td><td>6.5</td></tr>
+<tr><td>Approach 1 (closed loop)</td><td>:sampled</td><td>0</td><td>0</td><td>46.2</td></tr>
 </table></body></html>

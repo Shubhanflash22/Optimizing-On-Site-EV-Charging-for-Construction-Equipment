@@ -1,6 +1,81 @@
+# MPC — Mobile Charging Station Dispatch for Construction EVs
+
+Top-level overview of everything under `C:\Users\shubh\Desktop\MPC`.
+
+```
+MPC/
+├── Approach 1/                 Certainty-Equivalent (deterministic) MPC
+├── Approach 2/                 Stochastic (scenario-based) MPC
+├── Comparison_A0_A1_A2/        5-way comparison spanning BOTH approaches
+├── Approaches 1 and 2.pptx
+├── Optimization.pdf
+└── README.md                   this file
+```
+
+## The problem, in one paragraph
+
+One **MCS** (Mobile Charging Station — a big battery on a towed truck) has to keep a fleet
+of **CEVs** (electric excavators, fixed at construction sites) charged and working, all day,
+without knowing in advance exactly how much power each activity (digging, loading, etc.)
+will actually draw. The controller decides, every 15 minutes: where the MCS charges, how
+much it delivers to which CEV, when it drives between sites, and what each CEV is doing —
+subject to battery physics, work quotas, precedence and pacing rules — while minimizing
+time-of-use electricity cost, carbon, demand charges, missed-work penalties and towing
+labour. Both approaches below solve this same problem; they differ in how they handle the
+fact that the power estimate is a guess, not a certainty.
+
+## `Approach 1/` — Certainty-Equivalent MPC
+
+The baseline controller: plans against the **posterior mean** power draw (`μ`) as if it
+were exactly correct, and relies on **re-solving every 15 minutes from the real measured
+state** to correct for the fact that it wasn't. Two horizon variants live here
+(`Shrinking_Horizon/` — single day, window shrinks to the day boundary; `Receding_Horizon/`
+— multi-day, fixed-width window slides into tomorrow), plus its own 3-way comparison driver
+(`Comparison/`, — Approach 0 one-shot baseline vs this tree's Shrinking vs Receding) and a
+one-click batch runner (`RUN_ALL.jl`).
+
+Start at **`Approach 1/README.md`** — it's the master overview for that whole tree: the
+plain-language explanation, the sampled-vs-mean plant switch, Shrinking vs Receding,
+the file-by-file map, and a five-level appendix on planning vs reality.
+
+## `Approach 2/` — Stochastic (Scenario-Based) MPC
+
+Same folder structure, same data, same underlying MILP physics as Approach 1 — the
+difference is entirely in *how* it hedges against the uncertain power draw. Instead of
+planning against one mean value, at every re-solve it samples a small set of **scenarios**
+from the fitted posterior and solves one MILP that must stay feasible under **all of them
+at once**, coupled by a **non-anticipativity** constraint (the very next action must be
+identical across every scenario, since you don't yet know which one is real). That's what
+lets it hedge *before* a bad draw happens, rather than only reacting after re-measuring —
+see the worked example at the bottom of this file for exactly what that buys you.
+
+Start at **`Approach 2/README.md`** — same master-overview structure as Approach 1's, with
+§13 covering the full stochastic extension.
+
+## `Comparison_A0_A1_A2/` — the 5-way comparison
+
+Approach 1 and Approach 2 each ship their own 3-way comparison (Approach 0 vs that tree's
+own Shrinking vs Receding). This folder is the one that spans **both** trees at once: it
+solves Approach 0, Approach 1 – Shrinking, Approach 2 – Shrinking, Approach 1 – Receding,
+and Approach 2 – Receding **once each**, from one shared random power pool, and slices the
+results into 11 output folders — the full 5-way comparison plus 10 requested subsets (every
+A0-vs-one pairing, both A0-vs-shrinking-pair and A0-vs-receding-pair triples, shrinking vs
+shrinking, receding vs receding, and each approach's shrinking vs its own receding).
+
+Start at **`Comparison_A0_A1_A2/README.md`** for the full folder layout, the run
+instructions, the parameter table, and the compatibility notes on how four codebases safely
+share one power pool.
+
+## Where the diagrams and slides live
+
+- **`Approaches 1 and 2.pptx`** — the slide deck.
+- **`Optimization.pdf`** — the source optimization writeup.
+
+---
+
 # Understanding Deterministic MPC vs Stochastic MPC
 
-This document explains **Deterministic (Certainty-Equivalent) MPC** vs **Stochastic
+The next part explains **Deterministic (Certainty-Equivalent) MPC** vs **Stochastic
 (Scenario-Based) MPC** at five levels of depth — from a simple analogy to a formal
 treatment — and finishes with one worked numerical example that runs **an open-loop
 baseline, Deterministic MPC, and Stochastic MPC side by side** on the exact same hidden

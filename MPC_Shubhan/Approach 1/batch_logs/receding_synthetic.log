@@ -10,7 +10,7 @@ Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 
   planning power (mu)  : [4.6, 3.3, 4.5, 0.0] kW
   plant sampling sd    : [1.0, 1.0, 1.5, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 1 (plant = :sampled) done in 232.9 s (384 plant realizations)
+Approach 1 (plant = :sampled) done in 230.1 s (384 plant realizations)
   fixed power model (mu) : [4.6, 3.3, 4.5, 0.0] kW
   plant sampling sd      : [1.0, 1.0, 1.5, 0.0] kW
 

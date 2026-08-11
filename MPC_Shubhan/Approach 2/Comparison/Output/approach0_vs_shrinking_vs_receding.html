@@ -1,0 +1,28 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+body{font-family:sans-serif;margin:16px}
+table{border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #ccc;padding:4px 10px;text-align:right}
+th{background:#f4f4f4}
+td:first-child,th:first-child{text-align:left}
+</style></head><body>
+<h2>Approach 0 (one-shot) vs Shrinking Horizon vs Receding Horizon</h2>
+<p>All three columns are FULLY REALISED outcomes, drawn from each app's own shared per-(excavator, activity) power sample pool (same seed, same frozen prior mu/sigma, since the input data is identical across the two codebases apart from the regression-refreshed <code>parameters.csv</code>). The Receding Horizon run uses <code>n_days = 1</code> so its single reported day is directly comparable to the Shrinking Horizon's single-day scope.</p>
+<table><tr><th>Metric</th>
+<th>Approach 0 (one-shot, :sampled)</th>
+<th>Approach 2 — Shrinking (stochastic)</th>
+<th>Approach 2 — Receding (stochastic)</th>
+<th>&Delta; (Receding &minus; Shrinking)</th></tr>
+<tr><td>Grid energy (kWh)</td><td>31.651</td><td>31.852</td><td>31.852</td><td>0.000</td></tr>
+<tr><td>Energy cost (USD)</td><td>10.074</td><td>10.137</td><td>10.137</td><td>0.000</td></tr>
+<tr><td>CO2 emissions (kg)</td><td>8.600</td><td>8.654</td><td>8.654</td><td>0.000</td></tr>
+<tr><td>CO2 cost (USD)</td><td>0.430</td><td>0.433</td><td>0.433</td><td>0.000</td></tr>
+<tr><td>NCD peak (kW)</td><td>2.877</td><td>2.896</td><td>2.896</td><td>-0.000</td></tr>
+<tr><td>NCD charge (USD)</td><td>57.893</td><td>58.259</td><td>58.259</td><td>-0.000</td></tr>
+<tr><td>OPD peak (kW)</td><td>-0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>OPD charge (USD)</td><td>-0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>Missed work (h)</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>Missed work penalty (USD)</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>MCS transit (h)</td><td>0.500</td><td>0.500</td><td>0.500</td><td>0.000</td></tr>
+<tr><td>Travel labour (USD)</td><td>125.000</td><td>125.000</td><td>125.000</td><td>0.000</td></tr>
+<tr><td>TOTAL cost (USD)</td><td>193.396</td><td>193.829</td><td>193.829</td><td>-0.000</td></tr>
+</table></body></html>

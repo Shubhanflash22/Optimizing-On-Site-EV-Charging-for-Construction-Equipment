@@ -1,0 +1,110 @@
+==============================================================================
+5-WAY COMPARISON — Approach 0 vs A1-Shrinking vs A2-Shrinking vs A1-Receding vs A2-Receding
+A1 Shrinking code: C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\code
+A1 Receding  code: C:\Users\shubh\Desktop\MPC\Approach 1\Receding_Horizon\code
+A2 Shrinking code: C:\Users\shubh\Desktop\MPC\Approach 2\Shrinking_Horizon\code
+A2 Receding  code: C:\Users\shubh\Desktop\MPC\Approach 2\Receding_Horizon\code
+Input             : c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Input
+Output            : c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output
+Comparisons       : All5, A0_A1S, A0_A2S, A0_A1R, A0_A2R, A0_A1S_A2S, A0_A1R_A2R, A1S_A2S, A1R_A2R, A1S_A1R, A2S_A2R
+==============================================================================
+
+Shared power pool: n_samples=197 per (entity, activity) (96 intervals/day x 2 days incl. the Receding buffer day, + 5); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.82, 0.73, 1.55, 0.0] kW
+
+--- Approach 0 (one-shot, plant = :sampled, source = :a1_shrinking) ---
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.82, 0.73, 1.55, 0.0] kW
+  solver time limit      : 60.0 s
+Approach 0 one-shot (plant = :sampled) done in 5.2 s (96 plant realizations)
+  NOTE: 2 intervals had work CAPPED by available CEV energy (task could not fully
+        complete before hitting the SOE floor); the shortfall is reflected honestly in
+        rem_dig/rem_load.
+
+--- Approach 1 - Shrinking ---
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.82, 0.73, 1.55, 0.0] kW
+  solver time limit    : 60.0 s / window
+Approach 1 (plant = :sampled) done in 30.9 s (96 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.82, 0.73, 1.55, 0.0] kW
+
+--- Approach 2 - Shrinking (stochastic, 5 scenarios) ---
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.82, 0.73, 1.55, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.82, 0.73, 1.55, 0.0] kW
+  solver time limit    : 60.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 716.6 s (96 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.82, 0.73, 1.55, 0.0] kW
+  plant sampling sd      : [0.82, 0.73, 1.55, 0.0] kW
+
+--- Approach 1 - Receding (n_days = 1) ---
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.82, 0.73, 1.55, 0.0] kW
+  solver time limit    : 60.0 s / window
+Approach 1 (plant = :sampled) done in 118.3 s (192 plant realizations)
+  NOTE: 1 intervals had work CAPPED by available CEV energy (task could not fully
+        complete before hitting the SOE floor); the shortfall is reflected honestly in
+        rem_dig/rem_load.
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.82, 0.73, 1.55, 0.0] kW
+
+--- Approach 2 - Receding (stochastic, 5 scenarios, n_days = 1) ---
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.82, 0.73, 1.55, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.82, 0.73, 1.55, 0.0] kW
+  solver time limit    : 60.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 2007.0 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.82, 0.73, 1.55, 0.0] kW
+  plant sampling sd      : [0.82, 0.73, 1.55, 0.0] kW
+
+--- Writing 11 comparison(s) ---
+  All5: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\All5
+  A0_A1S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A0_A1S
+  A0_A2S: Approach 0 (one-shot, :sampled) vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A0_A2S
+  A0_A1R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A0_A1R
+  A0_A2R: Approach 0 (one-shot, :sampled) vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A0_A2R
+  A0_A1S_A2S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A0_A1S_A2S
+  A0_A1R_A2R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A0_A1R_A2R
+  A1S_A2S: Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A1S_A2S
+  A1R_A2R: Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A1R_A2R
+  A1S_A1R: Approach 1 - Shrinking vs Approach 1 - Receding  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A1S_A1R
+  A2S_A2R: Approach 2 - Shrinking (stochastic) vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output\A2S_A2R
+
+==============================================================================
+KPI SUMMARY (all five)
+Metric                                   A0      A1-Shrink      A2-Shrink       A1-Reced       A2-Reced
+Grid energy (kWh)                     31.66          31.45          31.45          30.52          31.45
+Energy cost (USD)                     10.08          10.01          10.01           9.71          10.01
+CO2 (kg)                               8.60           8.55           8.55           8.29           8.55
+NCD peak (kW)                          2.88           2.86           2.86           2.77           2.86
+OPD peak (kW)                          0.00           0.00           0.00           0.00           0.00
+Missed work (h)                        0.04           0.25           0.25           0.29           0.25
+==============================================================================
+
+Results written to: c:\Users\shubh\Downloads\Comparison_A0_A1_A2\Output
+  All5/  (A0 vs A1S vs A2S vs A1R vs A2R)
+  A0_A1S/  (A0 vs A1S)
+  A0_A2S/  (A0 vs A2S)
+  A0_A1R/  (A0 vs A1R)
+  A0_A2R/  (A0 vs A2R)
+  A0_A1S_A2S/  (A0 vs A1S vs A2S)
+  A0_A1R_A2R/  (A0 vs A1R vs A2R)
+  A1S_A2S/  (A1S vs A2S)
+  A1R_A2R/  (A1R vs A2R)
+  A1S_A1R/  (A1S vs A1R)
+  A2S_A2R/  (A2S vs A2R)
+  run_log.txt  (this console log, shared across all 11 comparisons)

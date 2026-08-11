@@ -551,10 +551,13 @@ intervals a CEV does **at most 4** work intervals (≥ 1 idle break). Two parts:
 5-windows, **plus a seam** seeded with the applied Work/Break history so a work-run cannot leak
 across the every-15-min re-solves.
 
-### 8.13 Travel pacing (Eq. 13, HARD)
+### 8.13 Travel pacing (Eq. 13, HARD, no tolerance)
 Exactly as in Avik with `work_per_travel = 4`: for each `(site, CEV)`, the two-sided band
-`W(k) − 4 ≤ 4·V(k) ≤ W(k)` on cumulative travel `V` vs cumulative useful work `W` (dig + load),
-seeded with the travel/work already applied in earlier windows.
+`W(k) − 4 ≤ 4·V(k) ≤ W(k)` on cumulative travel `V` vs cumulative useful work `W`. `V` and `W` are
+now raw **applied interval counts** off the `u` indicator (`cum_trv_cnt_e`/`cum_work_cnt_e`), not
+hours — a battery-shortage-capped interval still counts as one full travel/work interval, so no
+tolerance is needed (supersedes D11 below). Precedence (§8.11) still uses realized hours; only
+pacing switched to interval counts.
 
 > **No fallback.** Windows use the hard constraints only; an infeasible re-plan is reported
 > **INFEASIBLE** and the plant **holds state**. Under the Fork B stochastic plant **both**
@@ -721,6 +724,8 @@ Documented so a reviewer is not surprised by them. Full detail, with the code li
   meaningless (traced in detail via IIS on `run10_SOE_14.80`, §12). Fixed by adding
   `pacing_tol = 0.05` to the floor side only (§8.13) — large enough to absorb realistic capping
   residue, small enough (5% of one interval) that it cannot be mistaken for a free extra work unit.
+  **Superseded:** pacing now seeds off applied interval counts instead of hours, which removes the
+  fractional residue at its source, so `pacing_tol` was dropped entirely (see §8.13).
 
 **Open / instrumented, not resolved:**
 * **D5** — only the CEV side of the plant is stochastic (§6.7).

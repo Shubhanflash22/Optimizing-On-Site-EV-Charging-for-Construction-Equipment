@@ -603,16 +603,17 @@ overnight intervals sit in that history as idle, so a night supplies its own bre
 harmless in practice; but the "resets each morning" mechanism described in earlier revisions does
 not exist.
 
-### 8.13 Travel pacing (Eq. 13, HARD, with a small tolerance on the floor side)
+### 8.13 Travel pacing (Eq. 13, HARD, no tolerance)
 As in Avik with `work_per_travel = 4`: for each assigned `(site, CEV)`, the two-sided band
-`W(k) − 4 ≤ 4·V(k) ≤ W(k) + pacing_tol` on cumulative travel `V` vs cumulative useful work `W`
-(dig + load), seeded with the travel/work applied **over the whole run**, not just the current day.
-`pacing_tol = 0.05` (interval-units) is added to the upper side only, to absorb the sub-interval
-rounding residue the energy-capping fix (§6.6) can leave in the cumulative dig/load totals — without
-it, that residue can strand the band on opposite sides of an integer boundary with no whole-interval
-solution reachable in between, permanently and spuriously blocking further travel/work over a
-shortfall as small as a minute. `pacing_tol` is small relative to one full interval (1.0) and cannot
-be used to buy a genuine extra work unit; there are no other pacing slacks and no `soft_pace` lever.
+`W(k) − 4 ≤ 4·V(k) ≤ W(k)` on cumulative travel `V` vs cumulative useful work `W`. `V` and `W` are
+now raw **applied interval counts** off the `u` indicator (`cum_trv_cnt_e`/`cum_work_cnt_e`), not
+hours — a battery-shortage-capped interval still counts as one full travel/work interval, so no
+tolerance is needed. Applies to both the deterministic and scenario-linked stochastic builder.
+
+Unlike precedence (which still seeds off the whole-run hours), the pacing seed is scoped to the
+**current calendar day only**: `hist` never resets across days, so the count is taken from
+`today_start = (firstday-1)*n_day + 1` onward, i.e. only intervals applied since this calendar
+day's 8am boundary. A CEV's travel/work balance resets fresh every morning.
 
 > **No graceful fallback.** Every constraint except `s_miss_work` is hard and there is no soft
 > re-solve. An infeasible window makes the plant **hold state** for that interval, counted as
@@ -737,6 +738,9 @@ Carried over from the audit of the single-day Shrinking sibling; the same code p
   meaningless (traced in detail via HiGHS IIS on `run10_SOE_14.80`). Fixed by adding
   `pacing_tol = 0.05` to the floor side only (§8.13) — large enough to absorb realistic capping
   residue, small enough (5% of one interval) that it cannot be mistaken for a free extra work unit.
+  **Superseded:** pacing now seeds off applied interval counts instead of hours (scoped to the
+  current calendar day, §8.13), which removes the fractional residue at its source, so
+  `pacing_tol` was dropped entirely.
 
 **Corrected in the docs:**
 * `rest_cap` uses `round`, not `ceil` (§8.12) — `math_model.tex` said `⌈·⌉`.

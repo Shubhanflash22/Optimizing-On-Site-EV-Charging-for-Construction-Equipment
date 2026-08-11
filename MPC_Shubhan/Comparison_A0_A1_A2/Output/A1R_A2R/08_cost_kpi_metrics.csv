@@ -1,0 +1,16 @@
+Metric,A1R,A2R
+Total_Cost_USD,763.89,692.97
+Total_Energy_Cost_USD,9.71,10.01
+Total_CO2_Cost_USD,0.41,0.43
+NC_demand_charge_USD,55.82,57.53
+OP_demand_charge_USD,0.0,0.0
+Missed_Work_Penalty_USD,572.94,500.0
+Travel_Labour_USD,125.0,125.0
+Total_Grid_Energy_kWh,30.52,31.45
+Total_CO2_Emissions_kg,8.29,8.55
+NCD_Peak_kW,2.77,2.86
+OPD_Peak_kW,0.0,0.0
+Missed_Work_hour,0.29,0.25
+MCS_Transit_hour,0.5,0.5
+Infeasible_windows,0,0
+Solve_time_s,118.27,2006.96

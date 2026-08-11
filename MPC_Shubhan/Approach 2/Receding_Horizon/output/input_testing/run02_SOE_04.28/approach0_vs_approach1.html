@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+body{font-family:sans-serif}
+table{border-collapse:collapse;font-size:13px;margin-bottom:24px}
+th,td{border:1px solid #ccc;padding:4px 10px;text-align:right}
+th{background:#f4f4f4}
+td:first-child,th:first-child{text-align:left}
+</style></head><body>
+<h2>Approach 0 (one-shot per day) vs Approach 2 (stochastic closed-loop MPC)</h2>
+<p>Both columns are FULLY REALIZED outcomes over the 1 kept day(s), drawn from the SAME pre-generated per-(excavator, activity) power samples, so the difference reflects only the value of re-planning (Approach 0 re-solves once per day; Approach 2 re-solves every 15 minutes). Re-run with <code>approach0_plant = :mean</code> to see the deterministic MILP optima instead.</p>
+<h3>Totals (all kept days)</h3>
+<table><tr><th>Metric</th><th>Approach 0 &mdash; sampled plant<br>(one-shot/day, open loop)</th><th>Approach 2 &mdash; closed loop</th><th>&Delta; (A2 &minus; A0)</th></tr>
+<tr><td>Grid energy (kWh)</td><td>30.327</td><td>31.019</td><td>+0.692</td></tr>
+<tr><td>Energy cost (USD)</td><td>9.826</td><td>10.050</td><td>+0.224</td></tr>
+<tr><td>CO2 emissions (kg)</td><td>7.878</td><td>8.058</td><td>+0.180</td></tr>
+<tr><td>CO2 cost (USD)</td><td>0.394</td><td>0.403</td><td>+0.009</td></tr>
+<tr><td>NCD peak (kW)</td><td>2.527</td><td>2.585</td><td>+0.058</td></tr>
+<tr><td>NCD charge (USD)</td><td>50.847</td><td>52.008</td><td>+1.161</td></tr>
+<tr><td>OPD peak (kW)</td><td>-0.000</td><td>0.000</td><td>+0.000</td></tr>
+<tr><td>OPD charge (USD)</td><td>-0.000</td><td>0.000</td><td>+0.000</td></tr>
+<tr><td>Missed work (h)</td><td>0.250</td><td>0.250</td><td>+0.000</td></tr>
+<tr><td>Missed work penalty (USD)</td><td>500.000</td><td>500.000</td><td>+0.000</td></tr>
+<tr><td>MCS transit (h)</td><td>0.500</td><td>0.500</td><td>+0.000</td></tr>
+<tr><td>Travel labour (USD)</td><td>125.000</td><td>125.000</td><td>+0.000</td></tr>
+<tr><td>TOTAL cost (USD)</td><td>686.067</td><td>687.461</td><td>+1.394</td></tr>
+</table>
+<h3>Run diagnostics</h3>
+<table><tr><th>Run</th><th>Plant</th><th>Infeasible windows</th><th>Energy caps</th><th>Solve time (s)</th></tr>
+<tr><td>Approach 0 (one-shot/day)</td><td>:sampled</td><td>0</td><td>0</td><td>4.0</td></tr>
+<tr><td>Approach 2 (closed loop, stochastic)</td><td>:sampled</td><td>0</td><td>0</td><td>3664.9</td></tr>
+</table>
+<h3>Per-day breakdown</h3>
+<p>Physical/additive quantities only, so daily values sum to the totals above. NCD/OPD charges and the missed-work penalty are whole-run concepts (a single peak, a single end-of-run backlog) and are not split per day here.</p>
+<table><tr><th>Day</th><th>Approach</th><th>Grid energy (kWh)</th><th>Energy cost (USD)</th><th>CO2 (kg)</th><th>NC peak (kW)</th><th>MCS transit (h)</th><th>Travel labour (USD)</th></tr>
+<tr><td>1</td><td>Approach 0</td><td>30.327</td><td>9.826</td><td>7.878</td><td>2.527</td><td>0.500</td><td>125.000</td></tr>
+<tr><td>1</td><td>Approach 2</td><td>31.019</td><td>10.050</td><td>8.058</td><td>2.585</td><td>0.500</td><td>125.000</td></tr>
+</table></body></html>

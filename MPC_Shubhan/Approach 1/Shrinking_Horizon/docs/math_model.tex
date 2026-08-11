@@ -163,19 +163,19 @@ $\dt=0.25$\,h; the code rounds, it does not take a ceiling),
 $\sum_{k'=k}^{k+r}\sum_{a\in\{\text{dig,load,trv}\}}u_{e,i,a,k'}\le r$, \emph{seeded from the
 applied Work/Break history} so a work-run cannot leak across the every-15-min re-solves.
 
-\paragraph{Travel pacing (Eq.\ 13, HARD, with a small tolerance on the lower side).}
+\paragraph{Travel pacing (Eq.\ 13, HARD, no tolerance).}
 With $w_{\text{pt}}=4$, for each $(i,e)$ and $k$, on cumulative travel $V$ vs cumulative
 useful work $W$ (dig+load):
 \begin{equation}
-W(k)-w_{\text{pt}}\ \le\ w_{\text{pt}}\,V(k)\ \le\ W(k) + \tau,
+W(k)-w_{\text{pt}}\ \le\ w_{\text{pt}}\,V(k)\ \le\ W(k),
 \end{equation}
-seeded with the travel/work already applied in earlier windows, where $\tau =
-\texttt{pacing\_tol} = 0.05$ (interval-units) absorbs the sub-interval rounding residue that the
-energy-capping guard above can leave in \texttt{cum\_dig\_e}/\texttt{cum\_load\_e} — without $\tau$,
-that residue can strand the two-sided band on either side of an integer boundary with no reachable
-whole-interval solution in between, making a schedule spuriously infeasible for reasons unrelated
-to the pacing rule's intent. $\tau$ is small relative to one full interval (1.0) and is not enough
-to let a CEV travel a genuine interval "early."
+where $V$ and $W$ are raw \emph{applied interval counts} (whether the $u$ indicator fired that
+interval), read off \texttt{cum\_trv\_cnt\_e}/\texttt{cum\_work\_cnt\_e}, not hours. A battery-
+shortage-capped interval (e.g.\ 14 of 15 minutes realized) still counts as one full travel/work
+interval, so the sub-interval rounding residue that used to strand the band on an integer boundary
+(see \texttt{cum\_dig\_e}/\texttt{cum\_load\_e} in the precedence rule) cannot occur here, and no
+tolerance $\tau$ is needed. Precedence (above) still uses realized hours; only pacing switched to
+interval counts.
 
 \paragraph{Demand peaks (E1, HARD).}
 $P^{\text{NC}}\ge$ carried-in peak and $\ge\sum_m P^{\text{ch,tot}}_{m,k}$ for all $k$;

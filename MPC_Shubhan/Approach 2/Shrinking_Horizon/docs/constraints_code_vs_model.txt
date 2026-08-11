@@ -76,9 +76,10 @@ Legend:  OK = matches exactly   ADAPTED = deliberate, documented (MPC or user ch
        |                                      | rest_cap = ROUND(t_rest/dt).   |
 --------------------------------------------------------------------------------
  (13)  | Travel pacing: two-sided band        | work_per_travel = 4 (Avik):    | OK, see D11
-       |                                      | W-4 <= 4*V <= W + pacing_tol,  |
-       |                                      | pacing_tol=0.05 on the floor    |
-       |                                      | side only + MPC history seed   |
+       |                                      | W-4 <= 4*V <= W, no tolerance. |
+       |                                      | V/W = applied INTERVAL COUNTS  |
+       |                                      | (u indicator), not hours; MPC  |
+       |                                      | history seed. (D11 superseded) |
 --------------------------------------------------------------------------------
 
 EXTRA CONSTRAINTS / ADAPTATIONS IN THE CODE (beyond Avik's single shot)
@@ -167,6 +168,11 @@ listed so a reviewer is not surprised by them; several are still open.
      capping residue (~0.02 typical), small enough (5% of one interval) that it cannot be mistaken
      for a free extra work unit or meaningfully weaken the rule's intent.
 
+     SUPERSEDED: pacing now seeds V/W off applied INTERVAL COUNTS (whether the u indicator fired
+     that interval), not hours, which removes the fractional residue at its source. pacing_tol is
+     dropped entirely; the band is back to the strict `W-4 <= 4*V <= W`. Precedence (Eq. 12d) is
+     unaffected and still uses realized hours.
+
  D4  THE TERMINAL RULES SILENTLY VANISH WHEN shrinking = false.
      (8a), (8b) and (10e) are all inside `if is_terminal`, where
      is_terminal = (last(K) == d.n_day). With shrinking = true that holds for every
@@ -209,10 +215,10 @@ listed so a reviewer is not surprised by them; several are still open.
 
  D9  PRECEDENCE AND PACING READ THE SAME HISTORY THROUGH DIFFERENT AGGREGATIONS.
      Precedence seeds from cum_dig_site(i) / cum_load_site(i) (summed over CEVs assigned
-     to site i); pacing seeds from cum_dig_e / cum_load_e / cum_trv_e (per CEV). Both are
-     correct while A[i,e] is a one-to-one assignment, which it is in both datasets. If a
-     site ever gets two CEVs the two rules will disagree about what "cumulative work"
-     means. Not a bug today; a latent one.
+     to site i, in HOURS); pacing seeds from cum_trv_cnt_e / cum_work_cnt_e (per CEV, in
+     applied INTERVAL COUNTS, not hours). Both are correct while A[i,e] is a one-to-one
+     assignment, which it is in both datasets. If a site ever gets two CEVs the two rules
+     will disagree about what "cumulative work" means. Not a bug today; a latent one.
 
 NOTE vs the RECEDING sibling: this Shrinking model is single-day and LUMPSUM, so it does
 NOT add the receding version's per-day schedule. It DOES have a hard no-overshoot cap on

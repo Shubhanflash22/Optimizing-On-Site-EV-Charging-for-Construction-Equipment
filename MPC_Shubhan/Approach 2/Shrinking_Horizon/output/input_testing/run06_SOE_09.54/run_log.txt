@@ -1,0 +1,21 @@
+
+#################### run06_SOE_09.54 ####################
+Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit      : none (solve to the MIP gap)
+Approach 0 one-shot (plant = :sampled) done in 3.8 s (96 plant realizations)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.38, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1080.1 s (96 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.38, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  SOE_ini=9.54  realised $193.22 (plan $197.20)  changed: CEV1=21 MCS=15 /96  feas=true
+             A0(:sampled) $193.41 -> A2 $193.22 (-0.19)

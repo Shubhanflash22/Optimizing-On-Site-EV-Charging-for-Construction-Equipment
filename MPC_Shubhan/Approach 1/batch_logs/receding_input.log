@@ -10,47 +10,42 @@ STEP 0  Bayesian activity-power regression (pure Julia; NUTS 4 chains x 2000 dra
 ┌ Info: Found initial step size
 └   ϵ = 6.103515625e-6
 ┌ Info: Found initial step size
-└   ϵ = 3.0517578125e-6
-┌ Info: Found initial step size
 └   ϵ = 6.103515625e-6
 ┌ Info: Found initial step size
-└   ϵ = 6.103515625e-6
-STEP 0 done in 11.3 s; parameters.csv refreshed.
-  fitted means : dig=4.79 load=3.161 trv=4.709 kW
-  fitted sds   : dig=0.208 load=0.182 trv=0.382 kW
+└   ϵ = 3.814697265625e-7
+┌ Info: Found initial step size
+└   ϵ = 7.62939453125e-7
+STEP 0 done in 14.8 s; parameters.csv refreshed.
+  fitted means : dig=4.791 load=3.164 trv=4.706 kW
+  fitted sds   : dig=0.207 load=0.182 trv=0.386 kW
 Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
   solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 5.0 s (96 plant realizations, 1 day-solves)
+Approach 0 one-shot-per-day (plant = :sampled) done in 6.3 s (96 plant realizations, 1 day-solves)
 Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 1 (plant = :sampled) done in 84.6 s (192 plant realizations)
-  NOTE: 1 intervals had work CAPPED by available CEV energy (task could not fully
-        complete before hitting the SOE floor); the shortfall is reflected honestly in
-        rem_dig/rem_load.
+Approach 1 (plant = :sampled) done in 117.9 s (192 plant realizations)
   fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
 
 ==== Scenario 1 RECEDING-horizon KPIs (kept days 1..1; buffer day dropped) ====
-Total grid energy   : 30.96 kWh
-Total energy cost   : $9.85
-Total CO2 emissions : 8.41 kg
-NC peak demand      : 2.81 kW
+Total grid energy   : 31.93 kWh
+Total energy cost   : $10.16
+Total CO2 emissions : 8.68 kg
+NC peak demand      : 2.90 kW
 On-peak demand      : 0.00 kW
-Missed work (hours) : 0.25
+Missed work (hours) : 0.00
 Labour (towing)     : $125.00  (0.50 h in transit @ $250.00/h)
 
 ==== Approach comparison (both fully realised, kept days) ====
-A0 one-shot/day, sampled plant (open loop) : $193.41  (0.50 h transit, 0.00 h missed)
-A1 closed loop (re-planning)              : $691.90  (0.50 h transit, 0.25 h missed)
-  A1 - A0 (value of intra-day re-planning): +498.49  (negative = A1 cheaper)
-  NOTE: 1 interval(s) had work capped by available CEV energy -- the
-           shortfall is reflected honestly in rem_dig/rem_load, not hidden.
+A0 one-shot/day, sampled plant (open loop) : $193.43  (0.50 h transit, 0.00 h missed)
+A1 closed loop (re-planning)              : $194.00  (0.50 h transit, 0.00 h missed)
+  A1 - A0 (value of intra-day re-planning): +0.57  (negative = A1 cheaper)
 
 Results written to: C:\Users\shubh\Desktop\MPC\Approach 1\Receding_Horizon\output\input
   Figures (v4_real style, kept days): 01..07 + mcs_<m>_power_profile + 11_power_estimate_convergence

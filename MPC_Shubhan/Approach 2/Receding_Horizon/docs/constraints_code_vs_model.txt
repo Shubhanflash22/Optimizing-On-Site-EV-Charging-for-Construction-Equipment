@@ -90,11 +90,13 @@ Legend:  OK = matches exactly   ADAPTED = deliberate, documented (MPC or user ch
        |                                      | from applied work_hist (seam)   |
 --------------------------------------------------------------------------------
  (13)  | Travel pacing: two-sided band        | kappa_wt=4 (Avik): W-kappa <=  | OK, see below
-       |                                      | kappa*V <= W + pacing_tol,      | (per-day)
-       |                                      | PER day-block + history seed.   |
-       |                                      | HARD (no soft slack exists in  |
-       |                                      | the code — s_pace_hi/lo below   |
-       |                                      | was aspirational, never built) |
+       |                                      | kappa*V <= W, no tolerance.     | (per-day)
+       |                                      | V/W = applied INTERVAL COUNTS  |
+       |                                      | (u indicator), not hours;      |
+       |                                      | RESET each calendar day, not   |
+       |                                      | whole-run. HARD (no soft slack |
+       |                                      | exists — s_pace_hi/lo below was |
+       |                                      | aspirational, never built)     |
 --------------------------------------------------------------------------------
 
 EXTRA CONSTRAINTS / ADAPTATIONS IN THE CODE (beyond Avik's single shot)
@@ -300,6 +302,11 @@ CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
      (interval-units) to the floor side only (`kappa*V <= W + pacing_tol`) -- large enough to
      absorb realistic capping residue (~0.02 typical), small enough (5% of one interval) that it
      cannot be mistaken for a free extra work unit or meaningfully weaken the rule's intent.
+
+     SUPERSEDED: pacing now seeds V/W off applied INTERVAL COUNTS (whether the u indicator fired),
+     not hours, which removes the fractional residue at its source. pacing_tol is dropped; the
+     band is back to the strict `W-kappa <= kappa*V <= W`. This seed is also now scoped to the
+     CURRENT CALENDAR DAY only (today_start), unlike precedence, which still uses whole-run hours.
 
  A3  ONLY THE CEV SIDE OF THE PLANT IS STOCHASTIC.
      apply_and_simulate! advances the MCS by soe_mcs[m] = value(SOE_MCS[m, g0+1]) -- the

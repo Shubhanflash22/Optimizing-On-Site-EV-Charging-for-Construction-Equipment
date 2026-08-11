@@ -1,0 +1,29 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+body{font-family:sans-serif}
+table{border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #ccc;padding:4px 10px;text-align:right}
+th{background:#f4f4f4}
+td:first-child,th:first-child{text-align:left}
+tr:last-child td{font-weight:bold;background:#fafafa}
+</style></head><body>
+<h2>Approach 0 (one-shot 8:00 plan) vs Approach 2 (stochastic closed-loop MPC)</h2>
+<p>Both columns are fully realized over 08:00 &rarr; next-day 08:00 and draw from the SAME pre-generated per-(excavator, activity) power samples, so the &Delta; reflects only the value of re-planning, not different randomness. Re-run with <code>approach0_plant = :mean</code> to see the deterministic MILP optimum instead.</p>
+<table><tr><th>Metric</th><th>Approach 0 &mdash; sampled plant<br>(one-shot, open loop)</th><th>Approach 2 &mdash; closed loop</th><th>&Delta; (A2 &minus; A0)</th></tr>
+<tr><td>Grid energy (kWh)</td><td>31.659</td><td>31.639</td><td>-0.020</td></tr>
+<tr><td>Energy cost (USD)</td><td>10.076</td><td>10.070</td><td>-0.006</td></tr>
+<tr><td>CO2 emissions (kg)</td><td>8.602</td><td>8.597</td><td>-0.005</td></tr>
+<tr><td>CO2 cost (USD)</td><td>0.430</td><td>0.430</td><td>-0.000</td></tr>
+<tr><td>NCD peak (kW)</td><td>2.878</td><td>2.876</td><td>-0.002</td></tr>
+<tr><td>NCD charge (USD)</td><td>57.908</td><td>57.871</td><td>-0.037</td></tr>
+<tr><td>OPD peak (kW)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
+<tr><td>OPD charge (USD)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
+<tr><td>Missed work (h)</td><td>0.002</td><td>0.000</td><td>-0.002</td></tr>
+<tr><td>Missed work penalty (USD)</td><td>3.943</td><td>0.000</td><td>-3.943</td></tr>
+<tr><td>MCS transit (h)</td><td>0.500</td><td>0.500</td><td>+0.000</td></tr>
+<tr><td>Travel labour (USD)</td><td>125.000</td><td>125.000</td><td>+0.000</td></tr>
+<tr><td>TOTAL cost (USD)</td><td>197.357</td><td>193.371</td><td>-3.986</td></tr>
+</table>
+<h3>Run diagnostics</h3><table><tr><th>Run</th><th>Plant</th><th>Infeasible windows</th><th>Energy caps</th><th>Solve time (s)</th></tr>
+<tr><td>Approach 0 (one-shot)</td><td>:sampled</td><td>0</td><td>1</td><td>8.2</td></tr>
+<tr><td>Approach 2 (closed loop, stochastic)</td><td>:sampled</td><td>0</td><td>0</td><td>900.9</td></tr>
+</table></body></html>

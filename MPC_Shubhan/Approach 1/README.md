@@ -450,7 +450,8 @@ and `constraints_code_vs_model.txt`.
   delay, park at a grid node by the day boundary.
 - **(12) Work scheduling** — one activity per CEV per interval; the work quota; digging-before-
   loading precedence; the operator rest rule.
-- **(13) Travel pacing** — a two-sided band tying repositioning to productive work.
+- **(13) Travel pacing** — a two-sided band tying repositioning to productive work, in applied
+  interval counts (not hours), no tolerance.
 
 **On the work quota.** It is written as a **balance equality**: work done + shortfall slack =
 requirement outstanding. The shortfall is soft and priced, but because the slack is non-negative

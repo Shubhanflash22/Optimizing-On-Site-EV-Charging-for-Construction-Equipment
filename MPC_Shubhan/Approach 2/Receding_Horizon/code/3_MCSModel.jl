@@ -100,11 +100,19 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
 
     # ---- read the SHARED applied-activity history (Option-2 unification) ----
     # All three history-dependent rules derive what they need from `hist`:
-    #   precedence / pacing -> summed realized hours per activity;
-    #   rest rule           -> the recent Work(1)/Break(0) pattern (travel = work).
+    #   precedence -> summed realized HOURS per activity, over the WHOLE run
+    #                 (unchanged, not calendar-day-scoped);
+    #   pacing     -> summed applied INTERVAL COUNTS off the u indicator, scoped to
+    #                 the CURRENT CALENDAR DAY only (resets at each day boundary --
+    #                 see `today_start` below, since `hist` itself never resets);
+    #   rest rule  -> the recent Work(1)/Break(0) pattern (travel = work), unchanged.
     cum_dig_e  = [sum((r[2][1] for r in hist[e]); init = 0.0) for e in E]
     cum_load_e = [sum((r[2][2] for r in hist[e]); init = 0.0) for e in E]
-    cum_trv_e  = [sum((r[2][3] for r in hist[e]); init = 0.0) for e in E]
+    # `hist[e]` has one entry per applied GLOBAL interval, in order, starting at k=1,
+    # so entry index == global k. today_start is this calendar day's first interval.
+    today_start = (firstday - 1) * n_day + 1
+    cum_trv_cnt_e  = [count(r -> r[1] == 3, @view hist[e][min(today_start, length(hist[e]) + 1):end]) for e in E]
+    cum_work_cnt_e = [count(r -> r[1] in (1, 2), @view hist[e][min(today_start, length(hist[e]) + 1):end]) for e in E]
     work_hist  = [Int[(r[1] in (1, 2, 3)) ? 1 : 0 for r in hist[e]] for e in E]
 
     # Cumulative site work already done (seeds precedence).
@@ -414,20 +422,20 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # work (dig or load), EXACTLY as in Avik (MCS_OPTIMAL_v4_real.jl, work_per_travel = 4).
     # Two-sided band on cumulative travel V(k) vs cumulative useful work W(k):
     #   W(k) - work_per_travel <= work_per_travel * V(k) <= W(k).
-    # Indexed per (site, CEV) exactly like Avik. MPC SEAM (Avik has none): seed V and W
-    # with the travel/work already APPLIED earlier (cum_*_e, hours -> interval counts).
-    # The A-guard restricts to each CEV's assigned site so the nonzero seed cannot create
-    # spurious constraints on unassigned (i,e) pairs (in Avik's single shot the seeds are
-    # 0, so those rows are trivially 0 <= 0 and need no guard).
+    # Indexed per (site, CEV) exactly like Avik. V and W are raw APPLIED INTERVAL COUNTS
+    # (whether the u indicator fired), scoped to the CURRENT CALENDAR DAY only (see
+    # cum_trv_cnt_e / cum_work_cnt_e above) -- a battery-shortage-capped interval still
+    # counts as one full travel/work interval, so no tolerance is needed. The A-guard
+    # restricts to each CEV's assigned site so the nonzero seed cannot create spurious
+    # constraints on unassigned (i,e) pairs.
     work_per_travel = 4
-    pacing_tol = 0.25
     for i in N_c, e in E
         d.A[i, e] == 1 || continue
         for k in K
-            V = cum_trv_e[e] / delta_T + sum(u[e, i, B[3], tau] for tau in first(K):k)
-            W = (cum_dig_e[e] + cum_load_e[e]) / delta_T +
+            V = cum_trv_cnt_e[e] + sum(u[e, i, B[3], tau] for tau in first(K):k)
+            W = cum_work_cnt_e[e] +
                 sum(u[e, i, a, tau] for a in (B[1], B[2]), tau in first(K):k)
-            @constraint(model, work_per_travel * V <= W + pacing_tol)
+            @constraint(model, work_per_travel * V <= W)
             @constraint(model, work_per_travel * V >= W - work_per_travel)
         end
     end
@@ -487,9 +495,14 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
     length(w) == nS || error("build_window_model_stochastic: weights must have length $nS, got $(length(w))")
     p_activity_s = [Dict(B[a] => scenarios[s][a] for a in eachindex(B)) for s in S_scen]
 
+    # precedence keeps hours (whole run); pacing uses INTERVAL COUNTS scoped to the
+    # current calendar day only (hist never resets, so we slice it here -- same
+    # today_start logic as the deterministic build_window_model above).
     cum_dig_e  = [sum((r[2][1] for r in hist[e]); init = 0.0) for e in E]
     cum_load_e = [sum((r[2][2] for r in hist[e]); init = 0.0) for e in E]
-    cum_trv_e  = [sum((r[2][3] for r in hist[e]); init = 0.0) for e in E]
+    today_start = (firstday - 1) * n_day + 1
+    cum_trv_cnt_e  = [count(r -> r[1] == 3, @view hist[e][min(today_start, length(hist[e]) + 1):end]) for e in E]
+    cum_work_cnt_e = [count(r -> r[1] in (1, 2), @view hist[e][min(today_start, length(hist[e]) + 1):end]) for e in E]
     work_hist  = [Int[(r[1] in (1, 2, 3)) ? 1 : 0 for r in hist[e]] for e in E]
 
     cum_dig_site(i)  = sum(cum_dig_e[e]  * d.A[i, e] for e in E)
@@ -705,16 +718,16 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
         end
     end
 
-    # travel pacing (Eq. 13a, 13b), per scenario.
+    # travel pacing (Eq. 13a, 13b), per scenario, seeded from applied INTERVAL COUNTS
+    # scoped to the current calendar day (no tolerance needed).
     work_per_travel = 4
-    pacing_tol = 0.25
     for i in N_c, e in E
         d.A[i, e] == 1 || continue
         for k in K, s in S_scen
-            V = cum_trv_e[e] / delta_T + sum(u[e, i, B[3], tau, s] for tau in first(K):k)
-            W = (cum_dig_e[e] + cum_load_e[e]) / delta_T +
+            V = cum_trv_cnt_e[e] + sum(u[e, i, B[3], tau, s] for tau in first(K):k)
+            W = cum_work_cnt_e[e] +
                 sum(u[e, i, a, tau, s] for a in (B[1], B[2]), tau in first(K):k)
-            @constraint(model, work_per_travel * V <= W + pacing_tol)
+            @constraint(model, work_per_travel * V <= W)
             @constraint(model, work_per_travel * V >= W - work_per_travel)
         end
     end
