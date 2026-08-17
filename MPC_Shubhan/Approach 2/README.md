@@ -824,3 +824,14 @@ is self-contained and can be moved or copied as a unit. Both `Comparison`'s wrap
 (`RecedingApp`, `ShrinkingApp`) now also include `2b_ScenarioSampler.jl` alongside the other
 five numbered files, so the comparison run draws scenarios exactly the same way each standalone
 controller does.
+
+## Changes 2, 3, 4, 5 (this session)
+
+Both `Shrinking_Horizon` and `Receding_Horizon` under this folder got: the same Change 2 tie-break
+term as Approach 1, but scoped ONLY to the deterministic `build_window_model` objective (not the
+stochastic one — Approach 2's scenario hedge already addresses margin-for-error); the same Change 3
+terminal shortfall penalty, applying uniformly across every approach; a Change 4 fix to
+`2b_ScenarioSampler.jl` replacing 5 i.i.d. scenario draws with 5 fixed, stratified bins that
+guarantee tail coverage every re-solve instead of leaving it to chance; and the same Change 5
+`n_day_run` knob (currently 1). See each subfolder's `docs/README.md` for the full rationale and
+worked examples, and the repo-root `CHANGES_SUMMARY.md` for a complete file-by-file list.

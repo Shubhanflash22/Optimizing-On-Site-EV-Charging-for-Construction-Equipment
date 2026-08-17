@@ -1,21 +1,21 @@
 
 #################### run09_SOE_13.48 ####################
-Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit      : none (solve to the MIP gap)
-Approach 0 one-shot (plant = :sampled) done in 6.3 s (96 plant realizations)
-Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps
+Approach 0 one-shot (plant = :sampled) done in 3.3 s (96 plant realizations, 1 day(s))
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
   scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
   posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.21, 0.18, 0.38, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 628.2 s (96 plant realizations)
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 903.9 s (96 plant realizations, 1 day(s))
   posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.21, 0.18, 0.38, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
-  SOE_ini=13.48  realised $193.22 (plan $197.20)  changed: CEV1=23 MCS=18 /96  feas=true
-             A0(:sampled) $193.41 -> A2 $193.22 (-0.19)
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=13.48  realised $193.21 (plan $189.95)  changed: CEV1=22 MCS=17 /96  feas=true
+             A0(:sampled) $193.41 -> A2 $193.21 (-0.20)

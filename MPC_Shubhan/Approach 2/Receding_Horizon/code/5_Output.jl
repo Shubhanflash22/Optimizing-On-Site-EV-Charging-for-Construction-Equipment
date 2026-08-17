@@ -330,6 +330,10 @@ function _cost_emissions_timeseries(res)
         Cumulative_CO2_Emissions_kg = cumsum(co2))
 end
 
+# Same six objective components as the reference, PLUS Change 3's terminal
+# SOE_CEV shortfall penalty (see _terminal_soe_shortfall in 4_MPCLoop.jl) -- a
+# pure end-of-day check against SOE_CEV_ini, independent of `missed`/
+# `missed_cost` above (which only ever reflects live physical-floor capping).
 function _cost_components(res)
     d = res.d
     energy_cost = res.total_cost
@@ -338,8 +342,9 @@ function _cost_components(res)
     opd_cost    = d.lambda_demand_OP * res.op_peak
     missed_cost = d.rho_miss * res.missed
     travel_cost = res.labour_cost
-    total       = energy_cost + carbon_cost + ncd_cost + opd_cost + missed_cost + travel_cost
-    return (; energy_cost, carbon_cost, ncd_cost, opd_cost, missed_cost, travel_cost, total)
+    shortfall_cost = res.shortfall_penalty_cost
+    total       = energy_cost + carbon_cost + ncd_cost + opd_cost + missed_cost + travel_cost + shortfall_cost
+    return (; energy_cost, carbon_cost, ncd_cost, opd_cost, missed_cost, travel_cost, shortfall_cost, total)
 end
 
 function _write_cost_emissions(res, out_dir)
@@ -367,20 +372,21 @@ function _write_kpi_metrics(res, out_dir)
     totals = DataFrame(
         Metric = ["Total_Cost_USD", "Total_Energy_Cost_USD", "Total_CO2_Cost_USD",
                   "NC_demand_charge_USD", "OP_demand_charge_USD", "Missed_Work_Penalty_USD",
-                  "Travel_Labour_USD", "Total_Grid_Energy_kWh", "Total_CO2_Emissions_kg",
+                  "Travel_Labour_USD", "Terminal_Shortfall_Penalty_USD", "Total_Grid_Energy_kWh", "Total_CO2_Emissions_kg",
                   "NCD_Peak_kW", "OPD_Peak_kW", "Missed_Work_hour", "MCS_Transit_hour",
-                  "Infeasible_windows", "MPC_loop_time_s"],
+                  "Terminal_SOE_Shortfall_kWh", "Infeasible_windows", "MPC_loop_time_s"],
         Value = Any[round(c.total, digits = 2), round(c.energy_cost, digits = 2), round(c.carbon_cost, digits = 2),
                     round(c.ncd_cost, digits = 2), round(c.opd_cost, digits = 2), round(c.missed_cost, digits = 2),
-                    round(c.travel_cost, digits = 2), round(res.total_energy, digits = 2), round(res.total_co2, digits = 2),
+                    round(c.travel_cost, digits = 2), round(c.shortfall_cost, digits = 2), round(res.total_energy, digits = 2), round(res.total_co2, digits = 2),
                     round(res.nc_peak, digits = 2), round(res.op_peak, digits = 2), round(res.missed, digits = 2),
                     round(res.transit_intervals * res.d.delta_T, digits = 2),
+                    round(res.shortfall_kWh, digits = 3),
                     res.n_infeasible, round(res.elapsed, digits = 2)])
     CSV.write(joinpath(out_dir, "08_cost_kpi_metrics.csv"), totals)
 
-    cost_labels = ["Energy", "CO₂", "NCD", "OPD", "Missed Work", "Travel", "Total"]
-    cost_values = [c.energy_cost, c.carbon_cost, c.ncd_cost, c.opd_cost, c.missed_cost, c.travel_cost, c.total]
-    cost_colors = [:steelblue, :forestgreen, :darkorange, :purple, :firebrick, :teal, :black]
+    cost_labels = ["Energy", "CO₂", "NCD", "OPD", "Missed Work", "Travel", "Terminal Shortfall", "Total"]
+    cost_values = [c.energy_cost, c.carbon_cost, c.ncd_cost, c.opd_cost, c.missed_cost, c.travel_cost, c.shortfall_cost, c.total]
+    cost_colors = [:steelblue, :forestgreen, :darkorange, :purple, :firebrick, :teal, :sienna, :black]
     cost_ymax = max(maximum(cost_values), 1.0)
     p_costs = plot(title = "", xlabel = "(a)", ylabel = "Cost (USD)",
                    xticks = (1:length(cost_labels), cost_labels), xlims = (0.5, length(cost_labels) + 0.5),
@@ -872,7 +878,7 @@ function _write_by_entity_html(path, res, times, cev_plan, cev_act, mcs_plan, mc
 end
 
 # =============================================================================
-# 10 — SIDE-BY-SIDE TIMELINE COMPARISON (Approach 0 vs Approach 1), styled after
+# 10 — SIDE-BY-SIDE TIMELINE COMPARISON (Approach 0 vs Approach 2), styled after
 # the reference 3-row figure:
 #   (a) MCS power     — charging(+)/discharging(-), with NCDP & OPDP annotated,
 #                        plus total realised grid-charging energy
@@ -881,7 +887,7 @@ end
 #   (c) CEV work power — bars coloured by activity (Digging / Traveling /
 #                        Loading+Swinging), annotated with realised missed work
 # The on-peak window is shaded gray in every panel. Two columns: Approach 0
-# (one-shot, left) and Approach 1 (closed-loop, right). Uses the FULL kept
+# (one-shot, left) and Approach 2 (stochastic closed-loop, right). Uses the FULL kept
 # multi-day trajectory (res.nK), matching fig_total_grid_power / fig_cev_soe /
 # csv_mcs_cev_soe elsewhere in this file.
 # =============================================================================
@@ -1037,7 +1043,7 @@ function _panel_cev_work(res, title)
 end
 
 # Build the full 3-row x 2-col comparison figure: Approach 0 (left column) vs
-# Approach 1 (right column), rows = MCS power / CEV SOE / CEV work power.
+# Approach 2 (right column), rows = MCS power / CEV SOE / CEV work power.
 function fig_approach_timeline_comparison(res0, res1)
     p_a0 = _panel_mcs_power(res0, "Approach 0 (one-shot/day)")
     p_a1 = _panel_mcs_power(res1, "Approach 2 (stochastic, closed-loop)")
@@ -1090,6 +1096,8 @@ function write_approach_comparison(res0, res1, out_dir)
         ("OPD charge (USD)",          c0.opd_cost,                     c1.opd_cost),
         ("Missed work (h)",           res0.missed,                     res1.missed),
         ("Missed work penalty (USD)", c0.missed_cost,                  c1.missed_cost),
+        ("Terminal SOE shortfall (kWh)",     res0.shortfall_kWh,       res1.shortfall_kWh),
+        ("Terminal shortfall penalty (USD)", c0.shortfall_cost,        c1.shortfall_cost),
         ("MCS transit (h)",           res0.transit_intervals * res0.d.delta_T, res1.transit_intervals * res1.d.delta_T),
         ("Travel labour (USD)",       c0.travel_cost,                  c1.travel_cost),
         ("TOTAL cost (USD)",          c0.total,                        c1.total),

@@ -85,8 +85,41 @@ $g^{\text{ch}}_{m,i,k}$, $x_{m,i,j,k}$, $y_{m,i,j,k}$, $\beta^{\text{arr}},\beta
       +\sum_{m,k}\tfrac{c_{\text{ton}}}{1000}\lambda^{\text{CO2}}_{k}P^{\text{ch,tot}}_{m,k}\dt
       +\rho_{\text{miss}}\!\!\sum_{i\in\mathcal{N}_c,a}\!\! s^{\text{miss}}_{i,a}\notag\\
      &+\lambda^{\text{NC}}P^{\text{NC}}+\lambda^{\text{OP}}P^{\text{OP}}
-      +\rho_{\text{lab}}\dt\!\!\sum_{m,i,j,k}\!\! y_{m,i,j,k}.
+      +\rho_{\text{lab}}\dt\!\!\sum_{m,i,j,k}\!\! y_{m,i,j,k}
+      +10^{-6}\!\!\sum_{i\in\mathcal{N}_c,\,e,\,idx}\!\! idx\cdot \mu_{i,e,K_{idx}}.
 \end{align}
+The last term is the CHANGE 2 tie-break penalty (see below); it is scaled at $10^{-6}$ so it can
+only ever decide between schedules already tied on every real cost term above, never override one.
+
+\paragraph{Change 2 --- earlier-charging tie-break (Issue 2).} Under the mean-case forecast this
+model plans against, two schedules can be exactly cost-tied (e.g.\ ``charge the CEV now'' vs.\
+``wait, then charge'' -- same total energy, same price) even though one leaves the CEV's safety
+margin unspent for longer in the real, uncertain world. The added term is an index-weighted sum
+over the existing CEV-charging-acceptance indicator $\mu_{i,e,k}$ (1 if CEV $e$ at site $i$ is
+accepting power from the MCS at interval $k$ -- see the $P^{\text{MCS-CEV}}\le CH^{\text{CEV}}\mu$
+constraint below), where $idx\in\{1,\dots,|K|\}$ is that interval's position within the current
+solve window. \textbf{Note this targets $\mu$, not $g^{\text{ch}}$} (the MCS's own grid-charging
+indicator, used elsewhere in this objective's grid-exclusivity constraints): the diagnosed stall
+was the MCS sitting idle on \emph{discharge to the CEV} for 90 minutes with plenty of its own
+charge to spare, which is gated by $\mu$, not $g^{\text{ch}}$ -- $g^{\text{ch}}$ was already 0
+throughout that stall and an earlier version of this term, built against it, would have had
+nothing to push on. Later CEV-charging accumulates a larger penalty, so among cost-tied
+schedules the solver
+now prefers the one that charges sooner.
+
+\paragraph{Change 3 --- terminal SOE\textsuperscript{CEV} shortfall penalty (Issue 1), NOT part of
+this objective.} Eq.~8b above is enforced as a hard constraint on the \emph{plan}; nothing in the
+MILP checks whether the \emph{realized}, closed-loop trajectory actually reached
+$SOE^{\text{CEV,ini}}_e$ by day's end. This is evaluated \emph{after} the run, from the realized
+trajectory, not inside the optimization: $\text{shortfall}_e=\max(SOE^{\text{CEV,ini}}_e-
+SOE^{\text{CEV,end}}_e,0)$, converted to hours by that run's own realized weighted work-power rate
+($\text{realized kWh}/\text{realized hours}$, from \texttt{rem\_dig}/\texttt{rem\_load}), and
+charged directly as $\rho_{\text{miss}}\times\text{shortfall\_hours}$ onto the reported TOTAL cost
+(see \texttt{\_terminal\_soe\_shortfall} in \texttt{4\_MPCLoop.jl} and \texttt{\_cost\_components}
+in \texttt{5\_Output.jl}). It is independent of, and never double-counts with, the existing
+$s^{\text{miss}}$ slack above, which only ever reflects work capped live against the physical floor
+$\underline{SOE}_e$ -- a different, already-enforced check.
+
 
 %======================================================================
 \section{Constraints}

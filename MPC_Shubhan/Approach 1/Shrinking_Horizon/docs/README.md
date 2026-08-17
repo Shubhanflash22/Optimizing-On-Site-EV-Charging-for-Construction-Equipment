@@ -735,3 +735,49 @@ Documented so a reviewer is not surprised by them. Full detail, with the code li
   `A[i,e]` is a one-to-one assignment, which it is in both datasets; latent if a site ever gets
   two CEVs.
 * **D10** — the synthetic A0-vs-A1 gap (above).
+
+## Changes 2, 3, 5 (this session)
+
+Full rationale and worked numeric examples are in the handoff notes; this is the short version.
+
+* **Change 2 — earlier-charging tie-break (Issue 2).** `3_MCSModel.jl`'s objective now adds a
+  `1e-6`-weighted `idx * mu` term (existing CEV-charging-acceptance binary — is the CEV accepting
+  power from the MCS — index-weighted by position in the solve window). **Correction from an
+  earlier pass:** the term originally targeted `g_ch` (the MCS's own grid-charging binary), which
+  was already `0` throughout the diagnosed 90-minute stall (the MCS had plenty of its own charge
+  and wasn't grid-charging at all) — that version would have had nothing to push on for the
+  specific failure mode this change was meant to fix. Re-targeted at `mu`, which is the binary
+  actually gating whether the CEV receives power. Fixes the confirmed "wait vs charge now"
+  indifference (solver status = OPTIMAL, gap ≈ 0, tied on real cost) by nudging cost-tied
+  schedules toward earlier CEV charging, without ever overriding a genuine cost difference.
+* **Change 3 — terminal SOE_CEV shortfall penalty (Issue 1).** New `_terminal_soe_shortfall` in
+  `4_MPCLoop.jl`, called from both `run_mpc` and `run_one_shot`. A pure end-of-day check —
+  `SOE_CEV_ini − soe_cev_end` — completely separate from the live `SOE_CEV_min` floor check that
+  already feeds `rem_dig`/`rem_load`/`missed`. Converted to hours using *that run's own* realized
+  weighted work-power rate (not a flat average), charged directly onto TOTAL cost as a new
+  `shortfall_cost` line. Applies uniformly to all five approaches — see `5_Output.jl` and the three
+  comparison harnesses for the downstream reporting changes.
+* **Change 5 — `n_day_run` (currently 1), internal day loop.** `run_mpc`/`run_one_shot` in
+  `4_MPCLoop.jl` now contain their OWN internal day loop (an external `run_multiday` wrapper was
+  tried first, then retired once the day loop was moved inside — mirroring how the
+  `Receding_Horizon` sibling already worked). Within each day, the window is DAY-LOCAL — it shrinks
+  toward that day's own end and resets to full length at the next day's start, so the shrinking-
+  horizon behavior itself is completely unchanged; only the day-count and state carry-over are new.
+  Across days: `soe_mcs`/`soe_cev` continue naturally (no reset); `rem_dig`/`rem_load` ACCUMULATE
+  the same daily quota on top of any backlog (missed work does not silently vanish); the Bayesian
+  learner `est` and the applied-activity history `hist` persist for the WHOLE run, never reset at a
+  day boundary. Interval-count fields changed meaning: `res.nK` is now the TOTAL count across all
+  `n_day_run` days (was one day's count); the new `res.nKd` holds one day's count, and `res.n_day_run`
+  the day count. `_terminal_soe_shortfall` (Change 3) now also takes `n_day_run` so its "total
+  required work" denominator scales correctly for multi-day runs. `n_day_run = 1` is a pure
+  passthrough: `nK == nKd == n_kept`, so every existing single-day code path and result is
+  unchanged.
+  **Follow-up fix — `replan_by_day`:** the plan grids (`plan_grid_kW`/`plan_mcs_soe`/
+  `plan_cev_soe`/`plan_cev_act`/`plan_mcs_act`) originally stayed a single DAY-LOCAL `nKd × nKd`
+  set that got silently overwritten every day, and `5_Output.jl` indexed them up to the new global
+  `res.nK`, which would throw a `BoundsError` for `n_day_run > 1`. Fixed at the root: `run_mpc` now
+  builds a fresh set of grids every day and saves each into `replan_by_day[day]` (mirroring
+  `Receding_Horizon`'s already-established pattern exactly), and every `5_Output.jl` function that
+  reads them was updated to use `res.replan_by_day[1]` (day 1's plan, matching the report's own
+  documented intent) with `res.nKd` bounds. `n_day_run = 1` is unaffected — `replan_by_day[1]`
+  holds exactly what the old flat grid held.

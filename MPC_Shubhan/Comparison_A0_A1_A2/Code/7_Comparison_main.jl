@@ -331,8 +331,8 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
                           # so a :mean Approach 0 makes the reported gaps mix plan drift
                           # with the value of re-planning rather than isolating the latter.
                           approach0_plant::Symbol = :sampled,
-                          # time_limit_sec::Float64 = Inf,
-                          time_limit_sec::Float64 = 60.0, #<------------------------------------------ COMMENT THIS LINE FOR THE FULL RUN (Inf) ------------------------------------>
+                          time_limit_sec::Float64 = Inf,
+                          # time_limit_sec::Float64 = 60.0, #<------------------------------------------ COMMENT THIS LINE FOR THE FULL RUN (Inf) ------------------------------------>
                           multi_activity::Bool = false,
                           require_site_visit::Bool = false,
                           single_visit_per_site::Bool = false,
@@ -493,5 +493,5 @@ end
 
 # Auto-run unless a harness defines COMPARISON_NO_AUTORUN = true first.
 if !(@isdefined(COMPARISON_NO_AUTORUN) && COMPARISON_NO_AUTORUN)
-    run_comparison(n_days_receding = 5, approach0_source = :a1_receding)
+    run_comparison(n_days_receding = 1, approach0_source = :a1_receding)
 end

@@ -114,9 +114,15 @@ for (idx, soe) in enumerate(soe_vals)
         p  = Output._planned_kpis(res)      # planned @ 08:00
         c  = Output._cost_components(res)    # realised end-of-day
         r  = p.r
-        nK = res.nK
-        cev_chg = count(k -> res.plan_cev_act[1][r, k] != res.real_cev_act[1][k], 1:nK)
-        mcs_chg = count(k -> res.plan_mcs_act[r, k]    != res.real_mcs_act[k],    1:nK)
+        # Change 5 follow-up: same fix as Approach 1 Shrinking's sweep script --
+        # the flat plan_cev_act/plan_mcs_act fields were removed in favor of
+        # replan_by_day. This sweep only ever runs n_day_run=1, so day 1's
+        # plan is the whole plan. Compare over nKd (one day's interval count),
+        # not nK (which is n_day_run * nKd, the GLOBAL count).
+        g1  = res.replan_by_day[1]
+        nKd = res.nKd
+        cev_chg = count(k -> g1.plan_cev_act[1][r, k] != res.real_cev_act[1][k], 1:nKd)
+        mcs_chg = count(k -> g1.plan_mcs_act[r, k]    != res.real_mcs_act[k],    1:nKd)
 
         cev_end  = res.soe_cev_end[1]
         mcs_end  = res.soe_mcs_end[1]
@@ -127,7 +133,7 @@ for (idx, soe) in enumerate(soe_vals)
         a0_total = Output._cost_components(res0).total
 
         @printf("  SOE_ini=%.2f  realised \$%.2f (plan \$%.2f)  changed: CEV1=%d MCS=%d /%d  feas=%s\n",
-                soe, c.total, p.total, cev_chg, mcs_chg, nK, feasible)
+                soe, c.total, p.total, cev_chg, mcs_chg, nKd, feasible)
         @printf("             A0(:%s) \$%.2f -> A2 \$%.2f (%+.2f)\n",
                 A0_PLANT, a0_total, c.total, c.total - a0_total)
 
@@ -140,7 +146,7 @@ for (idx, soe) in enumerate(soe_vals)
            co2 = res.total_co2, missed = res.missed,
            labour = c.travel_cost, transit_h = res.transit_intervals * d0.delta_T,
            nc_peak = res.nc_peak, op_peak = res.op_peak,
-           cev_chg, mcs_chg, nK, elapsed = res.elapsed)
+           cev_chg, mcs_chg, nK = nKd, elapsed = res.elapsed)
     end
     push!(results, row)
 end

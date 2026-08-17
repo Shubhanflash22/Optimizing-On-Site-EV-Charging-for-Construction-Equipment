@@ -2,17 +2,18 @@
 #################### run02_SOE_04.28 ####################
 Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  planning power (mu)    : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
   solver time limit      : none (solve each day to the MIP gap)
 Approach 0 one-shot-per-day (plant = :sampled) done in 4.6 s (96 plant realizations, 1 day-solves)
 Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  planning power (mu)  : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 1 (plant = :sampled) done in 116.9 s (192 plant realizations)
-  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
-  SOE_ini=4.28  realised $1177.56 (plan $688.23)  changed: CEV1=21 MCS=19 /96  feas=true
-             A0(:sampled) $688.23 -> A1 $1177.56 (+489.33)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[4.275555555555556]
+Approach 1 (plant = :sampled) done in 134.9 s (192 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.7, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  SOE_ini=4.28  realised $690.72 (plan $688.21)  changed: CEV1=12 MCS=9 /96  feas=true
+             A0(:sampled) $722.18 -> A1 $690.72 (-31.46)

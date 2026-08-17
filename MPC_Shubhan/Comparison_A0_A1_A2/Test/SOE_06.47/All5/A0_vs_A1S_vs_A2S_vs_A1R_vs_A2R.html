@@ -1,0 +1,32 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+body{font-family:sans-serif;margin:16px}
+table{border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #ccc;padding:4px 10px;text-align:right}
+th{background:#f4f4f4}
+td:first-child,th:first-child{text-align:left}
+</style></head><body>
+<h2>Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)</h2>
+<p>All 5 columns are FULLY REALISED outcomes, drawn from the SAME shared per-(excavator, activity) power sample pool (same seed, same frozen prior mu/sigma -- input data is identical across all four codebases apart from the regression-refreshed <code>parameters.csv</code>, built once and shared). Receding Horizon runs use the shared <code>n_days_receding</code> reported day(s) so they are directly comparable to the single-day Shrinking Horizon runs.</p>
+<table><tr><th>Metric</th>
+<th>Approach 0 (one-shot, :sampled)</th>
+<th>Approach 1 - Shrinking</th>
+<th>Approach 2 - Shrinking (stochastic)</th>
+<th>Approach 1 - Receding</th>
+<th>Approach 2 - Receding (stochastic)</th>
+</tr>
+<tr><td>Grid energy (kWh)</td><td>30.336</td><td>35.677</td><td>35.869</td><td>30.414</td><td>36.008</td></tr>
+<tr><td>Energy cost (USD)</td><td>9.746</td><td>11.528</td><td>11.470</td><td>9.680</td><td>11.594</td></tr>
+<tr><td>CO2 emissions (kg)</td><td>8.053</td><td>9.333</td><td>9.634</td><td>8.264</td><td>9.508</td></tr>
+<tr><td>CO2 cost (USD)</td><td>0.403</td><td>0.467</td><td>0.482</td><td>0.413</td><td>0.475</td></tr>
+<tr><td>NCD peak (kW)</td><td>2.638</td><td>3.014</td><td>3.190</td><td>2.765</td><td>3.097</td></tr>
+<tr><td>NCD charge (USD)</td><td>53.074</td><td>60.647</td><td>64.182</td><td>55.631</td><td>62.318</td></tr>
+<tr><td>OPD peak (kW)</td><td>-0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>OPD charge (USD)</td><td>-0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>Missed work (h)</td><td>0.250</td><td>0.250</td><td>0.250</td><td>0.250</td><td>0.250</td></tr>
+<tr><td>Missed work penalty (USD)</td><td>500.000</td><td>500.010</td><td>500.000</td><td>500.000</td><td>500.000</td></tr>
+<tr><td>Terminal SOE shortfall (kWh)</td><td>0.071</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>Terminal shortfall penalty (USD)</td><td>33.643</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>MCS transit (h)</td><td>0.500</td><td>1.000</td><td>1.000</td><td>0.500</td><td>1.000</td></tr>
+<tr><td>Travel labour (USD)</td><td>125.000</td><td>250.000</td><td>250.000</td><td>125.000</td><td>250.000</td></tr>
+<tr><td>TOTAL cost (USD)</td><td>721.866</td><td>822.653</td><td>826.134</td><td>690.724</td><td>824.387</td></tr>
+</table></body></html>

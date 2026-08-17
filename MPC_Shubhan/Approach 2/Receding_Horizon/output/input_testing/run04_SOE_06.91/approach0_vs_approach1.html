@@ -9,28 +9,30 @@ td:first-child,th:first-child{text-align:left}
 <p>Both columns are FULLY REALIZED outcomes over the 1 kept day(s), drawn from the SAME pre-generated per-(excavator, activity) power samples, so the difference reflects only the value of re-planning (Approach 0 re-solves once per day; Approach 2 re-solves every 15 minutes). Re-run with <code>approach0_plant = :mean</code> to see the deterministic MILP optima instead.</p>
 <h3>Totals (all kept days)</h3>
 <table><tr><th>Metric</th><th>Approach 0 &mdash; sampled plant<br>(one-shot/day, open loop)</th><th>Approach 2 &mdash; closed loop</th><th>&Delta; (A2 &minus; A0)</th></tr>
-<tr><td>Grid energy (kWh)</td><td>31.653</td><td>30.493</td><td>-1.160</td></tr>
-<tr><td>Energy cost (USD)</td><td>10.074</td><td>9.705</td><td>-0.369</td></tr>
-<tr><td>CO2 emissions (kg)</td><td>8.600</td><td>8.285</td><td>-0.315</td></tr>
-<tr><td>CO2 cost (USD)</td><td>0.430</td><td>0.414</td><td>-0.016</td></tr>
-<tr><td>NCD peak (kW)</td><td>2.878</td><td>2.772</td><td>-0.105</td></tr>
-<tr><td>NCD charge (USD)</td><td>57.896</td><td>55.775</td><td>-2.121</td></tr>
+<tr><td>Grid energy (kWh)</td><td>31.669</td><td>30.811</td><td>-0.857</td></tr>
+<tr><td>Energy cost (USD)</td><td>10.079</td><td>9.806</td><td>-0.273</td></tr>
+<tr><td>CO2 emissions (kg)</td><td>8.605</td><td>8.372</td><td>-0.233</td></tr>
+<tr><td>CO2 cost (USD)</td><td>0.430</td><td>0.419</td><td>-0.012</td></tr>
+<tr><td>NCD peak (kW)</td><td>2.879</td><td>2.801</td><td>-0.078</td></tr>
+<tr><td>NCD charge (USD)</td><td>57.925</td><td>56.356</td><td>-1.568</td></tr>
 <tr><td>OPD peak (kW)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
 <tr><td>OPD charge (USD)</td><td>0.000</td><td>0.000</td><td>+0.000</td></tr>
-<tr><td>Missed work (h)</td><td>0.022</td><td>0.250</td><td>+0.228</td></tr>
-<tr><td>Missed work penalty (USD)</td><td>44.950</td><td>500.000</td><td>+455.050</td></tr>
+<tr><td>Missed work (h)</td><td>0.003</td><td>0.250</td><td>+0.247</td></tr>
+<tr><td>Missed work penalty (USD)</td><td>6.857</td><td>500.000</td><td>+493.143</td></tr>
+<tr><td>Terminal SOE shortfall (kWh)</td><td>0.171</td><td>0.000</td><td>-0.171</td></tr>
+<tr><td>Terminal shortfall penalty (USD)</td><td>80.430</td><td>0.000</td><td>-80.430</td></tr>
 <tr><td>MCS transit (h)</td><td>0.500</td><td>0.500</td><td>+0.000</td></tr>
 <tr><td>Travel labour (USD)</td><td>125.000</td><td>125.000</td><td>+0.000</td></tr>
-<tr><td>TOTAL cost (USD)</td><td>238.351</td><td>690.895</td><td>+452.544</td></tr>
+<tr><td>TOTAL cost (USD)</td><td>280.722</td><td>691.581</td><td>+410.860</td></tr>
 </table>
 <h3>Run diagnostics</h3>
 <table><tr><th>Run</th><th>Plant</th><th>Infeasible windows</th><th>Energy caps</th><th>Solve time (s)</th></tr>
-<tr><td>Approach 0 (one-shot/day)</td><td>:sampled</td><td>0</td><td>1</td><td>1.9</td></tr>
-<tr><td>Approach 2 (closed loop, stochastic)</td><td>:sampled</td><td>0</td><td>0</td><td>4353.0</td></tr>
+<tr><td>Approach 0 (one-shot/day)</td><td>:sampled</td><td>0</td><td>1</td><td>2.7</td></tr>
+<tr><td>Approach 2 (closed loop, stochastic)</td><td>:sampled</td><td>0</td><td>0</td><td>4708.5</td></tr>
 </table>
 <h3>Per-day breakdown</h3>
 <p>Physical/additive quantities only, so daily values sum to the totals above. NCD/OPD charges and the missed-work penalty are whole-run concepts (a single peak, a single end-of-run backlog) and are not split per day here.</p>
 <table><tr><th>Day</th><th>Approach</th><th>Grid energy (kWh)</th><th>Energy cost (USD)</th><th>CO2 (kg)</th><th>NC peak (kW)</th><th>MCS transit (h)</th><th>Travel labour (USD)</th></tr>
-<tr><td>1</td><td>Approach 0</td><td>31.653</td><td>10.074</td><td>8.600</td><td>2.878</td><td>0.500</td><td>125.000</td></tr>
-<tr><td>1</td><td>Approach 2</td><td>30.493</td><td>9.705</td><td>8.285</td><td>2.772</td><td>0.500</td><td>125.000</td></tr>
+<tr><td>1</td><td>Approach 0</td><td>31.669</td><td>10.079</td><td>8.605</td><td>2.879</td><td>0.500</td><td>125.000</td></tr>
+<tr><td>1</td><td>Approach 2</td><td>30.811</td><td>9.806</td><td>8.372</td><td>2.801</td><td>0.500</td><td>125.000</td></tr>
 </table></body></html>

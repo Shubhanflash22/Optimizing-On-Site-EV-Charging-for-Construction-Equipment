@@ -120,8 +120,44 @@ $g^{\text{ch}}_{m,i,k}$, $x_{m,i,j,k}$, $y_{m,i,j,k}$, $\beta^{\text{arr}},\beta
       +\rho_{\text{lab}}\dt\!\!\sum_{m,i,j,k}\!\! y_{m,i,j,k}
       + W_{\text{p}}\!\sum_{i,k}\! s^{\text{prec}}_{i,k}
       + W_{\text{c}}\!\sum_{e,k}\!(s^{\text{pace}+}_{e,k}{+}s^{\text{pace}-}_{e,k})
-      + W_{\text{t}}\!\sum_{e,d}\! s^{\text{term}}_{e,d}.
+      + W_{\text{t}}\!\sum_{e,d}\! s^{\text{term}}_{e,d}
+      +10^{-6}\!\!\sum_{i\in\mathcal{N}_c,\,e,\,idx}\!\! idx\cdot \mu_{i,e,K_{idx}}.
 \end{align}
+The last term is the CHANGE 2 tie-break penalty (see below), scaled at $10^{-6}$ so it can only
+ever decide between schedules already tied on every real cost term above, never override one.
+Here $idx\in\{1,\dots,|K_{\text{win}}|\}$ is the LOCAL position within the current re-solve window
+(not the global/day-relative $\mathrm{wd}(k)$ used for price/CO2 above) -- earlier WITHIN THIS
+WINDOW is what should be preferred when tied.
+
+\paragraph{Change 2 --- earlier-charging tie-break (Issue 2).} Under the mean-case forecast this
+model plans against, two schedules can be exactly cost-tied (e.g.\ ``charge the CEV now'' vs.\
+``wait, then charge'') even though one leaves the CEV's safety margin unspent for longer in the
+real, uncertain world. The added term penalizes later CEV-charging (via the existing acceptance
+indicator $\mu_{i,e,k}$, NOT $g^{\text{ch}}$ -- the diagnosed stall was the MCS idling on discharge
+\emph{to the CEV} with plenty of its own charge to spare, gated by $\mu$; $g^{\text{ch}}$, which
+only gates the MCS's own grid-charging, was already 0 throughout that stall and an earlier version
+of this term built against it would have had nothing to push on), so among cost-tied schedules the
+solver now prefers the one that charges the CEV sooner.
+
+\paragraph{Change 3 --- terminal SOE\textsuperscript{CEV} shortfall penalty (Issue 1), NOT part of
+this objective.} Eq.~8b is a hard constraint on the \emph{plan} only; nothing in the MILP checks
+whether the \emph{realized} closed-loop trajectory reached $SOE^{\text{CEV,ini}}_e$ by the kept-day
+boundary. This is evaluated AFTER the run from the realized trajectory, not inside the
+optimization: $\text{shortfall}_e=\max(SOE^{\text{CEV,ini}}_e-SOE^{\text{CEV,end}}_e,0)$, converted
+to hours by that run's own realized weighted work-power rate, and charged directly as
+$\rho_{\text{miss}}\times\text{shortfall\_hours}$ onto the reported TOTAL cost (see
+\texttt{\_terminal\_soe\_shortfall} in \texttt{4\_MPCLoop.jl}). Independent of, and never
+double-counting with, the existing miss-work slacks above, which only ever reflect work capped
+live against the physical floor $\underline{SOE}_e$.
+
+\paragraph{Change 5 --- \texttt{n\_day\_run}.} The day-count knob that previously defaulted to a
+hardcoded 2-day schedule with two DIFFERENT quotas is renamed \texttt{n\_day\_run} and now defaults
+to 1 (single day). For \texttt{n\_day\_run}~$>1$, each of the $\mathcal{D}$ days uses the SAME
+$R^{\text{dig}}_i,R^{\text{load}}_i$ requirement (not distinct per-day quotas) and starts from the
+REAL ending $SOE^{\text{MCS}},SOE^{\text{CEV}}$ the previous day finished at -- this closed-loop
+day-to-day carry-over already existed here and is unchanged; only the day-count default and its
+``same work every day'' semantics are new.
+
 Price/carbon use the within-day index $\mathrm{wd}(k)$. The overnight recharge is scheduled
 \emph{inside} this MILP, so its cost is already carried by the first two terms; there is no
 separate overnight accounting.

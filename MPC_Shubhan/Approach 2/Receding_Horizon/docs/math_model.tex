@@ -125,11 +125,41 @@ $g^{\text{ch}}_{m,i,k}$, $x_{m,i,j,k}$, $y_{m,i,j,k}$, $\beta^{\text{arr}},\beta
       +\rho_{\text{lab}}\dt\!\!\sum_{m,i,j,k}\!\! y_{m,i,j,k}
       + W_{\text{p}}\!\sum_{i,k}\! s^{\text{prec}}_{i,k}
       + W_{\text{c}}\!\sum_{e,k}\!(s^{\text{pace}+}_{e,k}{+}s^{\text{pace}-}_{e,k})
-      + W_{\text{t}}\!\sum_{e,d}\! s^{\text{term}}_{e,d}.
+      + W_{\text{t}}\!\sum_{e,d}\! s^{\text{term}}_{e,d}
+      +10^{-6}\!\!\sum_{i\in\mathcal{N}_c,\,e,\,idx}\!\! idx\cdot \mu_{i,e,K_{idx}}.
 \end{align}
+The last term is CHANGE 2's tie-break penalty, added ONLY to this deterministic objective, NOT to
+the stochastic window model's objective -- Approach 2's stochastic hedge already addresses
+margin-for-error via scenarios (Change 4).
+
+\paragraph{Change 2 --- earlier-charging tie-break (Issue 2).} Penalizes later CEV-charging (via
+the CEV-acceptance indicator $\mu_{i,e,k}$, NOT $g^{\text{ch}}$ -- the diagnosed stall was the MCS
+idling on discharge \emph{to the CEV} with plenty of its own charge to spare, gated by $\mu$;
+$g^{\text{ch}}$, the MCS's own grid-charging indicator, was already 0 throughout that stall) at
+weight $10^{-6}$, breaking ties toward earlier action without ever overriding a genuine cost
+difference. $idx$ is the LOCAL position within the current re-solve window.
+
+\paragraph{Change 3 --- terminal SOE\textsuperscript{CEV} shortfall penalty (Issue 1), NOT part of
+this objective.} Evaluated AFTER the run from the realized trajectory at the kept-day boundary:
+$\text{shortfall}_e=\max(SOE^{\text{CEV,ini}}_e-SOE^{\text{CEV,end}}_e,0)$, converted to hours by
+that run's own realized weighted work-power rate, charged as
+$\rho_{\text{miss}}\times\text{shortfall\_hours}$ directly onto reported TOTAL cost.
+
+\paragraph{Change 4 --- stratified scenario sampling (Issue 3).} \texttt{sample\_scenarios} now
+draws 5 FIXED, evenly spread bins instead of 5 i.i.d.\ Normal draws, guaranteeing tail coverage
+every re-solve. See the identical description in the Shrinking-Horizon sibling document.
+
+\paragraph{Change 5 --- \texttt{n\_day\_run}.} The day-count knob (previously a hardcoded 2-day
+schedule with two DIFFERENT quotas) is renamed \texttt{n\_day\_run}, defaulting to 1. For
+\texttt{n\_day\_run}~$>1$, every day uses the SAME work requirement and starts from the previous
+day's REAL ending state (day-to-day carry-over already existed here; only the default and
+same-work semantics are new).
+
 Price/carbon use the within-day index $\mathrm{wd}(k)$. The overnight recharge is scheduled
 \emph{inside} this MILP, so its cost is already carried by the first two terms; there is no
 separate overnight accounting.
+
+
 
 %======================================================================
 \section{Constraints}

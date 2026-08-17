@@ -21,7 +21,8 @@ using Statistics
 using Random
 
 export normalize_travel_steps, in_peak,
-       clock_label, build_time_labels, create_fixed_2hour_xticks,
+       clock_label, clock_day_label, build_time_labels, build_time_labels_days,
+       multiday_xticks, create_fixed_2hour_xticks,
        stepify_interval_values, stepify_boundary_values,
        interval_time_dataframe, safe_get,
        BayesianActivityEstimator, observe!, refit!,
@@ -77,6 +78,40 @@ function build_time_labels(t_start, delta_T, nK)
         clock_min = mod(Int(round(t_start * 60 + k * delta_T * 60)), 24 * 60)
         @sprintf("%02d:%02d", div(clock_min, 60), clock_min % 60)
     end for k in 0:nK]
+end
+
+# -----------------------------------------------------------------------------
+# CHANGE 5 -- multi-day time-label helpers (ported from Receding_Horizon's
+# Common.jl, needed now that run_mpc/run_one_shot support n_day_run > 1 days).
+# -----------------------------------------------------------------------------
+# "D<day> HH:MM" label for within-day boundary k (1..nKd+1) on a given day.
+clock_day_label(t_start, delta_T, day, k) = string("D", day, " ", clock_label(t_start, delta_T, k))
+
+# Boundary clock labels for a MULTI-DAY horizon of `n_days` days, each with
+# `nK` daytime intervals. Boundary index g (1..n_days*nK+1) is tagged with its
+# day and within-day clock (e.g. "D1 08:00", ..., "D2 08:00", ...).
+function build_time_labels_days(t_start, delta_T, n_days, nK)
+    labels = String[]
+    for g in 0:(n_days * nK)
+        day = min(n_days, div(g, nK) + 1)     # boundary g belongs to this day
+        wk  = g - (day - 1) * nK              # within-day boundary offset (0..nK)
+        push!(labels, clock_day_label(t_start, delta_T, day, wk + 1))
+    end
+    return labels
+end
+
+# X-ticks for a multi-day horizon: one tick every `every_hours` within each
+# day-block, placed on the boundary axis (1..n_days*nK+1) and labelled "D<d> HH:00".
+function multiday_xticks(n_days, nK, t_start, delta_T; every_hours::Int = 4)
+    step = max(1, Int(round(every_hours / delta_T)))
+    ticks = Int[]; labels = String[]
+    for dday in 1:n_days
+        for k in 1:step:nK
+            push!(ticks, (dday - 1) * nK + k)
+            push!(labels, clock_day_label(t_start, delta_T, dday, k))
+        end
+    end
+    return (ticks, labels)
 end
 
 # -----------------------------------------------------------------------------

@@ -355,3 +355,34 @@ CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
 
  NOTE: idle is a CONSTANT-power subactivity (paper Eq. 5e), pinned to 0 kW; there is
  NO separate shutdown/off state (a time-varying idle power is not part of the model).
+
+ =============================================================================
+ CHANGES 2, 3, 5 -- post-diagnosis corrections (this session)
+ =============================================================================
+ CHANGE 2 (objective, 3_MCSModel.jl): added a 1e-6-weighted time-index
+   tie-break term (idx * mu, idx = LOCAL position within the current
+   re-solve window) to build_window_model's @objective. Fixes Issue 2 (see
+   the Shrinking_Horizon sibling doc for the full rationale -- identical here,
+   including the g_ch -> mu correction after the initial implementation
+   targeted the wrong variable).
+
+ CHANGE 3 (post-processing, 4_MPCLoop.jl + 5_Output.jl + comparison harnesses):
+   added _terminal_soe_shortfall, called from run_mpc (using rem_dig_kept /
+   rem_load_kept / soe_cev_kept, snapshotted AT the kept-day boundary before
+   the trailing buffer day mutates them further) and run_one_shot. Same design
+   as the Shrinking_Horizon sibling: pure end-of-day snapshot against
+   SOE_CEV_ini, unrelated to the live SOE_CEV_min floor check already in
+   apply_and_simulate!; charged as a new shortfall_cost line onto TOTAL cost,
+   never overlapping missed_cost. Applies to all five approaches.
+
+ CHANGE 5 (2_DataLoader.jl): the day-count knob is renamed n_day_run,
+   defaulting to 1 (was a hardcoded 2-day synthetic default using two
+   DIFFERENT quotas). In the synthetic-data path, dig_by_day/load_by_day are
+   now built as n_day_run copies of the SAME hours_digging/hours_loading_swinging
+   (same work every day). In the real-data loader path, the params-file key
+   read is now "n_day_run" (falling back to legacy "n_days" if present),
+   defaulting to 1.0 instead of 2.0; when no real per-day CSV exists, the
+   existing fallback (copy hours_digging/hours_loading_swinging n_days times)
+   already matched "same work every day" and needed no change. Day-to-day
+   real-state carry-over (quota_dig/quota_load, soe_mcs/soe_cev continuation)
+   was ALREADY implemented here and is untouched.

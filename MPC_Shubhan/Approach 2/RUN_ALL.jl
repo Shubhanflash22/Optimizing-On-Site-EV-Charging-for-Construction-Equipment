@@ -68,12 +68,19 @@ const PLANT_MODE = :sampled          # <<<<<<  CHANGE THIS LINE: :sampled  or  :
 # ║   quick pass.                                                             ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
+# const STAGES = [
+#     :shrinking_input,
+#     :shrinking_synthetic,
+#     :shrinking_sweep,
+#     :receding_input,
+#     :receding_synthetic,
+#     :receding_sweep,
+#     :comparison,
+# ]
 const STAGES = [
     :shrinking_input,
-    :shrinking_synthetic,
     :shrinking_sweep,
     :receding_input,
-    :receding_synthetic,
     :receding_sweep,
     :comparison,
 ]

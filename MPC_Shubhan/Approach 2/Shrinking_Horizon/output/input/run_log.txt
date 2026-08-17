@@ -1,23 +1,20 @@
-Running Approach 0 (one-shot 8:00 plan, executed open-loop, no replanning): 96 steps
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit      : none (solve to the MIP gap)
-Approach 0 one-shot (plant = :sampled) done in 8.2 s (96 plant realizations)
-  NOTE: 1 intervals had work CAPPED by available CEV energy (task could not fully
-        complete before hitting the SOE floor); the shortfall is reflected honestly in
-        rem_dig/rem_load.
-Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps
+Approach 0 one-shot (plant = :sampled) done in 17.5 s (96 plant realizations, 1 day(s))
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
   scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
   posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.21, 0.18, 0.38, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 900.9 s (96 plant realizations)
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 694.5 s (96 plant realizations, 1 day(s))
   posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.21, 0.18, 0.38, 0.0] kW
-  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
 
 ==== Scenario 1 closed-loop KPIs (full 24 h horizon: 08:00 -> 08:00 next day) ====
 Total grid energy   : 31.64 kWh
@@ -31,11 +28,9 @@ CEV SOE at horizon  : [14.8] kWh (target [14.8])
 MCS SOE at horizon  : [250.0] kWh (target [250.0])
 
 ==== Approach comparison (both fully realised) ====
-A0 one-shot, sampled plant (open loop)  : $197.36  (0.50 h transit, 0.00 h missed)
+A0 one-shot, sampled plant (open loop)  : $193.41  (0.50 h transit, 0.00 h missed)
 A2 stochastic closed loop (5 scenarios) : $193.37  (0.50 h transit, 0.00 h missed)
-  A2 - A0 (value of hedging + re-planning)    : -3.99  (negative = A2 cheaper)
-  NOTE: 1 interval(s) had work capped by available CEV energy -- the
-           shortfall is reflected honestly in rem_dig/rem_load, not hidden.
+  A2 - A0 (value of hedging + re-planning)    : -0.04  (negative = A2 cheaper)
 
 Results written to: c:\Users\shubh\Desktop\MPC\Approach 2\Shrinking_Horizon\output\input
   Figures (v4_real style): 01..09 (09 = per-MCS power profiles)

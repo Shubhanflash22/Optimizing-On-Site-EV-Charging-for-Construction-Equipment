@@ -421,3 +421,29 @@ NOT AUDITED YET (same caveat as this file's own numbers above): no fresh Approac
 Approach 2 realized-cost comparison run has been recorded in this addendum. Re-run and
 record before quoting a headline "value of hedging" number, exactly as this file already
 cautions for the pre-existing Approach 0 vs Approach 1 numbers above.
+
+ =============================================================================
+ CHANGES 2, 3, 4, 5 -- post-diagnosis corrections (this session)
+ =============================================================================
+ CHANGE 2 (objective, 3_MCSModel.jl): 1e-6-weighted idx * mu tie-break term,
+   ONLY on build_window_model's (deterministic) @objective, NOT on
+   build_window_model_stochastic's. See Approach 2 Shrinking_Horizon sibling
+   doc for full rationale (identical here, including the g_ch -> mu
+   correction after the initial implementation targeted the wrong variable).
+
+ CHANGE 3 (post-processing, 4_MPCLoop.jl + 5_Output.jl + comparison harnesses):
+   identical design to the other three codebases -- _terminal_soe_shortfall
+   called from run_mpc (using rem_dig_kept/rem_load_kept/soe_cev_kept
+   snapshotted at the kept-day boundary) and run_one_shot, new shortfall_cost
+   line onto TOTAL cost, applies to all five approaches.
+
+ CHANGE 4 (2b_ScenarioSampler.jl): identical stratified-sampling replacement
+   as the Shrinking_Horizon sibling (this file and that one are two
+   independent, byte-identical copies -- both updated the same way).
+
+ CHANGE 5 (2_DataLoader.jl): day-count knob renamed n_day_run, defaulting to
+   1 (was hardcoded 2-day synthetic default with two DIFFERENT quotas).
+   Real-data loader path now reads "n_day_run" from the params file (falling
+   back to legacy "n_days"), defaulting to 1.0. See Approach 1 Receding_Horizon
+   sibling doc for the full rationale (identical here); day-to-day real-state
+   carry-over already existed and is untouched.

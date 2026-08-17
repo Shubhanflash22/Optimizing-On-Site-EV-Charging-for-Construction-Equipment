@@ -390,3 +390,29 @@ conservative."* This tiny example only has 3 scenarios and 4 intervals; your rea
 would carry this same logic across every CEV, every activity, and a full-day horizon,
 which is why scenario count and scenario reduction become the practical engineering
 problem once the concept itself is settled.
+
+## Changes 2–5, all four solver codebases (this session)
+
+Following a diagnosis run that identified three real, data-confirmed issues (A0's realized
+day-end battery shortfall going unreflected in reported KPIs; the deterministic MPC having no
+tie-break preference between cost-tied "charge now" vs "wait" schedules; Approach 2's 5 i.i.d.
+scenario draws having no guarantee of tail coverage), four changes were applied:
+
+* **Change 2** — a small (`1e-6`) deliberately-scaled objective term breaking ties toward earlier
+  grid-charging, in all four `3_MCSModel.jl` files (Approach 2's stochastic objective is
+  deliberately excluded — its scenario hedge already covers that failure mode).
+* **Change 3** — a terminal `SOE_CEV` shortfall penalty, computed after every run from the realized
+  trajectory (pure end-of-day check, unrelated to the physical-floor capping that already existed),
+  applied uniformly across all five approaches (A0, A1S, A1R, A2S, A2R) via each codebase's
+  `4_MPCLoop.jl`, and surfaced through every output file's `TOTAL cost`.
+* **Change 4** — Approach 2's `2b_ScenarioSampler.jl` now draws 5 fixed, stratified bins instead of
+  5 i.i.d. draws, guaranteeing a tail scenario every re-solve instead of leaving it to chance.
+* **Change 5** — a new `n_day_run` knob (currently 1) for chaining multiple days with real-state
+  carry-over and a constant work requirement, in all four codebases.
+
+(Change 1 — the fourth item originally proposed — turned out to need no code changes: the physical
+floor check it was meant to add already existed, unmodified, in `apply_and_simulate!`.)
+
+See `CHANGES_SUMMARY.md` at the repo root for the complete file-by-file list, and each
+`Approach N/{Shrinking,Receding}_Horizon/docs/README.md` for the full rationale and worked
+numeric examples.

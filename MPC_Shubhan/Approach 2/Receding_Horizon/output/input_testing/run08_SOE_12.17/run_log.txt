@@ -3,19 +3,20 @@
 Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 3.6 s (96 plant realizations, 1 day-solves)
+Approach 0 one-shot-per-day (plant = :sampled) done in 3.7 s (96 plant realizations, 1 day-solves)
 Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
   scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
   posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1619.6 s (192 plant realizations)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[12.221258057203418]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1629.3 s (192 plant realizations)
   posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=12.17  realised $193.84 (plan $197.17)  changed: CEV1=19 MCS=16 /96  feas=true
-             A0(:sampled) $193.40 -> A2 $193.84 (+0.44)
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=12.17  realised $194.00 (plan $188.77)  changed: CEV1=23 MCS=19 /96  feas=true
+             A0(:sampled) $279.19 -> A2 $194.00 (-85.19)

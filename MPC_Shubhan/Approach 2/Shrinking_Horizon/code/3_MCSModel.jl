@@ -160,6 +160,33 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @variable(model, P_peak_NC >= 0)               # tracked whole-day peak grid draw
     @variable(model, P_peak_OP >= 0)               # tracked on-peak peak grid draw
 
+    # ---- CHANGE 2 -- small time-index tie-break penalty (Issue 2) --------------
+    # When multiple schedules are cost-tied under the deterministic mean-case
+    # forecast (e.g. "charge the CEV now" vs "wait, then charge" -- same total
+    # energy, same price, so mathematically identical to the real-cost objective
+    # above), the solver has no preference between them, even though "wait"
+    # quietly spends down the CEV's safety margin in the real uncertain world.
+    #
+    # CORRECTED TARGET: the diagnosed stall was the MCS sitting idle on
+    # DISCHARGE TO THE CEV for 90 minutes with plenty of its own charge to
+    # spare -- that is gated by `mu[i,e,k]` (is CEV e accepting power at site i,
+    # interval k -- see the P_MCS_CEV <= CH_CEV * mu constraint below), NOT by
+    # `g_ch` (which only gates the MCS's own GRID charging and was already 0
+    # throughout that stall -- an earlier version of this term penalized g_ch
+    # and would have had nothing to push on for that specific failure mode).
+    # This adds a small, deliberately-scaled penalty on LATER CEV-charging
+    # activity (idx-weighted sum of the existing mu binary), so among schedules
+    # tied on real cost, earlier CEV charging is now preferred over waiting.
+    # weight = 1e-6 is small enough that it can only ever decide among options
+    # already tied on real cost -- it can never override a genuine cost
+    # difference. NOTE: this is added ONLY to this (deterministic) objective,
+    # not to build_window_model_stochastic's -- Approach 2's stochastic hedge
+    # (Issue 3 / Change 4) already addresses margin-for-error via scenarios, so
+    # this tie-break stays scoped to where Issue 2 (deterministic, no margin)
+    # actually applies: Approach 0's plan and Approach 1's real closed loop.
+    Kvec = collect(K)
+    early_charge_term = sum(idx * mu[i, e, Kvec[idx]] for i in N_c, e in E, idx in eachindex(Kvec))
+
     # ---- OBJECTIVE (Eq. 1): total operating cost. All constraints are HARD;
     # the only slack is s_miss_work (Eq. 12c), exactly as in the PDF/Avik. ----
     @objective(model, Min,
@@ -168,7 +195,8 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         d.rho_miss * sum(s_miss_work[i, a] for i in N_c, a in B) +                                             # SOFT penalty for unfinished work
         d.lambda_demand_NC * P_peak_NC +                                                                      # non-coincident demand charge
         d.lambda_demand_OP * P_peak_OP +                                                                      # on-peak demand charge
-        d.rho_labor * delta_T * sum(y_trv[m, i, j, k] for m in M, i in N, j in N, k in K))                     # towing labour: cost of time in transit
+        d.rho_labor * delta_T * sum(y_trv[m, i, j, k] for m in M, i in N, j in N, k in K) +                    # towing labour: cost of time in transit
+        1e-6 * early_charge_term)                                                                              # Change 2: small earlier-charging tie-break
 
     # ---- power aggregation & where power may flow ----
     # Total grid draw of an MCS = sum of its per-grid-node charge power.

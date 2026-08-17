@@ -8,9 +8,9 @@ INITIAL-SOE SWEEP (:input)  —  10 runs, SOE_CEV_ini in [2.96, 14.8] kWh
 Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 3.9 s (96 plant realizations, 1 day-solves)
+Approach 0 one-shot-per-day (plant = :sampled) done in 3.5 s (96 plant realizations, 1 day-solves)
   NOTE: 1 intervals had work CAPPED by available CEV energy (task could not fully
         complete before hitting the SOE floor); the shortfall is reflected honestly in
         rem_dig/rem_load.
@@ -18,210 +18,217 @@ Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day reced
   scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
   posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1743.4 s (192 plant realizations)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[3.208782553659994]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1756.8 s (192 plant realizations)
   posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=2.96  realised $1313.04 (plan $1183.47)  changed: CEV1=15 MCS=16 /96  feas=true
-             A0(:sampled) $1203.69 -> A2 $1313.04 (+109.35)
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=2.96  realised $1312.31 (plan $1172.38)  changed: CEV1=11 MCS=9 /96  feas=true
+             A0(:sampled) $1200.87 -> A2 $1312.31 (+111.44)
 
 #################### run02_SOE_04.28 ####################
 Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 4.0 s (96 plant realizations, 1 day-solves)
-Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
-  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
-  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 3664.9 s (192 plant realizations)
-  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=4.28  realised $687.46 (plan $1177.28)  changed: CEV1=21 MCS=14 /96  feas=true
-             A0(:sampled) $686.07 -> A2 $687.46 (+1.39)
-
-#################### run03_SOE_05.59 ####################
-Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
-  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 7.6 s (96 plant realizations, 1 day-solves)
-Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
-  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
-  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 3862.4 s (192 plant realizations)
-  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=5.59  realised $823.67 (plan $694.23)  changed: CEV1=21 MCS=18 /96  feas=true
-             A0(:sampled) $686.07 -> A2 $823.67 (+137.60)
-
-#################### run04_SOE_06.91 ####################
-Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
-  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 1.9 s (96 plant realizations, 1 day-solves)
-  NOTE: 1 intervals had work CAPPED by available CEV energy (task could not fully
-        complete before hitting the SOE floor); the shortfall is reflected honestly in
-        rem_dig/rem_load.
-Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
-  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
-  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 4353.0 s (192 plant realizations)
-  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=6.91  realised $690.89 (plan $694.23)  changed: CEV1=15 MCS=13 /96  feas=true
-             A0(:sampled) $238.35 -> A2 $690.89 (+452.54)
-
-#################### run05_SOE_08.22 ####################
-Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
-  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 3.6 s (96 plant realizations, 1 day-solves)
-  NOTE: 2 intervals had work CAPPED by available CEV energy (task could not fully
-        complete before hitting the SOE floor); the shortfall is reflected honestly in
-        rem_dig/rem_load.
-Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
-  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
-  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1914.6 s (192 plant realizations)
-  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=8.22  realised $194.40 (plan $197.17)  changed: CEV1=23 MCS=20 /96  feas=true
-             A0(:sampled) $236.45 -> A2 $194.40 (-42.05)
-
-#################### run06_SOE_09.54 ####################
-Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
-  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 4.0 s (96 plant realizations, 1 day-solves)
-Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
-  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
-  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 3499.0 s (192 plant realizations)
-  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=9.54  realised $193.84 (plan $197.17)  changed: CEV1=20 MCS=13 /96  feas=true
-             A0(:sampled) $193.40 -> A2 $193.84 (+0.44)
-
-#################### run07_SOE_10.85 ####################
-Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
-  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 4.3 s (96 plant realizations, 1 day-solves)
-Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
-  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
-  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1864.3 s (192 plant realizations)
-  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=10.85  realised $193.84 (plan $197.17)  changed: CEV1=22 MCS=13 /96  feas=true
-             A0(:sampled) $193.40 -> A2 $193.84 (+0.44)
-
-#################### run08_SOE_12.17 ####################
-Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
-  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 3.6 s (96 plant realizations, 1 day-solves)
-Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
-  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
-  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
-  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
-  solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1619.6 s (192 plant realizations)
-  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=12.17  realised $193.84 (plan $197.17)  changed: CEV1=19 MCS=16 /96  feas=true
-             A0(:sampled) $193.40 -> A2 $193.84 (+0.44)
-
-#################### run09_SOE_13.48 ####################
-Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
-  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
-  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit      : none (solve each day to the MIP gap)
 Approach 0 one-shot-per-day (plant = :sampled) done in 2.4 s (96 plant realizations, 1 day-solves)
 Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
   scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
   posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1564.2 s (192 plant realizations)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[4.85785723208752]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 3869.0 s (192 plant realizations)
   posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=13.48  realised $193.84 (plan $197.17)  changed: CEV1=15 MCS=12 /96  feas=true
-             A0(:sampled) $193.40 -> A2 $193.84 (+0.44)
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=4.28  realised $689.75 (plan $677.57)  changed: CEV1=16 MCS=14 /96  feas=true
+             A0(:sampled) $725.98 -> A2 $689.75 (-36.23)
+
+#################### run03_SOE_05.59 ####################
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit      : none (solve each day to the MIP gap)
+Approach 0 one-shot-per-day (plant = :sampled) done in 6.1 s (96 plant realizations, 1 day-solves)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[5.591111111111091]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 4262.0 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=5.59  realised $823.69 (plan $677.57)  changed: CEV1=15 MCS=16 /96  feas=true
+             A0(:sampled) $722.56 -> A2 $823.69 (+101.13)
+
+#################### run04_SOE_06.91 ####################
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit      : none (solve each day to the MIP gap)
+Approach 0 one-shot-per-day (plant = :sampled) done in 2.7 s (96 plant realizations, 1 day-solves)
+  NOTE: 1 intervals had work CAPPED by available CEV energy (task could not fully
+        complete before hitting the SOE floor); the shortfall is reflected honestly in
+        rem_dig/rem_load.
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[7.2567614469733925]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 4708.5 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=6.91  realised $691.58 (plan $188.77)  changed: CEV1=27 MCS=19 /96  feas=true
+             A0(:sampled) $280.72 -> A2 $691.58 (+410.86)
+
+#################### run05_SOE_08.22 ####################
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit      : none (solve each day to the MIP gap)
+Approach 0 one-shot-per-day (plant = :sampled) done in 2.7 s (96 plant realizations, 1 day-solves)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[8.222222222222221]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 2662.0 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=8.22  realised $193.87 (plan $188.77)  changed: CEV1=20 MCS=12 /96  feas=true
+             A0(:sampled) $279.19 -> A2 $193.87 (-85.32)
+
+#################### run06_SOE_09.54 ####################
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit      : none (solve each day to the MIP gap)
+Approach 0 one-shot-per-day (plant = :sampled) done in 6.1 s (96 plant realizations, 1 day-solves)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[9.537777777777778]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 3561.5 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=9.54  realised $193.87 (plan $188.77)  changed: CEV1=20 MCS=14 /96  feas=true
+             A0(:sampled) $279.19 -> A2 $193.87 (-85.32)
+
+#################### run07_SOE_10.85 ####################
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit      : none (solve each day to the MIP gap)
+Approach 0 one-shot-per-day (plant = :sampled) done in 5.2 s (96 plant realizations, 1 day-solves)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[11.287501380842013]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 2718.7 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=10.85  realised $194.91 (plan $188.77)  changed: CEV1=24 MCS=14 /96  feas=true
+             A0(:sampled) $301.08 -> A2 $194.91 (-106.17)
+
+#################### run08_SOE_12.17 ####################
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit      : none (solve each day to the MIP gap)
+Approach 0 one-shot-per-day (plant = :sampled) done in 3.7 s (96 plant realizations, 1 day-solves)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[12.221258057203418]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1629.3 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=12.17  realised $194.00 (plan $188.77)  changed: CEV1=23 MCS=19 /96  feas=true
+             A0(:sampled) $279.19 -> A2 $194.00 (-85.19)
+
+#################### run09_SOE_13.48 ####################
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit      : none (solve each day to the MIP gap)
+Approach 0 one-shot-per-day (plant = :sampled) done in 2.9 s (96 plant realizations, 1 day-solves)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[13.484444444444446]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1245.4 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=13.48  realised $193.87 (plan $188.77)  changed: CEV1=29 MCS=20 /96  feas=true
+             A0(:sampled) $279.19 -> A2 $193.87 (-85.32)
 
 #################### run10_SOE_14.80 ####################
 Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 3.4 s (96 plant realizations, 1 day-solves)
+Approach 0 one-shot-per-day (plant = :sampled) done in 3.3 s (96 plant realizations, 1 day-solves)
 Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
   scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
   posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1981.7 s (192 plant realizations)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1790.8 s (192 plant realizations)
   posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
-  SOE_ini=14.80  realised $193.84 (plan $197.17)  changed: CEV1=11 MCS=12 /96  feas=true
-             A0(:sampled) $193.40 -> A2 $193.84 (+0.44)
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
+  SOE_ini=14.80  realised $193.87 (plan $188.77)  changed: CEV1=18 MCS=16 /96  feas=true
+             A0(:sampled) $303.65 -> A2 $193.87 (-109.78)
 
 ==============================================================================
 SWEEP COMPLETE. Wrote 10 run folders + summary.html to:

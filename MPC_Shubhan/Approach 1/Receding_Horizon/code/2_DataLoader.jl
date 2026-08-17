@@ -81,12 +81,28 @@ function build_default_data()
     # own digging/loading quota per site. `dig_by_day[dy]` / `load_by_day[dy]` are
     # node-length vectors for reported day dy (1..n_days). `hours_digging` /
     # `hours_loading_swinging` remain the day-1 vectors as a legacy reference.
-    n_days = 2                     # synthetic default (reported days KEPT)
-    dig_by_day  = [[0.0, 2.5, 1.5], [0.0, 2.0, 1.0]]
-    load_by_day = [[0.0, 1.5, 1.0], [0.0, 1.0, 0.5]]
+    #
+    # CHANGE 5 -- n_day_run: simple multi-day extensibility. Set to 1 for now
+    # (single day, current behaviour exactly). If set to N > 1, this run
+    # simulates N consecutive days, each starting from the REAL ending
+    # SOE_MCS/SOE_CEV the previous day actually finished at (run_mpc/
+    # run_one_shot already carry real state day-to-day within their own loop --
+    # nothing new needed there), and each day facing the EXACT SAME work
+    # requirement as every other day (dig_by_day/load_by_day below are just
+    # hours_digging/hours_loading_swinging repeated N times, not N distinct
+    # quotas). This intentionally REPLACES the old hardcoded 2-day synthetic
+    # default (which used two DIFFERENT quotas) with the simpler "same work,
+    # chained state" semantics requested -- if you need genuinely different
+    # per-day quotas again, set dig_by_day/load_by_day directly, or supply a
+    # real per-day CSV (see _read_work_by_day below, which still overrides this
+    # when real per-day data is present and is untouched by this change).
+    n_day_run = 1
+    n_days = n_day_run
+    hours_digging          = [0.0, 2.5, 1.5]   # legacy single-day reference vector
+    hours_loading_swinging = [0.0, 1.5, 1.0]
+    dig_by_day  = [copy(hours_digging)          for _ in 1:n_day_run]
+    load_by_day = [copy(hours_loading_swinging) for _ in 1:n_day_run]
     @assert length(dig_by_day) == n_days == length(load_by_day)
-    hours_digging          = copy(dig_by_day[1])
-    hours_loading_swinging = copy(load_by_day[1])
 
     # ---- travel model: tau_trv[i,j] in INTERVALS, k_trv = kWh per arc ----
     tau_trv = [0.0 2.0 3.0;
@@ -328,7 +344,15 @@ function load_input_data(input_dir::AbstractString)
     B = [1, 2, 3, 4]
     
     # ---- Receding horizon multi-day schedule ----
-    n_days = max(1, Int(round(_psd_opt(par, "n_days", 2.0))))
+    # CHANGE 5 -- n_day_run: reads the "n_day_run" key from the params file,
+    # defaulting to 1 (single day, current behaviour). Falls back to a legacy
+    # "n_days" key if present (old param files), so nothing already configured
+    # breaks. When no real per-day CSV exists (wbd === nothing below), each of
+    # the n_day_run days already gets the SAME hours_digging/hours_loading_swinging
+    # repeated -- that fallback already matches "same work every day" exactly,
+    # nothing new needed there; this only renames/redefaults the day-count knob.
+    n_day_run = max(1, Int(round(_psd_opt(par, "n_day_run", _psd_opt(par, "n_days", 1.0)))))
+    n_days = n_day_run
 
     wbd = _read_work_by_day(input_dir, node_ids, node_idx, n_days)
     if wbd === nothing

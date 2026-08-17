@@ -92,8 +92,39 @@ $g^{\text{ch}}_{m,i,k}$, $x_{m,i,j,k}$, $y_{m,i,j,k}$, $\beta^{\text{arr}},\beta
       +\sum_{m,k}\tfrac{c_{\text{ton}}}{1000}\lambda^{\text{CO2}}_{k}P^{\text{ch,tot}}_{m,k}\dt
       +\rho_{\text{miss}}\!\!\sum_{i\in\mathcal{N}_c,a}\!\! s^{\text{miss}}_{i,a}\notag\\
      &+\lambda^{\text{NC}}P^{\text{NC}}+\lambda^{\text{OP}}P^{\text{OP}}
-      +\rho_{\text{lab}}\dt\!\!\sum_{m,i,j,k}\!\! y_{m,i,j,k}.
+      +\rho_{\text{lab}}\dt\!\!\sum_{m,i,j,k}\!\! y_{m,i,j,k}
+      +10^{-6}\!\!\sum_{i\in\mathcal{N}_c,\,e,\,idx}\!\! idx\cdot \mu_{i,e,K_{idx}}.
 \end{align}
+The last term is CHANGE 2's tie-break penalty, added ONLY to this deterministic objective, NOT to
+the stochastic window model's objective (\S\ref{sec:stochastic} below) -- Approach 2's stochastic
+hedge already addresses margin-for-error via scenarios (Change 4), so the tie-break stays scoped to
+where the deterministic no-margin failure mode (Issue 2) actually applies.
+
+\paragraph{Change 2 --- earlier-charging tie-break (Issue 2).} Two schedules can be exactly
+cost-tied under this deterministic plan even though one leaves the CEV's safety margin unspent for
+longer. The added term penalizes later CEV-charging via the CEV-acceptance indicator
+$\mu_{i,e,k}$, NOT $g^{\text{ch}}$ (the MCS's own grid-charging indicator): the diagnosed stall was
+the MCS idling on discharge \emph{to the CEV} with plenty of its own charge to spare, gated by
+$\mu$; $g^{\text{ch}}$ was already 0 throughout that stall, so an earlier version of this term,
+built against it, would have had nothing to push on. Weight $10^{-6}$ so it can only ever decide
+between schedules already tied, never override a real cost difference.
+
+\paragraph{Change 3 --- terminal SOE\textsuperscript{CEV} shortfall penalty (Issue 1), NOT part of
+this objective.} Evaluated AFTER the run from the realized trajectory:
+$\text{shortfall}_e=\max(SOE^{\text{CEV,ini}}_e-SOE^{\text{CEV,end}}_e,0)$, converted to hours by
+that run's own realized weighted work-power rate, charged as
+$\rho_{\text{miss}}\times\text{shortfall\_hours}$ directly onto reported TOTAL cost. Independent of
+the existing miss-work slack $s^{\text{miss}}$, which only reflects work capped live against the
+physical floor $\underline{SOE}_e$.
+
+\paragraph{Change 4 --- stratified scenario sampling (Issue 3).} \texttt{sample\_scenarios} in
+\texttt{2b\_ScenarioSampler.jl} previously drew all $S=5$ scenarios i.i.d.\ from
+$\mathcal{N}(\mu,\sigma)$, with no guarantee any landed in the risky tail. It now draws 5 FIXED,
+evenly spread bins (extreme-low/slightly-low/near-mean/extreme-high/mild-high), each still
+genuinely random WITHIN its bin every re-solve, so a tail scenario is structurally guaranteed every
+time instead of left to chance. Applies only when $S=5$ (the default); other $S$ fall back to the
+original i.i.d.\ draws.
+
 
 %======================================================================
 \section{Constraints}

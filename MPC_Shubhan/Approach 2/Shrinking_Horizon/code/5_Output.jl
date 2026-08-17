@@ -290,6 +290,11 @@ end
 # =============================================================================
 
 # The six objective cost components (same definitions as the reference).
+# The six objective cost components (same definitions as the reference), PLUS
+# Change 3's terminal SOE_CEV shortfall penalty (see _terminal_soe_shortfall in
+# 4_MPCLoop.jl) -- a pure end-of-day check against SOE_CEV_ini, independent of
+# `missed`/`missed_cost` above (which only ever reflects live physical-floor
+# capping).
 function _cost_components(res)
     d = res.d
     energy_cost = res.total_cost
@@ -298,8 +303,9 @@ function _cost_components(res)
     opd_cost    = d.lambda_demand_OP * res.op_peak
     missed_cost = d.rho_miss * res.missed
     travel_cost = res.labour_cost
-    total       = energy_cost + carbon_cost + ncd_cost + opd_cost + missed_cost + travel_cost
-    return (; energy_cost, carbon_cost, ncd_cost, opd_cost, missed_cost, travel_cost, total)
+    shortfall_cost = res.shortfall_penalty_cost
+    total       = energy_cost + carbon_cost + ncd_cost + opd_cost + missed_cost + travel_cost + shortfall_cost
+    return (; energy_cost, carbon_cost, ncd_cost, opd_cost, missed_cost, travel_cost, shortfall_cost, total)
 end
 
 # 08 — KPI totals CSV + a two-panel bar summary (costs + operations).
@@ -308,20 +314,21 @@ function _write_kpi_metrics(res, out_dir)
     totals = DataFrame(
         Metric = ["Total_Cost_USD", "Total_Energy_Cost_USD", "Total_CO2_Cost_USD",
                   "NC_demand_charge_USD", "OP_demand_charge_USD", "Missed_Work_Penalty_USD",
-                  "Travel_Labour_USD", "Total_Grid_Energy_kWh", "Total_CO2_Emissions_kg",
+                  "Travel_Labour_USD", "Terminal_Shortfall_Penalty_USD", "Total_Grid_Energy_kWh", "Total_CO2_Emissions_kg",
                   "NCD_Peak_kW", "OPD_Peak_kW", "Missed_Work_hour", "MCS_Transit_hour",
-                  "Infeasible_windows", "MPC_loop_time_s"],
+                  "Terminal_SOE_Shortfall_kWh", "Infeasible_windows", "MPC_loop_time_s"],
         Value = Any[round(c.total, digits = 2), round(c.energy_cost, digits = 2), round(c.carbon_cost, digits = 2),
                     round(c.ncd_cost, digits = 2), round(c.opd_cost, digits = 2), round(c.missed_cost, digits = 2),
-                    round(c.travel_cost, digits = 2), round(res.total_energy, digits = 2), round(res.total_co2, digits = 2),
+                    round(c.travel_cost, digits = 2), round(c.shortfall_cost, digits = 2), round(res.total_energy, digits = 2), round(res.total_co2, digits = 2),
                     round(res.nc_peak, digits = 2), round(res.op_peak, digits = 2), round(res.missed, digits = 2),
                     round(res.transit_intervals * res.d.delta_T, digits = 2),
+                    round(res.shortfall_kWh, digits = 3),
                     res.n_infeasible, round(res.elapsed, digits = 2)])
     CSV.write(joinpath(out_dir, "08_cost_kpi_metrics.csv"), totals)
 
-    cost_labels = ["Energy", "CO₂", "NCD", "OPD", "Missed Work", "Travel", "Total"]
-    cost_values = [c.energy_cost, c.carbon_cost, c.ncd_cost, c.opd_cost, c.missed_cost, c.travel_cost, c.total]
-    cost_colors = [:steelblue, :forestgreen, :darkorange, :purple, :firebrick, :teal, :black]
+    cost_labels = ["Energy", "CO₂", "NCD", "OPD", "Missed Work", "Travel", "Terminal Shortfall", "Total"]
+    cost_values = [c.energy_cost, c.carbon_cost, c.ncd_cost, c.opd_cost, c.missed_cost, c.travel_cost, c.shortfall_cost, c.total]
+    cost_colors = [:steelblue, :forestgreen, :darkorange, :purple, :firebrick, :teal, :sienna, :black]
     cost_ymax = max(maximum(cost_values), 1.0)
     p_costs = plot(title = "", xlabel = "(a)", ylabel = "Cost (USD)",
                    xticks = (1:length(cost_labels), cost_labels), xlims = (0.5, length(cost_labels) + 0.5),
@@ -351,19 +358,19 @@ end
 _cell(v::AbstractString) = v
 _cell(v::Real) = isnan(v) ? "" : round(v, digits = 3)
 
-function _write_replan_grid(path, mat, res)
-    d = res.d; nK = res.nK
+function _write_replan_grid(path, mat, res, nK)
+    d = res.d
     df = DataFrame(replan_at = [clock_label(d.t_start, d.delta_T, k0) for k0 in 1:nK])
     for k in 1:nK
         df[!, Symbol(clock_label(d.t_start, d.delta_T, k))] =
             Any[_cell(k < k0 ? mat[k, k] : mat[k0, k]) for k0 in 1:nK]
     end
     CSV.write(path, df)
-    _write_replan_grid_html(replace(path, r"\.csv$" => ".html"), mat, res)
+    _write_replan_grid_html(replace(path, r"\.csv$" => ".html"), mat, res, nK)
 end
 
-function _write_replan_grid_html(path, mat, res)
-    d = res.d; nK = res.nK
+function _write_replan_grid_html(path, mat, res, nK)
+    d = res.d
     io = IOBuffer()
     println(io, "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><style>")
     println(io, "body{font-family:sans-serif}")
@@ -397,15 +404,25 @@ function _write_replan_grid_html(path, mat, res)
     write(path, String(take!(io)))
 end
 
+# CHANGE 5 FIX -- res.plan_grid_kW etc no longer exist as flat fields (they were
+# silently overwritten every day for n_day_run > 1); run_mpc now returns
+# res.replan_by_day[day], one full set of DAY-LOCAL grids per day, mirroring
+# Receding_Horizon's established multi-day pattern exactly. Writes one grid
+# folder per KEPT day.
 function _write_replan_grids(res, out_dir)
-    d = res.d
-    grid_dir = joinpath(out_dir, "replan_grids"); mkpath(grid_dir)
-    _write_replan_grid(joinpath(grid_dir, "plan_grid_kW.csv"), res.plan_grid_kW, res)
-    _write_replan_grid(joinpath(grid_dir, "plan_mcs_soe.csv"), res.plan_mcs_soe, res)
-    _write_replan_grid(joinpath(grid_dir, "plan_mcs_activity.csv"), res.plan_mcs_act, res)
-    for e in d.E
-        _write_replan_grid(joinpath(grid_dir, "plan_cev$(e)_soe.csv"),      res.plan_cev_soe[e], res)
-        _write_replan_grid(joinpath(grid_dir, "plan_cev$(e)_activity.csv"), res.plan_cev_act[e], res)
+    d = res.d; nKd = res.nKd
+    for day in 1:res.n_day_run
+        g = res.replan_by_day[day]
+        gdir = res.n_day_run == 1 ? joinpath(out_dir, "replan_grids") :
+                                     joinpath(out_dir, "replan_grids", "day$(day)")
+        mkpath(gdir)
+        _write_replan_grid(joinpath(gdir, "plan_grid_kW.csv"), g.plan_grid_kW, res, nKd)
+        _write_replan_grid(joinpath(gdir, "plan_mcs_soe.csv"), g.plan_mcs_soe, res, nKd)
+        _write_replan_grid(joinpath(gdir, "plan_mcs_activity.csv"), g.plan_mcs_act, res, nKd)
+        for e in d.E
+            _write_replan_grid(joinpath(gdir, "plan_cev$(e)_soe.csv"),      g.plan_cev_soe[e], res, nKd)
+            _write_replan_grid(joinpath(gdir, "plan_cev$(e)_activity.csv"), g.plan_cev_act[e], res, nKd)
+        end
     end
 end
 
@@ -420,8 +437,9 @@ end
 # First replan step that actually produced a forward plan (row 1 unless step 1
 # was infeasible, in which case the earliest feasible row).
 function _first_plan_row(res)
-    for r in 1:res.nK
-        any(!isnan(res.plan_grid_kW[r, k]) for k in r:res.nK) && return r
+    g1 = res.replan_by_day[1]
+    for r in 1:res.nKd
+        any(!isnan(g1.plan_grid_kW[r, k]) for k in r:res.nKd) && return r
     end
     return 1
 end
@@ -431,28 +449,29 @@ end
 # power; travel labour from the planned MCS status; missed work from the planned
 # per-CEV activity vs each site's requirement.
 function _planned_kpis(res)
-    d = res.d; nK = res.nK; dt = d.delta_T
+    d = res.d; nKd = res.nKd; dt = d.delta_T
     r = _first_plan_row(res)
-    g = [ (v = res.plan_grid_kW[r, k]; isnan(v) ? 0.0 : v) for k in 1:nK ]
-    price = [d.lambda_whl_elec[k] for k in 1:nK]
-    co2f  = [d.lambda_CO2[k]      for k in 1:nK]
+    g1 = res.replan_by_day[1]
+    g = [ (v = g1.plan_grid_kW[r, k]; isnan(v) ? 0.0 : v) for k in 1:nKd ]
+    price = [d.lambda_whl_elec[k] for k in 1:nKd]
+    co2f  = [d.lambda_CO2[k]      for k in 1:nKd]
     energy = sum(g) * dt
     ecost  = sum(g .* price) * dt
     co2kg  = sum(g .* co2f)  * dt
     carbon = (d.carbon_price_per_ton / 1000.0) * co2kg
     ncpk   = isempty(g) ? 0.0 : maximum(g)
-    opmask = [in_peak(k, dt, d.t_start) for k in 1:nK]
+    opmask = [in_peak(k, dt, d.t_start) for k in 1:nKd]
     oppk   = any(opmask) ? maximum(g[opmask]) : 0.0
     ncd    = d.lambda_demand_NC * ncpk
     opd    = d.lambda_demand_OP * oppk
-    transit = count(k -> res.plan_mcs_act[r, k] == "Traveling", 1:nK)
+    transit = count(k -> g1.plan_mcs_act[r, k] == "Traveling", 1:nKd)
     labour  = d.rho_labor * dt * transit
     # planned missed work from the per-CEV activity grid (row r)
     pdig = zeros(length(d.N)); pload = zeros(length(d.N))
     for e in d.E
         site = findfirst(i -> d.A[i, e] == 1, d.N); site === nothing && continue
-        for k in 1:nK
-            lab = res.plan_cev_act[e][r, k]
+        for k in 1:nKd
+            lab = g1.plan_cev_act[e][r, k]
             lab == res.ACT_NAME[1] && (pdig[site]  += dt)   # Digging
             lab == res.ACT_NAME[2] && (pload[site] += dt)   # Loading/Swinging
         end
@@ -466,13 +485,15 @@ function _planned_kpis(res)
 end
 
 function _write_plan_vs_actual(res, out_dir)
-    d = res.d; nK = res.nK; dt = d.delta_T
+    d = res.d; nKd = res.nKd; dt = d.delta_T
     p = _planned_kpis(res)
     c = _cost_components(res)
     r = p.r
     plan_clock = clock_label(d.t_start, d.delta_T, r)
 
-    # ---- (a) headline summary table: planned@08:00 vs realised ----
+    # ---- (a) headline summary table: planned@08:00 (day 1) vs realised (whole
+    # run) -- matches Receding_Horizon's own established convention of comparing
+    # day 1's plan against the run's overall realized totals ----
     rows = [
         ("Grid energy (kWh)",         p.energy,          res.total_energy),
         ("Energy cost (USD)",         p.ecost,           c.energy_cost),
@@ -496,14 +517,15 @@ function _write_plan_vs_actual(res, out_dir)
         Pct_change = [abs(x[2]) < 1e-9 ? (abs(x[3]) < 1e-9 ? 0.0 : NaN) :
                       round(100 * (x[3] - x[2]) / x[2], digits = 1) for x in rows])
 
-    # ---- (b) per-interval planned vs realised grid draw ----
-    realized_g = [sum(res.real_P_ch[m, k] for m in d.M) for k in 1:nK]
+    # ---- (b) per-interval planned (day 1) vs realised (day 1's slice, since
+    # real_P_ch is globally indexed and day 1 occupies columns 1:nKd) ----
+    realized_g = [sum(res.real_P_ch[m, k] for m in d.M) for k in 1:nKd]
     byint = DataFrame(
-        k = collect(1:nK),
-        clock = [clock_label(d.t_start, d.delta_T, k) for k in 1:nK],
-        price = [d.lambda_whl_elec[k] for k in 1:nK],
-        co2_factor = [d.lambda_CO2[k] for k in 1:nK],
-        on_peak = [in_peak(k, dt, d.t_start) ? "Yes" : "No" for k in 1:nK],
+        k = collect(1:nKd),
+        clock = [clock_label(d.t_start, d.delta_T, k) for k in 1:nKd],
+        price = [d.lambda_whl_elec[k] for k in 1:nKd],
+        co2_factor = [d.lambda_CO2[k] for k in 1:nKd],
+        on_peak = [in_peak(k, dt, d.t_start) ? "Yes" : "No" for k in 1:nKd],
         planned_grid_kW  = round.(p.g, digits = 3),
         realized_grid_kW = round.(realized_g, digits = 3),
         delta_kW = round.(realized_g .- p.g, digits = 3))
@@ -535,7 +557,7 @@ function _write_plan_vs_actual(res, out_dir)
 end
 
 function _write_plan_vs_actual_html(path, res, p, summ, byint, plan_clock)
-    d = res.d; nK = res.nK
+    d = res.d; nK = res.nKd   # byint/p are DAY-1-SCOPED (nKd rows), not global
     io = IOBuffer()
     println(io, "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><style>")
     println(io, "body{font-family:sans-serif;margin:16px}")
@@ -611,7 +633,7 @@ _act_bg(l) = _ACT_COLORS_HEX[_act_code(l) + 1]
 
 # One heatmap panel (2 rows: Actual on top-index 1, Planned on 2) for one entity.
 function _activity_panel(res, planned, actual, plan_lbl, title)
-    d = res.d; nK = res.nK
+    d = res.d; nK = res.nKd   # planned/actual are DAY-1-SCOPED (length nKd), not global
     rT, rL = create_fixed_2hour_xticks(1:(nK + 1), d.t_start)
     cp = [_act_code(planned[k]) for k in 1:nK]
     ca = [_act_code(actual[k])  for k in 1:nK]
@@ -643,17 +665,20 @@ function _activity_legend_panel()
 end
 
 function _write_plan_vs_actual_side_by_side(res, out_dir)
-    d = res.d; nK = res.nK
+    d = res.d; nKd = res.nKd
     r = _first_plan_row(res)
     plan_clk = clock_label(d.t_start, d.delta_T, r)
     plan_lbl = "Planned @ $plan_clk"
-    times = [clock_label(d.t_start, d.delta_T, k) for k in 1:nK]
+    times = [clock_label(d.t_start, d.delta_T, k) for k in 1:nKd]
 
-    # PLANNED = the 08:00 forward plan (row r). ACTUAL = the applied diagonal.
-    cev_plan = [[res.plan_cev_act[e][r, k] for k in 1:nK] for e in d.E]
-    cev_act  = [res.real_cev_act[e]                       for e in d.E]
-    mcs_plan = [res.plan_mcs_act[r, k] for k in 1:nK]
-    mcs_act  = res.real_mcs_act
+    # PLANNED = day 1's 08:00 forward plan (row r). ACTUAL = day 1's applied
+    # diagonal -- real_cev_act/real_mcs_act are globally indexed, and day 1
+    # occupies indices 1:nKd, so slicing to that range picks out day 1's actual.
+    g1 = res.replan_by_day[1]
+    cev_plan = [[g1.plan_cev_act[e][r, k] for k in 1:nKd] for e in d.E]
+    cev_act  = [res.real_cev_act[e][1:nKd]                for e in d.E]
+    mcs_plan = [g1.plan_mcs_act[r, k] for k in 1:nKd]
+    mcs_act  = res.real_mcs_act[1:nKd]
 
     # ---- (a) PNG timeline heatmap (one Planned/Actual band per CEV + MCS + legend) ----
     entities = Any[]
@@ -686,7 +711,7 @@ function _write_plan_vs_actual_side_by_side(res, out_dir)
 end
 
 function _write_side_by_side_html(path, res, times, cev_plan, cev_act, mcs_plan, mcs_act, plan_clk)
-    d = res.d; nK = res.nK; nE = length(d.E)
+    d = res.d; nK = res.nKd; nE = length(d.E)   # inputs are DAY-1-SCOPED, not global
     cev_chg = [cev_plan[ei] .!= cev_act[ei] for ei in 1:nE]
     mcs_chg = mcs_plan .!= mcs_act
     io = IOBuffer()
@@ -749,7 +774,7 @@ end
 # Same data as side_by_side, but grouped per unit: each CEV/MCS shows its
 # "Planned @ plan_clk" column immediately next to its "Actual" column.
 function _write_by_entity_html(path, res, times, cev_plan, cev_act, mcs_plan, mcs_act, plan_clk)
-    d = res.d; nK = res.nK; nE = length(d.E)
+    d = res.d; nK = res.nKd; nE = length(d.E)   # inputs are DAY-1-SCOPED, not global
     cev_chg = [cev_plan[ei] .!= cev_act[ei] for ei in 1:nE]
     mcs_chg = mcs_plan .!= mcs_act
     io = IOBuffer()
@@ -808,14 +833,14 @@ function _write_by_entity_html(path, res, times, cev_plan, cev_act, mcs_plan, mc
 end
 
 # =============================================================================
-# 10 — SIDE-BY-SIDE TIMELINE COMPARISON (Approach 0 vs Approach 1), styled after
+# 10 — SIDE-BY-SIDE TIMELINE COMPARISON (Approach 0 vs Approach 2), styled after
 # the reference 3-row figure:
 #   (a) MCS power     — charging(+)/discharging(-), with NCDP & OPDP annotated
 #   (b) CEV state of energy — one line per CEV, dashed min/max guide lines
 #   (c) CEV work power — bars coloured by activity (Digging / Traveling /
 #                         Loading+Swinging), zero-power intervals left blank
 # The on-peak window is shaded gray in every panel. Two columns: Approach 0
-# (one-shot, left) and Approach 1 (closed-loop, right), sharing the row axes.
+# (one-shot, left) and Approach 2 (stochastic closed-loop, right), sharing the row axes.
 # =============================================================================
 
 const _WORK_ACT_COLORS = Dict(
@@ -903,8 +928,11 @@ function _realised_missed_kwh(res)
             lab == res.ACT_NAME[2] && (rload[site] += dt)   # Loading/Swinging
         end
     end
-    miss_dig_h  = sum((max(d.hours_digging[i]          - rdig[i],  0.0) for i in d.N_c); init = 0.0)
-    miss_load_h = sum((max(d.hours_loading_swinging[i] - rload[i], 0.0) for i in d.N_c); init = 0.0)
+    # Total REQUIRED hours across the whole run is n_day_run copies of one day's
+    # requirement (CHANGE 5 -- same work every day), matching
+    # _terminal_soe_shortfall's identical fix in 4_MPCLoop.jl.
+    miss_dig_h  = sum((max(res.n_day_run * d.hours_digging[i]          - rdig[i],  0.0) for i in d.N_c); init = 0.0)
+    miss_load_h = sum((max(res.n_day_run * d.hours_loading_swinging[i] - rload[i], 0.0) for i in d.N_c); init = 0.0)
     return miss_dig_h * d.p_digging, miss_load_h * d.p_loading_swinging
 end
 
@@ -952,7 +980,7 @@ function _panel_cev_work(res, title)
 end
 
 # Build the full 3-row x 2-col comparison figure: Approach 0 (left column) vs
-# Approach 1 (right column), rows = MCS power / CEV SOE / CEV work power.
+# Approach 2 (right column), rows = MCS power / CEV SOE / CEV work power.
 function fig_approach_timeline_comparison(res0, res1)
     p_a0 = _panel_mcs_power(res0, "Approach 0 (one-shot)")
     p_a1 = _panel_mcs_power(res1, "Approach 2 (stochastic, closed-loop)")
@@ -966,11 +994,12 @@ function fig_approach_timeline_comparison(res0, res1)
 end
 
 # =============================================================================
-# APPROACH 0 (one-shot 8:00 plan, executed open-loop) vs APPROACH 1 (existing
-# closed-loop MPC). Unlike plan_vs_actual.html (which compares the DETERMINISTIC
-# 8:00 forecast to Approach 1's realised trajectory), both columns here are
-# FULLY REALISED outcomes over 08:00 -> next-day 08:00, built from the SAME
-# shared ActivityPowerPool, so the gap reflects only the value of re-planning.
+# APPROACH 0 (one-shot 8:00 plan, executed open-loop) vs APPROACH 2 (existing
+# stochastic scenario-based closed-loop MPC). Unlike plan_vs_actual.html (which
+# compares the DETERMINISTIC 8:00 forecast to Approach 2's realised trajectory),
+# both columns here are FULLY REALISED outcomes over 08:00 -> next-day 08:00,
+# built from the SAME shared ActivityPowerPool, so the gap reflects only the
+# value of re-planning.
 # Additive-only: does not modify or replace any existing report.
 # =============================================================================
 # Every headline KPI of ONE realized run, as an ordered (label, value) list. Used to
@@ -988,6 +1017,8 @@ function _approach_kpi_rows(res)
         ("OPD charge (USD)",          c.opd_cost),
         ("Missed work (h)",           res.missed),
         ("Missed work penalty (USD)", c.missed_cost),
+        ("Terminal SOE shortfall (kWh)",       res.shortfall_kWh),
+        ("Terminal shortfall penalty (USD)",   c.shortfall_cost),
         ("MCS transit (h)",           res.transit_intervals * res.d.delta_T),
         ("Travel labour (USD)",       c.travel_cost),
         ("TOTAL cost (USD)",          c.total),
@@ -1002,7 +1033,7 @@ end
 #                    feedback -- what re-planning is being credited against.
 #        Exactly one of the two runs per call; the header and the delta label below
 #        adapt so the report always says which comparison it is actually showing.
-# res1 : Approach 1, the closed loop (always :sampled).
+# res1 : Approach 2, the stochastic closed loop (always :sampled).
 function write_approach_comparison(res0, res1, out_dir)
     mkpath(out_dir)
 

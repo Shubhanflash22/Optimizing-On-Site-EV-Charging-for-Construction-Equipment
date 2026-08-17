@@ -722,3 +722,13 @@ single-seed comparison far tighter than independent sampling would, but one seed
 sample path. A cost gap smaller than the across-seed spread means nothing. For any claim about
 the value of re-planning, sweep the seed and report a distribution — the machinery is already
 there in `run_soe_sweep.jl`.
+
+## Changes 2, 3, 5 (this session)
+
+Both `Shrinking_Horizon` and `Receding_Horizon` under this folder got: a small deliberately-scaled
+tie-break term in the objective favoring earlier grid-charging when schedules are cost-tied
+(Change 2, Issue 2); a terminal `SOE_CEV` shortfall penalty computed after every run from the
+realized trajectory, applying uniformly across every approach (Change 3, Issue 1); and a
+`n_day_run` knob for chaining multiple days with real-state carry-over, currently defaulting to 1
+(Change 5). See each subfolder's `docs/README.md` for the full rationale and worked examples, and
+the repo-root `CHANGES_SUMMARY.md` for a complete file-by-file list.

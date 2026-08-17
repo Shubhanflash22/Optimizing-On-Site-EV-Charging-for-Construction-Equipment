@@ -385,3 +385,54 @@ NOT AUDITED YET (same caveat as this file's own numbers above): no fresh Approac
 Approach 2 realized-cost comparison run has been recorded in this addendum. Re-run and
 record before quoting a headline "value of hedging" number, exactly as this file already
 cautions for the pre-existing Approach 0 vs Approach 1 numbers above.
+
+ =============================================================================
+ CHANGES 2, 3, 4, 5 -- post-diagnosis corrections (this session)
+ =============================================================================
+ CHANGE 2 (objective, 3_MCSModel.jl): added the same 1e-6-weighted
+   idx * mu tie-break term as Approach 1, but ONLY to build_window_model's
+   (deterministic) @objective -- NOT to build_window_model_stochastic's.
+   Approach 2's stochastic hedge (scenarios) already addresses margin-for-error
+   directly (Change 4 below), so the tie-break stays scoped to where the
+   deterministic no-margin failure mode (Issue 2) actually applies. (See the
+   Approach 1 Shrinking_Horizon sibling doc for the g_ch -> mu correction
+   after the initial implementation targeted the wrong variable -- identical
+   fix applied here.)
+
+ CHANGE 3 (post-processing, 4_MPCLoop.jl + 5_Output.jl + comparison harnesses):
+   identical design to Approach 1 (see that sibling doc) -- _terminal_soe_shortfall
+   called from both run_mpc and run_one_shot, new shortfall_cost line onto TOTAL
+   cost, applies uniformly to A0/A1S/A1R/A2S/A2R.
+
+ CHANGE 4 (2b_ScenarioSampler.jl): sample_scenarios previously drew all 5
+   scenarios i.i.d. from Normal(mu, sd), with no guarantee any landed in the
+   risky tail -- confirmed: 5 independent draws can all land "comfortably
+   average" on a given re-solve. Replaced (when n_scenarios == 5, the default)
+   with 5 FIXED bins -- extreme-low, slightly-low, near-mean, extreme-high,
+   mild-high -- each still genuinely random WITHIN its bin (fresh random
+   fraction per activity, every call), so a tail scenario is now structurally
+   guaranteed every re-solve. Formula:
+     extreme low   mu - (1+r1)*sd     r1 ~ U(0,1)
+     slightly low  mu - r2*sd         r2 ~ U(0,1)
+     near mean     mu + r3*sd         r3 ~ U(-0.3,0.3)
+     extreme high  mu + (1+r4)*sd     r4 ~ U(0,1)
+     mild high     mu + r5*sd         r5 ~ U(0,1)
+   Other n_scenarios values fall back to the original i.i.d. draws (the 5-bin
+   formula has no natural generalization to other counts).
+
+ CHANGE 5, FINAL (4_MPCLoop.jl): run_mpc/run_one_shot now contain their OWN
+   internal day loop -- identical design to the Approach 1 Shrinking_Horizon
+   sibling (an external run_multiday wrapper was tried first and retired; see
+   that sibling doc for the full before/after rationale). n_scenarios,
+   rng_scenarios, and the _ScenarioOneView machinery are untouched by day
+   boundaries -- est/hist persist for the whole run same as Approach 1.
+   apply_and_simulate_stochastic! was updated to forward the new gidx
+   (global write-index) through to the shared apply_and_simulate! it wraps.
+   n_day_run = 1 (default) is a pure passthrough.
+   FOLLOW-UP FIX -- replan_by_day: same fix as the Approach 1 sibling --
+   plan grids are now saved per day into replan_by_day (mirroring
+   Receding_Horizon's pattern) instead of being silently overwritten, and
+   every 5_Output.jl function that reads them was updated to use
+   res.replan_by_day[1] with res.nKd bounds. _realised_missed_kwh's
+   same-bug-class error (comparing multi-day realized hours against one
+   day's requirement) was also fixed, scaled by res.n_day_run.

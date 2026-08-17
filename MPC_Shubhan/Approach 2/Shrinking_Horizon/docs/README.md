@@ -901,3 +901,31 @@ Approach 0's baseline, the shared plant pool, and every constraint's physics are
 to Approach 1. The only thing Approach 2 changes is *what the MILP plans against* at each
 re-solve — one mean vector, or a hedged set of samples — exactly as
 `Understanding_Stochastic_MPC.md`'s master table lays out.
+
+## Changes 2, 3, 4, 5 (this session)
+
+* **Change 2 — earlier-charging tie-break (Issue 2).** Same `1e-6`-weighted `idx * mu` term as
+  Approach 1 (see that sibling doc for the `g_ch` → `mu` correction — the term originally targeted
+  the wrong variable), added ONLY to `build_window_model`'s (deterministic) objective in
+  `3_MCSModel.jl` — NOT to `build_window_model_stochastic`'s. Approach 2's scenario-based hedge
+  already addresses margin-for-error directly (Change 4), so the tie-break stays scoped to the
+  deterministic no-margin failure mode this issue actually describes.
+* **Change 3 — terminal SOE_CEV shortfall penalty (Issue 1).** Same design as Approach 1 — see that
+  sibling doc. Applies uniformly to all five approaches.
+* **Change 4 — stratified scenario sampling (Issue 3).** `2b_ScenarioSampler.jl`'s
+  `sample_scenarios` previously drew all 5 scenarios i.i.d. from `N(mu, sd)`, with no guarantee any
+  landed in the risky tail. Now draws 5 fixed, evenly spread bins (extreme-low / slightly-low /
+  near-mean / extreme-high / mild-high), each still genuinely random *within* its bin every
+  re-solve, so a tail scenario is structurally guaranteed instead of left to chance. Applies when
+  `n_scenarios == 5` (the default); other counts fall back to the original i.i.d. draws.
+* **Change 5 — `n_day_run` (currently 1), internal day loop.** `run_mpc`/`run_one_shot` in
+  `4_MPCLoop.jl` now contain their own internal day loop (identical design to the Approach 1
+  sibling — see that doc for the full rationale). The scenario-sampling machinery (`est`,
+  `rng_scenarios`, `_ScenarioOneView`) is unaffected by day boundaries: `est` and `hist` persist for
+  the whole run same as Approach 1, and `apply_and_simulate_stochastic!` was updated to forward the
+  new `gidx` (global write-index) through to the shared `apply_and_simulate!` it wraps.
+  `n_day_run = 1` is a pure passthrough. Same follow-up fix as the Approach 1 sibling: the
+  replanning-grid diagnostics (`plan_grid_kW` etc.) are now saved per day into `replan_by_day`
+  (mirroring `Receding_Horizon`'s pattern) instead of being silently overwritten, and every
+  `5_Output.jl` function that reads them was updated to use `res.replan_by_day[1]` with `res.nKd`
+  bounds — fixed, not just flagged.

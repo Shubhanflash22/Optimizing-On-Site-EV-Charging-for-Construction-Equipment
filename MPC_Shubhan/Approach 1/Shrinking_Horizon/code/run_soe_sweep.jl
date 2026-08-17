@@ -110,9 +110,20 @@ for (idx, soe) in enumerate(soe_vals)
         p  = Output._planned_kpis(res)      # planned @ 08:00
         c  = Output._cost_components(res)    # realised end-of-day
         r  = p.r
-        nK = res.nK
-        cev_chg = count(k -> res.plan_cev_act[1][r, k] != res.real_cev_act[1][k], 1:nK)
-        mcs_chg = count(k -> res.plan_mcs_act[r, k]    != res.real_mcs_act[k],    1:nK)
+        # Change 5 follow-up: the flat plan_cev_act/plan_mcs_act fields were
+        # removed from `res` in favor of `replan_by_day` (one entry per kept
+        # day, so multi-day runs don't overwrite earlier days' plans -- see
+        # CHANGES_SUMMARY.md). This sweep only ever runs n_day_run=1 (never
+        # passed above), so day 1's plan is the whole plan; fetch it via
+        # replan_by_day[1], same pattern already used in the working
+        # Receding-Horizon sibling script. Compare over nKd (one day's
+        # interval count), not nK (which is n_day_run * nKd, the GLOBAL count
+        # -- using nK here would silently drop the bounds-safety this once
+        # had, even though at n_day_run=1 nKd == nK numerically).
+        g1  = res.replan_by_day[1]
+        nKd = res.nKd
+        cev_chg = count(k -> g1.plan_cev_act[1][r, k] != res.real_cev_act[1][k], 1:nKd)
+        mcs_chg = count(k -> g1.plan_mcs_act[r, k]    != res.real_mcs_act[k],    1:nKd)
 
         cev_end  = res.soe_cev_end[1]
         mcs_end  = res.soe_mcs_end[1]
@@ -123,7 +134,7 @@ for (idx, soe) in enumerate(soe_vals)
         a0_total = Output._cost_components(res0).total
 
         @printf("  SOE_ini=%.2f  realised \$%.2f (plan \$%.2f)  changed: CEV1=%d MCS=%d /%d  feas=%s\n",
-                soe, c.total, p.total, cev_chg, mcs_chg, nK, feasible)
+                soe, c.total, p.total, cev_chg, mcs_chg, nKd, feasible)
         @printf("             A0(:%s) \$%.2f -> A1 \$%.2f (%+.2f)\n",
                 A0_PLANT, a0_total, c.total, c.total - a0_total)
 
@@ -136,7 +147,7 @@ for (idx, soe) in enumerate(soe_vals)
            co2 = res.total_co2, missed = res.missed,
            labour = c.travel_cost, transit_h = res.transit_intervals * d0.delta_T,
            nc_peak = res.nc_peak, op_peak = res.op_peak,
-           cev_chg, mcs_chg, nK, elapsed = res.elapsed)
+           cev_chg, mcs_chg, nK = nKd, elapsed = res.elapsed)
     end
     push!(results, row)
 end

@@ -1,0 +1,7 @@
+Metric,A0,A1S,A2S,A1R,A2R
+Total_Discharge_kWh,23.826,24.008,24.008,24.008,24.321
+Total_Work_kWh,24.008,24.008,24.008,24.008,24.008
+N_Capped_Intervals,0,0,0,0,0
+N_Infeasible_Windows,0,0,0,0,0
+Missed_Work_hour,0.0,0.0,0.0,0.0,0.0
+Missed_Work_Penalty_USD,0.0,0.0,0.0,0.0,0.0

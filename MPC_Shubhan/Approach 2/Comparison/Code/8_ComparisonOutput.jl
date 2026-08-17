@@ -117,10 +117,14 @@ _base_plot(; kw...) = plot(; size = (1000, 520), xrotation = 45,
     bottom_margin = 16Plots.mm, left_margin = 16Plots.mm, right_margin = 14Plots.mm, kw...)
 
 # The six cost components -- SAME definitions/formula as each source
-# codebase's private `_cost_components` (5_Output.jl). Duck-typed on `res`
-# fields (total_cost, total_co2, nc_peak, op_peak, missed, labour_cost) plus
-# `res.d` (carbon_price_per_ton, lambda_demand_NC/OP, rho_miss), so it works
-# unmodified on a result produced by either app.
+# codebase's private `_cost_components` (5_Output.jl), PLUS Change 3's
+# terminal SOE_CEV shortfall penalty (a pure end-of-day check against
+# SOE_CEV_ini, independent of `missed`/`missed_cost` above, which only ever
+# reflects live physical-floor capping). Duck-typed on `res` fields
+# (total_cost, total_co2, nc_peak, op_peak, missed, labour_cost,
+# shortfall_penalty_cost) plus `res.d` (carbon_price_per_ton,
+# lambda_demand_NC/OP, rho_miss), so it works unmodified on a result produced
+# by any of the four solver codebases or Approach 0.
 function cost_components(res)
     d = res.d
     energy_cost = res.total_cost
@@ -129,8 +133,9 @@ function cost_components(res)
     opd_cost    = d.lambda_demand_OP * res.op_peak
     missed_cost = d.rho_miss * res.missed
     travel_cost = res.labour_cost
-    total       = energy_cost + carbon_cost + ncd_cost + opd_cost + missed_cost + travel_cost
-    return (; energy_cost, carbon_cost, ncd_cost, opd_cost, missed_cost, travel_cost, total)
+    shortfall_cost = res.shortfall_penalty_cost
+    total       = energy_cost + carbon_cost + ncd_cost + opd_cost + missed_cost + travel_cost + shortfall_cost
+    return (; energy_cost, carbon_cost, ncd_cost, opd_cost, missed_cost, travel_cost, shortfall_cost, total)
 end
 
 # =============================================================================
@@ -248,17 +253,23 @@ function fig05_price_emission(apps)
     nK = minimum(a.res.nK for a in apps)
     K = 1:nK; Tplot = 1:(nK + 1)
     rT, rL = create_fixed_2hour_xticks(Tplot, d.t_start)
+    # d.lambda_whl_elec / d.lambda_CO2 are ONE day's curve (96 intervals),
+    # straight from time_data.csv -- not tiled out to the full multi-day span.
+    # For multi-day runs (nK > length of that array), wrap the index the same
+    # way the solver's own objective does (lambda_whl_elec[wd(k)], wd(k) =
+    # mod1(k, nKd), in 3_MCSModel.jl) -- the price/CO2 pattern repeats daily.
+    wd(k) = mod1(k, length(d.lambda_whl_elec))
     csv = DataFrame(Time_Period = collect(K),
-                    Electricity_Price_USD_per_kWh = [d.lambda_whl_elec[k] for k in K],
-                    CO2_Emission_Factor_kg_per_kWh = [d.lambda_CO2[k] for k in K])
+                    Electricity_Price_USD_per_kWh = [d.lambda_whl_elec[wd(k)] for k in K],
+                    CO2_Emission_Factor_kg_per_kWh = [d.lambda_CO2[wd(k)] for k in K])
     
     # 1. Standalone 2-panel figure for File 05
-    xs, ys = stepify_interval_values(K, [d.lambda_whl_elec[k] for k in K])
+    xs, ys = stepify_interval_values(K, [d.lambda_whl_elec[wd(k)] for k in K])
     p1 = _base_plot(ylabel = "Price (\$/kWh)",
                    xticks = (rT, rL), xlims = (first(Tplot), last(Tplot)))
     plot!(p1, xs, ys, label = "Price", linewidth = 2, color = :blue)
     
-    xc, yc = stepify_interval_values(K, [d.lambda_CO2[k] for k in K])
+    xc, yc = stepify_interval_values(K, [d.lambda_CO2[wd(k)] for k in K])
     p2 = _base_plot(xlabel = "Time", ylabel = "CO₂ (kg/kWh)", 
                    xticks = (rT, rL), xlims = (first(Tplot), last(Tplot)))
     plot!(p2, xc, yc, label = "CO₂ Factor", linewidth = 2, color = :red)
@@ -337,7 +348,7 @@ end
 # 3 bars per group (one per approach).
 # =============================================================================
 function fig08_kpi_summary(apps)
-    labels = ["Energy", "CO₂", "NCD", "OPD", "Missed", "Travel", "TOTAL"]
+    labels = ["Energy", "CO₂", "NCD", "OPD", "Missed", "Travel", "Shortfall", "TOTAL"]
     ymax = 1.0
     p_costs = plot(title = "Realised cost components", xlabel = "", ylabel = "Cost (USD)",
                    xticks = (1:length(labels), labels), xlims = (0.5, length(labels) + 0.5),
@@ -347,7 +358,7 @@ function fig08_kpi_summary(apps)
     width = 0.8 / nA
     for (ai, a) in enumerate(apps)
         c = cost_components(a.res)
-        vals = [c.energy_cost, c.carbon_cost, c.ncd_cost, c.opd_cost, c.missed_cost, c.travel_cost, c.total]
+        vals = [c.energy_cost, c.carbon_cost, c.ncd_cost, c.opd_cost, c.missed_cost, c.travel_cost, c.shortfall_cost, c.total]
         ymax = max(ymax, maximum(vals))
         offset = (ai - (nA + 1) / 2) * width
         bar!(p_costs, (1:length(labels)) .+ offset, vals; bar_width = width * 0.92,
@@ -387,6 +398,7 @@ function fig07_summary(apps, p05, p01, p03, p02, p04, p06)
         push!(summary_lines, @sprintf("  Energy cost   : \$%.2f", a.res.total_cost))
         push!(summary_lines, @sprintf("  NCD / OPD peak: %.2f / %.2f kW", a.res.nc_peak, a.res.op_peak))
         push!(summary_lines, @sprintf("  Missed work   : %.2f h", a.res.missed))
+        push!(summary_lines, @sprintf("  Terminal shortfall: %.3f kWh (\$%.2f)", a.res.shortfall_kWh, a.res.shortfall_penalty_cost))
     end
     p_summary = plot(legend = false, grid = false, framestyle = :none, xticks = false, yticks = false,
                      left_margin = 14Plots.mm, right_margin = 12Plots.mm)
@@ -573,6 +585,8 @@ function write_3way_kpi_html(apps, out_dir)
         ("OPD charge (USD)",          a -> cost_components(a.res).opd_cost),
         ("Missed work (h)",           a -> a.res.missed),
         ("Missed work penalty (USD)", a -> cost_components(a.res).missed_cost),
+        ("Terminal SOE shortfall (kWh)",     a -> a.res.shortfall_kWh),
+        ("Terminal shortfall penalty (USD)", a -> cost_components(a.res).shortfall_cost),
         ("MCS transit (h)",           a -> a.res.transit_intervals * a.res.d.delta_T),
         ("Travel labour (USD)",       a -> cost_components(a.res).travel_cost),
         ("TOTAL cost (USD)",          a -> cost_components(a.res).total),
@@ -616,17 +630,18 @@ end
 function write_3way_kpi_csv(apps, out_dir)
     metric_names = ["Total_Cost_USD", "Total_Energy_Cost_USD", "Total_CO2_Cost_USD",
                     "NC_demand_charge_USD", "OP_demand_charge_USD", "Missed_Work_Penalty_USD",
-                    "Travel_Labour_USD", "Total_Grid_Energy_kWh", "Total_CO2_Emissions_kg",
+                    "Travel_Labour_USD", "Terminal_Shortfall_Penalty_USD", "Total_Grid_Energy_kWh", "Total_CO2_Emissions_kg",
                     "NCD_Peak_kW", "OPD_Peak_kW", "Missed_Work_hour", "MCS_Transit_hour",
-                    "Infeasible_windows", "Solve_time_s"]
+                    "Terminal_SOE_Shortfall_kWh", "Infeasible_windows", "Solve_time_s"]
     df = DataFrame(Metric = metric_names)
     for a in apps
         c = cost_components(a.res)
         vals = Any[round(c.total, digits = 2), round(c.energy_cost, digits = 2), round(c.carbon_cost, digits = 2),
                    round(c.ncd_cost, digits = 2), round(c.opd_cost, digits = 2), round(c.missed_cost, digits = 2),
-                   round(c.travel_cost, digits = 2), round(a.res.total_energy, digits = 2), round(a.res.total_co2, digits = 2),
+                   round(c.travel_cost, digits = 2), round(c.shortfall_cost, digits = 2), round(a.res.total_energy, digits = 2), round(a.res.total_co2, digits = 2),
                    round(a.res.nc_peak, digits = 2), round(a.res.op_peak, digits = 2), round(a.res.missed, digits = 2),
                    round(a.res.transit_intervals * a.res.d.delta_T, digits = 2),
+                   round(a.res.shortfall_kWh, digits = 3),
                    a.res.n_infeasible, round(a.res.elapsed, digits = 2)]
         df[!, a.key] = vals
     end

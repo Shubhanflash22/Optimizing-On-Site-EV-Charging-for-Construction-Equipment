@@ -179,6 +179,21 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @variable(model, P_peak_NC >= 0)               # tracked whole-day peak grid draw
     @variable(model, P_peak_OP >= 0)               # tracked on-peak peak grid draw
 
+    # ---- CHANGE 2 -- small time-index tie-break penalty (Issue 2) --------------
+    # See the identical rationale in Approach 1/Shrinking_Horizon/code/3_MCSModel.jl.
+    # CORRECTED TARGET: penalizes LATE `mu` (is the CEV accepting charge from the
+    # MCS -- the actual "charge now vs wait" decision the stall was diagnosed
+    # against), NOT `g_ch` (the MCS's own grid-charging, which was already 0
+    # throughout that stall and would have had nothing to push on). idx here is
+    # the window's own LOCAL position (1..length(K)), same as that file, not
+    # the global/day-relative wd(k) used for price/CO2 above -- earlier WITHIN
+    # THIS WINDOW is what should be preferred when tied. Added ONLY to this
+    # (deterministic) objective, not to build_window_model_stochastic's below --
+    # Approach 2's stochastic hedge (Issue 3 / Change 4) already addresses
+    # margin-for-error via scenarios.
+    Kvec = collect(K)
+    early_charge_term = sum(idx * mu[i, e, Kvec[idx]] for i in N_c, e in E, idx in eachindex(Kvec))
+
     # ---- OBJECTIVE (Eq. 1): total operating cost. All constraints are HARD;
     # the only slack is s_miss_work (Eq. 12c), exactly as in the PDF/Avik. ----
     @objective(model, Min,
@@ -187,7 +202,8 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         d.rho_miss * sum(s_miss_work[i, a] for i in N_c, a in B) +                                             # SOFT penalty for unfinished work
         d.lambda_demand_NC * P_peak_NC +                                                                      # non-coincident demand charge
         d.lambda_demand_OP * P_peak_OP +                                                                      # on-peak demand charge
-        d.rho_labor * delta_T * sum(y_trv[m, i, j, k] for m in M, i in N, j in N, k in K))                     # towing labour: cost of time in transit
+        d.rho_labor * delta_T * sum(y_trv[m, i, j, k] for m in M, i in N, j in N, k in K) +                    # towing labour: cost of time in transit
+        1e-6 * early_charge_term)                                                                              # Change 2: small earlier-charging tie-break
 
     # ---- power aggregation & where power may flow ----
     # Total grid draw of an MCS = sum of its per-grid-node charge power.

@@ -4,18 +4,19 @@ Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open
   planning power (mu)    : [4.6, 3.3, 4.5, 0.0] kW
   plant sampling sd      : [1.0, 1.0, 1.5, 0.0] kW
   solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 12.1 s (192 plant realizations, 1 day-solves)
+Approach 0 one-shot-per-day (plant = :sampled) done in 16.2 s (192 plant realizations, 1 day-solves)
 Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)  : [4.6, 3.3, 4.5, 0.0] kW
   plant sampling sd    : [1.0, 1.0, 1.5, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 1 (plant = :sampled) done in 230.1 s (384 plant realizations)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[72.0, 48.408000079149595]
+Approach 1 (plant = :sampled) done in 332.7 s (384 plant realizations)
   fixed power model (mu) : [4.6, 3.3, 4.5, 0.0] kW
   plant sampling sd      : [1.0, 1.0, 1.5, 0.0] kW
 
 ==== Scenario 1 RECEDING-horizon KPIs (kept days 1..1; buffer day dropped) ====
-Total grid energy   : 43.11 kWh
+Total grid energy   : 43.10 kWh
 Total energy cost   : $5.58
 Total CO2 emissions : 12.15 kg
 NC peak demand      : 2.72 kW
@@ -24,9 +25,9 @@ Missed work (hours) : 0.25
 Labour (towing)     : $82.50  (2.75 h in transit @ $30.00/h)
 
 ==== Approach comparison (both fully realised, kept days) ====
-A0 one-shot/day, sampled plant (open loop) : $82.50  (1.75 h transit, 0.00 h missed)
-A1 closed loop (re-planning)              : $128.40  (2.75 h transit, 0.25 h missed)
-  A1 - A0 (value of intra-day re-planning): +45.90  (negative = A1 cheaper)
+A0 one-shot/day, sampled plant (open loop) : $101.58  (1.75 h transit, 0.00 h missed)
+A1 closed loop (re-planning)              : $128.36  (2.75 h transit, 0.25 h missed)
+  A1 - A0 (value of intra-day re-planning): +26.78  (negative = A1 cheaper)
 
 Results written to: C:\Users\shubh\Desktop\MPC\Approach 1\Receding_Horizon\output\synthetic
   Figures (v4_real style, kept days): 01..07 + mcs_<m>_power_profile + 11_power_estimate_convergence

@@ -1,0 +1,89 @@
+==============================================================================
+5-WAY COMPARISON — Approach 0 vs A1-Shrinking vs A2-Shrinking vs A1-Receding vs A2-Receding
+A1 Shrinking code: C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\code
+A1 Receding  code: C:\Users\shubh\Desktop\MPC\Approach 1\Receding_Horizon\code
+A2 Shrinking code: C:\Users\shubh\Desktop\MPC\Approach 2\Shrinking_Horizon\code
+A2 Receding  code: C:\Users\shubh\Desktop\MPC\Approach 2\Receding_Horizon\code
+Input             : C:\Users\shubh\Desktop\MPC\Approach 1\Comparison\Input
+Output            : C:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Test\SOE_08.22
+Comparisons       : All5
+==============================================================================
+
+Shared power pool: n_samples=197 per (entity, activity) (96 intervals/day x 2 days incl. the Receding buffer day, + 5); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.38, 0.0] kW
+
+--- Approach 0 (one-shot, plant = :sampled, source = :a1_receding) ---
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit      : none (solve each day to the MIP gap)
+Approach 0 one-shot-per-day (plant = :sampled) done in 3.8 s (96 plant realizations, 1 day-solves)
+
+--- Approach 1 - Shrinking ---
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 1 (plant = :sampled) done in 38.4 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+
+--- Approach 2 - Shrinking (stochastic, 5 scenarios) ---
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.38, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 1295.3 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.38, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+
+--- Approach 1 - Receding (n_days = 1) ---
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[8.22]
+Approach 1 (plant = :sampled) done in 110.8 s (192 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+
+--- Approach 2 - Receding (stochastic, 5 scenarios, n_days = 1) ---
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.38, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.38, 0.0] kW
+  solver time limit    : none (solve each window to the MIP gap)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[8.53398904418336]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 3074.8 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.38, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.38, 0.0] kW
+
+--- Writing 1 comparison(s) ---
+  All5: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  C:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Test\SOE_08.22\All5
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+  (no solve_log on A1S -- skipping 13_solve_status_A1S.csv)
+  (no solve_log on A2S -- skipping 13_solve_status_A2S.csv)
+
+==============================================================================
+KPI SUMMARY (all five)
+Metric                                   A0      A1-Shrink      A2-Shrink       A1-Reced       A2-Reced
+Grid energy (kWh)                     31.66          31.86          31.86          31.86          32.21
+Energy cost (USD)                     10.08          10.14          10.14          10.14          10.25
+CO2 (kg)                               8.60           8.66           8.66           8.66           8.75
+NCD peak (kW)                          2.88           2.90           2.90           2.90           2.93
+OPD peak (kW)                          0.00           0.00           0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00           0.00           0.00
+==============================================================================
+
+Results written to: C:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Test\SOE_08.22
+  All5/  (A0 vs A1S vs A2S vs A1R vs A2R)
+  run_log.txt  (this console log, shared across all 1 comparisons)

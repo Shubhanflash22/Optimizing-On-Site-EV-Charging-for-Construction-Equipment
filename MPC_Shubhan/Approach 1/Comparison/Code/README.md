@@ -190,3 +190,13 @@ Approach0-vs-Approach1 timeline figure to all three approaches side by side.
 (The `plan_vs_actual*` family from the previous version of this driver has
 been removed per your request — those compared one approach's own forecast
 against its own outcome, which doesn't extend cleanly to 3 approaches.)
+## Change 3 (this session)
+
+`8_ComparisonOutput.jl`'s `_cost_components` now adds a `shortfall_cost` line to `TOTAL cost` for
+every approach in this comparison — `rho_miss × shortfall_hours`, from a new end-of-day check
+(`SOE_CEV_ini` vs realized `soe_cev_end`, converted via each run's own realized weighted work-power
+rate) computed in each codebase's `4_MPCLoop.jl` (`_terminal_soe_shortfall`). This is separate from
+`missed_cost`, which only reflects work capped live against the physical `SOE_CEV_min` floor — the
+two never overlap. The KPI CSV and summary lines now also report `shortfall_kWh` alongside the
+dollar penalty. See the source codebases' own `docs/README.md` for the full rationale (Issues 1–3,
+Changes 2–5).

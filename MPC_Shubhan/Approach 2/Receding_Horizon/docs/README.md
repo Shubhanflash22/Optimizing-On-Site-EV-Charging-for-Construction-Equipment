@@ -847,3 +847,20 @@ mechanics (§6, §9) — is unchanged from §5.
 The output artefacts, the per-day replan-grid layout, the input schema, the estimator, the
 buffer-day dropping, Approach 0's baseline, and every constraint's physics are all identical
 to Approach 1. Only what the MILP plans against at each re-solve changes.
+
+## Changes 2, 3, 4, 5 (this session)
+
+* **Change 2 — earlier-charging tie-break (Issue 2).** Same `1e-6`-weighted `idx * mu` term,
+  ONLY on `build_window_model`'s (deterministic) objective — NOT on
+  `build_window_model_stochastic`'s. See Approach 2 Shrinking_Horizon sibling doc for full
+  rationale, including the `g_ch` → `mu` correction (the term originally targeted the wrong
+  variable).
+* **Change 3 — terminal SOE_CEV shortfall penalty (Issue 1).** Same design as the other three
+  codebases — `rem_dig`/`rem_load`/`soe_cev` snapshotted at the kept-day boundary before the buffer
+  day. Applies to all five approaches.
+* **Change 4 — stratified scenario sampling (Issue 3).** Identical replacement to the
+  Shrinking_Horizon sibling (the two `2b_ScenarioSampler.jl` files are byte-identical independent
+  copies; both updated the same way).
+* **Change 5 — `n_day_run` (currently 1).** Day-count knob renamed `n_day_run`, defaulting to 1
+  (was hardcoded 2-day synthetic default with two *different* quotas). Real-data loader path reads
+  `"n_day_run"` from the params file (falling back to legacy `"n_days"`), defaulting to 1.0.

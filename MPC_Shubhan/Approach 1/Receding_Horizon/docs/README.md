@@ -731,3 +731,19 @@ Carried over from the audit of the single-day Shrinking sibling; the same code p
   Shrinking_Horizon sibling, worth investigating rather than assumed benign.
 * **Scenario 1 vs 2.** Scenario 1 (this code) is certainty-equivalent (plans on the mean `μ`).
   Scenario 2 would sample multiple power scenarios from `N(μ, σ)` — the fixed `σ` is the hook.
+
+## Changes 2, 3, 5 (this session)
+
+* **Change 2 — earlier-charging tie-break (Issue 2).** Same `1e-6`-weighted `idx * mu` term as
+  the Shrinking_Horizon sibling (see that doc for the `g_ch` → `mu` correction — the term originally
+  targeted the wrong variable), added to `3_MCSModel.jl`'s objective. `idx` is the LOCAL position
+  within the current re-solve window.
+* **Change 3 — terminal SOE_CEV shortfall penalty (Issue 1).** Same design as the sibling doc.
+  `rem_dig`/`rem_load`/`soe_cev` are snapshotted at the kept-day boundary (`rem_dig_kept` etc.)
+  before the trailing buffer day mutates them further, so the shortfall reflects the kept-day
+  numbers klog reports, not the buffer day.
+* **Change 5 — `n_day_run` (currently 1).** The day-count knob is renamed `n_day_run` and now
+  defaults to 1 (was a hardcoded 2-day synthetic default using two *different* day-1/day-2 quotas).
+  When `n_day_run > 1`, every day now uses the *same* work requirement, repeated. Real-state
+  day-to-day carry-over (`quota_dig`/`quota_load`, `soe_mcs`/`soe_cev` continuation) already existed
+  here and is unchanged — this only renames/redefaults the day-count knob and its quota semantics.

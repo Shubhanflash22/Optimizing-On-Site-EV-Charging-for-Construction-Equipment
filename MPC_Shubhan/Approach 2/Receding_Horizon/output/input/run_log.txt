@@ -1,34 +1,35 @@
 Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
   plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
   planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit      : none (solve each day to the MIP gap)
-Approach 0 one-shot-per-day (plant = :sampled) done in 7.5 s (96 plant realizations, 1 day-solves)
+Approach 0 one-shot-per-day (plant = :sampled) done in 6.3 s (96 plant realizations, 1 day-solves)
 Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
   scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
   plant                : :sampled (stochastic -- realized power drawn from the shared pool)
   posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)  : [0.2, 0.19, 0.39, 0.0] kW  (scenario sampling spread)
-  plant sampling sd    : [0.2, 0.19, 0.39, 0.0] kW
+  posterior std  (sd)  : [0.2, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.2, 0.18, 0.39, 0.0] kW
   solver time limit    : none (solve each window to the MIP gap)
-Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 2873.3 s (192 plant realizations)
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 2511.6 s (192 plant realizations)
   posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
-  posterior std  (sd)    : [0.2, 0.19, 0.39, 0.0] kW
-  plant sampling sd      : [0.2, 0.19, 0.39, 0.0] kW
+  posterior std  (sd)    : [0.2, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.2, 0.18, 0.39, 0.0] kW
 
 ==== Scenario 1 RECEDING-horizon KPIs (kept days 1..1; buffer day dropped) ====
-Total grid energy   : 31.92 kWh
+Total grid energy   : 31.93 kWh
 Total energy cost   : $10.16
-Total CO2 emissions : 8.67 kg
+Total CO2 emissions : 8.68 kg
 NC peak demand      : 2.90 kW
 On-peak demand      : 0.00 kW
 Missed work (hours) : 0.00
 Labour (towing)     : $125.00  (0.50 h in transit @ $250.00/h)
 
 ==== Approach comparison (both fully realised, kept days) ====
-A0 one-shot/day, sampled plant (open loop) : $193.40  (0.50 h transit, 0.00 h missed)
-A2 stochastic closed loop (5 scenarios) : $193.98  (0.50 h transit, 0.00 h missed)
-  A2 - A0 (value of hedging + intra-day re-planning): +0.58  (negative = A2 cheaper)
+A0 one-shot/day, sampled plant (open loop) : $378.81  (0.50 h transit, 0.00 h missed)
+A2 stochastic closed loop (5 scenarios) : $194.01  (0.50 h transit, 0.00 h missed)
+  A2 - A0 (value of hedging + intra-day re-planning): -184.81  (negative = A2 cheaper)
 
 Results written to: c:\Users\shubh\Desktop\MPC\Approach 2\Receding_Horizon\output\input
   Figures (v4_real style, kept days): 01..07 + mcs_<m>_power_profile + 11_power_estimate_convergence

@@ -320,3 +320,87 @@ CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
 
  NOTE: idle is a CONSTANT-power subactivity (paper Eq. 5e), pinned to 0 kW; there is
  NO separate shutdown/off state (a time-varying idle power is not part of the model).
+
+ =============================================================================
+ CHANGES 2, 3, 5 -- post-diagnosis corrections (this session)
+ =============================================================================
+ CHANGE 2 (objective, 3_MCSModel.jl): added a 1e-6-weighted time-index
+   tie-break term (idx * mu, summed over N_c site nodes, E entities, window
+   intervals) to the @objective in build_window_model. Fixes Issue 2: under
+   the deterministic mean-case forecast, "charge the CEV now" vs "wait, then
+   charge" were provably cost-tied (verified: solver status=OPTIMAL, gap~=0
+   for every re-solve during a 90-min idle stretch), so the solver had no
+   preference and could quietly burn the CEV's safety margin waiting. The new
+   term breaks ties toward earlier action without ever overriding a genuine
+   cost difference (max possible spread over a full day is a small fraction
+   of a cent).
+   CORRECTION (caught after initial implementation): the first version of
+   this term targeted g_ch (the MCS's own grid-charging indicator) instead of
+   mu (whether the CEV is accepting power from the MCS -- the actual decision
+   the 90-minute stall was diagnosed against). g_ch was already 0 throughout
+   that stall (the MCS had plenty of its own charge and wasn't grid-charging
+   at all), so that version would have had nothing to push on for the
+   specific failure mode this change was meant to fix. Re-targeted at mu.
+
+ CHANGE 3 (post-processing, 4_MPCLoop.jl + 5_Output.jl + 8_ComparisonOutput.jl):
+   added _terminal_soe_shortfall(d, soe_cev_end, rem_dig, rem_load), called
+   from BOTH run_mpc and run_one_shot's return blocks. Fixes Issue 1: nothing
+   previously checked whether the REALIZED trajectory reached SOE_CEV_ini by
+   day's end (Eq 8b is only enforced on the PLAN). This is a pure end-of-day
+   snapshot, unrelated to the physical SOE_CEV_min floor (already enforced
+   live in apply_and_simulate!, feeding rem_dig/rem_load/missed unchanged).
+   shortfall_kWh is converted to hours using THIS RUN'S OWN realized weighted
+   work-power rate (realized kWh / realized hours, from rem_dig/rem_load), not
+   a flat average of p_digging/p_loading_swinging, and charged directly as
+   rho_miss * shortfall_hours onto TOTAL cost via a new shortfall_cost line in
+   _cost_components -- separate from and never overlapping missed_cost.
+   Applies uniformly to all five approaches (A0 through A2R), since a
+   closed-loop approach can still end a particular run short despite
+   re-solving (e.g. a late over-draw with no recovery capacity left in the
+   final interval).
+
+ CHANGE 5 (4_MPCLoop.jl) -- SUPERSEDED DESIGN, see below: an external
+   run_multiday(fn, d, pool; n_day_run, kwargs...) wrapper was tried first
+   (chaining n_day_run separate calls to run_mpc/run_one_shot, rebuilding `d`
+   between days), but it could only return a Vector of separate per-day res
+   objects, not one aggregated res -- Receding_Horizon avoids this because its
+   day loop is INSIDE run_mpc/run_one_shot, aggregating KPIs itself before
+   returning. Retired in favor of the matching design below.
+
+ CHANGE 5, FINAL (4_MPCLoop.jl): run_mpc/run_one_shot now contain their OWN
+   internal day loop, mirroring Receding_Horizon's structure. `nK` renamed
+   `nKd` (one day's interval count); a new `nK` = n_day_run * nKd is the TOTAL
+   across all days. Inside the day loop, the window itself stays DAY-LOCAL
+   (k0:nKd, shrinking to that day's own end, resetting at the next day's k0=1)
+   -- this is what preserves the shrinking-horizon behavior unchanged; only a
+   separate GLOBAL index gidx = (day-1)*nKd + k0 is used to write into the
+   res-wide real_P_ch/real_SOE_CEV/etc arrays and the `log` (which gained a
+   `day` column). apply_and_simulate! was given a new `gidx` keyword
+   (default = k0, so single-day/n_day_run=1 callers are an EXACT passthrough)
+   to separate its day-local `model` reads from its global array writes --
+   this was a real bug caught and fixed during implementation (writes would
+   otherwise have landed in the wrong column for day 2+).
+   Across days: soe_mcs/soe_cev/mcs_node/mcs_transit continue naturally (no
+   reset); rem_dig/rem_load ACCUMULATE the same daily quota on top of any
+   backlog every day (missed work does not silently reset); est (Bayesian
+   learner) and hist (precedence/pacing history) persist for the WHOLE run,
+   never reset at a day boundary -- confirmed to match Receding_Horizon's
+   existing pattern exactly. _terminal_soe_shortfall (Change 3) now takes an
+   n_day_run parameter so its total-required-work denominator scales
+   correctly (n_day_run * one day's requirement, not just one day's).
+   n_day_run = 1 (default) is a pure passthrough -- nK == nKd == n_kept, every
+   existing single-day code path and result is unchanged.
+   FOLLOW-UP FIX -- replan_by_day: plan_grid_kW/plan_mcs_soe/plan_cev_soe/
+   plan_cev_act/plan_mcs_act originally stayed a single DAY-LOCAL nKd x nKd
+   set that got silently overwritten every day, while 5_Output.jl indexed
+   them up to the new global res.nK -- a BoundsError for n_day_run > 1. Fixed
+   at the root: run_mpc now builds a fresh set of grids every day and saves
+   each into replan_by_day[day] (mirroring Receding_Horizon's already-
+   established pattern exactly), and every 5_Output.jl function that reads
+   them (_write_replan_grid(s), _first_plan_row, _planned_kpis,
+   _write_plan_vs_actual(_side_by_side), plus the four downstream consumers
+   _write_plan_vs_actual_html/_activity_panel/_write_side_by_side_html/
+   _write_by_entity_html) now uses res.replan_by_day[1] with res.nKd bounds.
+   Separately caught, same bug class: _realised_missed_kwh compared multi-day
+   realized hours against only one day's requirement -- fixed by scaling with
+   res.n_day_run, matching _terminal_soe_shortfall's identical fix.

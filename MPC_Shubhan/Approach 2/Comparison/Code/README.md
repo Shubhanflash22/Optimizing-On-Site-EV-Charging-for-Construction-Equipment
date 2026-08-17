@@ -214,3 +214,9 @@ approaches side by side.
 (The `plan_vs_actual*` family from the previous version of this driver has
 been removed per your request — those compared one approach's own forecast
 against its own outcome, which doesn't extend cleanly to 3 approaches.)
+## Change 3 (this session)
+
+Same addition as the Approach 1 Comparison sibling — `8_ComparisonOutput.jl`'s `_cost_components`
+now adds a `shortfall_cost` line to `TOTAL cost` for every approach in this comparison, sourced from
+each codebase's `4_MPCLoop.jl` (`_terminal_soe_shortfall`). See the Approach 1 Comparison README and
+the source codebases' own `docs/README.md` for the full rationale (Issues 1–3, Changes 2–5).

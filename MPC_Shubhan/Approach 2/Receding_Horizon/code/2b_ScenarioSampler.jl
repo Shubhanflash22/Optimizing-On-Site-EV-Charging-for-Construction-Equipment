@@ -63,6 +63,32 @@ const DEFAULT_N_SCENARIOS = 5
 # (kW) of activity `a` under scenario `s`. Pass a dedicated `rng` so scenario
 # draws are reproducible and never share a stream with the plant pool.
 # -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# CHANGE 4 -- STRATIFIED SCENARIO SAMPLING (Issue 3)
+# -----------------------------------------------------------------------------
+# The i.i.d. draws above have no guarantee any of the n_scenarios lands in the
+# risky tail -- 5 independent Normal draws can easily all land "comfortably
+# average" on a given re-solve, missing the one branch that would have
+# triggered a protective hedge (see Issue 3 in the handoff notes).
+#
+# When n_scenarios == 5 (the default), replace the draws with 5 FIXED, evenly
+# spread bins -- extreme-low / slightly-low / near-mean / extreme-high /
+# mild-high -- each still genuinely random WITHIN its bin (a fresh random
+# fraction drawn every call, per activity), so consecutive re-solves get
+# different concrete numbers, but a value in the tail is now structurally
+# guaranteed every single re-solve instead of left to chance:
+#
+#   Extreme low   mu - (1+r1)*sd     r1 ~ U(0,1)
+#   Slightly low  mu - r2*sd         r2 ~ U(0,1)
+#   Near mean     mu + r3*sd         r3 ~ U(-0.3,0.3)
+#   Extreme high  mu + (1+r4)*sd     r4 ~ U(0,1)
+#   Mild high     mu + r5*sd         r5 ~ U(0,1)
+#
+# For any OTHER n_scenarios (this function is called with a plain keyword
+# elsewhere, e.g. n_scenarios = 10), the 5-bin formula above has no natural
+# generalization, so this falls back to the original i.i.d. draws for that
+# call -- unchanged behaviour outside the n_scenarios = 5 default.
+# -----------------------------------------------------------------------------
 function sample_scenarios(mu::AbstractVector{<:Real}, sd::AbstractVector{<:Real},
                           n_scenarios::Int = DEFAULT_N_SCENARIOS; rng = Random.GLOBAL_RNG)
     n_scenarios >= 1 || error("sample_scenarios: n_scenarios must be >= 1, got $n_scenarios")
@@ -70,9 +96,31 @@ function sample_scenarios(mu::AbstractVector{<:Real}, sd::AbstractVector{<:Real}
         error("sample_scenarios: mu and sd must have the same length ($(length(mu)) vs $(length(sd)))")
     B = length(mu)
     scenarios = Vector{Vector{Float64}}(undef, n_scenarios)
-    for s in 1:n_scenarios
-        scenarios[s] = [sd[a] <= 1e-12 ? float(mu[a]) : max(mu[a] + sd[a] * randn(rng), 0.0) for a in 1:B]
+
+    if n_scenarios == 5
+        for s in 1:5
+            scenarios[s] = Vector{Float64}(undef, B)
+        end
+        for a in 1:B
+            if sd[a] <= 1e-12
+                for s in 1:5
+                    scenarios[s][a] = float(mu[a])
+                end
+                continue
+            end
+            r1 = rand(rng); r2 = rand(rng); r3 = -0.3 + 0.6 * rand(rng); r4 = rand(rng); r5 = rand(rng)
+            scenarios[1][a] = max(mu[a] - (1 + r1) * sd[a], 0.0)   # extreme low
+            scenarios[2][a] = max(mu[a] - r2 * sd[a],       0.0)   # slightly low
+            scenarios[3][a] = max(mu[a] + r3 * sd[a],       0.0)   # near mean
+            scenarios[4][a] = max(mu[a] + (1 + r4) * sd[a], 0.0)   # extreme high
+            scenarios[5][a] = max(mu[a] + r5 * sd[a],       0.0)   # mild high
+        end
+    else
+        for s in 1:n_scenarios
+            scenarios[s] = [sd[a] <= 1e-12 ? float(mu[a]) : max(mu[a] + sd[a] * randn(rng), 0.0) for a in 1:B]
+        end
     end
+
     return scenarios
 end
 

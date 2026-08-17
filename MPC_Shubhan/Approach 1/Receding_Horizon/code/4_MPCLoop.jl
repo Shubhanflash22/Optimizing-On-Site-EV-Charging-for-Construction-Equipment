@@ -278,6 +278,34 @@ function apply_and_simulate!(model, g0, Kend, d, pool::ActivityPowerPool, cursor
 end
 
 # =============================================================================
+# CHANGE 3 — TERMINAL SOE_CEV SHORTFALL PENALTY (all five approaches)
+# -----------------------------------------------------------------------------
+# See the identical docstring in Approach 1/Shrinking_Horizon/code/4_MPCLoop.jl
+# for the full rationale. Summary: this is a pure END-OF-DAY snapshot check
+# against SOE_CEV_ini (Eq 8b's recovery target) -- unrelated to the physical
+# SOE_CEV_min floor, which is already enforced live every interval inside
+# apply_and_simulate! (capped work already flows into rem_dig/rem_load/missed,
+# identically for every approach; nothing new needed there). Applies uniformly
+# to all five approaches, since any closed-loop approach can still end a
+# particular run short of the recovery target despite re-solving throughout
+# the day.
+# =============================================================================
+function _terminal_soe_shortfall(d, soe_cev_end, rem_dig, rem_load)
+    shortfall_kWh = sum(max(d.SOE_CEV_ini[e] - soe_cev_end[e], 0.0) for e in d.E; init = 0.0)
+
+    realized_dig_h  = sum(d.hours_digging)          - sum(rem_dig)
+    realized_load_h = sum(d.hours_loading_swinging) - sum(rem_load)
+    realized_h      = realized_dig_h + realized_load_h
+    realized_kWh    = realized_dig_h * d.p_digging + realized_load_h * d.p_loading_swinging
+    avg_work_power_kW = realized_h > 1e-9 ? realized_kWh / realized_h :
+                                             (d.p_digging + d.p_loading_swinging) / 2
+
+    shortfall_hours = shortfall_kWh / avg_work_power_kW
+    shortfall_penalty_cost = d.rho_miss * shortfall_hours
+    return (; shortfall_kWh, shortfall_hours, shortfall_penalty_cost)
+end
+
+# =============================================================================
 # MAIN CLOSED LOOP
 # =============================================================================
 function run_mpc(d, pool::ActivityPowerPool; plant::Symbol = :sampled,
@@ -376,6 +404,18 @@ function run_mpc(d, pool::ActivityPowerPool; plant::Symbol = :sampled,
     n_capped_total = 0
     gstep = 0
     missed_kept = 0.0
+    # Change 3 fix: pre-declare the kept-day snapshot vars BEFORE the loop, same
+    # defensive pattern as missed_kept just above. These are only ever meant to be
+    # OVERWRITTEN at `if day == n_days_keep` inside the loop below -- but without a
+    # pre-declaration, a bare `UndefVarError: soe_cev_kept not defined` was observed
+    # at runtime downstream (the `_terminal_soe_shortfall` call after the loop),
+    # even though the `if day == n_days_keep` branch appears reachable on static
+    # reading. Rather than leave that unresolved, fall back to the same values
+    # `missed_kept`'s default effectively represents: today's initial quota/state,
+    # i.e. what "kept day 1" looks like before any work happens.
+    rem_dig_kept  = copy(rem_dig)
+    rem_load_kept = copy(rem_load)
+    soe_cev_kept  = copy(soe_cev)
 
     for day in 1:D_total
         rem_dig  .+= quota_dig(day)
@@ -500,6 +540,16 @@ function run_mpc(d, pool::ActivityPowerPool; plant::Symbol = :sampled,
         # final boundary SOE snapshot for kept days
         if day == n_days_keep
             missed_kept = sum(rem_dig) + sum(rem_load)
+            # Snapshot rem_dig/rem_load/soe_cev HERE too (Change 3) -- the loop keeps
+            # running through the trailing buffer day below, which would otherwise
+            # keep mutating rem_dig/rem_load/soe_cev past the point klog reports.
+            rem_dig_kept  = copy(rem_dig)
+            rem_load_kept = copy(rem_load)
+            soe_cev_kept  = copy(soe_cev)
+            # DIAGNOSTIC (temporary): confirms this branch actually ran, so the
+            # pre-loop defaults above are provably just an unused safety net, not
+            # silently substituting for real data. Remove once confirmed.
+            println("  [Change 3 diag] kept-day snapshot taken at day=$(day) (n_days_keep=$(n_days_keep)), soe_cev_kept=", soe_cev_kept)
             for m in d.M; real_SOE_MCS[m, n_kept + 1] = soe_mcs[m]; end
             for e in d.E; real_SOE_CEV[e, n_kept + 1] = soe_cev[e]; end
         end
@@ -528,6 +578,8 @@ function run_mpc(d, pool::ActivityPowerPool; plant::Symbol = :sampled,
     missed       = missed_kept
     transit_intervals = count(==(0), klog.mcs_node)
     labour_cost  = d.rho_labor * d.delta_T * transit_intervals
+    (; shortfall_kWh, shortfall_hours, shortfall_penalty_cost) =
+        _terminal_soe_shortfall(d, soe_cev_kept, rem_dig_kept, rem_load_kept)   # Change 3
 
     time_labels = build_time_labels_days(d.t_start, d.delta_T, n_days_keep, nKd)
     xticks = multiday_xticks(n_days_keep, nKd, d.t_start, d.delta_T)
@@ -556,6 +608,7 @@ function run_mpc(d, pool::ActivityPowerPool; plant::Symbol = :sampled,
               total_energy, total_cost, total_co2, nc_peak, op_peak, missed,
               labour_cost, transit_intervals,
               soe_cev_end = copy(soe_cev), soe_mcs_end = real_SOE_MCS[:, n_kept + 1],
+              shortfall_kWh, shortfall_hours, shortfall_penalty_cost,
               n_obs_total, n_infeasible, elapsed,
               approach = 1, plant, n_capped = n_capped_total)
 end
@@ -744,6 +797,8 @@ function run_one_shot(d, pool::ActivityPowerPool; plant::Symbol = :sampled,
     missed       = sum(rem_dig) + sum(rem_load)
     transit_intervals = count(==(0), log.mcs_node)
     labour_cost  = d.rho_labor * d.delta_T * transit_intervals
+    (; shortfall_kWh, shortfall_hours, shortfall_penalty_cost) =
+        _terminal_soe_shortfall(d, soe_cev, rem_dig, rem_load)   # Change 3
 
     # csv_mcs_cev_soe (5_Output.jl) indexes res.time_labels, and
     # write_approach_comparison calls it on BOTH res0 and res1 -- so Approach 0
@@ -758,6 +813,7 @@ function run_one_shot(d, pool::ActivityPowerPool; plant::Symbol = :sampled,
               total_energy, total_cost, total_co2, nc_peak, op_peak, missed,
               labour_cost, transit_intervals,
               soe_cev_end = copy(soe_cev), soe_mcs_end = copy(soe_mcs),
+              shortfall_kWh, shortfall_hours, shortfall_penalty_cost,
               n_obs_total, n_infeasible = 0, elapsed,
               approach = 0, plant, n_capped = n_capped_total)
 end

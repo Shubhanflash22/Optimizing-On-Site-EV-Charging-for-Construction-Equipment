@@ -147,3 +147,16 @@ the KPI HTML table's Δ column is added only when comparing exactly 2
 approaches (with 3+ it's ambiguous which pair to difference, so it's left
 out — the CSV and bar chart still give you every approach's numbers
 side-by-side).
+
+## Change 3 (this session)
+
+This is the true 5-way harness (A0, A1S, A1R, A2S, A2R together), so it gets Change 3 too:
+`8_ComparisonOutput.jl`'s `_cost_components` now adds a `shortfall_cost` line to `TOTAL cost` for
+every approach shown, sourced from each of the four solver codebases' own `4_MPCLoop.jl`
+(`_terminal_soe_shortfall`). This addresses Issue 1 (Approach 0's realized day-end shortfall wasn't
+previously reflected anywhere in reported cost) uniformly across all five approaches — a closed-loop
+approach can still end a particular run short of `SOE_CEV_ini` despite re-solving throughout the
+day, and this now charges that honestly too, separate from `missed_cost` (which only reflects work
+capped live against the physical `SOE_CEV_min` floor). See the four source codebases' own
+`docs/README.md` for the full rationale (Issues 1–3, Changes 2–5) and this session's
+`CHANGES_SUMMARY.md` at the repo root for a complete file-by-file list.
