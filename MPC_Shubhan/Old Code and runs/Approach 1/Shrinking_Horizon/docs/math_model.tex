@@ -1,0 +1,287 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\title{Scenario 1 --- Shrinking-Horizon Certainty-Equivalent MPC\\
+       for Mobile Charging Station Dispatch\\[2pt]
+       \large Formal Model}
+\author{Approach 1 (Deterministic Certainty-Equivalent MPC)}
+\date{}
+
+\newcommand{\dt}{\Delta t}
+
+\begin{document}
+\maketitle
+
+Formal companion to the code in \texttt{Shrinking\_Horizon/code/} (the window MILP is
+built in \texttt{3\_MCSModel.jl}; the closed loop in \texttt{4\_MPCLoop.jl}). Plain-English
+descriptions and the data schema are in \texttt{README.md}; a code audit is in
+\texttt{constraints\_code\_vs\_model.txt}. The model below is solved every interval by
+Approach~1 (this document's subject) and solved \emph{once}, then replayed open-loop, by
+Approach~0, the one-shot baseline used to measure the value of re-planning; the MILP
+itself is identical either way. Approach~0 is replayed under \emph{two} plant modes --- a
+deterministic one, in which the realized powers equal the planning mean so the outcome is the
+MILP's own optimum, and a stochastic one --- so that plan drift and re-planning value can be
+read apart. Plant modes are defined in \S\ref{sec:plant}.
+
+The controller is a \textbf{single-day, full-24\,h shrinking horizon}. Each 15-minute step
+re-solves a MILP over the \emph{entire remaining day} $[k_0,\dots,n_{\text{day}}]$; only the
+first interval is applied, and the window shrinks as the day advances. There is one
+optimisation per step and one horizon: the overnight MCS recharge is scheduled \emph{inside}
+this MILP (there is no separate phase). The activity powers are a \textbf{fixed} calibrated
+estimate; the MILP plans on the mean, and the stochastic plant draws realized powers from a
+pool pre-sampled from $\mathcal{N}(\mu,\sigma)$, one draw per (excavator, activity) occurrence
+(shared across every approach that simulates the plant, so their realizations are comparable).
+
+%======================================================================
+\section{Sets and indices}
+\begin{tabular}{ll}
+$m \in \mathcal{M}$ & mobile charging stations (MCS) \\
+$e \in \mathcal{E}$ & construction EVs (excavators) \\
+$i,j \in \mathcal{N}$ & nodes; $\mathcal{N}_g$ grid, $\mathcal{N}_c$ sites \\
+$a \in \mathcal{B}$ & activities $=\{\text{dig},\text{load},\text{trv},\text{idle}\}$ \\
+$k$ & interval $1,\dots,n_{\text{day}}$; window $[k_0,n_{\text{day}}]$ \\
+$\mathcal{T}_b$ & interval boundaries of the window \\
+\end{tabular}
+
+\medskip
+$n_{\text{day}} = n_{\text{int}} = 96$ is the \textbf{full 24\,h} day at $\dt=0.25$\,h
+(08:00 $\to$ 08:00 next day). $A_{i,e}=1$ iff CEV $e$ works at site $i$. Work availability
+$R_{i,e,k}$ is $0$ outside the shift, but the MCS/CEVs may charge and the MCS may travel at
+any interval.
+
+%======================================================================
+\section{Parameters (selected)}
+\begin{tabular}{ll}
+$\dt$ & interval length (h), $0.25$ \\
+$\lambda^{\text{buy}}_{k},\lambda^{\text{CO2}}_{k}$ & price (\$/kWh) / carbon intensity \\
+$\overline{SOE}_\bullet,\underline{SOE}_\bullet,SOE^{\text{ini}}_\bullet$ & energy cap / floor / start (MCS, CEV) \\
+$CH_m,DCH_m,DCH^{\text{plug}}_m,C^{\text{plug}}_m,\eta_m,CH^{\text{CEV}}_e$ & MCS / CEV charge-discharge parameters \\
+$p_a$ & activity power (kW); fixed calibrated mean, MILP plans on it \\
+$H^{\text{dig}}_i,H^{\text{load}}_i$ & lumpsum dig / load requirement (hours) at site $i$ \\
+$\tau_{i,j},k_{\text{trv}},R_{i,e,k}$ & travel time / energy / work availability \\
+$\rho_{\text{miss}},\rho_{\text{lab}},\lambda^{\text{NC}},\lambda^{\text{OP}}$ & penalties \\
+$\text{scale},w_{\text{pt}}=4,r$ & precedence ratio / travels-per-work / rest cap \\
+\end{tabular}
+
+%======================================================================
+\section{Decision variables}
+\textbf{Continuous ($\ge0$):} $P^{\text{ch}}_{m,i,k}$, $P^{\text{dch}}_{m,i,k}$,
+$P^{\text{MCS-CEV}}_{m,i,e,k}$, $P^{\text{work}}_{i,e,k}$, totals
+$P^{\text{ch,tot}}_{m,k},P^{\text{dch,tot}}_{m,k}$, travel energy $L_{m,i,j,k}$, state
+$SOE^{\text{MCS}}_{m,t},SOE^{\text{CEV}}_{e,t}$, peaks $P^{\text{NC}},P^{\text{OP}}$, and the
+single work-shortfall slack $s^{\text{miss}}_{i,a}$.
+
+\smallskip
+\textbf{Binary:} $u_{e,i,a,k}$, $\mu_{i,e,k}$, $\rho_{m,i,e,k}$, $z_{m,i,k}$,
+$g^{\text{ch}}_{m,i,k}$, $x_{m,i,j,k}$, $y_{m,i,j,k}$, $\beta^{\text{arr}},\beta^{\text{dep}}$.
+
+%======================================================================
+\section{Objective (Eq.\ 1)}
+\begin{align}
+\min\ &\sum_{m,k}\lambda^{\text{buy}}_{k}P^{\text{ch,tot}}_{m,k}\dt
+      +\sum_{m,k}\tfrac{c_{\text{ton}}}{1000}\lambda^{\text{CO2}}_{k}P^{\text{ch,tot}}_{m,k}\dt
+      +\rho_{\text{miss}}\!\!\sum_{i\in\mathcal{N}_c,a}\!\! s^{\text{miss}}_{i,a}\notag\\
+     &+\lambda^{\text{NC}}P^{\text{NC}}+\lambda^{\text{OP}}P^{\text{OP}}
+      +\rho_{\text{lab}}\dt\!\!\sum_{m,i,j,k}\!\! y_{m,i,j,k}
+      +10^{-6}\!\!\sum_{i\in\mathcal{N}_c,\,e,\,idx}\!\! idx\cdot \mu_{i,e,K_{idx}}.
+\end{align}
+The last term is the CHANGE 2 tie-break penalty (see below); it is scaled at $10^{-6}$ so it can
+only ever decide between schedules already tied on every real cost term above, never override one.
+
+\paragraph{Change 2 --- earlier-charging tie-break (Issue 2).} Under the mean-case forecast this
+model plans against, two schedules can be exactly cost-tied (e.g.\ ``charge the CEV now'' vs.\
+``wait, then charge'' -- same total energy, same price) even though one leaves the CEV's safety
+margin unspent for longer in the real, uncertain world. The added term is an index-weighted sum
+over the existing CEV-charging-acceptance indicator $\mu_{i,e,k}$ (1 if CEV $e$ at site $i$ is
+accepting power from the MCS at interval $k$ -- see the $P^{\text{MCS-CEV}}\le CH^{\text{CEV}}\mu$
+constraint below), where $idx\in\{1,\dots,|K|\}$ is that interval's position within the current
+solve window. \textbf{Note this targets $\mu$, not $g^{\text{ch}}$} (the MCS's own grid-charging
+indicator, used elsewhere in this objective's grid-exclusivity constraints): the diagnosed stall
+was the MCS sitting idle on \emph{discharge to the CEV} for 90 minutes with plenty of its own
+charge to spare, which is gated by $\mu$, not $g^{\text{ch}}$ -- $g^{\text{ch}}$ was already 0
+throughout that stall and an earlier version of this term, built against it, would have had
+nothing to push on. Later CEV-charging accumulates a larger penalty, so among cost-tied
+schedules the solver
+now prefers the one that charges sooner.
+
+\paragraph{Change 3 --- terminal SOE\textsuperscript{CEV} shortfall penalty (Issue 1), NOT part of
+this objective.} Eq.~8b above is enforced as a hard constraint on the \emph{plan}; nothing in the
+MILP checks whether the \emph{realized}, closed-loop trajectory actually reached
+$SOE^{\text{CEV,ini}}_e$ by day's end. This is evaluated \emph{after} the run, from the realized
+trajectory, not inside the optimization: $\text{shortfall}_e=\max(SOE^{\text{CEV,ini}}_e-
+SOE^{\text{CEV,end}}_e,0)$, converted to hours by that run's own realized weighted work-power rate
+($\text{realized kWh}/\text{realized hours}$, from \texttt{rem\_dig}/\texttt{rem\_load}), and
+charged directly as $\rho_{\text{miss}}\times\text{shortfall\_hours}$ onto the reported TOTAL cost
+(see \texttt{\_terminal\_soe\_shortfall} in \texttt{4\_MPCLoop.jl} and \texttt{\_cost\_components}
+in \texttt{5\_Output.jl}). It is independent of, and never double-counts with, the existing
+$s^{\text{miss}}$ slack above, which only ever reflects work capped live against the physical floor
+$\underline{SOE}_e$ -- a different, already-enforced check.
+
+
+%======================================================================
+\section{Constraints}
+
+\paragraph{Power aggregation \& flow (HARD).}
+$P^{\text{ch,tot}}_{m,k}=\sum_{i\in\mathcal{N}_g}P^{\text{ch}}_{m,i,k}$,
+$P^{\text{dch,tot}}_{m,k}=\sum_{i\in\mathcal{N}_c}P^{\text{dch}}_{m,i,k}$;
+$P^{\text{dch}}_{m,i,k}=\sum_e P^{\text{MCS-CEV}}_{m,i,e,k}\le DCH_m z_{m,i,k}$;
+$P^{\text{MCS-CEV}}_{m,i,e,k}\le DCH^{\text{plug}}_m\rho_{m,i,e,k}$;
+$\sum_m P^{\text{MCS-CEV}}_{m,i,e,k}\le CH^{\text{CEV}}_e\mu_{i,e,k}$.
+Grid exclusivity: $P^{\text{ch}}_{m,i,k}\le CH_m g^{\text{ch}}_{m,i,k}$,
+$g^{\text{ch}}\le z$, $\sum_m g^{\text{ch}}_{m,i,k}\le 1$.
+
+\paragraph{State of energy (HARD).}
+\begin{align}
+SOE^{\text{MCS}}_{m,k+1}&=SOE^{\text{MCS}}_{m,k}+\eta_m P^{\text{ch,tot}}_{m,k}\dt-\tfrac{1}{\eta_m}P^{\text{dch,tot}}_{m,k}\dt-L^{\text{tot}}_{m,k},\\
+SOE^{\text{CEV}}_{e,k+1}&=SOE^{\text{CEV}}_{e,k}+\textstyle\sum_{m,i}P^{\text{MCS-CEV}}_{m,i,e,k}\dt-\sum_i P^{\text{work}}_{i,e,k}\dt,\\
+\underline{SOE}_\bullet&\le SOE_\bullet\le\overline{SOE}_\bullet .
+\end{align}
+
+\paragraph{Terminal energy targets (Eq.\ 8a / 8b, HARD).}
+Applied at the final window boundary \emph{when that boundary is the end of the day}, i.e.
+only when $\max K=n_{\text{day}}$. On the shrinking horizon this holds for every window, so
+the rules always bind; under the alternative fixed-$H$ lookahead they are absent from all
+but the last $H$ windows and nothing replaces them (see \S\ref{sec:fixedH}).
+\begin{align}
+SOE^{\text{MCS}}_{m,n_{\text{day}}+1}&= SOE^{\text{MCS,ini}}_m && \text{(8a, exact; overnight refill inside this MILP)},\\
+SOE^{\text{CEV}}_{e,n_{\text{day}}+1}&\ge SOE^{\text{CEV,ini}}_e && \text{(8b, floor; overcharging allowed)}.
+\end{align}
+The CEV target is a \emph{floor} rather than Avik's exact equality: a CEV cannot discharge, so
+under the stochastic plant an equality can become unrecoverable; the floor keeps the terminal
+reachable while guaranteeing the fleet ends at least as charged as it began.
+
+\paragraph{Plugging, presence \& routing (Eq.\ 10, HARD).}
+$\rho\le A$, $\rho\le z$, $\sum_e \rho_{m,i,e,k}\le C^{\text{plug}}_m$. Presence partition
+$\sum_i z_{m,i,k}+\sum_{i\ne j}y_{m,i,j,k}=1$; $\beta^{\text{dep}}_{m,i,k}=\sum_j x_{m,i,j,k}$;
+$\beta^{\text{arr}}$ from finishing trips (or a carried-in arrival);
+$\beta^{\text{arr}}-\beta^{\text{dep}}=z_k-z_{k-1}$; $\beta^{\text{arr}}+\beta^{\text{dep}}\le1$;
+flow balance (generalised for the carried-in start). Trip on $i\!\to\!j$ lasts $\tau_{i,j}$ and
+costs $L=k_{\text{trv}}\dt\,y$. \textbf{(10e)} MCS parked at a grid node by day-end:
+$\sum_{i\in\mathcal{N}_g}z_{m,i,n_{\text{day}}}=1$.
+
+\paragraph{Activity scheduling (Eq.\ 11, HARD).}
+$\sum_a u_{e,i,a,k}=A_{i,e}$; $u\le A$; $\mu_{i,e,k}\le u_{e,i,\text{idle},k}$;
+$P^{\text{work}}_{i,e,k}\le R_{i,e,k}A_{i,e}(1-\mu_{i,e,k})$;
+$P^{\text{work}}_{i,e,k}=\sum_a p_a u_{e,i,a,k}$ (Eq.\ 5e), with $p_{\text{idle}}=0$.
+(The code uses this 4-activity encoding; Avik's equivalent 3-activity form is
+$\sum_a u\le1$, $\sum_a u+\mu\le1$.)
+
+\paragraph{Work quota (Eq.\ 12c, SOFT shortfall + implicit HARD cap) --- lumpsum.}
+Written in the code as a balance \emph{equality} against the work still outstanding
+($H^{\bullet}_i$ below is the \emph{remaining} requirement $\text{rem}^{\bullet}_i$ at the
+start of the window, not the whole-day figure):
+\begin{equation}
+\dt\!\!\sum_{e,k}\!u_{e,i,\text{dig},k}+s^{\text{miss}}_{i,\text{dig}}=H^{\text{dig}}_i,\qquad
+\dt\!\!\sum_{e,k}\!u_{e,i,\text{load},k}+s^{\text{miss}}_{i,\text{load}}=H^{\text{load}}_i,\qquad
+s^{\text{miss}}\ge0 .
+\end{equation}
+The shortfall $s^{\text{miss}}$ is soft (priced at $\rho_{\text{miss}}$ in Eq.~1), but because
+$s^{\text{miss}}\ge0$ the equality also implies the \textbf{hard} upper bound
+$\dt\sum_{e,k}u_{e,i,a,k}\le H^{a}_i$: a CEV cannot do more dig/load work than the requirement
+still outstanding. This is the shrinking-horizon analogue of an explicit no-working-ahead rule,
+obtained implicitly, and it is re-imposed against the \emph{remaining} requirement at every
+re-solve. (Earlier revisions of this document wrote the constraint as
+$s^{\text{miss}}\ge H-\dt\sum u$, which permits overshoot; that did not match the code.)
+
+\paragraph{Precedence (Eq.\ 12d, HARD).}
+Raw interval counts, seeded by realized work carried in:
+$\sum_{e,\tau\le k}u_{e,i,\text{load},\tau}\le\text{scale}\sum_{e,\tau\le k}u_{e,i,\text{dig},\tau}$.
+
+\paragraph{Rest rule (Eq.\ 12e, HARD).}
+With $r=\mathrm{round}(t_{\text{rest}}/\dt)$ (=4 at the defaults $t_{\text{rest}}=1$\,h,
+$\dt=0.25$\,h; the code rounds, it does not take a ceiling),
+$\sum_{k'=k}^{k+r}\sum_{a\in\{\text{dig,load,trv}\}}u_{e,i,a,k'}\le r$, \emph{seeded from the
+applied Work/Break history} so a work-run cannot leak across the every-15-min re-solves.
+
+\paragraph{Travel pacing (Eq.\ 13, HARD, no tolerance).}
+With $w_{\text{pt}}=4$, for each $(i,e)$ and $k$, on cumulative travel $V$ vs cumulative
+useful work $W$ (dig+load):
+\begin{equation}
+W(k)-w_{\text{pt}}\ \le\ w_{\text{pt}}\,V(k)\ \le\ W(k),
+\end{equation}
+where $V$ and $W$ are raw \emph{applied interval counts} (whether the $u$ indicator fired that
+interval), read off \texttt{cum\_trv\_cnt\_e}/\texttt{cum\_work\_cnt\_e}, not hours. A battery-
+shortage-capped interval (e.g.\ 14 of 15 minutes realized) still counts as one full travel/work
+interval, so the sub-interval rounding residue that used to strand the band on an integer boundary
+(see \texttt{cum\_dig\_e}/\texttt{cum\_load\_e} in the precedence rule) cannot occur here, and no
+tolerance $\tau$ is needed. Precedence (above) still uses realized hours; only pacing switched to
+interval counts.
+
+\paragraph{Demand peaks (E1, HARD).}
+$P^{\text{NC}}\ge$ carried-in peak and $\ge\sum_m P^{\text{ch,tot}}_{m,k}$ for all $k$;
+$P^{\text{OP}}$ likewise on on-peak $k$ only.
+
+%======================================================================
+\section{Single horizon, fixed model}
+There is no overnight ``Phase~2'': the terminal rules (8a/8b) close the MCS energy cycle inside
+the one 24\,h MILP. The activity powers $p_a=\mu_a$ are the posterior \emph{mean} of a Bayesian
+fit performed \textbf{offline, once, before the loop} by step~0 (\texttt{0\_Regression.jl}): it
+reads the raw task-recording data, builds cumulative-$\Delta$SoC energy-balance equations
+$A x = b$, and fits $b\sim\mathcal{N}(Ax,s)$ with $\mathrm{TruncatedNormal}(\mu_0,\sigma_0;\ge0)$
+power priors and a half-normal noise (pooled NUTS chains). It writes both the mean $\mu$ and a
+\textbf{per-activity} standard deviation $\sigma_a$ to \texttt{parameters.csv}. The MILP plans on
+$\mu$; the closed-loop plant draws each realized power from a pool pre-sampled from
+$\mathcal{N}(\mu_a,\sigma_a)$ (truncated at $0$, idle pinned to $0$) once, before the run, and
+consumes the next unused sample for a $(\text{CEV},a)$ pair each time that pair actually occurs
+--- not a fresh draw every interval. The model is \emph{not} re-fit online during the day.
+
+%======================================================================
+\section{Plant modes: what the disturbance actually is}
+\label{sec:plant}
+The MILP above is identical in every mode; only what the \emph{plant} does with the applied
+plan differs. Both \texttt{run\_mpc} (Approach~1) and \texttt{run\_one\_shot} (Approach~0)
+take a \texttt{plant} switch:
+
+\medskip
+\begin{tabular}{ll}
+\texttt{:sampled} & realized power $\hat p_{e,a}$ = the next unused draw from the pre-sampled\\
+                  & pool; the within-interval activity split may be randomised. Realized\\
+                  & $\ne$ planned, so the day drifts. \emph{(default)}\\[4pt]
+\texttt{:mean}    & realized power $\hat p_{e,a}=\mu_a$, the same mean the MILP planned on, and\\
+                  & each interval realizes its single planned activity in full. Realized\\
+                  & $=$ planned \emph{exactly}. No pool sample is consumed and no cursor\\
+                  & advances, so a \texttt{:mean} run cannot perturb a \texttt{:sampled} run\\
+                  & sharing the same pool, and needs no seed to be reproducible.\\
+\end{tabular}
+
+\medskip
+Approach~0 under \texttt{:mean} is therefore the whole-day MILP's \emph{own optimum} evaluated
+over the full day --- the deterministic reference, with nothing stochastic anywhere --- and
+the difference between the modes separates two effects that a single headline figure conflates:
+\begin{align*}
+\text{A0}(\texttt{:mean})\to\text{A0}(\texttt{:sampled})\ &=\ \text{cost of plan drift with no feedback},\\
+\text{A0}(\texttt{:sampled})\to\text{A1}\ &=\ \text{value of re-planning against that drift}.
+\end{align*}
+
+\paragraph{Scope of the disturbance.} Only the CEV side is stochastic. The MCS state is
+advanced by the \emph{planned} value $SOE^{\text{MCS}}_{m,k_0+1}$ from the solved window, so
+grid draw, travel loss and hence every cost term follow the plan exactly; the disturbance
+enters through CEV depletion and reaches the objective only indirectly, through what the next
+re-solve decides to do about it.
+
+\paragraph{State guard.} The realized dig/load/travel duration for each CEV is capped by the
+energy actually available before hitting $\underline{SOE}_e$: if the sampled draw would push the
+balance below the floor, the executed duration is scaled down to exactly what the floor allows,
+crediting only the affordable fraction of that interval's work (the remainder becomes idle) before
+the SOE update is applied. This is a physical correction, not a numerical guard — no energy is
+created or destroyed, and \texttt{rem\_dig}/\texttt{rem\_load} are only reduced by what was truly
+completed. A residual \texttt{clamp} to $[\underline{SOE}_e,\overline{SOE}_e]$ remains afterward as
+a pure safety net and should not bind under normal operation. Capping events are counted and
+reported per run ($\texttt{n\_capped}$), because they are invisible to the MILP's own feasibility
+status.
+
+%======================================================================
+\section{The fixed-\texorpdfstring{$H$}{H} lookahead is not this controller}
+\label{sec:fixedH}
+The code exposes a switch that replaces the shrinking window $[k_0,n_{\text{day}}]$ with a fixed
+lookahead $[k_0,\min(k_0+H-1,n_{\text{day}})]$. The terminal rules (8a), (8b) and (10e) are conditioned on the window actually reaching
+day-end, so under a fixed $H$ they are absent from all but the final $H$ windows, and
+\textbf{nothing replaces them} --- there is no terminal cost and no value-function approximation
+standing in for the discarded tail. The resulting controller is myopic and will discharge the MCS
+early with no obligation to restore it. The fixed-$H$ mode is provided for experimentation only;
+a terminal cost must be added before it is used for reported results.
+
+\end{document}
