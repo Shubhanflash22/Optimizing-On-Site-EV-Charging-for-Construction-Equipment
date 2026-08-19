@@ -462,13 +462,14 @@ powers **kW**, times in **hours** and **15-min intervals**.
 > full-24 h, lumpsum model; travel pacing uses the fixed `work_per_travel = 4`).
 
 ### `ev_data.csv` — one row per CEV
-`id, SOE_min, SOE_max, SOE_ini, ch_rate`. `SOE_ini` is the **end-of-day floor target** (the CEV
-must finish **at or above** it); `ch_rate` = CEV charge-acceptance (kW).
+`id, SOE_min, SOE_max, SOE_ini, ch_rate, eta_ch_dch_cev`. `SOE_ini` is the **end-of-day floor
+target** (the CEV must finish **at or above** it); `ch_rate` = CEV charge-acceptance (kW);
+`eta_ch_dch_cev` = the CEV's own charge-acceptance efficiency.
 
 ### `mcs_data.csv` — one row per MCS
-`id, SOE_min, SOE_max, SOE_ini, CH_MCS, DCH_MCS, C_MCS_plug, DCH_MCS_plug, eta_ch_dch`.
+`id, SOE_min, SOE_max, SOE_ini, CH_MCS, DCH_MCS, C_MCS_plug, DCH_MCS_plug, eta_ch_dch_mcs`.
 `CH_MCS`/`DCH_MCS` = grid-charge / total-discharge caps; `C_MCS_plug` = simultaneous plugs;
-`DCH_MCS_plug` = per-plug cap; `eta_ch_dch` = round-trip efficiency.
+`DCH_MCS_plug` = per-plug cap; `eta_ch_dch_mcs` = the MCS's own round-trip efficiency.
 
 ### `place.csv` — one row per node
 `site, <one column per CEV id>, hours_digging, hours_loading_swinging`. A `1` in a CEV column
@@ -502,7 +503,7 @@ Every rule is **HARD** unless marked **SOFT**. Variable names match Avik's
 
 ### 8.1 Decision variables
 **Continuous (≥ 0):** `P_ch_MCS`, `P_dch_MCS`, `P_MCS_CEV`, `P_work`, totals
-`P_ch_tot`/`P_dch_tot`, travel energy `L_trv`/`L_trv_tot`, state `SOE_MCS[m,t]`/`SOE_CEV[e,t]`,
+`P_ch_tot`/`P_dch_tot`, state `SOE_MCS[m,t]`/`SOE_CEV[e,t]`,
 peaks `P_peak_NC`/`P_peak_OP`, and the slack `s_miss_work[i,a]`.
 
 > `s_miss_work` is declared over all four activities and the objective sums all four, but only
@@ -510,43 +511,49 @@ peaks `P_peak_NC`/`P_peak_OP`, and the slack `s_miss_work[i,a]`.
 > `s_miss_work[i,idle]` are free `≥0` variables carrying a positive cost, so the minimisation
 > drives them to 0 and the result is unaffected — they are dead variables, not a missing
 > travel/idle quota. Likewise `y_trv[m,i,i,k]` is never defined (the defining loop skips
-> `i == j`) yet is summed into `L_trv` and the labour term; it only ever costs, so presolve
+> `i == j`) yet is summed into the labour term; it only ever costs, so presolve
 > fixes it to 0.
 
-**Binary:** `u[e,i,a,k]`, `mu[i,e,k]`, `rho[m,i,e,k]`, `z[m,i,k]`, `g_ch[m,i,k]`, `x[m,i,j,k]`,
+**Binary:** `u[e,i,a,k]`, `mu[i,e,k]`, `rho[m,i,e,k]`, `z[m,i,k]`, `x[m,i,j,k]`,
 `y_trv[m,i,j,k]`, `beta_arr`/`beta_dep`.
 
 ### 8.2 Objective (Eq. 1) — minimise total operating cost
 `energy` (Σ price·P_ch_tot·Δt) `+ carbon` (Σ (carbon_price/1000)·co2·P_ch_tot·Δt)
 `+ missed work` (SOFT, ρ_miss·Σ s_miss_work) `+ demand` (λ_NC·P_peak_NC + λ_OP·P_peak_OP)
-`+ towing labour` (ρ_labor·Δt·Σ y_trv). Six terms, identical to Avik.
+`+ towing labour` (ρ_labor·Δt·Σ y_trv). Six terms.
 
 ### 8.3 Power flow & where power may go (HARD)
 * `P_ch_tot = Σ_grid P_ch_MCS`; `P_dch_tot = Σ_site P_dch_MCS`; discharge forbidden at grid,
   charge forbidden at sites.
 * `P_dch_MCS = Σ_e P_MCS_CEV` and `≤ DCH_MCS·z`.
-* **Grid exclusivity:** `P_ch_MCS ≤ CH_MCS·g_ch`, `g_ch ≤ z`, ≤ 1 MCS charging per grid node.
+* **Grid charging:** `P_ch_MCS ≤ CH_MCS·z` — capped by the MCS's charge rate, and flows only
+  where the MCS is physically parked.
 * **Plug limits:** `P_MCS_CEV ≤ DCH_MCS_plug·rho`; `Σ_m P_MCS_CEV ≤ CH_CEV[e]·mu`.
+* **Charging-mode consistency:** `mu[i,e,k] == Σ_m rho[m,i,e,k]` — a CEV is in charging mode
+  exactly when it is plugged into an MCS.
 
 ### 8.4 Peak-demand trackers (E1, HARD)
 `P_peak_NC ≥` carried-in peak and `≥ Σ_m P_ch_tot[m,k]` (all k); `P_peak_OP` likewise on the
 **on-peak** k only.
 
-### 8.5 Travel energy (HARD)
+### 8.5 Transit tracking (HARD)
 `y_trv` is 1 while a trip is in flight (its `tau_trv` intervals), or forced for a carried-in
-in-transit trip. `L_trv = k_trv·Δt·y_trv`; `L_trv_tot = Σ L_trv`.
+in-transit trip. Transit is costed purely as time (the labour term in §8.2) and does not draw
+from either battery.
 
 ### 8.6 Battery dynamics & bounds (HARD)
 * Initial: `SOE_MCS[first] = soe_mcs0`, `SOE_CEV[first] = soe_cev0` (measured carry-in).
-* **MCS:** `SOE_MCS[k+1] = SOE_MCS[k] + η·P_ch_tot·Δt − P_dch_tot·Δt/η − L_trv_tot`.
-* **CEV:** `SOE_CEV[k+1] = SOE_CEV[k] + Σ P_MCS_CEV·Δt − Σ P_work·Δt`.
+* **MCS:** `SOE_MCS[k+1] = SOE_MCS[k] + η_mcs·P_ch_tot·Δt − P_dch_tot·Δt/η_mcs` — transit does
+  not draw from the battery (§8.5).
+* **CEV:** `SOE_CEV[k+1] = SOE_CEV[k] + η_cev·Σ P_MCS_CEV·Δt − Σ P_work·Δt`, where `η_cev` is the
+  CEV's own charge-acceptance efficiency.
 * **Bounds:** every boundary clamped to `[SOE_min, SOE_max]` for MCS and CEV (a safety net; the
   realized CEV work duration is capped by available energy *before* this bound is ever reached — see
   §6.7).
 
 ### 8.7 Terminal energy targets (Eq. 8a / 8b, HARD)
 Applied at the final window boundary **only when that boundary is the end of the day** — the
-code gates all three terminal rules (8a, 8b and 10e) on
+code gates both terminal rules (8a and 8b) on
 `is_terminal = last(K) == d.n_day`. On the shrinking horizon every window reaches day-end, so
 they always bind. Under the experimental fixed-`H` lookahead (`shrinking = false`) they are
 absent from all but the last `H` windows and **nothing replaces them** — there is no terminal
@@ -554,7 +561,9 @@ cost and no value-function approximation standing in for the discarded tail, so 
 myopic controller that will drain the MCS early with no obligation to restore it. Add a
 terminal cost before using fixed-`H` for reported results.
 * **MCS (8a, exact):** `SOE_MCS[end] == SOE_MCS_ini` — energy-neutral, ready for the next day;
-  the overnight refill is scheduled inside this MILP.
+  the overnight refill is scheduled inside this MILP. Since transit costs no energy, the MCS can
+  reach this target while charging and then depart for a site afterward at no cost — so the
+  target alone governs recovery, with no separate requirement to remain at the grid node.
 * **CEV (8b, floor):** `SOE_CEV[end] ≥ SOE_CEV_ini` — **overcharging is allowed**. Because a CEV
   cannot discharge, a hard equality would be unrecoverable whenever the stochastic plant lets a
   CEV drift above target; the floor keeps the terminal reachable while guaranteeing the fleet
@@ -566,7 +575,6 @@ terminal cost before using fixed-`H` for reported results.
 * **Departure/arrival:** `beta_dep = Σ_j x`; `beta_arr` from finishing trips (or carried-in
   arrival); `beta_arr − beta_dep = z[k] − z[k−1]`; `beta_arr + beta_dep ≤ 1`; flow balance
   (generalised for the MPC's carried-in start position).
-* **(10e) Home by day-end:** `Σ_grid z[m,i,n_day] = 1` at the final interval.
 
 ### 8.9 Activity scheduling (Eq. 11, HARD)
 * Exactly one activity per assigned CEV: `Σ_a u = A`; `u ≤ A`.
@@ -845,9 +853,9 @@ routing, …) still applies **individually in every scenario** — nothing is re
 constraints added after the model is otherwise built, tying every *decision* variable at the
 window's first interval `k0` across scenarios (`X[..., k0, s] == X[..., k0, 1]` for `s = 2..S`):
 
-* **Tied at `k0`** — everything the controller *chooses*: `u`, `mu`, `rho`, `z`, `g_ch`, `x`,
+* **Tied at `k0`** — everything the controller *chooses*: `u`, `mu`, `rho`, `z`, `x`,
   `y_trv`, `beta_arr`, `beta_dep` (every binary), and `P_ch_MCS`, `P_MCS_CEV`, `P_dch_MCS`,
-  `P_ch_tot`, `P_dch_tot`, `L_trv`, `L_trv_tot` (the controlled power/travel flows).
+  `P_ch_tot`, `P_dch_tot` (the controlled power flows).
 * **NOT tied at `k0`** — `P_work` and `SOE_CEV`. This is the whole mechanism: `P_work[i,e,k0,s]
   = sum_a scenarios[s][a] * u[e,i,a,k0,s]`, and `u` is tied but `scenarios[s][a]` is not, so the
   *action* ("Dig") is shared while the *energy it costs* is scenario-dependent — exactly the

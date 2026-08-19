@@ -385,14 +385,16 @@ powers **kW**, times in **hours** and **15-min intervals**.
 > `place.csv` quota is repeated for every day.
 
 ### `ev_data.csv` — one row per CEV
-`id, SOE_min, SOE_max, SOE_ini, ch_rate`. `SOE_ini` is the **daily end-of-day floor target** (the
-CEV must finish each daytime block **at or above** it); `ch_rate` = CEV charge-acceptance (kW).
+`id, SOE_min, SOE_max, SOE_ini, ch_rate, eta_ch_dch_cev`. `SOE_ini` is the **daily end-of-day floor
+target** (the CEV must finish each daytime block **at or above** it); `ch_rate` = CEV
+charge-acceptance (kW); `eta_ch_dch_cev` = the CEV's own charge-acceptance efficiency (fraction of
+power sent by the MCS that actually reaches the CEV's battery).
 
 ### `mcs_data.csv` — one row per MCS
-`id, SOE_min, SOE_max, SOE_ini, CH_MCS, DCH_MCS, C_MCS_plug, DCH_MCS_plug, eta_ch_dch`.
+`id, SOE_min, SOE_max, SOE_ini, CH_MCS, DCH_MCS, C_MCS_plug, DCH_MCS_plug, eta_ch_dch_mcs`.
 `CH_MCS`/`DCH_MCS` = grid-charge / total-discharge caps; `C_MCS_plug` = simultaneous plugs;
-`DCH_MCS_plug` = per-plug cap; `eta_ch_dch` = round-trip efficiency. `SOE_ini` is the level the
-overnight phase refills to each night.
+`DCH_MCS_plug` = per-plug cap; `eta_ch_dch_mcs` = the MCS's own round-trip efficiency. `SOE_ini` is
+the level the overnight phase refills to each night.
 
 ### `place.csv` — one row per node
 `site, <one column per CEV id>, hours_digging, hours_loading_swinging`. A `1` in a CEV column
@@ -422,24 +424,22 @@ These caps drive `R_work` and, via the last non-zero column, infer `day_end_hour
 ## 8. The optimization model — every variable & constraint
 
 Built in `build_window_model` over the cross-day window `K_win = [k0 … lookahead day-end]`
-(boundaries `Tb`). Every rule is **HARD** unless marked **SOFT**. Variable names match Avik's
-`MCS_OPTIMAL_v4_real.jl`.
+(boundaries `Tb`). Every rule is **HARD** unless marked **SOFT**.
 
 ### 8.1 Decision variables
 **Continuous (≥ 0):** `P_ch_MCS`, `P_dch_MCS`, `P_MCS_CEV`, `P_work`, totals
-`P_ch_tot`/`P_dch_tot`, travel energy `L_trv`/`L_trv_tot`, state `SOE_MCS[m,t]`/`SOE_CEV[e,t]`,
+`P_ch_tot`/`P_dch_tot`, state `SOE_MCS[m,t]`/`SOE_CEV[e,t]`,
 peaks `P_peak_NC`/`P_peak_OP`, and the slack `s_miss_work[i,a]` (per site & activity — **not** per
 day-block). This is the model's only slack; every other constraint is hard and there are no
 `soft_*` levers.
 
 > `s_miss_work` is declared over all four activities and the objective sums all four, but only dig
 > and load appear in a balance (§8.10). The travel/idle entries are free `≥0` variables carrying a
-> positive cost, so the minimisation drives them to 0 — dead variables, not a missing quota. The
-> source PDF's objective has the same quirk. Likewise `y_trv[m,i,i,k]` is never defined (the
-> defining loop skips `i == j`) yet is summed into `L_trv` and the labour term; it only ever costs,
-> so presolve fixes it to 0.
+> positive cost, so the minimisation drives them to 0 — dead variables, not a missing quota.
+> Likewise `y_trv[m,i,i,k]` is never defined (the defining loop skips `i == j`) yet is summed into
+> the labour term; it only ever costs, so presolve fixes it to 0.
 
-**Binary:** `u[e,i,a,k]`, `mu[i,e,k]`, `rho[m,i,e,k]`, `z[m,i,k]`, `g_ch[m,i,k]`, `x[m,i,j,k]`,
+**Binary:** `u[e,i,a,k]`, `mu[i,e,k]`, `rho[m,i,e,k]`, `z[m,i,k]`, `x[m,i,j,k]`,
 `y_trv[m,i,j,k]`, `beta_arr`/`beta_dep`.
 
 ### 8.2 Objective (Eq. 1) — minimise total operating cost
@@ -454,22 +454,27 @@ terms — there is no separate overnight accounting.
 * `P_ch_tot = Σ_grid P_ch_MCS`; `P_dch_tot = Σ_site P_dch_MCS`; discharge forbidden at grid,
   charge forbidden at sites.
 * `P_dch_MCS = Σ_e P_MCS_CEV` and `≤ DCH_MCS·z`.
-* **Grid exclusivity:** `P_ch_MCS ≤ CH_MCS·g_ch`, `g_ch ≤ z`, ≤ 1 MCS charging per grid node.
+* **Grid charging:** `P_ch_MCS ≤ CH_MCS·z` — capped by the MCS's charge rate, and flows only where
+  the MCS is physically parked.
 * **Plug limits:** `P_MCS_CEV ≤ DCH_MCS_plug·rho`; `Σ_m P_MCS_CEV ≤ CH_CEV[e]·mu`.
+* **Charging-mode consistency:** `mu[i,e,k] == Σ_m rho[m,i,e,k]` — a CEV is in charging mode
+  exactly when it is plugged into an MCS.
 
 ### 8.4 Peak-demand trackers (E1, HARD)
 `P_peak_NC ≥` carried-in peak and `≥ Σ_m P_ch_tot[m,k]` (all k); `P_peak_OP` likewise on the
 **on-peak** k only. Peaks carry across the day's re-solves.
 
-### 8.5 Travel energy (HARD)
+### 8.5 Transit tracking (HARD)
 `y_trv` is 1 while a trip is in flight (its `tau_trv` intervals), or forced for a carried-in
-in-transit trip. `L_trv = k_trv·Δt·y_trv`; `L_trv_tot = Σ L_trv`.
+in-transit trip. Transit is costed purely as time — the labour term in the objective
+(§8.2) — and does not draw from either battery.
 
 ### 8.6 Battery dynamics & bounds (HARD)
 * Initial: `SOE_MCS[first] = soe_mcs0`, `SOE_CEV[first] = soe_cev0` (measured carry-in).
-* **MCS:** `SOE_MCS[k+1] = SOE_MCS[k] + η·P_ch_tot·Δt − P_dch_tot·Δt/η − L_trv_tot`, run
+* **MCS:** `SOE_MCS[k+1] = SOE_MCS[k] + η_mcs·P_ch_tot·Δt − P_dch_tot·Δt/η_mcs`, run
   **unbroken across the whole window, nights included**. There is no reset bridge.
-* **CEV:** `SOE_CEV[k+1] = SOE_CEV[k] + Σ P_MCS_CEV·Δt − Σ P_work·Δt`, likewise unbroken.
+* **CEV:** `SOE_CEV[k+1] = SOE_CEV[k] + η_cev·Σ P_MCS_CEV·Δt − Σ P_work·Δt`, where `η_cev` is
+  the CEV's own charge-acceptance efficiency, likewise unbroken.
 * **Bounds:** every boundary clamped to `[SOE_min, SOE_max]` for MCS and CEV (a safety net; the
   realized CEV work duration is capped by available energy *before* this bound is ever reached — see
   §6.7).
@@ -481,7 +486,10 @@ long, so that boundary always falls inside it.
 
 * **MCS (Eq. 8a):** `SOE_MCS[b_term] == SOE_MCS_ini` — an **exact equality**. The overnight
   recharge that satisfies it is scheduled *inside this same MILP*, driven by the TOU price, so
-  the cheapest hours are chosen automatically.
+  the cheapest hours are chosen automatically. Since transit does not draw from the battery
+  (§8.5), the MCS can reach this target while charging and then depart for a site afterward at no
+  energy cost — so the target alone governs recovery, with no separate requirement to remain
+  physically parked at the grid node.
 * **CEV (Eq. 8b):** `SOE_CEV[b_term] ≥ SOE_CEV_ini` — a **floor**; overcharging is allowed. A CEV
   cannot discharge, so a hard equality would be unrecoverable once the stochastic plant lets a CEV
   drift above target. The floor keeps the terminal reachable while guaranteeing the fleet ends at
@@ -497,7 +505,6 @@ described all three, plus `soft_term`/`term_tol` levers, none of which exist.
 * **Departure/arrival:** `beta_dep = Σ_j x`; `beta_arr` from finishing trips (or carried-in
   arrival); `beta_arr − beta_dep = z[k] − z[k−1]`; `beta_arr + beta_dep ≤ 1`; flow balance
   (generalised for the MPC's carried-in start position).
-* **Home by day-end:** the MCS is at a grid node at each day-end boundary in the window.
 
 ### 8.9 Activity scheduling (Eq. 11, HARD)
 * Exactly one activity per assigned CEV: `Σ_a u = A`; `u ≤ A`.
@@ -704,7 +711,7 @@ Carried over from the audit of the single-day Shrinking sibling; the same code p
 * `s_miss_work` is declared over all four activities and summed in the objective, but only dig and
   load appear in a balance; the travel/idle entries are free `≥0` variables carrying a positive
   cost, so they are driven to 0 — dead variables, not a missing quota. Likewise `y_trv[m,i,i,k]`
-  is never defined yet is summed into `L_trv` and the labour term; it only ever costs, so presolve
+  is never defined yet is summed into the labour term; it only ever costs, so presolve
   fixes it to 0.
 * Precedence seeds per **site**, travel pacing seeds per **CEV**. Equivalent while `A[i,e]` is a
   one-to-one assignment, which it is in both datasets; latent if a site ever gets two CEVs.
@@ -735,8 +742,7 @@ Carried over from the audit of the single-day Shrinking sibling; the same code p
 ## Changes 2, 3, 5 (this session)
 
 * **Change 2 — earlier-charging tie-break (Issue 2).** Same `1e-6`-weighted `idx * mu` term as
-  the Shrinking_Horizon sibling (see that doc for the `g_ch` → `mu` correction — the term originally
-  targeted the wrong variable), added to `3_MCSModel.jl`'s objective. `idx` is the LOCAL position
+  the Shrinking_Horizon sibling, added to `3_MCSModel.jl`'s objective. `idx` is the LOCAL position
   within the current re-solve window.
 * **Change 3 — terminal SOE_CEV shortfall penalty (Issue 1).** Same design as the sibling doc.
   `rem_dig`/`rem_load`/`soe_cev` are snapshotted at the kept-day boundary (`rem_dig_kept` etc.)

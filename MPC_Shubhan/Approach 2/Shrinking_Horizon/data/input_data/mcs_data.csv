@@ -1,2 +1,2 @@
-Unnamed: 0,SOE_min,SOE_max,SOE_ini,CH_MCS,DCH_MCS,C_MCS_plug,DCH_MCS_plug,eta_ch_dch
-m1,50,250,250,31.25,80,2,52,0.95
+Unnamed: 0,SOE_min,SOE_max,SOE_ini,CH_MCS,DCH_MCS,C_MCS_plug,DCH_MCS_plug,eta_ch_dch_mcs
+m1,50.0,250.0,250.0,150.0,150.0,2,60.0,0.95

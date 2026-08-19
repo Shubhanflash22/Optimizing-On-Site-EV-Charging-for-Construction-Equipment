@@ -54,13 +54,14 @@ function build_default_data()
     # ---- MCS (charging-truck) parameters ----
     SOE_MCS_ini = [250.0]; SOE_MCS_max = [250.0]; SOE_MCS_min = [50.0]
     CH_MCS  = [150.0]; DCH_MCS = [150.0]; DCH_MCS_plug = [60.0]
-    C_MCS_plug = [2]; eta_ch_dch = [0.95]
+    C_MCS_plug = [2]; eta_ch_dch_mcs = [0.95]
 
     # ---- CEV (excavator) parameters ----
     SOE_CEV_max = [90.0, 60.0]
     SOE_CEV_ini = [72.0, 48.0]     # 80% of max = the end-of-day target
     SOE_CEV_min = [18.0, 12.0]
     CH_CEV      = [45.0, 30.0]
+    eta_ch_dch_cev = [0.95, 0.95]
 
     # ---- activity power draws, kW (B = [dig, load, travel, idle]) ----
     # Idle is pinned to 0 kW with 0 std: no power is lost while idling.
@@ -124,8 +125,8 @@ function build_default_data()
     return (; delta_T, K, T, t_start, n_int, n_day, t_limit_rest,
               N, N_g, N_c, M, E, A,
               SOE_MCS_ini, SOE_MCS_max, SOE_MCS_min, CH_MCS, DCH_MCS,
-              DCH_MCS_plug, C_MCS_plug, eta_ch_dch,
-              SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV,
+              DCH_MCS_plug, C_MCS_plug, eta_ch_dch_mcs,
+              SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV, eta_ch_dch_cev,
               p_digging, p_loading_swinging, p_traveling, p_idling,
               prior_mu, prior_sigma, true_powers, true_sigma, obs_noise_std,
               hours_digging, hours_loading_swinging, tau_trv, k_trv,
@@ -168,9 +169,9 @@ function load_input_data(input_dir::AbstractString)
     isdir(input_dir) || error("DataLoader input mode: input directory not found -> $input_dir")
 
     par = _read_csv(input_dir, "parameters.csv"; required_cols = ["Parameter", "Value"])
-    evd = _read_csv(input_dir, "ev_data.csv";   required_cols = ["SOE_min","SOE_max","SOE_ini","ch_rate"])
+    evd = _read_csv(input_dir, "ev_data.csv";   required_cols = ["SOE_min","SOE_max","SOE_ini","ch_rate","eta_ch_dch_cev"])
     mcd = _read_csv(input_dir, "mcs_data.csv";  required_cols =
-            ["SOE_min","SOE_max","SOE_ini","CH_MCS","DCH_MCS","C_MCS_plug","DCH_MCS_plug","eta_ch_dch"])
+            ["SOE_min","SOE_max","SOE_ini","CH_MCS","DCH_MCS","C_MCS_plug","DCH_MCS_plug","eta_ch_dch_mcs"])
     plc = _read_csv(input_dir, "place.csv";     required_cols = ["site","hours_digging","hours_loading_swinging"])
     tdd = _read_csv(input_dir, "time_data.csv"; required_cols = ["lambda_buy","intensity_tons_emissions"])
     ttm = _read_csv(input_dir, "travel_time.csv")
@@ -224,9 +225,10 @@ function load_input_data(input_dir::AbstractString)
     # ---- MCS / CEV battery parameters ----
     SOE_MCS_ini = Float64.(mcd.SOE_ini); SOE_MCS_max = Float64.(mcd.SOE_max)
     SOE_MCS_min = Float64.(mcd.SOE_min); CH_MCS = Float64.(mcd.CH_MCS); DCH_MCS = Float64.(mcd.DCH_MCS)
-    DCH_MCS_plug = Float64.(mcd.DCH_MCS_plug); C_MCS_plug = Int.(mcd.C_MCS_plug); eta_ch_dch = Float64.(mcd.eta_ch_dch)
+    DCH_MCS_plug = Float64.(mcd.DCH_MCS_plug); C_MCS_plug = Int.(mcd.C_MCS_plug); eta_ch_dch_mcs = Float64.(mcd.eta_ch_dch_mcs)
     SOE_CEV_ini = Float64.(evd.SOE_ini); SOE_CEV_max = Float64.(evd.SOE_max)
     SOE_CEV_min = Float64.(evd.SOE_min); CH_CEV = Float64.(evd.ch_rate)
+    eta_ch_dch_cev = Float64.(evd.eta_ch_dch_cev)
 
     # ---- activity powers: known constants seed the learner's prior ----
     prior_mu    = [_psd(par, "p_digging"), _psd(par, "p_loading_swinging"), _psd(par, "p_traveling"), p_idling]
@@ -291,8 +293,8 @@ function load_input_data(input_dir::AbstractString)
     return (; delta_T, K, T, t_start, n_int, n_day, t_limit_rest,
               N, N_g, N_c, M, E, A,
               SOE_MCS_ini, SOE_MCS_max, SOE_MCS_min, CH_MCS, DCH_MCS,
-              DCH_MCS_plug, C_MCS_plug, eta_ch_dch,
-              SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV,
+              DCH_MCS_plug, C_MCS_plug, eta_ch_dch_mcs,
+              SOE_CEV_ini, SOE_CEV_max, SOE_CEV_min, CH_CEV, eta_ch_dch_cev,
               p_digging, p_loading_swinging, p_traveling, p_idling,
               prior_mu, prior_sigma, true_powers, true_sigma, obs_noise_std,
               hours_digging, hours_loading_swinging, tau_trv, k_trv,

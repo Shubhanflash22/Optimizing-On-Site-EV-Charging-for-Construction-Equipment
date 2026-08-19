@@ -1,0 +1,70 @@
+==============================================================================
+3-WAY COMPARISON — Approach 0 vs A1-Receding vs A2-Receding
+A1 Receding  code: C:\Users\shubh\Desktop\MPC\Approach 1\Receding_Horizon\code
+A2 Receding  code: C:\Users\shubh\Desktop\MPC\Approach 2\Receding_Horizon\code
+Input             : c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Input
+Output            : c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output
+Comparisons       : A0_A1R, A0_A2R, A0_A1R_A2R, A1R_A2R
+==============================================================================
+
+Shared power pool: n_samples=581 per (entity, activity) (96 intervals/day x 6 days incl. the Receding buffer day, + 5); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+
+--- Approach 0 (one-shot, plant = :sampled, source = :a1_receding) ---
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 5 day(s), 480 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s / day-solve
+Approach 0 one-shot-per-day (plant = :sampled) done in 52.7 s (480 plant realizations, 5 day-solves)
+
+--- Approach 1 - Receding (n_days = 5) ---
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 480 steps (5 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=5 (n_days_keep=5), soe_cev_kept=[14.8]
+Approach 1 (plant = :sampled) done in 648.1 s (576 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+
+--- Approach 2 - Receding (stochastic, 5 scenarios, n_days = 5) ---
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 480 steps (5 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=5 (n_days_keep=5), soe_cev_kept=[14.8]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 20504.7 s (576 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+
+--- Writing 4 comparison(s) ---
+  A0_A1R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\A0_A1R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+  A0_A2R: Approach 0 (one-shot, :sampled) vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\A0_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+  A0_A1R_A2R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\A0_A1R_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+  A1R_A2R: Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\A1R_A2R
+
+==============================================================================
+KPI SUMMARY (all three)
+Metric                                   A0       A1-Reced       A2-Reced
+Grid energy (kWh)                    158.88         158.41         158.41
+Energy cost (USD)                     50.57          50.42          50.42
+CO2 (kg)                              43.17          43.04          43.04
+NCD peak (kW)                          2.91           2.91           2.91
+OPD peak (kW)                          0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+==============================================================================
+
+Results written to: c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output
+  A0_A1R/  (A0 vs A1R)
+  A0_A2R/  (A0 vs A2R)
+  A0_A1R_A2R/  (A0 vs A1R vs A2R)
+  A1R_A2R/  (A1R vs A2R)
+  run_log.txt  (this console log, shared across all 4 comparisons)

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOE_06.91 — Missed Work Root Cause Analysis</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d0f12;
+    --surface:   #141619;
+    --card:      #1a1d21;
+    --border:    #252830;
+    --border2:   #2e3239;
+    --text:      #e8eaed;
+    --muted:     #7a8190;
+    --subtle:    #4a5060;
+    --blue:      #4fa3e0;
+    --blue-dim:  #1e3a50;
+    --orange:    #e07a4f;
+    --orange-dim:#3d2218;
+    --amber:     #f0b429;
+    --amber-dim: #3a2a08;
+    --green:     #52c97a;
+    --green-dim: #0d2e1a;
+    --red:       #e05252;
+    --red-dim:   #2e1212;
+    --accent:    #4fa3e0;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── layout ── */
+  .page { max-width: 960px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  /* ── header ── */
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 32px; margin-bottom: 40px; }
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  h1 span { color: var(--muted); font-weight: 300; }
+  .header-sub { color: var(--muted); font-size: 14px; }
+
+  /* ── section ── */
+  .section { margin-bottom: 48px; }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::before { content: '//'; opacity: .5; }
+
+  /* ── KPI row ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .kpi-card.ok  { border-color: #1e4030; background: var(--green-dim); }
+  .kpi-card.err { border-color: #3d1c1c; background: var(--red-dim); }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-family: var(--mono); }
+  .kpi-val { font-size: 28px; font-weight: 600; font-family: var(--mono); letter-spacing: -.02em; }
+  .kpi-card.ok  .kpi-val { color: var(--green); }
+  .kpi-card.err .kpi-val { color: var(--red); }
+  .kpi-sub { font-size: 11px; margin-top: 6px; }
+  .kpi-card.ok  .kpi-sub { color: var(--green); opacity: .7; }
+  .kpi-card.err .kpi-sub { color: var(--red); opacity: .7; }
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: .04em;
+  }
+  .badge-ok  { background: var(--green-dim); color: var(--green); border: 1px solid #1e4030; }
+  .badge-err { background: var(--red-dim);   color: var(--red);   border: 1px solid #3d1c1c; }
+  .badge-warn{ background: var(--amber-dim); color: var(--amber); border: 1px solid #4a3510; }
+
+  /* ── cause chain ── */
+  .chain { display: flex; flex-direction: column; gap: 0; position: relative; }
+  .chain-row {
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+  .chain-row + .chain-row { margin-top: 0; }
+  .chain-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40px;
+    flex-shrink: 0;
+  }
+  .chain-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .chain-num.n1 { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber); }
+  .chain-num.n2 { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange); }
+  .chain-num.n3 { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+  .chain-line { width: 1px; flex: 1; background: var(--border2); min-height: 24px; }
+  .chain-body {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 0 0 12px 12px;
+  }
+  .chain-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
+  .chain-detail { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .chain-detail code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(255,255,255,.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--text);
+  }
+
+  /* ── chart ── */
+  .chart-outer {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 20px 16px;
+  }
+  .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .chart-title { font-size: 13px; font-weight: 500; }
+  .legend { display: flex; gap: 20px; }
+  .leg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .leg-line { width: 20px; height: 2px; }
+  .leg-dash { width: 20px; height: 0; border-top: 2px dashed; }
+  .leg-dot-line { width: 20px; height: 0; border-top: 1.5px dashed; }
+  .chart-wrap { position: relative; width: 100%; height: 280px; }
+
+  /* ── callout box ── */
+  .callout {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--amber-dim);
+    border: 1px solid #4a3510;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 16px;
+  }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .callout-text strong { color: var(--amber); }
+
+  /* ── interval table ── */
+  .tbl-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    background: var(--card);
+  }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,.02); }
+  tbody tr.miss td { background: var(--red-dim); color: var(--red); font-weight: 500; }
+  tbody tr.trigger td { background: var(--amber-dim); }
+  .mono { font-family: var(--mono); font-size: 12px; }
+
+  /* ── bottom KPI comparison ── */
+  .cmp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .cmp-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .cmp-card.best { border-color: #1e4030; background: #0d1f15; }
+  .cmp-label { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 8px; letter-spacing: .06em; }
+  .cmp-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; margin-bottom: 4px; }
+  .cmp-key { color: var(--muted); }
+  .cmp-val { font-family: var(--mono); font-size: 12px; color: var(--text); }
+  .cmp-val.bad { color: var(--red); }
+  .cmp-val.ok  { color: var(--green); }
+
+  /* ── footer ── */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-left { font-family: var(--mono); font-size: 11px; color: var(--subtle); }
+  .footer-right { font-family: var(--mono); font-size: 11px; color: var(--subtle); }
+
+  @media (max-width: 700px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .cmp-grid  { grid-template-columns: repeat(2, 1fr); }
+    .legend    { flex-wrap: wrap; gap: 10px; }
+    h1         { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- header -->
+  <div class="header">
+    <div class="header-eyebrow">MPC Comparison — SOE_06.91 &nbsp;·&nbsp; All5</div>
+    <h1>Missed Work <span>— Root Cause Analysis</span></h1>
+    <div class="header-sub">
+      5-way comparison: A0 (one-shot) · A1-Shrinking · A2-Shrinking · A1-Receding · A2-Receding &nbsp;|&nbsp;
+      Run date: 2026-08-15 &nbsp;|&nbsp; 96 intervals (1 day, 15-min steps)
+    </div>
+  </div>
+
+  <!-- missed work summary -->
+  <div class="section">
+    <div class="section-label">Work completion</div>
+    <div class="kpi-grid">
+      <div class="kpi-card ok">
+        <div class="kpi-label">A0 — one-shot</div>
+        <div class="kpi-val">0.00 h</div>
+        <div class="kpi-sub"><span class="badge badge-ok">✓ complete</span></div>
+      </div>
+      <div class="kpi-card err">
+        <div class="kpi-label">A1S — shrinking MPC</div>
+        <div class="kpi-val">0.25 h</div>
+        <div class="kpi-sub"><span class="badge badge-err">$500 penalty</span></div>
+      </div>
+      <div class="kpi-card err">
+        <div class="kpi-label">A2S — stochastic shrink</div>
+        <div class="kpi-val">0.25 h</div>
+        <div class="kpi-sub"><span class="badge badge-err">$500 penalty</span></div>
+      </div>
+      <div class="kpi-card err">
+        <div class="kpi-label">A1R / A2R — receding</div>
+        <div class="kpi-val">0.25 h</div>
+        <div class="kpi-sub"><span class="badge badge-err">$500 penalty</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- root cause chain -->
+  <div class="section">
+    <div class="section-label">Root cause chain</div>
+    <div class="chain">
+
+      <div class="chain-row">
+        <div class="chain-left">
+          <div class="chain-num n1">1</div>
+          <div class="chain-line"></div>
+        </div>
+        <div class="chain-body">
+          <div class="chain-title">15:45 — MPC under-charges the CEV during the afternoon service stop</div>
+          <div class="chain-detail">
+            Both A0 and A1S arrive at the CEV station at 15:45 with nearly equal SOE (~7.6–7.7 kWh).
+            A0's open-loop plan pre-committed a full <code>8.00 kW</code> transfer (+2.00 kWh).
+            A1S committed only <code>0.21 kW</code> (+0.05 kWh).
+            The two approaches exit the interval <strong style="color:var(--amber)">1.887 kWh apart</strong>:
+            A0 at 9.617 kWh, A1S at 7.730 kWh.
+          </div>
+        </div>
+      </div>
+
+      <div class="chain-row">
+        <div class="chain-left">
+          <div class="chain-num n2">2</div>
+          <div class="chain-line"></div>
+        </div>
+        <div class="chain-body">
+          <div class="chain-title">The 1.887 kWh gap persists unchanged through 16:00–16:30</div>
+          <div class="chain-detail">
+            No subsequent charging event closes the gap before the last work block.
+            CEV SOE tracks in parallel: A0 at <code>9.6 → 8.5 → 7.3 → 6.0 kWh</code>;
+            A1S at <code>7.7 → 6.6 → 5.4 → 4.2 kWh</code> entering 16:45.
+          </div>
+        </div>
+      </div>
+
+      <div class="chain-row">
+        <div class="chain-left">
+          <div class="chain-num n3">3</div>
+        </div>
+        <div class="chain-body">
+          <div class="chain-title">16:45 — last field-work interval blocked by the SOE floor constraint</div>
+          <div class="chain-detail">
+            The 16:45 work slot demands <code>5.234 kW × 0.25 h = 1.309 kWh</code> from the CEV.
+            <br><br>
+            A0 CEV entering: <code>6.045 kWh</code> → after work: <code>4.736 kWh</code> &nbsp;✓ (floor <code>2.96 kWh</code>, headroom +1.78).
+            <br>
+            A1S CEV entering: <code>4.157 kWh</code> → after work: <code>2.848 kWh</code> &nbsp;✗ (<strong style="color:var(--red)">0.11 kWh below floor</strong>).
+            <br><br>
+            The solver correctly refuses to schedule work and instead charges the CEV from the MCS.
+            This is the proximate cause of the missed interval — but the real error occurred 1 hour earlier.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="callout" style="margin-top:8px">
+      <div class="callout-icon">⚠</div>
+      <div class="callout-text">
+        <strong>The SOE floor refusal at 16:45 is correct behaviour.</strong>
+        The upstream bug is the MPC's conservative charging decision at 15:45. With a shrinking/receding
+        horizon, the optimizer sees only ~5 remaining intervals and underweights the need to top up the CEV
+        before the final work block. The stochastic variants (A2S, A2R) do not fix this — all 5 scenarios
+        share the same deterministic constraint once the 15:45 charge level is committed.
+      </div>
+    </div>
+  </div>
+
+  <!-- CEV SOE chart -->
+  <div class="section">
+    <div class="section-label">CEV state of energy — A0 vs. A1S (MPC representative)</div>
+    <div class="chart-outer">
+      <div class="chart-header">
+        <div class="chart-title">CEV SOE trajectory, 08:00–17:15</div>
+        <div class="legend">
+          <div class="leg"><div class="leg-line" style="background:#4fa3e0"></div> A0 (one-shot)</div>
+          <div class="leg"><div class="leg-dash" style="border-color:#e07a4f"></div> A1S / MPC</div>
+          <div class="leg"><div class="leg-dot-line" style="border-color:#f0b429"></div> SOE floor (2.96 kWh)</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="soeChart" role="img"
+          aria-label="Line chart: CEV SOE from 08:00 to 17:15. A0 stays ~1.9 kWh above A1S from 16:00 onwards. At 16:45 A0 is at 6.05 kWh and A1S at 4.16 kWh; the floor is 2.96 kWh. A1S would drop to 2.85 kWh if it worked, violating the floor.">
+          A0 CEV SOE at 16:45: 6.045 kWh (above floor). A1S CEV SOE at 16:45: 4.157 kWh — after work would be 2.848 kWh, below the floor of 2.96 kWh.
+        </canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- interval table -->
+  <div class="section">
+    <div class="section-label">Interval-level evidence — 15:30 through 17:15</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Clock</th>
+            <th>A0 CEV (kWh)</th>
+            <th>A1S CEV (kWh)</th>
+            <th>Gap (A0−A1S)</th>
+            <th>A0 — MCS action</th>
+            <th>A1S — MCS action</th>
+            <th>A1S discharge</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">15:30</td>
+            <td class="mono">8.829</td><td class="mono">8.889</td>
+            <td class="mono">−0.06</td>
+            <td>Digging</td><td>Digging</td>
+            <td class="mono">—</td>
+          </tr>
+          <tr class="trigger">
+            <td class="mono">15:45 ← trigger</td>
+            <td class="mono">7.617</td><td class="mono">7.678</td>
+            <td class="mono">−0.06</td>
+            <td>Serving CEV <span class="badge badge-ok">8.00 kW</span></td>
+            <td>Serving CEV <span class="badge badge-warn">0.21 kW</span></td>
+            <td class="mono"><span class="badge badge-warn">0.21 kW</span></td>
+          </tr>
+          <tr>
+            <td class="mono">16:00</td>
+            <td class="mono">9.617</td><td class="mono">7.730</td>
+            <td class="mono"><strong style="color:var(--amber)">+1.887</strong></td>
+            <td>Digging</td><td>Digging</td>
+            <td class="mono">0</td>
+          </tr>
+          <tr>
+            <td class="mono">16:15</td>
+            <td class="mono">8.453</td><td class="mono">6.566</td>
+            <td class="mono">+1.887</td>
+            <td>Traveling</td><td>Traveling</td>
+            <td class="mono">0</td>
+          </tr>
+          <tr>
+            <td class="mono">16:30</td>
+            <td class="mono">7.263</td><td class="mono">5.376</td>
+            <td class="mono">+1.887</td>
+            <td>Digging</td><td>Digging</td>
+            <td class="mono">0</td>
+          </tr>
+          <tr class="miss">
+            <td class="mono">16:45 ← missed</td>
+            <td class="mono">6.045</td><td class="mono">4.157</td>
+            <td class="mono">+1.887</td>
+            <td>Digging (5.23 kW) ✓</td>
+            <td>Charging CEV ✗</td>
+            <td class="mono">SOE → 2.848 &lt; 2.96</td>
+          </tr>
+          <tr>
+            <td class="mono">17:00</td>
+            <td class="mono">4.736</td><td class="mono">4.910</td>
+            <td class="mono">−0.17</td>
+            <td>Charging</td><td>Charging</td>
+            <td class="mono">—</td>
+          </tr>
+          <tr>
+            <td class="mono">17:15</td>
+            <td class="mono">6.736</td><td class="mono">6.910</td>
+            <td class="mono">−0.17</td>
+            <td>Idle</td><td>Idle</td>
+            <td class="mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- full KPI comparison -->
+  <div class="section">
+    <div class="section-label">Full KPI comparison</div>
+    <div class="cmp-grid">
+      <div class="cmp-card best">
+        <div class="cmp-label">A0 — one-shot</div>
+        <div class="cmp-row"><span class="cmp-key">Grid (kWh)</span><span class="cmp-val ok">31.66</span></div>
+        <div class="cmp-row"><span class="cmp-key">Cost (USD)</span><span class="cmp-val ok">$10.08</span></div>
+        <div class="cmp-row"><span class="cmp-key">CO₂ (kg)</span><span class="cmp-val">8.60</span></div>
+        <div class="cmp-row"><span class="cmp-key">NCD peak (kW)</span><span class="cmp-val">2.88</span></div>
+        <div class="cmp-row"><span class="cmp-key">Missed work (h)</span><span class="cmp-val ok">0.00</span></div>
+        <div class="cmp-row"><span class="cmp-key">Total cost</span><span class="cmp-val ok">$280</span></div>
+      </div>
+      <div class="cmp-card">
+        <div class="cmp-label">A1S — shrink</div>
+        <div class="cmp-row"><span class="cmp-key">Grid (kWh)</span><span class="cmp-val">30.41</span></div>
+        <div class="cmp-row"><span class="cmp-key">Cost (USD)</span><span class="cmp-val">$9.63</span></div>
+        <div class="cmp-row"><span class="cmp-key">CO₂ (kg)</span><span class="cmp-val">8.30</span></div>
+        <div class="cmp-row"><span class="cmp-key">NCD peak (kW)</span><span class="cmp-val">2.83</span></div>
+        <div class="cmp-row"><span class="cmp-key">Missed work (h)</span><span class="cmp-val bad">0.25</span></div>
+        <div class="cmp-row"><span class="cmp-key">Total cost</span><span class="cmp-val bad">$697</span></div>
+      </div>
+      <div class="cmp-card">
+        <div class="cmp-label">A2S — stoch. shrink</div>
+        <div class="cmp-row"><span class="cmp-key">Grid (kWh)</span><span class="cmp-val">30.44</span></div>
+        <div class="cmp-row"><span class="cmp-key">Cost (USD)</span><span class="cmp-val">$9.69</span></div>
+        <div class="cmp-row"><span class="cmp-key">CO₂ (kg)</span><span class="cmp-val">8.27</span></div>
+        <div class="cmp-row"><span class="cmp-key">NCD peak (kW)</span><span class="cmp-val">2.77</span></div>
+        <div class="cmp-row"><span class="cmp-key">Missed work (h)</span><span class="cmp-val bad">0.25</span></div>
+        <div class="cmp-row"><span class="cmp-key">Total cost</span><span class="cmp-val bad">$691</span></div>
+      </div>
+      <div class="cmp-card">
+        <div class="cmp-label">A1R — receding</div>
+        <div class="cmp-row"><span class="cmp-key">Grid (kWh)</span><span class="cmp-val">36.59</span></div>
+        <div class="cmp-row"><span class="cmp-key">Cost (USD)</span><span class="cmp-val">$11.78</span></div>
+        <div class="cmp-row"><span class="cmp-key">CO₂ (kg)</span><span class="cmp-val">9.67</span></div>
+        <div class="cmp-row"><span class="cmp-key">NCD peak (kW)</span><span class="cmp-val">3.15</span></div>
+        <div class="cmp-row"><span class="cmp-key">Missed work (h)</span><span class="cmp-val bad">0.25</span></div>
+        <div class="cmp-row"><span class="cmp-key">Total cost</span><span class="cmp-val bad">$826</span></div>
+      </div>
+      <div class="cmp-card">
+        <div class="cmp-label">A2R — stoch. reced.</div>
+        <div class="cmp-row"><span class="cmp-key">Grid (kWh)</span><span class="cmp-val">30.44</span></div>
+        <div class="cmp-row"><span class="cmp-key">Cost (USD)</span><span class="cmp-val">$9.69</span></div>
+        <div class="cmp-row"><span class="cmp-key">CO₂ (kg)</span><span class="cmp-val">8.27</span></div>
+        <div class="cmp-row"><span class="cmp-key">NCD peak (kW)</span><span class="cmp-val">2.77</span></div>
+        <div class="cmp-row"><span class="cmp-key">Missed work (h)</span><span class="cmp-val bad">0.25</span></div>
+        <div class="cmp-row"><span class="cmp-key">Total cost</span><span class="cmp-val bad">$691</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- diagnostics -->
+  <div class="section">
+    <div class="section-label">Diagnostic capacity summary</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>A0</th><th>A1S</th><th>A2S</th><th>A1R</th><th>A2R</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Total discharge (kWh)</td>
+            <td class="mono">23.826</td><td class="mono">22.691</td>
+            <td class="mono">22.724</td><td class="mono">23.519</td><td class="mono">22.724</td>
+          </tr>
+          <tr>
+            <td>Total work (kWh)</td>
+            <td class="mono">24.008</td><td class="mono">22.699</td>
+            <td class="mono">22.699</td><td class="mono">22.699</td><td class="mono">22.699</td>
+          </tr>
+          <tr>
+            <td>N capped intervals</td>
+            <td class="mono">1</td><td class="mono">1</td>
+            <td class="mono">0</td><td class="mono">0</td><td class="mono">0</td>
+          </tr>
+          <tr>
+            <td>N infeasible windows</td>
+            <td class="mono">0</td><td class="mono">0</td>
+            <td class="mono">0</td><td class="mono">0</td><td class="mono">0</td>
+          </tr>
+          <tr>
+            <td>Missed work (h)</td>
+            <td class="mono"><span class="badge badge-ok">0.002</span></td>
+            <td class="mono"><span class="badge badge-err">0.252</span></td>
+            <td class="mono"><span class="badge badge-err">0.250</span></td>
+            <td class="mono"><span class="badge badge-err">0.250</span></td>
+            <td class="mono"><span class="badge badge-err">0.250</span></td>
+          </tr>
+          <tr>
+            <td>Missed work penalty</td>
+            <td class="mono">$4.68</td>
+            <td class="mono"><strong style="color:var(--red)">$504.68</strong></td>
+            <td class="mono"><strong style="color:var(--red)">$500.00</strong></td>
+            <td class="mono"><strong style="color:var(--red)">$500.00</strong></td>
+            <td class="mono"><strong style="color:var(--red)">$500.00</strong></td>
+          </tr>
+          <tr>
+            <td>Solve time (s)</td>
+            <td class="mono">2.0</td><td class="mono">27.2</td>
+            <td class="mono">1,672</td><td class="mono">135.5</td><td class="mono">4,401</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <div class="footer">
+    <div class="footer-left">SOE_06.91 · All5 · Generated 2026-08-19</div>
+    <div class="footer-right">MPC Comparison — Shubhan / ERL</div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const raw = [{"period":1,"clock":"08:00","a0":6.91,"a1s":6.91},{"period":2,"clock":"08:15","a0":5.719,"a1s":5.719},{"period":3,"clock":"08:30","a0":7.719,"a1s":7.719},{"period":4,"clock":"08:45","a0":9.719,"a1s":9.719},{"period":5,"clock":"09:00","a0":8.955,"a1s":8.471},{"period":6,"clock":"09:15","a0":7.707,"a1s":7.313},{"period":7,"clock":"09:30","a0":6.549,"a1s":6.186},{"period":8,"clock":"09:45","a0":8.549,"a1s":4.903},{"period":9,"clock":"10:00","a0":7.266,"a1s":6.903},{"period":10,"clock":"10:15","a0":6.139,"a1s":6.139},{"period":11,"clock":"10:30","a0":5.36,"a1s":5.36},{"period":12,"clock":"10:45","a0":4.586,"a1s":4.586},{"period":13,"clock":"11:00","a0":6.586,"a1s":3.79},{"period":14,"clock":"11:15","a0":5.79,"a1s":5.79},{"period":15,"clock":"11:30","a0":4.667,"a1s":4.667},{"period":16,"clock":"11:45","a0":3.776,"a1s":3.776},{"period":17,"clock":"12:00","a0":2.96,"a1s":2.96},{"period":18,"clock":"12:15","a0":4.96,"a1s":4.96},{"period":19,"clock":"12:30","a0":6.96,"a1s":6.96},{"period":20,"clock":"12:45","a0":8.96,"a1s":8.96},{"period":21,"clock":"13:00","a0":10.96,"a1s":8.96},{"period":22,"clock":"13:15","a0":12.786,"a1s":8.96},{"period":23,"clock":"13:30","a0":12.786,"a1s":10.96},{"period":24,"clock":"13:45","a0":12.786,"a1s":12.846},{"period":25,"clock":"14:00","a0":12.786,"a1s":12.846},{"period":26,"clock":"14:15","a0":11.705,"a1s":11.765},{"period":27,"clock":"14:30","a0":10.452,"a1s":10.512},{"period":28,"clock":"14:45","a0":12.452,"a1s":12.512},{"period":29,"clock":"15:00","a0":11.265,"a1s":11.325},{"period":30,"clock":"15:15","a0":10.023,"a1s":10.083},{"period":31,"clock":"15:30","a0":8.829,"a1s":8.889},{"period":32,"clock":"15:45","a0":7.617,"a1s":7.678},{"period":33,"clock":"16:00","a0":9.617,"a1s":7.73},{"period":34,"clock":"16:15","a0":8.453,"a1s":6.566},{"period":35,"clock":"16:30","a0":7.263,"a1s":5.376},{"period":36,"clock":"16:45","a0":6.045,"a1s":4.157},{"period":37,"clock":"17:00","a0":4.736,"a1s":4.91},{"period":38,"clock":"17:15","a0":6.736,"a1s":6.91}];
+
+const labels = raw.map(d => d.clock);
+const a0data = raw.map(d => d.a0);
+const a1data = raw.map(d => d.a1s);
+const floorData = raw.map(() => 2.96);
+
+new Chart(document.getElementById('soeChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: 'A0 (one-shot)',
+        data: a0data,
+        borderColor: '#4fa3e0',
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#4fa3e0',
+        tension: 0.3,
+        fill: false
+      },
+      {
+        label: 'A1S / MPC',
+        data: a1data,
+        borderColor: '#e07a4f',
+        borderWidth: 2,
+        borderDash: [5, 3],
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#e07a4f',
+        tension: 0.3,
+        fill: false
+      },
+      {
+        label: 'SOE floor',
+        data: floorData,
+        borderColor: '#f0b429',
+        borderWidth: 1.5,
+        borderDash: [8, 4],
+        pointRadius: 0,
+        fill: false
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1a1d21',
+        borderColor: '#252830',
+        borderWidth: 1,
+        titleColor: '#7a8190',
+        bodyColor: '#e8eaed',
+        padding: 10,
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)} kWh`
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: '#4a5060',
+          font: { family: "'IBM Plex Mono', monospace", size: 10 },
+          autoSkip: true,
+          maxTicksLimit: 10
+        },
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'CEV SOE (kWh)',
+          color: '#4a5060',
+          font: { family: "'IBM Plex Mono', monospace", size: 10 }
+        },
+        ticks: {
+          color: '#4a5060',
+          font: { family: "'IBM Plex Mono', monospace", size: 10 },
+          callback: v => v.toFixed(0)
+        },
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        min: 0,
+        max: 15
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>

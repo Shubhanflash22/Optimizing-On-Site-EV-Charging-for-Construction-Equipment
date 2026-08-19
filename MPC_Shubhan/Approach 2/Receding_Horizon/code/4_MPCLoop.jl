@@ -182,7 +182,6 @@ function apply_and_simulate!(model, g0, Kend, d, pool::ActivityPowerPool, cursor
         for m in d.M
             real_P_ch[m, out_idx]  = value(model[:P_ch_tot][m, g0])
             real_P_dch[m, out_idx] = value(model[:P_dch_tot][m, g0])
-            real_L_trv[m, out_idx] = value(model[:L_trv_tot][m, g0])
             real_loc[m, out_idx]   = let nh = findfirst(i -> value(model[:z][m, i, g0]) > 0.5, d.N)
                 nh === nothing ? 0 : nh
             end
@@ -428,7 +427,7 @@ function run_mpc(d, pool::ActivityPowerPool; plant::Symbol = :sampled,
     nM = length(d.M); nE = length(d.E); nN = length(d.N)
     real_P_ch    = zeros(nM, n_kept)
     real_P_dch   = zeros(nM, n_kept)
-    real_L_trv   = zeros(nM, n_kept)
+    real_L_trv   = zeros(nM, n_kept)  # transit does not draw from the battery; kept at zero for the output schema
     real_SOE_MCS = zeros(nM, n_kept + 1)
     real_SOE_CEV = zeros(nE, n_kept + 1)
     real_P_work  = zeros(nN, nE, n_kept)
@@ -756,7 +755,7 @@ function run_one_shot(d, pool::ActivityPowerPool; plant::Symbol = :sampled,
     nM = length(d.M); nE = length(d.E); nN = length(d.N)
     real_P_ch    = zeros(nM, n_kept)
     real_P_dch   = zeros(nM, n_kept)
-    real_L_trv   = zeros(nM, n_kept)
+    real_L_trv   = zeros(nM, n_kept)  # transit does not draw from the battery; kept at zero for the output schema
     real_SOE_MCS = zeros(nM, n_kept + 1)
     real_SOE_CEV = zeros(nE, n_kept + 1)
     real_P_work  = zeros(nN, nE, n_kept)

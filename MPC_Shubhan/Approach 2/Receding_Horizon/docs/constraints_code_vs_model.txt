@@ -47,11 +47,16 @@ Legend:  OK = matches exactly   ADAPTED = deliberate, documented (MPC or user ch
 --------------------------------------------------------------------------------
  (2-5) | Power aggregation, grid-only charge, | P_ch_tot/P_dch_tot defs;       | OK
        | site-only discharge, plug limits,    | P_MCS_CEV<=DCH_plug*rho;       |
-       | charge-only-while-idle               | mu<=u[idle]                    |
+       | charge-only-while-idle, grid charge   | mu<=u[idle]; P_ch_MCS<=CH_MCS  |
+       | capped by physical presence, charging | *z; mu==sum(rho) (charging    |
+       | mode tied to an active plug           | mode requires an active plug)  |
 --------------------------------------------------------------------------------
  (5e)  | P_work = sum_a p_a * u (const power) | P_work == sum p_activity*u     | OK
 --------------------------------------------------------------------------------
- (6)   | MCS + CEV SOE dynamics w/ efficiency | SOE_MCS / SOE_CEV recursions   | OK
+ (6)   | MCS + CEV SOE dynamics, separate     | SOE_MCS / SOE_CEV recursions;  | OK
+       | round-trip efficiencies              | eta_ch_dch_mcs (MCS), eta_ch_  |
+       |                                      | dch_cev (CEV reception); no    |
+       |                                      | transit debit (time-costed only)|
 --------------------------------------------------------------------------------
  (7)   | SOE bounds [min,max] every boundary  | @constraint on SOE_MCS/SOE_CEV | OK
 --------------------------------------------------------------------------------
@@ -66,12 +71,15 @@ Legend:  OK = matches exactly   ADAPTED = deliberate, documented (MPC or user ch
        |                                      | HARD - no tolerance, no soft   |
        |                                      | variant                        |
 --------------------------------------------------------------------------------
- (10)  | Routing:--------------------------------------------------------------------------------
  (10)  | Routing: presence partition, arrival/| z + y partition; beta_arr/dep; | OK
-       | departure, flow conservation, travel | flow balance; L=k_trv;         |
-       | energy; carried-in transit           | is_carried_trv / carried_arr   |
- (10e) | MCS parked at grid by day-end        | z[grid, k_term] == 1           | OK
-       |                                      | (each day-block's end-of-shift)|
+       | departure, flow conservation         | flow balance; transit costed   |
+       | carried-in transit                   | by time (rho_labor), not       |
+       |                                      | energy; is_carried_trv/carr_arr|
+ (10e) | Overnight recovery reachable         | Eq 8a's terminal SOE equality  | OK
+       | by day-end                           | alone governs recovery; since  |
+       |                                      | transit costs no energy, the   |
+       |                                      | MCS can hit it while charging  |
+       |                                      | and depart after at no cost    |
 --------------------------------------------------------------------------------
  (11)  | One activity per assigned CEV; work  | sum_a u == A; P_work <=        | OK
        | capped by availability R             | R_work*A*(1-mu)                | (4-act.)
@@ -330,10 +338,10 @@ CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
      only a in A_con), so this mirrors the paper rather than departing from it.
 
  A6  y_trv[m,i,i,k] IS NEVER DEFINED.
-     The y_trv == sum(x) definition loop skips i == j, but L_trv and the objective's
-     labour term both sum over ALL (i,j) including i == j. Self-loop y is thus a free
-     binary that only ever costs money and battery, so presolve fixes it to 0 -- benign,
-     but it is |M|*|N|*|K| junk binaries and an easy trap when reading the model.
+     The y_trv == sum(x) definition loop skips i == j, but the objective's labour
+     term sums over ALL (i,j) including i == j. Self-loop y is thus a free binary
+     that only ever costs money, so presolve fixes it to 0 -- benign, but it is
+     |M|*|N|*|K| junk binaries and an easy trap when reading the model.
 
  A7  PRECEDENCE AND PACING READ THE SAME HISTORY THROUGH DIFFERENT AGGREGATIONS.
      Precedence seeds per SITE, pacing seeds per CEV. Both correct while A[i,e] is a
@@ -379,8 +387,8 @@ WHAT'S NEW: a block of non-anticipativity @constraint calls, added AFTER the mod
 otherwise fully built, immediately before optimize!(model). Audited family-by-family
 against the "TIED at k0" list documented in docs/README.md Sec 13.2 (the
 3_MCSModel.jl table row):
-  u, mu(charge-permission), rho, z, g_ch, x, y_trv, beta_arr, beta_dep  -- all tied
-  P_ch_MCS, P_MCS_CEV, P_dch_MCS, P_ch_tot, P_dch_tot, L_trv, L_trv_tot -- all tied
+  u, mu(charge-permission), rho, z, x, y_trv, beta_arr, beta_dep            -- all tied
+  P_ch_MCS, P_MCS_CEV, P_dch_MCS, P_ch_tot, P_dch_tot                       -- all tied
   P_work, SOE_CEV                                                       -- NOT tied (by design)
   s_miss_work, P_peak_NC, P_peak_OP, SOE_MCS                            -- NOT tied (by design;
                                                                            SOE_MCS comes out

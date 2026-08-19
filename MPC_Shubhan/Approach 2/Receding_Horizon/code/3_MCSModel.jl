@@ -14,9 +14,9 @@
 # NOMENCLATURE is identical to MCS_OPTIMAL_v4_real.jl so a reviewer sees the same
 # decision variables:
 #   P_ch_MCS, P_dch_MCS, P_MCS_CEV, P_work, P_ch_tot, P_dch_tot   (power flows)
-#   L_trv, L_trv_tot                                              (travel energy)
-#   SOE_MCS, SOE_CEV                                              (state of energy)
-#   u, mu, rho, z, g_ch, x, y_trv, beta_arr, beta_dep            (binaries)
+#   SOE_MCS, SOE_CEV                                              (state of energy;
+#       MCS uses eta_ch_dch_mcs, CEV charging uses eta_ch_dch_cev)
+#   u, mu, rho, z, x, y_trv, beta_arr, beta_dep                   (binaries)
 #   P_peak_NC, P_peak_OP, s_miss_work                             (peaks / slack)
 #
 # The MCS/CEV terminal energy-neutral rule (Eq. 8a/8b) is enforced inside this
@@ -158,10 +158,6 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @variable(model, P_dch_tot[M, K] >= 0)         # total discharge out of the MCS
     @variable(model, s_miss_work[N_c, B] >= 0)     # UNFINISHED work (hours) — penalised slack (Eq. 12c)  
 
-    # ---- travel energy (kWh) ----
-    @variable(model, L_trv[M, N, N, K] >= 0)
-    @variable(model, L_trv_tot[M, K] >= 0)
-
     # ---- state of energy, indexed at interval BOUNDARIES ----
     @variable(model, SOE_MCS[M, Tb] >= 0)
     @variable(model, SOE_CEV[E, Tb] >= 0)
@@ -171,7 +167,6 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @variable(model, mu[N, E, K], Bin)             # is the excavator charging?
     @variable(model, rho[M, N, E, K], Bin)         # is the excavator plugged into the MCS?
     @variable(model, z[M, N, K], Bin)              # is the MCS parked at this node?
-    @variable(model, g_ch[M, N_g, K], Bin)         # is the MCS actively grid-charging here?
     @variable(model, x[M, N, N, K], Bin)           # does the MCS depart i -> j this interval?
     @variable(model, y_trv[M, N, N, K], Bin)       # is the MCS in transit on arc i -> j?
     @variable(model, beta_arr[M, N, K], Bin)       # MCS arrival indicator at a node
@@ -179,23 +174,24 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @variable(model, P_peak_NC >= 0)               # tracked whole-day peak grid draw
     @variable(model, P_peak_OP >= 0)               # tracked on-peak peak grid draw
 
-    # ---- CHANGE 2 -- small time-index tie-break penalty (Issue 2) --------------
-    # See the identical rationale in Approach 1/Shrinking_Horizon/code/3_MCSModel.jl.
-    # CORRECTED TARGET: penalizes LATE `mu` (is the CEV accepting charge from the
-    # MCS -- the actual "charge now vs wait" decision the stall was diagnosed
-    # against), NOT `g_ch` (the MCS's own grid-charging, which was already 0
-    # throughout that stall and would have had nothing to push on). idx here is
-    # the window's own LOCAL position (1..length(K)), same as that file, not
-    # the global/day-relative wd(k) used for price/CO2 above -- earlier WITHIN
-    # THIS WINDOW is what should be preferred when tied. Added ONLY to this
-    # (deterministic) objective, not to build_window_model_stochastic's below --
-    # Approach 2's stochastic hedge (Issue 3 / Change 4) already addresses
-    # margin-for-error via scenarios.
+    # ---- small time-index tie-break penalty on CEV charging ----
+    # When multiple schedules are cost-tied under the deterministic mean-case
+    # forecast (e.g. "charge the CEV now" vs "wait, then charge" -- same total
+    # energy, same price, so mathematically identical in the real-cost objective
+    # below), the solver has no preference between them, even though waiting
+    # quietly spends down the CEV's safety margin in the real uncertain world.
+    # The penalty targets `mu[i,e,k]` (is CEV e accepting power at site i,
+    # interval k -- see the P_MCS_CEV <= CH_CEV * mu constraint below), the
+    # binary that governs whether the CEV is charging. idx is the window's own
+    # LOCAL position (1..length(K)), not the global/day-relative wd(k) used for
+    # price/CO2 above -- earlier WITHIN THIS WINDOW is preferred when tied.
+    # This penalty applies only to the deterministic objective here; the
+    # scenario-based objective below already hedges timing risk via scenarios.
     Kvec = collect(K)
     early_charge_term = sum(idx * mu[i, e, Kvec[idx]] for i in N_c, e in E, idx in eachindex(Kvec))
 
     # ---- OBJECTIVE (Eq. 1): total operating cost. All constraints are HARD;
-    # the only slack is s_miss_work (Eq. 12c), exactly as in the PDF/Avik. ----
+    # the only slack is s_miss_work (Eq. 12c). ----
     @objective(model, Min,
         sum(d.lambda_whl_elec[wd(k)] * P_ch_tot[m, k] * delta_T for m in M, k in K) +                             # energy cost: price x grid kWh
         sum((d.carbon_price_per_ton / 1000.0) * d.lambda_CO2[wd(k)] * P_ch_tot[m, k] * delta_T for m in M, k in K) +  # carbon cost of that grid energy
@@ -203,7 +199,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         d.lambda_demand_NC * P_peak_NC +                                                                      # non-coincident demand charge
         d.lambda_demand_OP * P_peak_OP +                                                                      # on-peak demand charge
         d.rho_labor * delta_T * sum(y_trv[m, i, j, k] for m in M, i in N, j in N, k in K) +                    # towing labour: cost of time in transit
-        1e-6 * early_charge_term)                                                                              # Change 2: small earlier-charging tie-break
+        1e-6 * early_charge_term)                                                                              # small earlier-charging tie-break
 
     # ---- power aggregation & where power may flow ----
     # Total grid draw of an MCS = sum of its per-grid-node charge power.
@@ -221,13 +217,9 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @constraint(model, [m in M, i in N_c, k in K],
         P_dch_MCS[m, i, k] <= d.DCH_MCS[m] * z[m, i, k])
 
-    # grid-connection exclusivity
-    # Charge power is capped by CH_MCS and only flows when actively grid-charging (g_ch=1).
-    @constraint(model, [m in M, i in N_g, k in K], P_ch_MCS[m, i, k] <= d.CH_MCS[m] * g_ch[m, i, k])
-    # Can only grid-charge at a node where the MCS is parked (z=1).
-    @constraint(model, [m in M, i in N_g, k in K], g_ch[m, i, k] <= z[m, i, k])
-    # At most one MCS may occupy a given grid connection per interval.
-    @constraint(model, [i in N_g, k in K], sum(g_ch[m, i, k] for m in M) <= 1)
+    # Grid charging power is capped by CH_MCS and flows only when the MCS is
+    # physically parked at that node (z=1).
+    @constraint(model, [m in M, i in N_g, k in K], P_ch_MCS[m, i, k] <= d.CH_MCS[m] * z[m, i, k])
 
     # plug-level and excavator-acceptance limits
     # Power into one CEV via one plug is capped by the per-plug rate and needs rho=1 (plugged in).
@@ -236,6 +228,10 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # Total power a CEV accepts is capped by its own charge rate and needs mu=1 (charging).
     @constraint(model, [i in N_c, e in E, k in K],
         sum(P_MCS_CEV[m, i, e, k] for m in M) <= d.CH_CEV[e] * mu[i, e, k])
+    # Charging-mode consistency: CEV e is in charging mode at site i (mu=1) exactly
+    # when it is plugged into an MCS there (sum of rho over M).
+    @constraint(model, [i in N_c, e in E, k in K],
+        mu[i, e, k] == sum(rho[m, i, e, k] for m in M))
 
     # peak-demand trackers (carry the peak already seen earlier today)
     # Whole-day peak is at least the biggest grid draw already realised before this window.
@@ -263,27 +259,24 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
                 for tau in max(first(K), k - travel_steps[i, j] + 1):k if tau in K))
         end
     end
-    # Each in-transit interval burns k_trv kWh (per Delta_t) off the MCS battery.
-    @constraint(model, [m in M, i in N, j in N, k in K],
-        L_trv[m, i, j, k] == d.k_trv * delta_T * y_trv[m, i, j, k])
-    # Total travel loss this interval = sum over all arcs.
-    @constraint(model, [m in M, k in K],
-        L_trv_tot[m, k] == sum(L_trv[m, i, j, k] for i in N, j in N))
+    # MCS transit cost is captured as time via the rho_labor term in the objective;
+    # y_trv is used there and in the routing/presence bookkeeping below.
 
     # ---- battery dynamics ----
     # Pin the first boundary of each battery to the measured carried-in SOE (MPC initial condition).
     @constraint(model, [m in M], SOE_MCS[m, first(Tb)] == soe_mcs0[m])
     @constraint(model, [e in E], SOE_CEV[e, first(Tb)] == soe_cev0[e])
-    # MCS SOE recursion: previous + charge*(eta) - discharge/(eta) - travel energy lost this step.
+    # MCS SOE recursion: previous + charge*(eta_mcs) - discharge/(eta_mcs). Transit
+    # does not draw from the battery (see travel-energy bookkeeping above).
     @constraint(model, [m in M, k in K],
         SOE_MCS[m, k + 1] == SOE_MCS[m, k] +
-            d.eta_ch_dch[m] * P_ch_tot[m, k] * delta_T -
-            (P_dch_tot[m, k] * delta_T) / d.eta_ch_dch[m] -
-            L_trv_tot[m, k])
-    # CEV SOE recursion: previous + energy received from the MCS - energy spent working this step.
+            d.eta_ch_dch_mcs[m] * P_ch_tot[m, k] * delta_T -
+            (P_dch_tot[m, k] * delta_T) / d.eta_ch_dch_mcs[m])
+    # CEV SOE recursion: previous + energy RECEIVED from the MCS (scaled by the CEV's
+    # own charge-acceptance efficiency, eta_ch_dch_cev) - energy spent working this step.
     @constraint(model, [e in E, k in K],
         SOE_CEV[e, k + 1] == SOE_CEV[e, k] +
-            sum(P_MCS_CEV[m, i, e, k] for m in M, i in N_c) * delta_T -
+            d.eta_ch_dch_cev[e] * sum(P_MCS_CEV[m, i, e, k] for m in M, i in N_c) * delta_T -
             sum(P_work[i, e, k] for i in N_c) * delta_T)
 
     # SOE operating ranges (Eq. 8c, 8d).
@@ -358,8 +351,10 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
             z[m, i, last(K)] - start_here)
     end
 
-    # terminal position: parked at a grid node by the next 8am (ready for the recharge above).
-    @constraint(model, [m in M], sum(z[m, i, k_term] for i in N_g) == 1)
+    # The terminal energy target above (Eq. 8a) governs recovery on its own: since
+    # transit does not draw from the battery, the MCS can reach the exact SOE target
+    # while charging and then depart for a site afterward at no energy cost, so no
+    # separate requirement to remain physically parked at the grid node is needed.
 
     # optional site-visit rules
     if require_site_visit
@@ -548,9 +543,6 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
     @variable(model, P_dch_tot[M, K, S_scen] >= 0)
     @variable(model, s_miss_work[N_c, B, S_scen] >= 0)
 
-    @variable(model, L_trv[M, N, N, K, S_scen] >= 0)
-    @variable(model, L_trv_tot[M, K, S_scen] >= 0)
-
     @variable(model, SOE_MCS[M, Tb, S_scen] >= 0)
     @variable(model, SOE_CEV[E, Tb, S_scen] >= 0)
 
@@ -558,7 +550,6 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
     @variable(model, mu[N, E, K, S_scen], Bin)
     @variable(model, rho[M, N, E, K, S_scen], Bin)
     @variable(model, z[M, N, K, S_scen], Bin)
-    @variable(model, g_ch[M, N_g, K, S_scen], Bin)
     @variable(model, x[M, N, N, K, S_scen], Bin)
     @variable(model, y_trv[M, N, N, K, S_scen], Bin)
     @variable(model, beta_arr[M, N, K, S_scen], Bin)
@@ -587,14 +578,18 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
     @constraint(model, [m in M, i in N_c, k in K, s in S_scen],
         P_dch_MCS[m, i, k, s] <= d.DCH_MCS[m] * z[m, i, k, s])
 
-    @constraint(model, [m in M, i in N_g, k in K, s in S_scen], P_ch_MCS[m, i, k, s] <= d.CH_MCS[m] * g_ch[m, i, k, s])
-    @constraint(model, [m in M, i in N_g, k in K, s in S_scen], g_ch[m, i, k, s] <= z[m, i, k, s])
-    @constraint(model, [i in N_g, k in K, s in S_scen], sum(g_ch[m, i, k, s] for m in M) <= 1)
+    # Grid charging power is capped by CH_MCS and flows only when the MCS is
+    # physically parked at that node (z=1).
+    @constraint(model, [m in M, i in N_g, k in K, s in S_scen], P_ch_MCS[m, i, k, s] <= d.CH_MCS[m] * z[m, i, k, s])
 
     @constraint(model, [m in M, i in N_c, e in E, k in K, s in S_scen],
         P_MCS_CEV[m, i, e, k, s] <= d.DCH_MCS_plug[m] * rho[m, i, e, k, s])
     @constraint(model, [i in N_c, e in E, k in K, s in S_scen],
         sum(P_MCS_CEV[m, i, e, k, s] for m in M) <= d.CH_CEV[e] * mu[i, e, k, s])
+    # Charging-mode consistency: CEV e is in charging mode at site i (mu=1) exactly
+    # when it is plugged into an MCS there (sum of rho over M).
+    @constraint(model, [i in N_c, e in E, k in K, s in S_scen],
+        mu[i, e, k, s] == sum(rho[m, i, e, k, s] for m in M))
 
     @constraint(model, [s in S_scen], P_peak_NC[s] >= peak_nc0)
     @constraint(model, [s in S_scen], P_peak_OP[s] >= peak_op0)
@@ -614,22 +609,23 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
                 for tau in max(first(K), k - travel_steps[i, j] + 1):k if tau in K))
         end
     end
-    @constraint(model, [m in M, i in N, j in N, k in K, s in S_scen],
-        L_trv[m, i, j, k, s] == d.k_trv * delta_T * y_trv[m, i, j, k, s])
-    @constraint(model, [m in M, k in K, s in S_scen],
-        L_trv_tot[m, k, s] == sum(L_trv[m, i, j, k, s] for i in N, j in N))
+    # MCS transit cost is captured as time via the rho_labor term in the objective;
+    # y_trv is used there and in the routing/presence bookkeeping below.
 
     # ---- battery dynamics (per scenario) ----
     @constraint(model, [m in M, s in S_scen], SOE_MCS[m, first(Tb), s] == soe_mcs0[m])
     @constraint(model, [e in E, s in S_scen], SOE_CEV[e, first(Tb), s] == soe_cev0[e])
+    # MCS SOE recursion: previous + charge*(eta_mcs) - discharge/(eta_mcs). Transit
+    # does not draw from the battery (see travel-energy bookkeeping above).
     @constraint(model, [m in M, k in K, s in S_scen],
         SOE_MCS[m, k + 1, s] == SOE_MCS[m, k, s] +
-            d.eta_ch_dch[m] * P_ch_tot[m, k, s] * delta_T -
-            (P_dch_tot[m, k, s] * delta_T) / d.eta_ch_dch[m] -
-            L_trv_tot[m, k, s])
+            d.eta_ch_dch_mcs[m] * P_ch_tot[m, k, s] * delta_T -
+            (P_dch_tot[m, k, s] * delta_T) / d.eta_ch_dch_mcs[m])
+    # CEV SOE recursion: previous + energy received from the MCS (scaled by the CEV's
+    # own charge-acceptance efficiency, eta_ch_dch_cev) - energy spent working.
     @constraint(model, [e in E, k in K, s in S_scen],
         SOE_CEV[e, k + 1, s] == SOE_CEV[e, k, s] +
-            sum(P_MCS_CEV[m, i, e, k, s] for m in M, i in N_c) * delta_T -
+            d.eta_ch_dch_cev[e] * sum(P_MCS_CEV[m, i, e, k, s] for m in M, i in N_c) * delta_T -
             sum(P_work[i, e, k, s] for i in N_c) * delta_T)
 
     @constraint(model, [m in M, t in Tb, s in S_scen], d.SOE_MCS_min[m] <= SOE_MCS[m, t, s] <= d.SOE_MCS_max[m])
@@ -682,8 +678,10 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
             z[m, i, last(K), s] - start_here)
     end
 
-    # terminal position: parked at a grid node by the next 8am, per scenario, always.
-    @constraint(model, [m in M, s in S_scen], sum(z[m, i, k_term, s] for i in N_g) == 1)
+    # The terminal energy target above (Eq. 8a) governs recovery on its own, per
+    # scenario: since transit does not draw from the battery, the MCS can reach the
+    # exact SOE target while charging and then depart for a site afterward at no
+    # energy cost, so no separate requirement to remain at the grid node is needed.
 
     if require_site_visit
         @constraint(model, [m in M, s in S_scen], sum(beta_arr[m, i, k, s] for i in N_c, k in K) >= 1)
@@ -758,7 +756,6 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
         @constraint(model, [i in N, e in E, s in 2:nS], mu[i, e, k0, s] == mu[i, e, k0, 1])
         @constraint(model, [m in M, i in N, e in E, s in 2:nS], rho[m, i, e, k0, s] == rho[m, i, e, k0, 1])
         @constraint(model, [m in M, i in N, s in 2:nS], z[m, i, k0, s] == z[m, i, k0, 1])
-        @constraint(model, [m in M, i in N_g, s in 2:nS], g_ch[m, i, k0, s] == g_ch[m, i, k0, 1])
         @constraint(model, [m in M, i in N, j in N, s in 2:nS], x[m, i, j, k0, s] == x[m, i, j, k0, 1])
         @constraint(model, [m in M, i in N, j in N, s in 2:nS], y_trv[m, i, j, k0, s] == y_trv[m, i, j, k0, 1])
         @constraint(model, [m in M, i in N, s in 2:nS], beta_arr[m, i, k0, s] == beta_arr[m, i, k0, 1])
@@ -768,8 +765,6 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
         @constraint(model, [m in M, i in N_c, e in E, s in 2:nS], P_MCS_CEV[m, i, e, k0, s] == P_MCS_CEV[m, i, e, k0, 1])
         @constraint(model, [m in M, s in 2:nS], P_ch_tot[m, k0, s] == P_ch_tot[m, k0, 1])
         @constraint(model, [m in M, s in 2:nS], P_dch_tot[m, k0, s] == P_dch_tot[m, k0, 1])
-        @constraint(model, [m in M, i in N, j in N, s in 2:nS], L_trv[m, i, j, k0, s] == L_trv[m, i, j, k0, 1])
-        @constraint(model, [m in M, s in 2:nS], L_trv_tot[m, k0, s] == L_trv_tot[m, k0, 1])
     end
 
     try
