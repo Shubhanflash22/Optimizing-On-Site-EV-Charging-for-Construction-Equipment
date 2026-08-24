@@ -1,0 +1,415 @@
+================================================================================
+ SCENARIO 1 (SHRINKING HORIZON) - CONSTRAINT-BY-CONSTRAINT: CODE vs MODEL
+================================================================================
+Compares what the Julia code enforces against the formal model (math_model.tex /
+the source "Optimization.pdf") and Avik's reference MCS_OPTIMAL_v4_real.jl. The
+window MILP is built in code/3_MCSModel.jl (build_window_model); the closed loop
+is code/4_MPCLoop.jl (run_mpc). The entry point is code/6_Shrinking_Horizon_main.jl.
+code/4_MPCLoop.jl also has run_one_shot (Approach 0): the SAME build_window_model,
+solved ONCE over the whole day and replayed open-loop, so every row below applies
+to Approach 0 unchanged -- the difference is purely how many times the MILP is
+solved, not what it enforces.
+
+Controller: SINGLE-DAY, FULL-24 h SHRINKING horizon. Each 15-min step re-solves the
+entire remaining day [k0 .. n_day]; only the first interval is applied and the window
+shrinks as the day advances. There is ONE optimisation per step and ONE horizon - the
+overnight MCS recharge is scheduled INSIDE the same MILP (no separate phase).
+(shrinking = false switches to a fixed H-interval lookahead; see D4 below -- it is NOT
+the same controller, because the terminal rules silently drop out.)
+
+Power model: FIXED per run, FITTED OFFLINE by STEP 0. Before the loop, code/0_Regression.jl
+(a pure-Julia port of Avik's Python Bayesian regression) reads the soil .xlsx task files,
+builds the cumulative-dSoC energy-balance equations, and fits N(mu, sigma) with the SAME
+Turing model as 1_Common.jl (4 pooled NUTS chains). It writes the posterior MEAN (p_*) and
+the PER-ACTIVITY SD (sigma_*) into parameters.csv. The MILP then plans on mu; the plant
+(Fork B) samples per-(excavator, activity) powers from a pool pre-drawn from N(mu, sigma) --
+one draw per occurrence of that (excavator, activity) pair, shared by every approach that
+simulates the plant (see POWER-MODEL FIT section below).
+No ONLINE re-fitting (the fit is offline, once, before the loop; skippable via run_regression=false).
+
+Legend:  OK = matches exactly   ADAPTED = deliberate, documented (MPC or user choice)
+
+--------------------------------------------------------------------------------
+ Eq.   | Model requirement                    | Code                           | Status
+--------------------------------------------------------------------------------
+ (1)   | Objective = energy + carbon + missed | obj in build_window_model:     | OK
+       | + NC/OP demand + towing labour       | price*P_ch + carbon + rho_miss |
+       |                                      | *s_miss + demand + rho_labor*y |
+--------------------------------------------------------------------------------
+ (2-5) | Power aggregation, grid-only charge, | P_ch_tot/P_dch_tot defs;       | OK
+       | site-only discharge, plug limits,    | P_MCS_CEV<=DCH_plug*rho;       |
+       | charge-only-while-idle, grid charge   | mu<=u[idle]; P_ch_MCS<=CH_MCS  |
+       | capped by physical presence, charging | *z; mu==sum(rho) (charging    |
+       | mode tied to an active plug           | mode requires an active plug)  |
+--------------------------------------------------------------------------------
+ (5e)  | P_work = sum_a p_a * u (const power) | P_work == sum p_activity*u     | OK
+--------------------------------------------------------------------------------
+ (6)   | MCS + CEV SOE dynamics, separate     | SOE_MCS / SOE_CEV recursions;  | OK
+       | round-trip efficiencies              | eta_ch_dch_mcs (MCS), eta_ch_  |
+       |                                      | dch_cev (CEV reception); no    |
+       |                                      | transit debit (time-costed only)|
+--------------------------------------------------------------------------------
+ (7)   | SOE bounds [min,max] every boundary  | @constraint on SOE_MCS/SOE_CEV | OK
+--------------------------------------------------------------------------------
+ (8a)  | MCS energy-neutral terminal EQUALITY | SOE_MCS[end] == SOE_MCS_ini,   | OK
+       | SOE_MCS[end] == SOE_ini              | inside the single 24 h MILP    | (*)
+ (8b)  | CEV energy-neutral terminal          | SOE_CEV[end] >= SOE_CEV_ini    | ADAPTED
+       | (Avik: == SOE_ini exact)             | (FLOOR; overcharge allowed)    | (floor) (*)
+       | (*) BOTH are gated on is_terminal = (last(K) == n_day). True for every  |
+       | window when shrinking = true; FALSE for most windows when false. See D4.|
+--------------------------------------------------------------------------------
+ (10)  | Routing: presence partition, arrival/| z + y partition; beta_arr/dep; | OK
+       | departure, flow conservation         | flow balance; transit costed   |
+       | carried-in transit                   | by time (rho_labor), not       |
+       |                                      | energy; is_carried_trv/carr_arr|
+ (10e) | Overnight recovery reachable         | Eq 8a's terminal SOE equality  | OK
+       | by day-end                           | alone governs recovery; since  |
+       |                                      | transit costs no energy, the   |
+       |                                      | MCS can hit it while charging  |
+       |                                      | and depart after at no cost    |
+--------------------------------------------------------------------------------
+ (11)  | One activity per assigned CEV; work  | sum_a u == A; P_work <=        | OK
+       | capped by availability R             | R_work*A*(1-mu)                | (4-act.)
+--------------------------------------------------------------------------------
+ (12c) | Finish work or pay rho_miss (SOFT)   | EQUALITY: dt*sum u + s_miss    | ADAPTED
+       | LUMPSUM per-site requirement         | == max(rem, 0), s_miss >= 0    | (implicit
+       |                                      | ==> dt*sum u <= rem is a HARD  |  hard cap)
+       |                                      | upper cap on work. See D1.     |
+--------------------------------------------------------------------------------
+ (12d) | Precedence: cum load <= scale*cum dig| raw interval counts (Avik      | OK
+       |                                      | form) + MPC history seed       |
+--------------------------------------------------------------------------------
+ (12e) | Rest rule: <= t_limit_rest work per  | <= rest_cap work per (rest_cap | OK
+       | rolling (t_limit+dt) window          | +1) window; SEEDED from applied|
+       |                                      | work_hist across the re-solves.|
+       |                                      | rest_cap = ROUND(t_rest/dt).   |
+--------------------------------------------------------------------------------
+ (13)  | Travel pacing: two-sided band        | work_per_travel = 4 (Avik):    | OK, see D11
+       |                                      | W-4 <= 4*V <= W, no tolerance. |
+       |                                      | V/W = applied INTERVAL COUNTS  |
+       |                                      | (u indicator), not hours; MPC  |
+       |                                      | history seed. (D11 superseded) |
+--------------------------------------------------------------------------------
+
+EXTRA CONSTRAINTS / ADAPTATIONS IN THE CODE (beyond Avik's single shot)
+--------------------------------------------------------------------------------
+ E1  Peak-demand trackers  | P_NC/P_OP >= grid draw (+ carried-in) | realises demand terms of (1)
+ E2  Closed-loop carry-in  | each re-solve starts from measured    | MPC initial conditions
+                           | SOE / position / work done            |
+ E3  History seeds         | precedence/pacing/rest seeded from a   | keeps rolling rules correct
+                           | shared per-CEV applied-activity hist   | across the 15-min re-solves
+ E4  Site-visit switches   | require_site_visit / single_visit     | optional; OFF by default
+ E5  No fallback           | infeasible window -> hold state        | user decision
+
+THE DELIBERATE DEVIATIONS FROM AVIK'S EXACT FORMULATION
+--------------------------------------------------------------------------------
+ 1. (8b) CEV terminal is a FLOOR (>= SOE_ini), not exact equality. A CEV cannot
+    discharge, so under the stochastic plant an exact equality can become
+    unrecoverable if a CEV drifts above target; the floor keeps it feasible while
+    guaranteeing the fleet ends at least as charged as it began. (User choice.)
+ 2. Activity ENCODING: the code uses a 4th explicit "idle" activity (B=[1,2,3,4],
+    sum_a u == A, mu <= u[idle]); Avik uses the equivalent 3-activity form
+    (B=[1,2,3], sum_a u <= 1, sum_a u + mu <= 1). Functionally identical because
+    idle power = 0. (User chose to keep the 4-activity form.)
+ 3. MPC adaptations that cannot match a single-shot solve: shrinking-horizon
+    re-solves, per-window history seeds (E3), carried-in MCS start position and the
+    generalised flow balance, remaining-work targets (rem_dig/rem_load vs full
+    hours), and the carried-in demand peaks (E1).
+
+================================================================================
+ KNOWN DISCREPANCIES AND MODELLING CAVEATS  (audit, current as of this revision)
+================================================================================
+These are places where the CODE and the WRITTEN MODEL do not say the same thing, or
+where the code does something that materially qualifies a reported number. They are
+listed so a reviewer is not surprised by them; several are still open.
+
+ D1  (12c) THE WORK QUOTA IS AN EQUALITY, SO THERE *IS* A HARD NO-OVERSHOOT CAP.
+     3_MCSModel.jl writes
+         delta_T * sum(u[e,i,dig,k]) + s_miss_work[i,dig] == max(rem_dig[i], 0.0)
+     and s_miss_work >= 0, so this implies delta_T * sum u <= rem_dig[i]. A CEV
+     therefore CANNOT dig (or load) more than the requirement still outstanding.
+     math_model.tex previously wrote this as an inequality (s >= H - dt*sum u), which
+     admits overshoot; both it and this file previously stated "no hard cap". Corrected
+     in this revision: the cap is real, and because it is re-imposed each window against
+     the *remaining* requirement it is an active constraint throughout the closed loop,
+     not a formality. Functionally it is the shrinking-horizon analogue of the receding
+     sibling's explicit no-working-ahead rule -- reached by a different construction.
+
+ D2  work_kW IN THE ANALYST LOG WAS COMPUTED FROM THE WRONG POWER VECTOR (FIXED).
+     4_MPCLoop.jl's shared plant step logged
+         work_kW = sum(dot(a_real[e], d.true_powers)) / delta_T
+     i.e. from d.true_powers -- the Fork-A hidden-truth curve -- while the CEV batteries
+     and real_P_work were drained using p_true, the Fork-B pool draw. In :synthetic those
+     vectors differ ([5.2, 2.8, 5.0] vs a pool drawn around [4.6, 3.3, 4.5]), so the
+     logged work power disagreed with the batteries it was supposed to describe. Now
+     computed from p_true. 5_Output.jl never consumed this column, so figures and KPI
+     CSVs were unaffected; only run_log.txt / the analyst DataFrame were wrong.
+
+ D3  THE CEV SOE BALANCE USED TO BE CLAMPED, AND THE CLAMP CREATED OR DESTROYED ENERGY (FIXED).
+     apply_and_simulate! used to end with
+         soe_cev[e] = clamp(soe_cev[e] + charged - work_true, SOE_min, SOE_max)
+     crediting the FULL realized activity duration to rem_dig/rem_load before this clamp ran.
+     If a sampled over-draw would push a CEV below SOE_min, the clamp silently raised it back --
+     energy out of nowhere -- and the reported SOE trace stopped being the integral of the
+     reported power, while rem_dig/rem_load falsely showed the work as fully done. This was
+     invisible in the MILP's own feasibility count, so a run could report "0 infeasible windows"
+     while still being physically inconsistent.
+     FIXED: the realized dig/load/travel duration is now capped by the energy actually
+     available (headroom = soe_cev + charged - SOE_min) BEFORE it is credited -- only the
+     affordable fraction of the interval counts toward rem_dig/rem_load, and the SOE trajectory
+     never actually needs to be clamped below the floor in normal operation (a clamp() call
+     remains only as a safety net). Events are counted as res.n_capped (renamed from
+     res.n_clamped), printed at the end of each run, and shown per-run in
+     approach0_vs_approach1.html and the sweep summary.
+
+ D11 THE TRAVEL-PACING TWO-SIDED BAND COULD BECOME SPURIOUSLY INFEASIBLE FROM D3's OWN FIX (FIXED).
+     D3's fix can leave a small fractional residue in cum_dig_e/cum_load_e (e.g. one interval
+     credited as 0.246h instead of a clean 0.25h). The pacing band (13) checks these cumulative
+     totals with exact arithmetic and no tolerance, so this residue can land the band's floor
+     (4V <= W) and ceiling (W <= 4V+4) on opposite sides of an integer boundary with no
+     whole-interval solution reachable in between -- e.g. needing "between 11.996 and 12.246"
+     buckets of work when only whole 0.25h steps are allowed. This permanently blocks further
+     travel/work for that CEV for the rest of the day, even though the shortfall is physically
+     meaningless (~1 minute). Root-caused via HiGHS IIS on the run10_SOE_14.80 sweep point
+     (isolated with a standalone repro script + a constraint-bisection harness; see git history /
+     conversation log for the trace). FIXED: added pacing_tol = 0.05 (interval-units) to the
+     floor side only (`work_per_travel * V <= W + pacing_tol`) -- large enough to absorb realistic
+     capping residue (~0.02 typical), small enough (5% of one interval) that it cannot be mistaken
+     for a free extra work unit or meaningfully weaken the rule's intent.
+
+     SUPERSEDED: pacing now seeds V/W off applied INTERVAL COUNTS (whether the u indicator fired
+     that interval), not hours, which removes the fractional residue at its source. pacing_tol is
+     dropped entirely; the band is back to the strict `W-4 <= 4*V <= W`. Precedence (Eq. 12d) is
+     unaffected and still uses realized hours.
+
+ D4  THE TERMINAL RULES SILENTLY VANISH WHEN shrinking = false.
+     (8a), (8b) and (10e) are all inside `if is_terminal`, where
+     is_terminal = (last(K) == d.n_day). With shrinking = true that holds for every
+     window, so the docs' claim "the window always reaches day-end" is correct. With
+     shrinking = false and H = 16 it is false for the first 80 of 96 windows, so those
+     windows have NO terminal SOE target, NO energy-neutrality and NO home-by-day-end
+     rule -- and nothing replaces them (there is no terminal cost and no value function).
+     Fixed-H mode is therefore a myopic controller that will happily drain the MCS early,
+     not a like-for-like variant of the shrinking one. It is exposed as a kwarg but is
+     NOT validated and should not be used for reported results without adding a terminal
+     cost first.
+
+ D5  ONLY THE CEV SIDE OF THE PLANT IS STOCHASTIC.
+     apply_and_simulate! advances the MCS by soe_mcs[m] = value(SOE_MCS[m, k0+1]) -- the
+     PLANNED value -- while the CEVs are advanced by the sampled draw. So MCS energy,
+     grid draw, travel loss and therefore every cost term follow the plan exactly; the
+     disturbance enters only through CEV depletion, and reaches the cost only indirectly
+     (via what the next re-solve decides to do about it). This is a deliberate scope
+     choice, but "the stochastic plant" should not be read as "everything is stochastic".
+
+ D6  rest_cap USES round(), math_model.tex SAID ceil().
+     Code: rest_cap = Int(round(t_limit_rest / delta_T)). At the default
+     t_limit_rest = 1.0, delta_T = 0.25 both give 4, so nothing changes today; they
+     diverge for any t_limit_rest that is not a whole multiple of delta_T (e.g. 0.9 h
+     -> round 4, ceil 4; 1.1 h -> round 4, ceil 5). math_model.tex corrected to round().
+
+ D7  TWO SLACK VARIABLES ARE DECLARED BUT NEVER CONSTRAINED.
+     s_miss_work is declared over [N_c, B] (all four activities) and the objective sums
+     all four, but only B[1] (dig) and B[2] (load) appear in a balance. s_miss_work[i,trv]
+     and s_miss_work[i,idle] are free >= 0 variables carrying a positive cost, so the
+     minimisation drives them to 0 and the result is unaffected -- but they are dead
+     variables and the phrase "slack per site/activity" over-promises. Harmless; noted so
+     nobody looks for the missing travel/idle quota.
+
+ D8  y_trv[m,i,i,k] IS NEVER DEFINED.
+     The y_trv == sum(x) definition loop skips i == j, but the objective's labour
+     term sums over ALL (i,j) including i == j. Self-loop y is thus a free binary
+     that only ever costs money, so presolve fixes it to 0 -- benign, but it is
+     |M|*|N|*|K| junk binaries and an easy trap when reading the model.
+
+ D9  PRECEDENCE AND PACING READ THE SAME HISTORY THROUGH DIFFERENT AGGREGATIONS.
+     Precedence seeds from cum_dig_site(i) / cum_load_site(i) (summed over CEVs assigned
+     to site i, in HOURS); pacing seeds from cum_trv_cnt_e / cum_work_cnt_e (per CEV, in
+     applied INTERVAL COUNTS, not hours). Both are correct while A[i,e] is a one-to-one
+     assignment, which it is in both datasets. If a site ever gets two CEVs the two rules
+     will disagree about what "cumulative work" means. Not a bug today; a latent one.
+
+NOTE vs the RECEDING sibling: this Shrinking model is single-day and LUMPSUM, so it does
+NOT add the receding version's per-day schedule. It DOES have a hard no-overshoot cap on
+work, but as an implicit consequence of the (12c) equality (D1) rather than as an explicit
+no-working-ahead rule. With one day + daily neutrality there is in any case no incentive to
+overshoot, so the cap is rarely the binding reason work stops.
+
+POWER-MODEL FIT (STEP 0) vs ONLINE LEARNING
+--------------------------------------------------------------------------------
+ The Turing/NUTS learner in 1_Common.jl (activity_power_model, observe!, refit!) IS
+ now used - but OFFLINE, by step 0 (0_Regression.jl), before the loop starts. It fits
+ mu/sigma from the raw task data and writes them to parameters.csv; the loop then holds
+ them FIXED (no online re-fit). The idle activity is PINNED to 0 kW in the Julia fit
+ (deliberate deviation from the Python, which estimates a small idle power) because the
+ fleet model treats idle as no-draw. The same refit! path could run ONLINE (Fork A) but
+ is not called during the loop. Per-activity sigma_* rows in parameters.csv override the
+ old single prior_sigma_frac (kept only as a fallback when sigma_* are absent).
+
+ SHARED SAMPLE POOL (1_Common.jl: ActivityPowerPool / draw_activity_power_pool /
+ new_cursor / next_power!): from the frozen mu/sigma, 20 samples are pre-drawn per
+ (excavator, activity) pair BEFORE any approach runs. Each approach gets its OWN
+ cursor into the SAME pool (new_cursor), so run_mpc and run_one_shot draw identical
+ numbers for identical occurrence sequences without one approach's consumption
+ disturbing the other's. A draw is consumed only when that (excavator, activity) pair
+ actually occurs that interval (idle, sigma=0, never consumes a slot) - this replaced
+ the previous per-interval fresh-randn draw.
+
+================================================================================
+ PLANT MODES: :sampled vs :mean  (run_mpc and run_one_shot both take `plant`)
+================================================================================
+ The MILP is unchanged by the plant mode; only what the plant does with the plan differs.
+
+   plant = :sampled  (default, the original behaviour)
+       Realized per-(excavator, activity) power = the next unused pool draw. The
+       within-interval activity split may be randomised (multi_activity). The day
+       therefore drifts away from the plan.
+
+   plant = :mean     (new)
+       Realized power is PINNED to the same mu the MILP planned on, and each interval
+       realizes its single planned activity for its whole length (multi_activity is
+       forced off, since a random split would reintroduce randomness). Realized ==
+       planned EXACTLY. No pool sample is consumed and no cursor advances, so a :mean
+       run cannot perturb a :sampled run sharing the same pool, and it is exactly
+       reproducible without a seed.
+
+ WHY THE :mean MODE EXISTS. Approach 0 with plant = :mean is the whole-day MILP's own
+ optimum, evaluated over the full day -- the clean reproduction of Avik's deterministic
+ single-shot model, with nothing stochastic anywhere.
+
+ EXACTLY ONE MODE RUNS PER CALL, chosen by run_scenario_1's approach0_plant kwarg
+ (default :sampled). Which one you pick decides what the reported A1-vs-A0 gap MEANS:
+
+     A0(:sampled) -> A1   = value of re-planning against drift (like-for-like plant)
+     A0(:mean)    -> A1   = drift AND re-planning together (the net figure)
+
+ and the difference between the two A0 numbers, if you run it both ways, is the cost of
+ plan drift alone. approach0_vs_approach1.html labels its own column and delta from
+ res0.plant, so a report always states which of the two comparisons it is showing.
+
+ run_mpc accepts `plant` too, so a fully deterministic closed loop is available for
+ debugging: with plant = :mean and shrinking = true, Approach 1 should reproduce
+ Approach 0(:mean) exactly, and any difference is a closed-loop seam bug (E3) rather
+ than a plant effect. That is the first check to run against D10 below.
+
+ D10 OPEN: THE SYNTHETIC A0-vs-A1 GAP IS STILL UNEXPLAINED.
+     On :synthetic, Approach 1 costs ~28% more than Approach 0 ($114.82 vs $82.50),
+     mostly extra MCS transit (2.75 h vs 1.75 h), while on :input the two agree to
+     ~0.02%. The previously-published numbers were taken BEFORE the :mean mode and the
+     D2 fix existed, so they should be regenerated before being interpreted. The
+     diagnostic order is: (i) A1(:mean) vs A0(:mean) -- if these differ, the cause is a
+     seam/carry-in bug, not randomness; (ii) A0(:sampled) vs A0(:mean) -- how much is
+     drift alone; (iii) only then read the A1 number.
+
+CLOSED-LOOP CORRECTNESS (modular code 3_MCSModel.jl / 4_MPCLoop.jl):
+ - Rolling rules (rest 12e, precedence 12d, pacing 13) are seeded from a SHARED
+   per-CEV applied-activity history, so a within-window limit cannot "leak" work-runs
+   across the every-15-min re-solves.
+ - run_mpc (Approach 1) and run_one_shot (Approach 0) share apply_and_simulate! for the
+   apply/draw/advance step, so both approaches update plant state identically; only the
+   re-solve cadence and the plant mode differ. write_approach_comparison (5_Output.jl)
+   reports A0 (under whichever plant mode was selected) and A1 side by side in
+   approach0_vs_approach1.html, with a per-run diagnostics table (plant mode, infeasible
+   windows, SOE caps, solve time).
+
+ PREVIOUSLY VERIFIED (Fork B stochastic plant, WITH ActivityPowerPool), both datasets
+ solved with ZERO infeasible/held windows for BOTH approaches:
+   * SYNTHETIC : Approach 1 -- MCS ends 250.0 (==250 target); CEVs end 72.0/48.12
+                 (>= 72/48); 0 infeasible; 0.0 h missed work; total cost $114.82.
+                 Approach 0 (sampled) -- total cost $82.50.  See D10.
+   * INPUT     : Approach 1 -- MCS ends 250.0 (==250 target); CEV ends 14.8
+                 (>= 14.8); 0 infeasible; 0.0 h missed work; total cost $193.36.
+                 Approach 0 (sampled) -- total cost $193.40 (agreement ~0.02%).
+ (Both runs: run_scenario_1 default time_limit_sec = Inf, seed = 1; solve times
+ ~3.8-12.6 s for Approach 0's single whole-day MILP, ~33-48 s for Approach 1's 96
+ re-solves.)
+ THESE NUMBERS PRE-DATE the D2 fix, the D3 capping fix, the D11 pacing-tolerance fix and the
+ :mean mode, and no capped count was recorded for them. Re-run before quoting. The A0(:mean) column is not
+ yet measured on either dataset.
+
+ NOTE: idle is a CONSTANT-power subactivity (paper Eq. 5e), pinned to 0 kW; there is
+ NO separate shutdown/off state (a time-varying idle power is not part of the model).
+
+ =============================================================================
+ CHANGES 2, 3, 5 -- post-diagnosis corrections (this session)
+ =============================================================================
+ CHANGE 2 (objective, 3_MCSModel.jl): added a 1e-6-weighted time-index
+   tie-break term (idx * mu, summed over N_c site nodes, E entities, window
+   intervals) to the @objective in build_window_model. Fixes Issue 2: under
+   the deterministic mean-case forecast, "charge the CEV now" vs "wait, then
+   charge" were provably cost-tied (verified: solver status=OPTIMAL, gap~=0
+   for every re-solve during a 90-min idle stretch), so the solver had no
+   preference and could quietly burn the CEV's safety margin waiting. The new
+   term breaks ties toward earlier action without ever overriding a genuine
+   cost difference (max possible spread over a full day is a small fraction
+   of a cent).
+   CORRECTION (caught after initial implementation): the first version of
+   this term targeted g_ch (the MCS's own grid-charging indicator) instead of
+   mu (whether the CEV is accepting power from the MCS -- the actual decision
+   the 90-minute stall was diagnosed against). g_ch was already 0 throughout
+   that stall (the MCS had plenty of its own charge and wasn't grid-charging
+   at all), so that version would have had nothing to push on for the
+   specific failure mode this change was meant to fix. Re-targeted at mu.
+
+ CHANGE 3 (post-processing, 4_MPCLoop.jl + 5_Output.jl + 8_ComparisonOutput.jl):
+   added _terminal_soe_shortfall(d, soe_cev_end, rem_dig, rem_load), called
+   from BOTH run_mpc and run_one_shot's return blocks. Fixes Issue 1: nothing
+   previously checked whether the REALIZED trajectory reached SOE_CEV_ini by
+   day's end (Eq 8b is only enforced on the PLAN). This is a pure end-of-day
+   snapshot, unrelated to the physical SOE_CEV_min floor (already enforced
+   live in apply_and_simulate!, feeding rem_dig/rem_load/missed unchanged).
+   shortfall_kWh is converted to hours using THIS RUN'S OWN realized weighted
+   work-power rate (realized kWh / realized hours, from rem_dig/rem_load), not
+   a flat average of p_digging/p_loading_swinging, and charged directly as
+   rho_miss * shortfall_hours onto TOTAL cost via a new shortfall_cost line in
+   _cost_components -- separate from and never overlapping missed_cost.
+   Applies uniformly to all five approaches (A0 through A2R), since a
+   closed-loop approach can still end a particular run short despite
+   re-solving (e.g. a late over-draw with no recovery capacity left in the
+   final interval).
+
+ CHANGE 5 (4_MPCLoop.jl) -- SUPERSEDED DESIGN, see below: an external
+   run_multiday(fn, d, pool; n_day_run, kwargs...) wrapper was tried first
+   (chaining n_day_run separate calls to run_mpc/run_one_shot, rebuilding `d`
+   between days), but it could only return a Vector of separate per-day res
+   objects, not one aggregated res -- Receding_Horizon avoids this because its
+   day loop is INSIDE run_mpc/run_one_shot, aggregating KPIs itself before
+   returning. Retired in favor of the matching design below.
+
+ CHANGE 5, FINAL (4_MPCLoop.jl): run_mpc/run_one_shot now contain their OWN
+   internal day loop, mirroring Receding_Horizon's structure. `nK` renamed
+   `nKd` (one day's interval count); a new `nK` = n_day_run * nKd is the TOTAL
+   across all days. Inside the day loop, the window itself stays DAY-LOCAL
+   (k0:nKd, shrinking to that day's own end, resetting at the next day's k0=1)
+   -- this is what preserves the shrinking-horizon behavior unchanged; only a
+   separate GLOBAL index gidx = (day-1)*nKd + k0 is used to write into the
+   res-wide real_P_ch/real_SOE_CEV/etc arrays and the `log` (which gained a
+   `day` column). apply_and_simulate! was given a new `gidx` keyword
+   (default = k0, so single-day/n_day_run=1 callers are an EXACT passthrough)
+   to separate its day-local `model` reads from its global array writes --
+   this was a real bug caught and fixed during implementation (writes would
+   otherwise have landed in the wrong column for day 2+).
+   Across days: soe_mcs/soe_cev/mcs_node/mcs_transit continue naturally (no
+   reset); rem_dig/rem_load ACCUMULATE the same daily quota on top of any
+   backlog every day (missed work does not silently reset); est (Bayesian
+   learner) and hist (precedence/pacing history) persist for the WHOLE run,
+   never reset at a day boundary -- confirmed to match Receding_Horizon's
+   existing pattern exactly. _terminal_soe_shortfall (Change 3) now takes an
+   n_day_run parameter so its total-required-work denominator scales
+   correctly (n_day_run * one day's requirement, not just one day's).
+   n_day_run = 1 (default) is a pure passthrough -- nK == nKd == n_kept, every
+   existing single-day code path and result is unchanged.
+   FOLLOW-UP FIX -- replan_by_day: plan_grid_kW/plan_mcs_soe/plan_cev_soe/
+   plan_cev_act/plan_mcs_act originally stayed a single DAY-LOCAL nKd x nKd
+   set that got silently overwritten every day, while 5_Output.jl indexed
+   them up to the new global res.nK -- a BoundsError for n_day_run > 1. Fixed
+   at the root: run_mpc now builds a fresh set of grids every day and saves
+   each into replan_by_day[day] (mirroring Receding_Horizon's already-
+   established pattern exactly), and every 5_Output.jl function that reads
+   them (_write_replan_grid(s), _first_plan_row, _planned_kpis,
+   _write_plan_vs_actual(_side_by_side), plus the four downstream consumers
+   _write_plan_vs_actual_html/_activity_panel/_write_side_by_side_html/
+   _write_by_entity_html) now uses res.replan_by_day[1] with res.nKd bounds.
+   Separately caught, same bug class: _realised_missed_kwh compared multi-day
+   realized hours against only one day's requirement -- fixed by scaling with
+   res.n_day_run, matching _terminal_soe_shortfall's identical fix.

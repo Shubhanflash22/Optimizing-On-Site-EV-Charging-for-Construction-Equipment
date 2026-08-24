@@ -1,0 +1,387 @@
+==============================================================================
+DRAW-MODE SWEEP — 3-WAY COMPARISON x 5 plant modes
+Modes             : normal, near_mean, high, low, spread_wide
+A1 Receding  code: C:\Users\shubh\Desktop\MPC\Approach 1\Receding_Horizon\code
+A2 Receding  code: C:\Users\shubh\Desktop\MPC\Approach 2\Receding_Horizon\code
+Input             : c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Input
+Output            : c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output
+Comparisons       : A0_A1R, A0_A2R, A0_A1R_A2R, A1R_A2R  (written per mode)
+n_days_receding   : 1  (1-day runs)
+[18:58:41] Sweep started
+==============================================================================
+[18:58:41] -> starting: loading input data (A1R + A2R DataLoaders)
+[18:58:46] -> done: loading input data (A1R + A2R DataLoaders) (5.2s)
+
+##############################################################################
+# MODE: :normal
+##############################################################################
+[18:58:47] -> starting: building :normal power pool (197 samples/entity-activity)
+[18:58:47] -> done: building :normal power pool (197 samples/entity-activity) (0.0s)
+[:normal] pool: n_samples=197 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[18:59:06] -> starting: [:normal] Approach 0 solve (source = :a1_receding)
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s / day-solve
+Approach 0 one-shot-per-day (plant = :sampled) done in 41.0 s (96 plant realizations, 1 day-solves)
+[18:59:47] -> done: [:normal] Approach 0 solve (source = :a1_receding) (41.2s)
+[18:59:52] -> starting: [:normal] Approach 1 - Receding solve (n_days = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 1 (plant = :sampled) done in 438.8 s (192 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[19:07:11] -> done: [:normal] Approach 1 - Receding solve (n_days = 1) (439.0s)
+[19:07:18] -> starting: [:normal] Approach 2 - Receding solve (5 scenarios, n_days = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 17900.0 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[00:05:38] -> done: [:normal] Approach 2 - Receding solve (5 scenarios, n_days = 1) (17900.7s)
+
+--- [:normal] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal ---
+  A0_A1R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal\A0_A1R
+[00:05:38] -> starting: [:normal] writing A0_A1R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[00:05:59] -> done: [:normal] writing A0_A1R (20.7s)
+  A0_A2R: Approach 0 (one-shot, :sampled) vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal\A0_A2R
+[00:05:59] -> starting: [:normal] writing A0_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[00:06:02] -> done: [:normal] writing A0_A2R (2.6s)
+  A0_A1R_A2R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal\A0_A1R_A2R
+[00:06:02] -> starting: [:normal] writing A0_A1R_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[00:06:03] -> done: [:normal] writing A0_A1R_A2R (1.8s)
+  A1R_A2R: Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal\A1R_A2R
+[00:06:03] -> starting: [:normal] writing A1R_A2R
+[00:06:05] -> done: [:normal] writing A1R_A2R (1.4s)
+
+##############################################################################
+# MODE: :near_mean
+##############################################################################
+[00:06:05] -> starting: building :near_mean power pool (197 samples/entity-activity)
+[00:06:05] -> done: building :near_mean power pool (197 samples/entity-activity) (0.0s)
+[:near_mean] pool: n_samples=197 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[00:06:05] -> starting: [:near_mean] Approach 0 solve (source = :a1_receding)
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s / day-solve
+Approach 0 one-shot-per-day (plant = :sampled) done in 34.4 s (96 plant realizations, 1 day-solves)
+[00:06:39] -> done: [:near_mean] Approach 0 solve (source = :a1_receding) (34.5s)
+[00:06:39] -> starting: [:near_mean] Approach 1 - Receding solve (n_days = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 1 (plant = :sampled) done in 443.1 s (192 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[00:14:02] -> done: [:near_mean] Approach 1 - Receding solve (n_days = 1) (443.1s)
+[00:14:02] -> starting: [:near_mean] Approach 2 - Receding solve (5 scenarios, n_days = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 17519.4 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[05:06:02] -> done: [:near_mean] Approach 2 - Receding solve (5 scenarios, n_days = 1) (17519.5s)
+
+--- [:near_mean] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean ---
+  A0_A1R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean\A0_A1R
+[05:06:02] -> starting: [:near_mean] writing A0_A1R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[05:06:03] -> done: [:near_mean] writing A0_A1R (0.9s)
+  A0_A2R: Approach 0 (one-shot, :sampled) vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean\A0_A2R
+[05:06:03] -> starting: [:near_mean] writing A0_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[05:06:04] -> done: [:near_mean] writing A0_A2R (0.9s)
+  A0_A1R_A2R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean\A0_A1R_A2R
+[05:06:04] -> starting: [:near_mean] writing A0_A1R_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[05:06:05] -> done: [:near_mean] writing A0_A1R_A2R (0.9s)
+  A1R_A2R: Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean\A1R_A2R
+[05:06:05] -> starting: [:near_mean] writing A1R_A2R
+[05:06:05] -> done: [:near_mean] writing A1R_A2R (0.7s)
+
+##############################################################################
+# MODE: :high
+##############################################################################
+[05:06:05] -> starting: building :high power pool (197 samples/entity-activity)
+[05:06:05] -> done: building :high power pool (197 samples/entity-activity) (0.0s)
+[:high] pool: n_samples=197 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[05:06:05] -> starting: [:high] Approach 0 solve (source = :a1_receding)
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s / day-solve
+Approach 0 one-shot-per-day (plant = :sampled) done in 28.5 s (96 plant realizations, 1 day-solves)
+  NOTE: 3 intervals had work CAPPED by available CEV energy (task could not fully
+        complete before hitting the SOE floor); the shortfall is reflected honestly in
+        rem_dig/rem_load.
+[05:06:34] -> done: [:high] Approach 0 solve (source = :a1_receding) (28.9s)
+[05:06:34] -> starting: [:high] Approach 1 - Receding solve (n_days = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 1 (plant = :sampled) done in 329.2 s (192 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[05:12:04] -> done: [:high] Approach 1 - Receding solve (n_days = 1) (329.3s)
+[05:12:04] -> starting: [:high] Approach 2 - Receding solve (5 scenarios, n_days = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 21970.5 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[11:18:14] -> done: [:high] Approach 2 - Receding solve (5 scenarios, n_days = 1) (21970.7s)
+
+--- [:high] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high ---
+  A0_A1R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high\A0_A1R
+[11:18:14] -> starting: [:high] writing A0_A1R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[11:18:16] -> done: [:high] writing A0_A1R (1.3s)
+  A0_A2R: Approach 0 (one-shot, :sampled) vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high\A0_A2R
+[11:18:16] -> starting: [:high] writing A0_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[11:18:17] -> done: [:high] writing A0_A2R (1.1s)
+  A0_A1R_A2R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high\A0_A1R_A2R
+[11:18:17] -> starting: [:high] writing A0_A1R_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[11:18:18] -> done: [:high] writing A0_A1R_A2R (1.2s)
+  A1R_A2R: Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high\A1R_A2R
+[11:18:18] -> starting: [:high] writing A1R_A2R
+[11:18:19] -> done: [:high] writing A1R_A2R (1.0s)
+
+##############################################################################
+# MODE: :low
+##############################################################################
+[11:18:19] -> starting: building :low power pool (197 samples/entity-activity)
+[11:18:19] -> done: building :low power pool (197 samples/entity-activity) (0.0s)
+[:low] pool: n_samples=197 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[11:18:19] -> starting: [:low] Approach 0 solve (source = :a1_receding)
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s / day-solve
+Approach 0 one-shot-per-day (plant = :sampled) done in 43.1 s (96 plant realizations, 1 day-solves)
+[11:19:02] -> done: [:low] Approach 0 solve (source = :a1_receding) (43.1s)
+[11:19:02] -> starting: [:low] Approach 1 - Receding solve (n_days = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 1 (plant = :sampled) done in 543.4 s (192 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[11:28:05] -> done: [:low] Approach 1 - Receding solve (n_days = 1) (543.4s)
+[11:28:05] -> starting: [:low] Approach 2 - Receding solve (5 scenarios, n_days = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 20356.2 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[17:07:22] -> done: [:low] Approach 2 - Receding solve (5 scenarios, n_days = 1) (20356.2s)
+
+--- [:low] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low ---
+  A0_A1R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low\A0_A1R
+[17:07:22] -> starting: [:low] writing A0_A1R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[17:07:23] -> done: [:low] writing A0_A1R (1.1s)
+  A0_A2R: Approach 0 (one-shot, :sampled) vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low\A0_A2R
+[17:07:23] -> starting: [:low] writing A0_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[17:07:24] -> done: [:low] writing A0_A2R (1.0s)
+  A0_A1R_A2R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low\A0_A1R_A2R
+[17:07:24] -> starting: [:low] writing A0_A1R_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[17:07:25] -> done: [:low] writing A0_A1R_A2R (1.0s)
+  A1R_A2R: Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low\A1R_A2R
+[17:07:25] -> starting: [:low] writing A1R_A2R
+[17:07:26] -> done: [:low] writing A1R_A2R (1.0s)
+
+##############################################################################
+# MODE: :spread_wide
+##############################################################################
+[17:07:26] -> starting: building :spread_wide power pool (197 samples/entity-activity)
+[17:07:26] -> done: building :spread_wide power pool (197 samples/entity-activity) (0.0s)
+[:spread_wide] pool: n_samples=197 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[17:07:26] -> starting: [:spread_wide] Approach 0 solve (source = :a1_receding)
+Running Approach 0 (one-shot PER DAY: solve once at each day's 8:00, replay open-loop): 1 day(s), 96 steps total
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s / day-solve
+Approach 0 one-shot-per-day (plant = :sampled) done in 34.1 s (96 plant realizations, 1 day-solves)
+[17:08:00] -> done: [:spread_wide] Approach 0 solve (source = :a1_receding) (34.1s)
+[17:08:00] -> starting: [:spread_wide] Approach 1 - Receding solve (n_days = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 1 (plant = :sampled) done in 412.9 s (192 plant realizations)
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[17:14:53] -> done: [:spread_wide] Approach 1 - Receding solve (n_days = 1) (412.9s)
+[17:14:53] -> starting: [:spread_wide] Approach 2 - Receding solve (5 scenarios, n_days = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, multi-day receding horizon): 96 steps (1 kept days)
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+  [Change 3 diag] kept-day snapshot taken at day=1 (n_days_keep=1), soe_cev_kept=[14.8]
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 15377.2 s (192 plant realizations)
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[21:31:10] -> done: [:spread_wide] Approach 2 - Receding solve (5 scenarios, n_days = 1) (15377.3s)
+
+--- [:spread_wide] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide ---
+  A0_A1R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide\A0_A1R
+[21:31:10] -> starting: [:spread_wide] writing A0_A1R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[21:31:11] -> done: [:spread_wide] writing A0_A1R (1.2s)
+  A0_A2R: Approach 0 (one-shot, :sampled) vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide\A0_A2R
+[21:31:11] -> starting: [:spread_wide] writing A0_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[21:31:12] -> done: [:spread_wide] writing A0_A2R (1.0s)
+  A0_A1R_A2R: Approach 0 (one-shot, :sampled) vs Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide\A0_A1R_A2R
+[21:31:12] -> starting: [:spread_wide] writing A0_A1R_A2R
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[21:31:13] -> done: [:spread_wide] writing A0_A1R_A2R (1.2s)
+  A1R_A2R: Approach 1 - Receding vs Approach 2 - Receding (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide\A1R_A2R
+[21:31:13] -> starting: [:spread_wide] writing A1R_A2R
+[21:31:14] -> done: [:spread_wide] writing A1R_A2R (0.9s)
+
+==============================================================================
+CROSS-MODE KPI SUMMARY
+
+--[ :normal ]-----------------------------------------------------------------
+Metric                                   A0       A1-Reced       A2-Reced
+Grid energy (kWh)                     27.79          26.77          26.64
+Energy cost (USD)                      8.51           8.61           8.63
+CO2 (kg)                               6.84           6.37           6.43
+NCD peak (kW)                          2.00           1.91           1.91
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+Terminal shortfall (kWh)              0.000          0.000          0.000
+
+--[ :near_mean ]--------------------------------------------------------------
+Metric                                   A0       A1-Reced       A2-Reced
+Grid energy (kWh)                     27.79          26.60          26.53
+Energy cost (USD)                      8.51           8.55           8.38
+CO2 (kg)                               6.84           6.32           7.10
+NCD peak (kW)                          2.00           1.91           2.31
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+Terminal shortfall (kWh)              0.000          0.000          0.000
+
+--[ :high ]-------------------------------------------------------------------
+Metric                                   A0       A1-Reced       A2-Reced
+Grid energy (kWh)                     27.79          28.35          29.84
+Energy cost (USD)                      8.51           9.10           9.50
+CO2 (kg)                               6.84           6.76           8.11
+NCD peak (kW)                          2.00           2.13           2.71
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.49           0.25           0.00
+Terminal shortfall (kWh)              0.022          0.000          0.000
+
+--[ :low ]--------------------------------------------------------------------
+Metric                                   A0       A1-Reced       A2-Reced
+Grid energy (kWh)                     27.79          23.15          23.15
+Energy cost (USD)                      8.51           6.99           7.04
+CO2 (kg)                               6.84           5.39           5.80
+NCD peak (kW)                          2.00           1.79           1.88
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+Terminal shortfall (kWh)              0.000          0.000          0.000
+
+--[ :spread_wide ]------------------------------------------------------------
+Metric                                   A0       A1-Reced       A2-Reced
+Grid energy (kWh)                     27.79          25.82          25.83
+Energy cost (USD)                      8.51           8.30           8.19
+CO2 (kg)                               6.84           6.14           6.97
+NCD peak (kW)                          2.00           1.85           2.31
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+Terminal shortfall (kWh)              0.000          0.000          0.000
+==============================================================================
+
+Cross-mode KPI summary written to: c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\mode_sweep_kpi_summary.csv
+
+Results written to: c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output
+  normal/
+    A0_A1R/  (A0 vs A1R)
+    A0_A2R/  (A0 vs A2R)
+    A0_A1R_A2R/  (A0 vs A1R vs A2R)
+    A1R_A2R/  (A1R vs A2R)
+  near_mean/
+    A0_A1R/  (A0 vs A1R)
+    A0_A2R/  (A0 vs A2R)
+    A0_A1R_A2R/  (A0 vs A1R vs A2R)
+    A1R_A2R/  (A1R vs A2R)
+  high/
+    A0_A1R/  (A0 vs A1R)
+    A0_A2R/  (A0 vs A2R)
+    A0_A1R_A2R/  (A0 vs A1R vs A2R)
+    A1R_A2R/  (A1R vs A2R)
+  low/
+    A0_A1R/  (A0 vs A1R)
+    A0_A2R/  (A0 vs A2R)
+    A0_A1R_A2R/  (A0 vs A1R vs A2R)
+    A1R_A2R/  (A1R vs A2R)
+  spread_wide/
+    A0_A1R/  (A0 vs A1R)
+    A0_A2R/  (A0 vs A2R)
+    A0_A1R_A2R/  (A0 vs A1R vs A2R)
+    A1R_A2R/  (A1R vs A2R)
+  mode_sweep_kpi_summary.csv
+  run_log.txt  (this console log, shared across all 5 modes x 4 comparisons)
+[21:31:15] Sweep finished — total elapsed 95553.9s

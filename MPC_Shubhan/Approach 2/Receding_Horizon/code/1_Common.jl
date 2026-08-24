@@ -318,6 +318,24 @@ end
 # Idle (or any activity pinned with sd = 0) is deterministic by construction,
 # so next_power! returns `mu[a]` directly for it without consuming a slot --
 # idle would otherwise occur far more than `n_samples` times in a day.
+#
+# -----------------------------------------------------------------------------
+# DRAW MODE (sensitivity sweep) -- CHANGE 6
+# -----------------------------------------------------------------------------
+# `mode` controls WHERE on the Normal(mu, sd) curve each draw lands, without
+# touching mu/sd/n_samples/cursor/next_power! or any consumer. Default
+# `:normal` is the original unbiased behaviour (z ~ N(0,1), i.e. the draw can
+# land anywhere on the curve). The other four modes bias the z-score used for
+# `mu[a] + sd[a] * z` so a whole pool can be regenerated as one of four fixed
+# scenarios for a sensitivity sweep:
+#   :near_mean    -- clustered close to the mean:      |z| within ~0.5 sigma
+#   :high         -- far above the mean:                z >= 2 sigma
+#   :low          -- far below the mean:                z <= -2 sigma
+#   :spread_wide  -- far from the mean, either side:   |z| >= 2 sigma, sign random
+# "Far" = 2 sigma and "near" = 0.5 sigma are the two anchors; each still adds a
+# small amount of genuine randomness on top (so repeated draws in the same
+# mode are not identical), it just can no longer land anywhere else on the
+# curve. Idle (sd <= 0) is unaffected by `mode` -- it is deterministic either way.
 # #############################################################################
 struct ActivityPowerPool
     mu::Vector{Float64}
@@ -325,14 +343,39 @@ struct ActivityPowerPool
     samples::Dict{Tuple{Int,Int}, Vector{Float64}}   # (entity, activity) -> n_samples draws
 end
 
+# z-score used by `draw_activity_power_pool` for a single draw, as a function
+# of `mode` (see CHANGE 6 above). "Far" is anchored at 2 sigma, "near" at 0.5
+# sigma; the `abs(randn(rng))` / `randn(rng)` terms add genuine within-mode
+# randomness on top of that anchor so consecutive draws still differ.
+function _draw_mode_z(mode::Symbol, rng)
+    if mode === :normal
+        return randn(rng)                                        # unbiased, unconstrained
+    elseif mode === :near_mean
+        return 0.5 * randn(rng)                                   # clustered within ~0.5 sigma
+    elseif mode === :high
+        return 2.0 + 0.5 * abs(randn(rng))                        # >= 2 sigma above the mean
+    elseif mode === :low
+        return -2.0 - 0.5 * abs(randn(rng))                       # >= 2 sigma below the mean
+    elseif mode === :spread_wide
+        sign = rand(rng, Bool) ? 1.0 : -1.0
+        return sign * (2.0 + 0.5 * abs(randn(rng)))               # >= 2 sigma, either side
+    else
+        error("draw_activity_power_pool: unknown mode :$mode ",
+              "(expected :normal, :near_mean, :high, :low, or :spread_wide)")
+    end
+end
+
 # Generate the pool. `entities` is the collection of entity indices (e.g. d.E);
 # `mu`/`sd` is the frozen per-activity power estimate (e.g. d.prior_mu /
 # d.prior_sigma). Pass a dedicated `rng` so this generation step is reproducible
-# and independent of any other randomness used later in a run.
-function draw_activity_power_pool(entities, mu, sd; n_samples::Int = 20, rng = Random.GLOBAL_RNG)
+# and independent of any other randomness used later in a run. `mode` selects
+# the sensitivity-sweep scenario (see CHANGE 6 above); the default `:normal`
+# reproduces the original, unbiased behaviour exactly.
+function draw_activity_power_pool(entities, mu, sd; n_samples::Int = 20,
+                                   rng = Random.GLOBAL_RNG, mode::Symbol = :normal)
     samples = Dict{Tuple{Int,Int}, Vector{Float64}}()
     for e in entities, a in eachindex(mu)
-        samples[(e, a)] = [max(mu[a] + sd[a] * randn(rng), 0.0) for _ in 1:n_samples]
+        samples[(e, a)] = [max(mu[a] + sd[a] * _draw_mode_z(mode, rng), 0.0) for _ in 1:n_samples]
     end
     return ActivityPowerPool(collect(float.(mu)), collect(float.(sd)), samples)
 end
