@@ -373,6 +373,120 @@
     .headline-stat-row{grid-template-columns:repeat(2,1fr);}
     h1{font-size:32px;}
   }
+
+  /* ---------- COMPUTE TIME TABLE ---------- */
+
+  .compute-table-wrap {
+    margin-top: 28px;
+  }
+
+  .compute-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 14px;
+  }
+
+  .compute-table-header h3 {
+    margin-bottom: 4px;
+  }
+
+  .compute-total {
+    text-align: right;
+    padding: 10px 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    white-space: nowrap;
+  }
+
+  .compute-total .slabel {
+    display: block;
+    font-size: 10px;
+    letter-spacing: .08em;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+
+  .compute-total .sval {
+    display: block;
+    margin-top: 2px;
+    font-size: 22px;
+    font-weight: 750;
+    color: var(--ink);
+  }
+
+  .compute-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .compute-table th {
+    padding: 12px 14px;
+    text-align: right;
+    background: var(--ink);
+    color: white;
+    font-size: 11px;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+
+  .compute-table th:first-child {
+    text-align: left;
+  }
+
+  .compute-table td {
+    padding: 13px 14px;
+    text-align: right;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+
+  .compute-table td:first-child {
+    text-align: left;
+    color: var(--ink);
+  }
+
+  .compute-table .total {
+    font-weight: 700;
+    background: rgba(14,122,176,.06);
+  }
+
+  .compute-table .a2-row td {
+    background: rgba(185,134,11,.07);
+  }
+
+  .compute-table .a2-row td:last-child {
+    color: var(--gold-dark);
+    font-weight: 800;
+  }
+
+  .compute-table .total-row td {
+    border-top: 2px solid var(--line);
+    border-bottom: none;
+    background: var(--card);
+    font-weight: 700;
+  }
+
+  .compute-note {
+    margin: 12px 2px 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  @media (max-width: 800px) {
+    .compute-table-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .compute-total {
+      text-align: left;
+    }
+  }
 </style>
 </head>
 <body>
@@ -506,6 +620,81 @@
           <div class="stat-box hl"><div class="slabel">A2R worst gap seen</div><div class="sval">75%</div></div>
         </div>
       </div>
+      <div class="compute-table-wrap">
+  <div class="compute-table-header">
+    <div>
+      <h3>Compute time across the full sweep</h3>
+      <div class="cap">Total solve time in hours · 5 modes × 3 approaches</div>
+    </div>
+    <div class="compute-total">
+      <span class="slabel">TOTAL COMPUTE</span>
+      <span class="sval">26.52 h</span>
+    </div>
+  </div>
+
+  <div class="table-panel" style="overflow-x:auto;">
+    <table class="compute-table">
+      <thead>
+        <tr>
+          <th>Approach</th>
+          <th>Normal</th>
+          <th>Near-mean</th>
+          <th>High</th>
+          <th>Low</th>
+          <th>Spread-wide</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td><strong>A0</strong></td>
+          <td>0.01 h</td>
+          <td>0.01 h</td>
+          <td>0.01 h</td>
+          <td>0.01 h</td>
+          <td>0.01 h</td>
+          <td class="total">0.05 h</td>
+        </tr>
+
+        <tr>
+          <td><strong>A1-Receding</strong></td>
+          <td>0.12 h</td>
+          <td>0.12 h</td>
+          <td>0.09 h</td>
+          <td>0.15 h</td>
+          <td>0.12 h</td>
+          <td class="total">0.60 h</td>
+        </tr>
+
+        <tr class="a2-row">
+          <td><strong>A2-Receding</strong></td>
+          <td>4.97 h</td>
+          <td>4.86 h</td>
+          <td>6.10 h</td>
+          <td>5.66 h</td>
+          <td>4.27 h</td>
+          <td class="total">25.86 h</td>
+        </tr>
+
+        <tr class="total-row">
+          <td><strong>All approaches</strong></td>
+          <td>5.11 h</td>
+          <td>5.00 h</td>
+          <td>6.20 h</td>
+          <td>5.82 h</td>
+          <td>4.40 h</td>
+          <td><strong>26.52 h</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="compute-note">
+    A2-Receding accounts for <strong>97.5%</strong> of total solve time.
+    The stochastic formulation delivers robustness at substantially higher compute cost.
+  </p>
+</div>
     </div>
   </div>
 </section>

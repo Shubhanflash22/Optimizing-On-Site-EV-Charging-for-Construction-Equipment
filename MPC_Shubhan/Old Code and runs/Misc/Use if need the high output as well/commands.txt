@@ -1,0 +1,11 @@
+julia -i "C:\Users\shubh\Downloads\normal.jl" 2>&1 | Tee-Object -FilePath "C:\Users\shubh\Downloads\log_manual_normal.txt"
+
+julia -i "C:\Users\shubh\Downloads\near_mean.jl" 2>&1 | Tee-Object -FilePath "C:\Users\shubh\Downloads\log_manual_near_mean.txt"
+
+julia -i "C:\Users\shubh\Downloads\high.jl" 2>&1 | Tee-Object -FilePath "C:\Users\shubh\Downloads\log_manual_high.txt"
+
+julia -i "C:\Users\shubh\Downloads\low.jl" 2>&1 | Tee-Object -FilePath "C:\Users\shubh\Downloads\log_manual_low.txt"
+
+julia -i "C:\Users\shubh\Downloads\spread_wide.jl" 2>&1 | Tee-Object -FilePath "C:\Users\shubh\Downloads\log_manual_spread_wide.txt"
+
+python rebuild_sweep_summary.py

@@ -1,0 +1,377 @@
+==============================================================================
+DRAW-MODE SWEEP — 3-WAY COMPARISON x 5 plant modes
+Modes             : normal, near_mean, high, low, spread_wide
+A1 Shrinking code: C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\code
+A2 Shrinking code: C:\Users\shubh\Desktop\MPC\Approach 2\Shrinking_Horizon\code
+Input             : c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Input
+Output            : c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output
+Comparisons       : A0_A1S, A0_A2S, A0_A1S_A2S, A1S_A2S  (written per mode)
+n_day_run         : 1  (1-day runs)
+[21:18:17] Sweep started
+==============================================================================
+[21:18:17] -> starting: loading input data (A1S + A2S DataLoaders)
+[21:18:24] -> done: loading input data (A1S + A2S DataLoaders) (7.2s)
+
+##############################################################################
+# MODE: :normal
+##############################################################################
+[21:18:24] -> starting: building :normal power pool (101 samples/entity-activity)
+[21:18:24] -> done: building :normal power pool (101 samples/entity-activity) (0.0s)
+[:normal] pool: n_samples=101 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[21:18:37] -> starting: [:normal] Approach 0 solve (source = :a1_shrinking)
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s
+Approach 0 one-shot (plant = :sampled) done in 85.1 s (96 plant realizations, 1 day(s))
+[21:20:02] -> done: [:normal] Approach 0 solve (source = :a1_shrinking) (85.8s)
+[21:20:06] -> starting: [:normal] Approach 1 - Shrinking solve (n_day_run = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 1 (plant = :sampled) done in 364.9 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[21:26:11] -> done: [:normal] Approach 1 - Shrinking solve (n_day_run = 1) (365.0s)
+[21:26:20] -> starting: [:normal] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 7953.5 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[23:38:54] -> done: [:normal] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1) (7954.2s)
+
+--- [:normal] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal ---
+  A0_A1S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal\A0_A1S
+[23:38:54] -> starting: [:normal] writing A0_A1S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[23:39:14] -> done: [:normal] writing A0_A1S (20.2s)
+  A0_A2S: Approach 0 (one-shot, :sampled) vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal\A0_A2S
+[23:39:14] -> starting: [:normal] writing A0_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[23:39:17] -> done: [:normal] writing A0_A2S (2.6s)
+  A0_A1S_A2S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal\A0_A1S_A2S
+[23:39:17] -> starting: [:normal] writing A0_A1S_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[23:39:19] -> done: [:normal] writing A0_A1S_A2S (1.8s)
+  A1S_A2S: Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\normal\A1S_A2S
+[23:39:19] -> starting: [:normal] writing A1S_A2S
+[23:39:20] -> done: [:normal] writing A1S_A2S (1.4s)
+
+##############################################################################
+# MODE: :near_mean
+##############################################################################
+[23:39:20] -> starting: building :near_mean power pool (101 samples/entity-activity)
+[23:39:20] -> done: building :near_mean power pool (101 samples/entity-activity) (0.0s)
+[:near_mean] pool: n_samples=101 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[23:39:20] -> starting: [:near_mean] Approach 0 solve (source = :a1_shrinking)
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s
+Approach 0 one-shot (plant = :sampled) done in 34.5 s (96 plant realizations, 1 day(s))
+[23:39:55] -> done: [:near_mean] Approach 0 solve (source = :a1_shrinking) (34.5s)
+[23:39:55] -> starting: [:near_mean] Approach 1 - Shrinking solve (n_day_run = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 1 (plant = :sampled) done in 193.7 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[23:43:08] -> done: [:near_mean] Approach 1 - Shrinking solve (n_day_run = 1) (193.7s)
+[23:43:08] -> starting: [:near_mean] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 7487.8 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[01:47:56] -> done: [:near_mean] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1) (7487.9s)
+
+--- [:near_mean] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean ---
+  A0_A1S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean\A0_A1S
+[01:47:56] -> starting: [:near_mean] writing A0_A1S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[01:47:57] -> done: [:near_mean] writing A0_A1S (1.1s)
+  A0_A2S: Approach 0 (one-shot, :sampled) vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean\A0_A2S
+[01:47:57] -> starting: [:near_mean] writing A0_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[01:47:59] -> done: [:near_mean] writing A0_A2S (1.6s)
+  A0_A1S_A2S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean\A0_A1S_A2S
+[01:47:59] -> starting: [:near_mean] writing A0_A1S_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[01:48:00] -> done: [:near_mean] writing A0_A1S_A2S (1.1s)
+  A1S_A2S: Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\near_mean\A1S_A2S
+[01:48:00] -> starting: [:near_mean] writing A1S_A2S
+[01:48:01] -> done: [:near_mean] writing A1S_A2S (0.9s)
+
+##############################################################################
+# MODE: :high
+##############################################################################
+[01:48:01] -> starting: building :high power pool (101 samples/entity-activity)
+[01:48:01] -> done: building :high power pool (101 samples/entity-activity) (0.0s)
+[:high] pool: n_samples=101 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[01:48:01] -> starting: [:high] Approach 0 solve (source = :a1_shrinking)
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s
+Approach 0 one-shot (plant = :sampled) done in 33.8 s (96 plant realizations, 1 day(s))
+  NOTE: 3 intervals had work CAPPED by available CEV energy (task could not fully
+        complete before hitting the SOE floor); the shortfall is reflected honestly in
+        rem_dig/rem_load.
+[01:48:35] -> done: [:high] Approach 0 solve (source = :a1_shrinking) (33.8s)
+[01:48:35] -> starting: [:high] Approach 1 - Shrinking solve (n_day_run = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 1 (plant = :sampled) done in 206.5 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[01:52:01] -> done: [:high] Approach 1 - Shrinking solve (n_day_run = 1) (206.5s)
+[01:52:01] -> starting: [:high] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 6499.4 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[03:40:21] -> done: [:high] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1) (6499.4s)
+
+--- [:high] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high ---
+  A0_A1S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high\A0_A1S
+[03:40:21] -> starting: [:high] writing A0_A1S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[03:40:22] -> done: [:high] writing A0_A1S (1.0s)
+  A0_A2S: Approach 0 (one-shot, :sampled) vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high\A0_A2S
+[03:40:22] -> starting: [:high] writing A0_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[03:40:23] -> done: [:high] writing A0_A2S (1.0s)
+  A0_A1S_A2S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high\A0_A1S_A2S
+[03:40:23] -> starting: [:high] writing A0_A1S_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[03:40:24] -> done: [:high] writing A0_A1S_A2S (1.1s)
+  A1S_A2S: Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\high\A1S_A2S
+[03:40:24] -> starting: [:high] writing A1S_A2S
+[03:40:25] -> done: [:high] writing A1S_A2S (1.1s)
+
+##############################################################################
+# MODE: :low
+##############################################################################
+[03:40:25] -> starting: building :low power pool (101 samples/entity-activity)
+[03:40:25] -> done: building :low power pool (101 samples/entity-activity) (0.0s)
+[:low] pool: n_samples=101 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[03:40:25] -> starting: [:low] Approach 0 solve (source = :a1_shrinking)
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s
+Approach 0 one-shot (plant = :sampled) done in 34.6 s (96 plant realizations, 1 day(s))
+[03:40:59] -> done: [:low] Approach 0 solve (source = :a1_shrinking) (34.6s)
+[03:40:59] -> starting: [:low] Approach 1 - Shrinking solve (n_day_run = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 1 (plant = :sampled) done in 159.9 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[03:43:39] -> done: [:low] Approach 1 - Shrinking solve (n_day_run = 1) (159.9s)
+[03:43:39] -> starting: [:low] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 7780.9 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[05:53:20] -> done: [:low] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1) (7780.9s)
+
+--- [:low] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low ---
+  A0_A1S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low\A0_A1S
+[05:53:20] -> starting: [:low] writing A0_A1S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[05:53:21] -> done: [:low] writing A0_A1S (1.0s)
+  A0_A2S: Approach 0 (one-shot, :sampled) vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low\A0_A2S
+[05:53:21] -> starting: [:low] writing A0_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[05:53:22] -> done: [:low] writing A0_A2S (1.0s)
+  A0_A1S_A2S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low\A0_A1S_A2S
+[05:53:22] -> starting: [:low] writing A0_A1S_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[05:53:23] -> done: [:low] writing A0_A1S_A2S (1.1s)
+  A1S_A2S: Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\low\A1S_A2S
+[05:53:23] -> starting: [:low] writing A1S_A2S
+[05:53:24] -> done: [:low] writing A1S_A2S (0.9s)
+
+##############################################################################
+# MODE: :spread_wide
+##############################################################################
+[05:53:24] -> starting: building :spread_wide power pool (101 samples/entity-activity)
+[05:53:24] -> done: building :spread_wide power pool (101 samples/entity-activity) (0.0s)
+[:spread_wide] pool: n_samples=101 per (entity, activity); mu=[4.79, 3.16, 4.71, 0.0] kW; sd=[0.21, 0.18, 0.39, 0.0] kW
+[05:53:24] -> starting: [:spread_wide] Approach 0 solve (source = :a1_shrinking)
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 600.0 s
+Approach 0 one-shot (plant = :sampled) done in 34.8 s (96 plant realizations, 1 day(s))
+[05:53:59] -> done: [:spread_wide] Approach 0 solve (source = :a1_shrinking) (34.8s)
+[05:53:59] -> starting: [:spread_wide] Approach 1 - Shrinking solve (n_day_run = 1)
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 1 (plant = :sampled) done in 182.4 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[05:57:01] -> done: [:spread_wide] Approach 1 - Shrinking solve (n_day_run = 1) (182.4s)
+[05:57:01] -> starting: [:spread_wide] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1)
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 600.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 7231.1 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+[07:57:33] -> done: [:spread_wide] Approach 2 - Shrinking solve (5 scenarios, n_day_run = 1) (7231.3s)
+
+--- [:spread_wide] writing 4 comparison(s) to c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide ---
+  A0_A1S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide\A0_A1S
+[07:57:33] -> starting: [:spread_wide] writing A0_A1S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[07:57:33] -> done: [:spread_wide] writing A0_A1S (0.8s)
+  A0_A2S: Approach 0 (one-shot, :sampled) vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide\A0_A2S
+[07:57:33] -> starting: [:spread_wide] writing A0_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[07:57:34] -> done: [:spread_wide] writing A0_A2S (0.8s)
+  A0_A1S_A2S: Approach 0 (one-shot, :sampled) vs Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide\A0_A1S_A2S
+[07:57:34] -> starting: [:spread_wide] writing A0_A1S_A2S
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+[07:57:35] -> done: [:spread_wide] writing A0_A1S_A2S (0.9s)
+  A1S_A2S: Approach 1 - Shrinking vs Approach 2 - Shrinking (stochastic)  ->  c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\spread_wide\A1S_A2S
+[07:57:35] -> starting: [:spread_wide] writing A1S_A2S
+[07:57:36] -> done: [:spread_wide] writing A1S_A2S (0.7s)
+
+==============================================================================
+CROSS-MODE KPI SUMMARY
+
+--[ :normal ]-----------------------------------------------------------------
+Metric                                   A0      A1-Shrink      A2-Shrink
+Grid energy (kWh)                     27.79          26.47          26.36
+Energy cost (USD)                      8.51           8.51           8.15
+CO2 (kg)                               6.84           6.29           6.70
+NCD peak (kW)                          2.00           1.90           2.08
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+Terminal shortfall (kWh)              0.000          0.000          0.000
+
+--[ :near_mean ]--------------------------------------------------------------
+Metric                                   A0      A1-Shrink      A2-Shrink
+Grid energy (kWh)                     27.79          26.45          26.40
+Energy cost (USD)                      8.51           8.50           8.24
+CO2 (kg)                               6.84           6.28           6.88
+NCD peak (kW)                          2.00           1.90           2.17
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+Terminal shortfall (kWh)              0.000          0.000          0.000
+
+--[ :high ]-------------------------------------------------------------------
+Metric                                   A0      A1-Shrink      A2-Shrink
+Grid energy (kWh)                     27.79          28.92          29.92
+Energy cost (USD)                      8.51           9.16           9.25
+CO2 (kg)                               6.84           7.27           7.55
+NCD peak (kW)                          2.00           2.26           2.29
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.50           0.25           0.00
+Terminal shortfall (kWh)              0.022          0.000          0.000
+
+--[ :low ]--------------------------------------------------------------------
+Metric                                   A0      A1-Shrink      A2-Shrink
+Grid energy (kWh)                     27.79          23.14          23.04
+Energy cost (USD)                      8.51           6.77           7.11
+CO2 (kg)                               6.84           5.50           5.77
+NCD peak (kW)                          2.00           1.91           1.74
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+Terminal shortfall (kWh)              0.000          0.000          0.000
+
+--[ :spread_wide ]------------------------------------------------------------
+Metric                                   A0      A1-Shrink      A2-Shrink
+Grid energy (kWh)                     27.79          26.38          26.27
+Energy cost (USD)                      8.51           8.45           8.00
+CO2 (kg)                               6.84           6.24           6.57
+NCD peak (kW)                          2.00           1.93           2.13
+OPD peak (kW)                         -0.00           0.00           0.00
+Missed work (h)                        0.00           0.00           0.00
+Terminal shortfall (kWh)              0.000          0.000          0.000
+==============================================================================
+
+Cross-mode KPI summary written to: c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output\mode_sweep_kpi_summary.csv
+
+Results written to: c:\Users\shubh\Desktop\MPC\Comparison_A0_A1_A2\Output
+  normal/
+    A0_A1S/  (A0 vs A1S)
+    A0_A2S/  (A0 vs A2S)
+    A0_A1S_A2S/  (A0 vs A1S vs A2S)
+    A1S_A2S/  (A1S vs A2S)
+  near_mean/
+    A0_A1S/  (A0 vs A1S)
+    A0_A2S/  (A0 vs A2S)
+    A0_A1S_A2S/  (A0 vs A1S vs A2S)
+    A1S_A2S/  (A1S vs A2S)
+  high/
+    A0_A1S/  (A0 vs A1S)
+    A0_A2S/  (A0 vs A2S)
+    A0_A1S_A2S/  (A0 vs A1S vs A2S)
+    A1S_A2S/  (A1S vs A2S)
+  low/
+    A0_A1S/  (A0 vs A1S)
+    A0_A2S/  (A0 vs A2S)
+    A0_A1S_A2S/  (A0 vs A1S vs A2S)
+    A1S_A2S/  (A1S vs A2S)
+  spread_wide/
+    A0_A1S/  (A0 vs A1S)
+    A0_A2S/  (A0 vs A2S)
+    A0_A1S_A2S/  (A0 vs A1S vs A2S)
+    A1S_A2S/  (A1S vs A2S)
+  mode_sweep_kpi_summary.csv
+  run_log.txt  (this console log, shared across all 5 modes x 4 comparisons)
+[07:57:36] Sweep finished — total elapsed 38359.9s

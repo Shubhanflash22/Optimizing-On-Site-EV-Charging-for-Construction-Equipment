@@ -1,0 +1,167 @@
+##############################################################################
+# MODE: :normal
+##############################################################################
+
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 1200.0 s
+Approach 0 one-shot (plant = :sampled) done in 36.4 s (96 plant realizations, 1 day(s))
+
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 1 (plant = :sampled) done in 177.8 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 20835.6 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+
+##############################################################################
+# MODE: :near_mean
+##############################################################################
+
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 1200.0 s
+Approach 0 one-shot (plant = :sampled) done in 45.7 s (96 plant realizations, 1 day(s))
+
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 1 (plant = :sampled) done in 204.8 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 17784.4 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+
+##############################################################################
+# MODE: :high
+##############################################################################
+
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 1200.0 s
+Approach 0 one-shot (plant = :sampled) done in 46.8 s (96 plant realizations, 1 day(s))
+  NOTE: 3 intervals had work CAPPED by available CEV energy (task could not fully
+        complete before hitting the SOE floor); the shortfall is reflected honestly in
+        rem_dig/rem_load.
+
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 1 (plant = :sampled) done in 227.8 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 12971.2 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+
+##############################################################################
+# MODE: :low
+##############################################################################
+
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 1200.0 s
+Approach 0 one-shot (plant = :sampled) done in 45.9 s (96 plant realizations, 1 day(s))
+
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 1 (plant = :sampled) done in 163.5 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 13468.9 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
+
+##############################################################################
+# MODE: :spread_wide
+##############################################################################
+
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit      : 1200.0 s
+Approach 0 one-shot (plant = :sampled) done in 32.1 s (96 plant realizations, 1 day(s))
+
+Running Approach 1 (closed-loop MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 1 (plant = :sampled) done in 138.1 s (96 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+
+Running Approach 2 (STOCHASTIC scenario-based MPC, 15-min steps, shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal-weight, resampled fresh every window)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  posterior mean (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)  : [0.21, 0.18, 0.39, 0.0] kW  (scenario sampling spread)
+  plant sampling sd    : [0.21, 0.18, 0.39, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 11435.2 s (96 plant realizations, 1 day(s))
+  posterior mean (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  posterior std  (sd)    : [0.21, 0.18, 0.39, 0.0] kW
+  plant sampling sd      : [0.21, 0.18, 0.39, 0.0] kW
+  (no solve_log on A0 -- skipping 13_solve_status_A0.csv)
