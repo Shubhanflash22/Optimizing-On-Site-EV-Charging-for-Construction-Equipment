@@ -1,0 +1,11 @@
+Parameter,Value,Unit,Description
+k_trv,10,kWh/hour,MCS Average enegy consumption per hour
+rho_miss,2000,-,Large  constant
+delta_T,0.25,h,Time step duration
+p_digging,4.79,kW,Power of digging
+p_loading_swinging,3.16,kW,Power of loading+swinging
+p_traveling,4.71,kW,Power of traveling
+lambda_demand_NC,20.12,$/kW,NCDC rate
+lambda_demand_OP,20.58,$/kW,OPDC rate
+carbon_price_per_ton,50,$/tonneCO2,carbon
+rho_labor,250,$/hr,$/hr per man
