@@ -187,19 +187,32 @@ function apply_and_simulate!(model, g0, Kend, d, pool::ActivityPowerPool, cursor
     # budget per pair is spent only on real occurrences).
     p_true = Dict{Int, Vector{Float64}}()
     n_obs_added = 0
+    nKd_local = length(d.K)   # day-local interval count, for wrapping g0 -> clock time
     for e in d.E
         row = a_real[e]
         pt  = zeros(length(row))
+        site = findfirst(i -> d.A[i, e] == 1, d.N)
+        # Off-shift (Eq. 8b: is_working false) means NO activity concept applies at
+        # all -- the machine is off, unattended, zero draw. Without this gate,
+        # applied_act_index's idle fallback would otherwise route every off-shift
+        # interval through next_power!, drawing a real nonzero LIVE_DATA_MODE idle
+        # sample for hours the CEV was never actually on and idling. g0 is a GLOBAL
+        # (multi-day) step index here, wrapped to day-local via mod1, mirroring the
+        # wd() helper used for the same purpose elsewhere in this file.
+        working = site !== nothing && d.is_working[site, e, mod1(g0, nKd_local)]
         for a in eachindex(row)
             row[a] > 1e-9 || continue
+            if !working
+                pt[a] = 0.0   # off-shift: no pool draw, cursor untouched, power forced to 0
+                continue
+            end
             # :mean pins the realized power to the planning mean and does NOT advance
             # the cursor; :sampled consumes the next pre-drawn sample for this pair.
             pt[a] = use_mean ? pool.mu[a] : next_power!(pool, cursor, e, a)
         end
         p_true[e] = pt
-        sum(row) > 1e-9 && (n_obs_added += 1)
+        sum(row) > 1e-9 && working && (n_obs_added += 1)
         if out_idx !== nothing
-            site = findfirst(i -> d.A[i, e] == 1, d.N)
             if site !== nothing
                 # Sum ALL 4 activities (dig/load/travel/idle), matching the MILP's own
                 # P_work definition (3_MCSModel.jl Eq. 8d: P_work = sum_a p_a*u, over

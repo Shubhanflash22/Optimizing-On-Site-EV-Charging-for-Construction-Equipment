@@ -95,7 +95,8 @@ function applied_act_index(model, d, e, k0)
     for i in d.N_c, (ai, act) in enumerate(d.B)
         value(model[:u][e, i, act, k0]) > 0.5 && return ai
     end
-    return length(d.B)   # nothing scheduled -> idle (a break)
+    return length(d.B)   # nothing scheduled -> off-shift (Eq. 8b); logged as idle bucket,
+                          # power is forced to 0 in apply_and_simulate! via the `working` check
 end
 
 # -----------------------------------------------------------------------------
@@ -188,15 +189,25 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
     for e in d.E
         row = a_real[e]
         pt  = zeros(length(row))
+        site = findfirst(i -> d.A[i, e] == 1, d.N)
+        # Off-shift (Eq. 8b: is_working false) means NO activity concept applies at
+        # all -- the machine is off, unattended, zero draw. Without this gate,
+        # applied_act_index's idle fallback would otherwise route every off-shift
+        # interval through next_power!, drawing a real nonzero LIVE_DATA_MODE idle
+        # sample for hours the CEV was never actually on and idling.
+        working = site !== nothing && d.is_working[site, e, k0]
         for a in eachindex(row)
             row[a] > 1e-9 || continue
+            if !working
+                pt[a] = 0.0   # off-shift: no pool draw, cursor untouched, power forced to 0
+                continue
+            end
             # :mean pins the realized power to the planning mean and does NOT advance
             # the cursor; :sampled consumes the next pre-drawn sample for this pair.
             pt[a] = use_mean ? pool.mu[a] : next_power!(pool, cursor, e, a)
         end
         p_true[e] = pt
-        sum(row) > 1e-9 && (n_obs_added += 1)
-        site = findfirst(i -> d.A[i, e] == 1, d.N)
+        sum(row) > 1e-9 && working && (n_obs_added += 1)
         if site !== nothing
             # Sum ALL 4 activities (dig/load/travel/idle), matching the MILP's own
             # P_work definition (3_MCSModel.jl Eq. 8d: P_work = sum_a p_a*u, over the

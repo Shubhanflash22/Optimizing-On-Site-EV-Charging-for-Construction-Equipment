@@ -372,7 +372,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @constraint(model, [i in N_c, e in E, a in B, k in K], u[e, i, a, k] <= d.A[i, e])
     # A CEV may charge (mu=1) only in an idle interval (the 4-activity encoding of the
     # PDF's work-or-charge exclusivity; idle draws 0 kW so it is a true "do nothing").
-    @constraint(model, [i in N_c, e in E, k in K], mu[i, e, k] <= u[e, i, B[4], k])
+    @constraint(model, [i in N_c, e in E, k in K],mu[i, e, k] <= (d.is_working[i, e, k] ? u[e, i, B[4], k] : 1))
     # (5e): work power = the chosen activity's constant draw. Idle (B[4]) has p_idle = 0,
     # so an idling CEV consumes no power (no time-varying power, no shutdown state).
     @constraint(model, [i in N_c, e in E, k in K],
@@ -753,7 +753,7 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
     @constraint(model, [i in N_c, e in E, a in B, k in K, s in S_scen; !d.is_working[i, e, k]],
         u[e, i, a, k, s] == 0)
     @constraint(model, [i in N_c, e in E, a in B, k in K, s in S_scen], u[e, i, a, k, s] <= d.A[i, e])
-    @constraint(model, [i in N_c, e in E, k in K, s in S_scen], mu[i, e, k, s] <= u[e, i, B[4], k, s])
+    @constraint(model, [i in N_c, e in E, k in K, s in S_scen], mu[i, e, k, s] <= (d.is_working[i, e, k] ? u[e, i, B[4], k, s] : 1))
     # (5e) but with THIS SCENARIO's sampled power, not the posterior mean.
     @constraint(model, [i in N_c, e in E, k in K, s in S_scen],
         P_work[i, e, k, s] == sum(p_activity_s[s][a] * u[e, i, a, k, s] for a in B))
