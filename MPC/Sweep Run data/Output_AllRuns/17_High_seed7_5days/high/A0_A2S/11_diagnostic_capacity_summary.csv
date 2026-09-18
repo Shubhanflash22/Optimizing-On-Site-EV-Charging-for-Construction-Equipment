@@ -1,0 +1,7 @@
+Metric,A0,A2S
+Total_Discharge_kWh,130.309,137.581
+Total_Work_kWh,136.344,137.198
+N_Capped_Intervals,9,1
+N_Infeasible_Windows,0,0
+Missed_Work_hour,1.283,0.002
+Missed_Work_Penalty_USD,2565.63,4.69

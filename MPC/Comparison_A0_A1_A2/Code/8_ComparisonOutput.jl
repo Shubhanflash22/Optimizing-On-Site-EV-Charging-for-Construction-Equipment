@@ -1,12 +1,12 @@
 # #############################################################################
-# ComparisonOutput.jl  —  module ComparisonOutput   [GENERALIZED, 2-5 WAY]
+# ComparisonOutput.jl  —  module ComparisonOutput   [GENERALIZED, 2-3 WAY]
 # -----------------------------------------------------------------------------
-# Produces MERGED, N-way side-by-side artefacts for any subset (2 to 5
+# Produces MERGED, N-way side-by-side artefacts for any subset (2 to 3
 # approaches) drawn from: Approach 0 (one-shot), Approach 1 - Shrinking,
-# Approach 2 - Shrinking (stochastic), Approach 1 - Receding, Approach 2 -
-# Receding (stochastic) — all sharing the SAME ActivityPowerPool (one pool
-# object, built once by the driver and passed into every run; see
-# 7_Comparison_main.jl). This module does not call any source codebase's own
+# Approach 2 - Shrinking (stochastic) — all sharing the SAME ActivityPowerPool
+# (one pool object, built once by the driver and passed into every run; see
+# 7_Comparison_main_ShrinkingOnlyVersion.jl). This module does not call any
+# source codebase's own
 # Output.jl at all — only these merged files are written, directly into the
 # run's `out_dir` (no per-approach subfolders):
 #
@@ -44,7 +44,7 @@
 #
 # Every function below takes `apps::Vector{Approach}` and only ever loops
 # over it / reads `length(apps)` — nothing is hardcoded to 3, so the SAME
-# code path serves the full 5-way run and every 2-way/3-way subset.
+# code path serves the full 3-way run and every 2-way subset.
 # #############################################################################
 module ComparisonOutput
 
@@ -60,10 +60,10 @@ gr()
 # =============================================================================
 # SMALL SHARED HELPERS  (duplicated, on purpose, from Common.jl)
 # -----------------------------------------------------------------------------
-# RecedingApp.Common and ShrinkingApp.Common are two DIFFERENT modules (each
-# nested inside its own namespace -- see 7_Comparison_main.jl), so there is no
-# single canonical "Common" this module could depend on without picking a
-# side. These five helpers are tiny, dependency-free, and IDENTICAL in both
+# A1ShrinkingApp.Common and A0App/A2ShrinkingApp's aliases of it are all the
+# SAME module (see 7_Comparison_main_ShrinkingOnlyVersion.jl's aliasing note),
+# but this file is kept dependency-free anyway so it never has to assume which
+# app wrapper is in scope. These five helpers are tiny and dependency-free in
 # source codebases, so they are copied here verbatim rather than importing
 # from one app and quietly coupling this module's correctness to it.
 # =============================================================================
@@ -433,11 +433,10 @@ end
 
 # =============================================================================
 # 07b — 3-way side-by-side TIMELINE comparison. A direct port of each source
-# codebase's own 3-row x 2-col fig_approach_timeline_comparison (see
-# 5_Output.jl), which only ever laid out Approach 0 vs Approach 1 side by
-# side. Here there are THREE approaches (approach0 / shrinking / receding),
-# so it stays a 3x3 grid — one column per approach, sharing the same three
-# rows:
+# codebase's own single-run figures (see each Approach's own 5_Output.jl),
+# which only ever laid out one approach's own trajectory. Here there are up
+# to THREE approaches (A0 / A1-Shrinking / A2-Shrinking), so this stays a
+# 3x3 grid — one column per approach, sharing the same three rows:
 #   row 1: MCS power (charging/discharging, NCDP/OPDP annotated)
 #   row 2: CEV state of energy
 #   row 3: CEV work power (bars coloured by activity)
@@ -579,7 +578,7 @@ end
 # (2 to 5 of them), rows = MCS power / CEV SOE / CEV work power. Column
 # titles carry each approach's label (top row only, same as the 3x2 source
 # version only titling its top row). Width scales with N (800px/column) so a
-# 2-way comparison isn't stretched as wide as the full 5-way one.
+# 2-way comparison isn't stretched as wide as the full 3-way one.
 function fig07_timeline_comparison(apps)
     nA = length(apps)
     row1 = [_panel_mcs_power(a.res, a.label) for a in apps]
@@ -629,10 +628,8 @@ function write_kpi_html(apps, out_dir)
     println(io, "<h2>", join([a.label for a in apps], " vs "), "</h2>")
     println(io, "<p>All ", nA, " column", nA == 1 ? "" : "s", " are FULLY REALISED outcomes, drawn from the ",
                 "SAME shared per-(excavator, activity) power sample pool (same seed, same frozen prior ",
-                "mu/sigma -- input data is identical across all four codebases apart from the regression-",
-                "refreshed <code>parameters.csv</code>, built once and shared). Receding Horizon runs use ",
-                "the shared <code>n_days_receding</code> reported day(s) so they are directly comparable to ",
-                "the single-day Shrinking Horizon runs.</p>")
+                "mu/sigma -- input data is identical across all three codebases apart from the regression-",
+                "refreshed <code>parameters.csv</code>, built once and shared).</p>")
     println(io, "<table><tr><th>Metric</th>")
     for a in apps; println(io, "<th>", a.label, "</th>"); end
     add_delta && println(io, "<th>&Delta; (", apps[2].label, " &minus; ", apps[1].label, ")</th>")
@@ -681,7 +678,7 @@ end
 # =============================================================================
 # Entry point: write the FULL merged artefact set for whatever `apps` subset
 # (2 to 5 Approach objects) is passed in, into `out_dir`. Every helper above
-# is N-generic, so this is the SAME code path for the full 5-way run and
+# is N-generic, so this is the SAME code path for the full 3-way run and
 # every 2-way/3-way subset -- only `apps` and `out_dir` change per call.
 # =============================================================================
 function write_comparison_outputs(apps::Vector{Approach}, out_dir::AbstractString)
@@ -844,7 +841,7 @@ end
 # HiGHS/JuMP) typically a MIP gap and solve time.
 #
 # This function does NOT hardcode solve_log's column names, even though the
-# schema is currently identical across Shrinking_Horizon and Receding_Horizon's
+# schema is currently identical across Approach 1 and Approach 2's
 # 4_MPCLoop.jl (day, step, clock, status, objective, gap_percent, solve_time_s):
 # writing it out AS-IS, whatever columns it actually has, means this stays
 # correct even if a future codebase variant adds/renames a column -- open

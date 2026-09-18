@@ -31,14 +31,14 @@
 # `n_day_run` keyword to `run_comparison_sweep` if a longer horizon is needed;
 # nothing else about the sweep depends on that value.
 #
-# NOTHING about the two codebases, Approach 0's source, the data loading, or
+# NOTHING about the three codebases, the data loading, or
 # `write_comparison_outputs` is duplicated or reimplemented here — this file
 # `include()`s 7_Comparison_main_ShrinkingOnlyVersion.jl (with its own
-# auto-run disabled) to get the SAME `A1ShrinkingApp` / `A2ShrinkingApp`
-# namespaced wrappers, the SAME `build_comparison_input`, the SAME
-# `_ALL_COMBOS`, and the SAME `write_comparison_outputs`, then adds ONLY the
-# mode loop around the same three solves that driver already performs once.
-# Edit either codebase (or the base comparison driver) in place and the next
+# auto-run disabled) to get the SAME `A0App` / `A1ShrinkingApp` /
+# `A2ShrinkingApp` namespaced wrappers, the SAME `build_comparison_input`, the
+# SAME `_ALL_COMBOS`, and the SAME `write_comparison_outputs`, then adds ONLY
+# the mode loop around the same three solves that driver already performs once.
+# Edit any codebase (or the base comparison driver) in place and the next
 # sweep run picks the change up automatically, exactly like the base driver.
 # #############################################################################
 
@@ -69,9 +69,8 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
                                      regression_data_dir::AbstractString = _DEFAULT_REGRESSION_DATA_DIR,
                                      regression_samples::Int = 2000,
                                      regression_chains::Int = 4,
-                                     approach0_source::Symbol = :a1_shrinking,   # :a1_shrinking / :a2_shrinking
                                      approach0_plant::Symbol = :sampled,         # :sampled / :mean
-                                    time_limit_sec::Float64 = 1200.0,
+                                     time_limit_sec::Float64 = 1200.0,
                                      multi_activity::Bool = false,
                                      require_site_visit::Bool = false,
                                      single_visit_per_site::Bool = false,
@@ -83,9 +82,8 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
                                      n_scenarios::Int = A2ShrinkingApp.ScenarioSampler.DEFAULT_N_SCENARIOS,
                                      combos = _ALL_COMBOS,
                                      modes = _DEFAULT_SWEEP_MODES,
+                                     detailed_output::Bool = false,
                                      seed::Int = 1)
-    approach0_source in (:a1_shrinking, :a2_shrinking) ||
-        error("run_comparison_sweep: approach0_source must be :a1_shrinking or :a2_shrinking")
     approach0_plant in (:sampled, :mean) ||
         error("run_comparison_sweep: approach0_plant must be :sampled or :mean")
     isempty(modes) && error("run_comparison_sweep: `modes` must list at least one mode")
@@ -109,8 +107,9 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
 
         # ---- load data ONCE, shared across every mode -- only the plant pool
         # changes between modes, never the underlying input data or (mu, sd) ----
-        dA1S, dA2S = _timed_status("loading input data (A1S + A2S DataLoaders)") do
-            (A1ShrinkingApp.DataLoader.load_data(:input;  input_dir = input_dir),
+        dA0, dA1S, dA2S = _timed_status("loading input data (A0 + A1S + A2S DataLoaders)") do
+            (A0App.DataLoader.load_data(:input;    input_dir = input_dir),
+             A1ShrinkingApp.DataLoader.load_data(:input;  input_dir = input_dir),
              A2ShrinkingApp.DataLoader.load_data(:input;  input_dir = input_dir))
         end
 
@@ -149,32 +148,25 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
                     round.(pool.mu, digits = 2), " kW; sd=", round.(pool.sd, digits = 2), " kW")
 
             # ---- APPROACH 0 (one-shot, no replanning) ----
-            res0 = _timed_status("[:$(mode)] Approach 0 solve (source = :$(approach0_source))") do
-                if approach0_source == :a1_shrinking
-                    A1ShrinkingApp.MPCLoop.run_one_shot(dA1S, pool; plant = approach0_plant,
-                                                       time_limit_sec, multi_activity,
-                                                       require_site_visit, single_visit_per_site,
-                                                       n_day_run, seed)
-                else # :a2_shrinking
-                    A2ShrinkingApp.MPCLoop.run_one_shot(dA2S, pool; plant = approach0_plant,
-                                                       time_limit_sec, multi_activity,
-                                                       require_site_visit, single_visit_per_site,
-                                                       n_day_run, seed)
-                end
+            res0 = _timed_status("[:$(mode)] Approach 0 solve") do
+                A0App.OneShot.run_one_shot(dA0, pool; plant = approach0_plant,
+                                           time_limit_sec, multi_activity,
+                                           require_site_visit, single_visit_per_site,
+                                           n_day_run, seed, detailed_output)
             end
 
             # ---- APPROACH 1b: Shrinking Horizon closed-loop MPC ----
             resA1S = _timed_status("[:$(mode)] Approach 1 - Shrinking solve (n_day_run = $(n_day_run))") do
                 A1ShrinkingApp.MPCLoop.run_mpc(dA1S, pool; shrinking, H, time_limit_sec, multi_activity,
                                               require_site_visit, single_visit_per_site,
-                                              mcmc_samples, plant = :sampled, n_day_run, seed)
+                                              mcmc_samples, plant = :sampled, n_day_run, seed, detailed_output)
             end
 
             # ---- APPROACH 2b: Shrinking Horizon, stochastic scenario-based closed-loop MPC ----
             resA2S = _timed_status("[:$(mode)] Approach 2 - Shrinking solve ($(n_scenarios) scenarios, n_day_run = $(n_day_run))") do
                 A2ShrinkingApp.MPCLoop.run_mpc(dA2S, pool; shrinking, H, time_limit_sec, multi_activity,
                                               require_site_visit, single_visit_per_site,
-                                              mcmc_samples, plant = :sampled, n_scenarios, n_day_run, seed)
+                                              mcmc_samples, plant = :sampled, n_scenarios, n_day_run, seed, detailed_output)
             end
 
             all_apps = Dict(
@@ -182,6 +174,31 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
                 "A1S" => Approach("A1S", "Approach 1 - Shrinking",                     resA1S, :firebrick),
                 "A2S" => Approach("A2S", "Approach 2 - Shrinking (stochastic)",        resA2S, :darkorange),
             )
+
+            # ---- DETAILED OUTPUT (opt-in): separate tree, nested per mode ----
+            if detailed_output
+                mode_detailed = joinpath(dirname(out_dir), "Detailed_" * basename(out_dir), String(mode))
+                mkpath(mode_detailed)
+                if res0.detailed_plan_df !== nothing
+                    CSV.write(joinpath(mode_detailed, "A0_plan_full.csv"), res0.detailed_plan_df)
+                    CSV.write(joinpath(mode_detailed, "A0_realized_tuple.csv"), res0.detailed_realized_df)
+                    CSV.write(joinpath(mode_detailed, "A0_MCS_plan_full.csv"), res0.detailed_mcs_plan_df)
+                    CSV.write(joinpath(mode_detailed, "A0_MCS_realized_tuple.csv"), res0.detailed_mcs_realized_df)
+                end
+                if resA1S.detailed_plan_df !== nothing
+                    CSV.write(joinpath(mode_detailed, "A1S_plan_full.csv"), resA1S.detailed_plan_df)
+                    CSV.write(joinpath(mode_detailed, "A1S_realized_tuple.csv"), resA1S.detailed_realized_df)
+                    CSV.write(joinpath(mode_detailed, "A1S_MCS_plan_full.csv"), resA1S.detailed_mcs_plan_df)
+                    CSV.write(joinpath(mode_detailed, "A1S_MCS_realized_tuple.csv"), resA1S.detailed_mcs_realized_df)
+                end
+                if resA2S.detailed_plan_df !== nothing
+                    CSV.write(joinpath(mode_detailed, "A2S_plan_full.csv"), resA2S.detailed_plan_df)
+                    CSV.write(joinpath(mode_detailed, "A2S_realized_tuple.csv"), resA2S.detailed_realized_df)
+                    CSV.write(joinpath(mode_detailed, "A2S_MCS_plan_full.csv"), resA2S.detailed_mcs_plan_df)
+                    CSV.write(joinpath(mode_detailed, "A2S_MCS_realized_tuple.csv"), resA2S.detailed_mcs_realized_df)
+                end
+                println("[:$(mode)] detailed output -> $(mode_detailed)")
+            end
 
             # ---- write every requested comparison for THIS mode, nested
             # under Output/<mode>/ ----
@@ -242,11 +259,11 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
         println("  run_log.txt  (this console log, shared across all $(length(modes)) modes x $(length(combos)) comparisons)")
         _status("Sweep finished — total elapsed $(round(time() - _sweep_t0, digits=1))s")
 
-        return (; mode_summaries, dA1S, dA2S)
+        return (; mode_summaries, dA0, dA1S, dA2S)
     end
 end
 
 # Auto-run unless a harness defines SWEEP_NO_AUTORUN = true first.
 if !(@isdefined(SWEEP_NO_AUTORUN) && SWEEP_NO_AUTORUN)
-    run_comparison_sweep(n_day_run = 1, approach0_source = :a1_shrinking)
+    run_comparison_sweep(n_day_run = 1)
 end

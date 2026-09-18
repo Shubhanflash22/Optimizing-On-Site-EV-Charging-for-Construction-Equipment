@@ -2,12 +2,9 @@
 # Comparison_main.jl  —  TOP-LEVEL 3-WAY + 3-SUBSET COMPARISON DRIVER
 # -----------------------------------------------------------------------------
 # Runs, side by side, from the SAME input data and the SAME shared power pool:
-#   * Approach 0    (A0)  — one-shot plan, executed open-loop, no replanning
-#                    (taken from ONE canonical codebase's run_one_shot by
-#                    default — see `approach0_source` below; verified
-#                    byte-identical across both candidate sources, so either
-#                    one is an equally valid choice — see the note above
-#                    `module A1ShrinkingApp`)
+#   * Approach 0    (A0)  — one-shot plan, executed open-loop, no replanning.
+#                    Its own independent codebase now (../Approach 0/) --
+#                    no longer borrowed from Approach 1 or Approach 2.
 #   * Approach 1b   (A1S) — Approach 1, Shrinking Horizon closed-loop MPC
 #                    (n_day_run = n_day_run)
 #   * Approach 2b   (A2S) — Approach 2, Shrinking Horizon, STOCHASTIC
@@ -31,49 +28,41 @@
 # see 8_ComparisonOutput.jl's write_diagnostic_dispatch_trace for what these
 # contain. No changes needed here: it's called automatically from inside
 # write_comparison_outputs, using data already returned by run_mpc /
-# run_one_shot -- Approach 1/2's own solver code (4_MPCLoop.jl etc.) is
-# untouched.
+# run_one_shot -- Approach 0/1/2's own solver code (4_OneShot.jl /
+# 4_MPCLoop.jl etc.) is untouched. ALL cross-approach images and comparison
+# CSVs live here, in this Comparison folder, and only here -- Approach 0/1/2's
+# own `write_outputs` only ever draws that one approach's own single-run
+# figures.
 #
 # MULTI-DAY (n_day_run) — WHO ACTUALLY HONORS IT:
-#   A1S / A2S (Shrinking Horizon)      -- yes, natively. Their own MPCLoop.jl
-#                                         has an internal day loop with real
-#                                         state carried from one day into the
-#                                         next.
-#   A0 (one-shot, source = shrinking)  -- yes. run_one_shot re-solves once per
-#                                         kept day, each time starting from
-#                                         the REAL carried-over state. Default
-#                                         is approach0_source = :a1_shrinking
-#                                         so A0 is genuinely multi-day too,
-#                                         comparable to A1S/A2S.
-# THE CODE IS CALLED IN PLACE — NOTHING IS COPIED. This driver include()s both
-# source codebases directly from their own folders (paths resolved relative
-# to THIS file, not hardcoded, so the whole Comparison_A0_A1_A2 folder is
-# portable as long as it stays a sibling of Approach 1 / Approach 2 under the
-# same MPC root — see _MPC_ROOT below). Edit either codebase in place and the
-# next run picks the change up automatically.
+#   A1S / A2S (Shrinking Horizon)  -- yes, natively. Their own MPCLoop.jl has
+#                                     an internal day loop with real state
+#                                     carried from one day into the next.
+#   A0 (one-shot)                  -- yes. run_one_shot re-solves once per
+#                                     kept day, each time starting from the
+#                                     REAL carried-over state (see
+#                                     ../Approach 0/docs/README.md §5 for what
+#                                     carries over and what resets daily).
 #
-# HOW THE TWO CODEBASES ARE KEPT SEPARATE (WITHOUT DUPLICATING Common.jl)
-# Both codebases define modules with the SAME names (Common, DataLoader,
-# MCSModel, MPCLoop, Output, plus ScenarioSampler for Approach 2), so each is
+# THE CODE IS CALLED IN PLACE — NOTHING IS COPIED. This driver include()s all
+# three source codebases directly from their own folders (paths resolved
+# relative to THIS file, not hardcoded, so the whole Comparison_A0_A1_A2
+# folder is portable as long as it stays a sibling of Approach 0 / Approach 1
+# / Approach 2 under the same MPC root — see _MPC_ROOT below). Edit any
+# codebase in place and the next run picks the change up automatically.
+#
+# HOW THE THREE CODEBASES ARE KEPT SEPARATE (WITHOUT DUPLICATING Common.jl)
+# All three codebases define modules with the SAME names (Common, DataLoader,
+# MCSModel, plus MPCLoop/Output for A1/A2, ScenarioSampler for A2), so each is
 # include()-d inside its own wrapper module below to avoid one silently
 # overwriting another. Common.jl is the ONE exception: only A1ShrinkingApp
-# includes its own copy; A2ShrinkingApp ALIASES it. This is what makes it
-# possible to build exactly ONE `ActivityPowerPool` object and hand the SAME
-# object to all three runs — they are otherwise distinct Julia modules, so
-# without this alias the pool's type from one app would be rejected by the
-# other's `run_mpc`/`run_one_shot` (a different nominal type), forcing
-# separately-built pools and quietly voiding the shared-plant comparison.
-#
-# This aliasing choice was VERIFIED against the actual codebase (checksummed,
-# not assumed) before this driver was written:
-#   - Approach 1/Shrinking_Horizon/code/1_Common.jl
-#       ==  Approach 2/Shrinking_Horizon/code/1_Common.jl    (byte-identical)
-# So Approach 1's copy is aliased into A2ShrinkingApp below — every app gets
-# everything it needs, nothing is lost.
-# The same checksum pass also confirmed 2_DataLoader.jl matches between
-# Approach 1 / Approach 2 (so dA1S/dA2S are loaded through literally the same
-# DataLoader code), and that run_one_shot's function BODY is byte-identical
-# between A1S and A2S, consistent with A0 being interchangeable across both.
+# includes its own copy; A0App and A2ShrinkingApp both ALIAS it. This is what
+# makes it possible to build exactly ONE `ActivityPowerPool` object and hand
+# the SAME object to all three runs — they are otherwise distinct Julia
+# modules, so without this alias the pool's type from one app would be
+# rejected by another app's `run_mpc`/`run_one_shot` (a different nominal
+# type), forcing separately-built pools and quietly voiding the shared-plant
+# comparison.
 #
 # WHAT GETS WRITTEN — see the folder list above; each subfolder additionally
 # gets its own run_log.txt is NOT written per-subfolder (there's one shared
@@ -83,6 +72,7 @@
 using Printf
 using Random
 using Dates
+using CSV
 
 const _CODE_DIR = @__DIR__
 
@@ -116,22 +106,22 @@ end
 # levels up is the MPC root that Approach 1 / Approach 2 also live under.
 # -----------------------------------------------------------------------------
 const _ROOT     = normpath(joinpath(_CODE_DIR, ".."))
-# --- TEMP-RUN PATCH -----------------------------------------
-# This copy of Comparison_A0_A1_A2 lives in Downloads, NOT as a sibling of
-# Approach 1 / Approach 2 under the Desktop MPC root, so the normal "two
-# levels up" resolution (`normpath(joinpath(_ROOT, ".."))`) would look for
-# Approach 1/2 inside Downloads and fail. Hardcode the real MPC root instead
-# -- Approach 1 and Approach 2 still live here, unmoved, on the Desktop.
-const _MPC_ROOT = raw"C:\Users\shubh\Desktop\MPC"
-# ------------------------------------------------------------------------------
+# _MPC_ROOT is the folder that contains Approach 0 / Approach 1 / Approach 2 /
+# Comparison_A0_A1_A2 as siblings -- two levels up from this file
+# (.../Comparison_A0_A1_A2/Code). Resolved relative to THIS file so the whole
+# Comparison_A0_A1_A2 folder is portable as long as it stays a sibling of the
+# three Approach folders, wherever that is.
+const _MPC_ROOT = normpath(joinpath(_ROOT, ".."))
 const _A1_ROOT  = joinpath(_MPC_ROOT, "Approach 1")
 const _A2_ROOT  = joinpath(_MPC_ROOT, "Approach 2")
+const _A0_ROOT  = joinpath(_MPC_ROOT, "Approach 0")
 
-const _A1S_CODE  = joinpath(_A1_ROOT, "Shrinking_Horizon", "code")
-const _A2S_CODE  = joinpath(_A2_ROOT, "Shrinking_Horizon", "code")
+const _A1S_CODE  = joinpath(_A1_ROOT, "code")
+const _A2S_CODE  = joinpath(_A2_ROOT, "code")
+const _A0_CODE   = joinpath(_A0_ROOT, "code")
 
-const _A1S_INPUT = joinpath(_A1_ROOT, "Shrinking_Horizon", "data", "input_data")
-const _A2S_INPUT = joinpath(_A2_ROOT, "Shrinking_Horizon", "data", "input_data")
+const _A1S_INPUT = joinpath(_A1_ROOT, "data", "input_data")
+const _A2S_INPUT = joinpath(_A2_ROOT, "data", "input_data")
 
 const _COMPARISON_INPUT = joinpath(_ROOT, "Input")
 const _COMPARISON_OUT   = joinpath(_ROOT, "Output")
@@ -146,14 +136,19 @@ const _SHARED_INPUT_FILES = ["time_data.csv", "travel_time.csv", "work_flexible.
 
 # =============================================================================
 # NAMESPACED APP WRAPPERS — see the big header comment above for why each is
-# its own module and why only A1ShrinkingApp includes 1_Common.jl.
+# its own module and why only A1ShrinkingApp includes 1_Common.jl. A0App and
+# A2ShrinkingApp both ALIAS A1ShrinkingApp's Common instead of including their
+# own copy: `ActivityPowerPool` is a nominal struct type declared inside
+# `module Common`, so two separately-include()-d copies of 1_Common.jl would
+# produce two DIFFERENT types, and a pool built by one app's
+# draw_activity_power_pool would be rejected by another app's
+# run_mpc/run_one_shot. Aliasing is what makes it possible to build exactly
+# ONE ActivityPowerPool object and hand the literal SAME object to all three
+# solves. (DataLoader's `d` is a plain NamedTuple, not a nominal struct, so it
+# has no such restriction -- each app is free to keep its own copy of that.)
 # =============================================================================
 module A1ShrinkingApp
-    # TEMP-RUN PATCH: was normpath(joinpath(@__DIR__, "..", "..",
-    # "Approach 1", "Shrinking_Horizon", "code")) -- that resolves relative to
-    # wherever THIS file physically sits, which is now Downloads, not Desktop\MPC.
-    # Hardcoded to the real (unmoved) Desktop location of Approach 1/2 instead.
-    const _DIR = raw"C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\code"
+    const _DIR = normpath(joinpath(@__DIR__, "..", "..", "Approach 1", "code"))
     include(joinpath(_DIR, "1_Common.jl"))
     include(joinpath(_DIR, "0_Regression.jl"))
     include(joinpath(_DIR, "2_DataLoader.jl"))
@@ -162,11 +157,23 @@ module A1ShrinkingApp
     include(joinpath(_DIR, "5_Output.jl"))
 end
 
+module A0App
+    # Approach 0 is its own independent codebase now (../../Approach 0/code) --
+    # no longer borrowed from Approach 1 or Approach 2's run_one_shot, so there
+    # is no more approach0_source switch to get wrong. Common is ALIASED (see
+    # this section's header note), not included from Approach 0's own copy.
+    import ..A1ShrinkingApp
+    const Common = A1ShrinkingApp.Common
+    const _DIR = normpath(joinpath(@__DIR__, "..", "..", "Approach 0", "code"))
+    include(joinpath(_DIR, "2_DataLoader.jl"))
+    include(joinpath(_DIR, "3_MCSModel.jl"))
+    include(joinpath(_DIR, "4_OneShot.jl"))
+end
+
 module A2ShrinkingApp
     import ..A1ShrinkingApp
     const Common = A1ShrinkingApp.Common
-    # TEMP-RUN PATCH: hardcoded for the same reason as A1ShrinkingApp above.
-    const _DIR = raw"C:\Users\shubh\Desktop\MPC\Approach 2\Shrinking_Horizon\code"
+    const _DIR = normpath(joinpath(@__DIR__, "..", "..", "Approach 2", "code"))
     include(joinpath(_DIR, "2_DataLoader.jl"))
     include(joinpath(_DIR, "2b_ScenarioSampler.jl"))
     include(joinpath(_DIR, "3_MCSModel.jl"))
@@ -176,6 +183,33 @@ end
 
 include(joinpath(_CODE_DIR, "8_ComparisonOutput.jl"))
 using .ComparisonOutput: Approach, write_comparison_outputs
+
+# =============================================================================
+# DETAILED OUTPUT WRITER (opt-in via `detailed_output = true`)
+# -----------------------------------------------------------------------------
+# Writes the 4 CSVs (<prefix>_plan_full, <prefix>_realized_tuple,
+# <prefix>_MCS_plan_full, <prefix>_MCS_realized_tuple) for ONE approach into a
+# COMPLETELY SEPARATE tree, Detailed_Output/ -- a sibling to `out_dir`, never
+# nested inside it or inside any comparison subfolder. Called once per
+# approach (A0, A1S, A2S) right after all three solves finish.
+# =============================================================================
+function _write_detailed_output(res, approach_prefix::AbstractString, out_dir::AbstractString)
+    detailed_root = joinpath(dirname(out_dir), "Detailed_" * basename(out_dir))
+    mkpath(detailed_root)
+    if res.detailed_plan_df !== nothing
+        CSV.write(joinpath(detailed_root, "$(approach_prefix)_plan_full.csv"), res.detailed_plan_df)
+    end
+    if res.detailed_realized_df !== nothing
+        CSV.write(joinpath(detailed_root, "$(approach_prefix)_realized_tuple.csv"), res.detailed_realized_df)
+    end
+    if res.detailed_mcs_plan_df !== nothing
+        CSV.write(joinpath(detailed_root, "$(approach_prefix)_MCS_plan_full.csv"), res.detailed_mcs_plan_df)
+    end
+    if res.detailed_mcs_realized_df !== nothing
+        CSV.write(joinpath(detailed_root, "$(approach_prefix)_MCS_realized_tuple.csv"), res.detailed_mcs_realized_df)
+    end
+    return detailed_root
+end
 
 # -----------------------------------------------------------------------------
 # CONSOLE LOG CAPTURE — mirrors each source codebase's own _with_console_log,
@@ -281,11 +315,6 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
                           regression_data_dir::AbstractString = _DEFAULT_REGRESSION_DATA_DIR,
                           regression_samples::Int = 2000,
                           regression_chains::Int = 4,
-                          # Which codebase's run_one_shot is "Approach 0". Verified
-                          # byte-identical between A1S and A2S on the actual codebase,
-                          # so either is an equally valid choice; :a1_shrinking is the
-                          # default only to match the original comparison scripts.
-                          approach0_source::Symbol = :a1_shrinking,   # :a1_shrinking / :a2_shrinking
                           # PLANT MODE for Approach 0's open-loop replay:
                           #   :sampled  the one-shot plan drifts under the shared pool
                           #   :mean     realized power pinned to mu, so realized == planned
@@ -323,9 +352,14 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
                           # draws). Same `mode` name as run_comparison_sweep's `modes` tuple
                           # in this same file's Sweep sibling.
                           mode::Symbol = :normal,
+                          # DETAILED OUTPUT (opt-in): when true, every 15-min
+                          # plan/realized decision is written to CSV for all
+                          # three approaches (CEV + MCS), into a
+                          # Detailed_Output/ tree parallel to `out_dir` -- see
+                          # _write_detailed_output below. Off by default since
+                          # it costs extra memory/time per solve.
+                          detailed_output::Bool = false,
                           seed::Int = 1)
-    approach0_source in (:a1_shrinking, :a2_shrinking) ||
-        error("run_comparison: approach0_source must be :a1_shrinking or :a2_shrinking")
     approach0_plant in (:sampled, :mean) ||
         error("run_comparison: approach0_plant must be :sampled or :mean")
 
@@ -346,8 +380,9 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
 
         # ---- load data separately with each app's OWN DataLoader, from the
         # SAME Comparison/Input folder ----
-        dA1S, dA2S = _timed_status("loading input data (A1S + A2S DataLoaders)") do
-            (A1ShrinkingApp.DataLoader.load_data(:input;  input_dir = input_dir),
+        dA0, dA1S, dA2S = _timed_status("loading input data (A0 + A1S + A2S DataLoaders)") do
+            (A0App.DataLoader.load_data(:input;    input_dir = input_dir),
+             A1ShrinkingApp.DataLoader.load_data(:input;  input_dir = input_dir),
              A2ShrinkingApp.DataLoader.load_data(:input;  input_dir = input_dir))
         end
 
@@ -382,19 +417,12 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
                 round.(pool.mu, digits = 2), " kW; sd=", round.(pool.sd, digits = 2), " kW")
 
         # ---- APPROACH 0 (one-shot, no replanning) ----
-        println("\n--- Approach 0 (one-shot, plant = :$(approach0_plant), source = :$(approach0_source)) ---")
-        res0 = _timed_status("Approach 0 solve (source = :$(approach0_source))") do
-            if approach0_source == :a1_shrinking
-                A1ShrinkingApp.MPCLoop.run_one_shot(dA1S, pool; plant = approach0_plant,
-                                                   time_limit_sec, multi_activity,
-                                                   require_site_visit, single_visit_per_site,
-                                                   n_day_run, seed)
-            else # :a2_shrinking
-                A2ShrinkingApp.MPCLoop.run_one_shot(dA2S, pool; plant = approach0_plant,
-                                                   time_limit_sec, multi_activity,
-                                                   require_site_visit, single_visit_per_site,
-                                                   n_day_run, seed)
-            end
+        println("\n--- Approach 0 (one-shot, plant = :$(approach0_plant)) ---")
+        res0 = _timed_status("Approach 0 solve") do
+            A0App.OneShot.run_one_shot(dA0, pool; plant = approach0_plant,
+                                       time_limit_sec, multi_activity,
+                                       require_site_visit, single_visit_per_site,
+                                       n_day_run, seed, detailed_output)
         end
 
         # ---- APPROACH 1b: Shrinking Horizon closed-loop MPC ----
@@ -402,7 +430,7 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
         resA1S = _timed_status("Approach 1 - Shrinking solve (n_day_run = $(n_day_run))") do
             A1ShrinkingApp.MPCLoop.run_mpc(dA1S, pool; shrinking, H, time_limit_sec, multi_activity,
                                           require_site_visit, single_visit_per_site,
-                                          mcmc_samples, plant = :sampled, n_day_run, seed)
+                                          mcmc_samples, plant = :sampled, n_day_run, seed, detailed_output)
         end
 
         # ---- APPROACH 2b: Shrinking Horizon, stochastic scenario-based closed-loop MPC ----
@@ -410,7 +438,7 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
         resA2S = _timed_status("Approach 2 - Shrinking solve ($(n_scenarios) scenarios, n_day_run = $(n_day_run))") do
             A2ShrinkingApp.MPCLoop.run_mpc(dA2S, pool; shrinking, H, time_limit_sec, multi_activity,
                                           require_site_visit, single_visit_per_site,
-                                          mcmc_samples, plant = :sampled, n_scenarios, n_day_run, seed)
+                                          mcmc_samples, plant = :sampled, n_scenarios, n_day_run, seed, detailed_output)
         end
 
         # ---- the three Approach identities, keyed exactly as _ALL_COMBOS expects ----
@@ -419,6 +447,14 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
             "A1S" => Approach("A1S", "Approach 1 - Shrinking",                     resA1S, :firebrick),
             "A2S" => Approach("A2S", "Approach 2 - Shrinking (stochastic)",        resA2S, :darkorange),
         )
+
+        # ---- DETAILED OUTPUT (opt-in): separate tree, all three approaches ----
+        if detailed_output
+            d0 = _write_detailed_output(res0,   "A0",  out_dir)
+            _write_detailed_output(resA1S, "A1S", out_dir)
+            _write_detailed_output(resA2S, "A2S", out_dir)
+            println("\nDetailed output -> $(d0)  (A0_*.csv, A1S_*.csv, A2S_*.csv, incl. *_MCS_*.csv)")
+        end
 
         # ---- write every requested comparison — same 3 solved results,
         # sliced into as many output folders as `combos` lists ----
@@ -450,11 +486,11 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
         println("  run_log.txt  (this console log, shared across all $(length(combos)) comparisons)")
         _status("Run finished — total elapsed $(round(time() - _run_t0, digits=1))s")
 
-        return (; res0, resA1S, resA2S, all_apps, dA1S, dA2S, pool)
+        return (; res0, resA1S, resA2S, all_apps, dA0, dA1S, dA2S, pool)
     end
 end
 
 # Auto-run unless a harness defines COMPARISON_NO_AUTORUN = true first.
 if !(@isdefined(COMPARISON_NO_AUTORUN) && COMPARISON_NO_AUTORUN)
-    run_comparison(n_day_run = 5, approach0_source = :a1_shrinking)
+    run_comparison(n_day_run = 5)
 end
