@@ -92,7 +92,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         (i, j) == (mcs_transit0[m][1], mcs_transit0[m][2]) &&
         k <= K[min(mcs_transit0[m][3], length(K))])
     carried_arrival_k(m) = mcs_transit0[m] === nothing ? nothing :
-        (mcs_transit0[m][3] + 1 <= length(K) ? K[mcs_transit0[m][3] + 1] : nothing)
+        (mcs_transit0[m][3] + 1 <= length(K) ? K[mcs_transit0[m][3] + 1] : nothing) 
 
     # ---- model + solver configuration ----
     model = Model(HiGHS.Optimizer)

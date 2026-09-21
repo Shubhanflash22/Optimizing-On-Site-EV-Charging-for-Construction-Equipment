@@ -439,7 +439,7 @@ end
 # no cursor/exhaustion concept for a live pool at all.
 # #############################################################################
 function draw_activity_power_pool_live(entities, live_values::Dict{Int, Vector{Float64}};
-                                        rng = Random.GLOBAL_RNG)
+                                        n_samples::Int = 20, rng = Random.GLOBAL_RNG)
     n_act = length(live_values)
     mu = zeros(n_act); sd = zeros(n_act)
     samples = Dict{Tuple{Int,Int}, Vector{Float64}}()
@@ -449,12 +449,12 @@ function draw_activity_power_pool_live(entities, live_values::Dict{Int, Vector{F
         mu[a] = sum(vals) / length(vals)
         sd[a] = length(vals) > 1 ?
             sqrt(sum((v - mu[a])^2 for v in vals) / (length(vals) - 1)) : 0.0
+        fixed_sequence = [vals[rand(rng, 1:length(vals))] for _ in 1:n_samples]
         for e in entities
-            samples[(e, a)] = vals   # shared reference is fine: never mutated, and every
-                                      # draw below is independent random-with-replacement
+            samples[(e, a)] = fixed_sequence
         end
     end
-    return ActivityPowerPool(mu, sd, samples, true, rng)
+    return ActivityPowerPool(mu, sd, samples, false, nothing)
 end
 
 

@@ -235,13 +235,6 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
         p_true[e] = pt
         sum(row) > 1e-9 && working && (n_obs_added += 1)
         if site !== nothing
-            # Sum ALL 4 activities (dig/load/travel/idle), matching the MILP's own
-            # P_work definition (3_MCSModel.jl Eq. 8d: P_work = sum_a p_a*u, over the
-            # FULL activity set B, not just the 3 productive ones). idle currently
-            # draws 0 kW so row[4]*pt[4] contributes nothing today, but excluding it
-            # here would silently under-report realized work power the moment idle
-            # power (p_idling) is ever made nonzero -- this line must stay in sync
-            # with `work_kW` below, which already sums over all 4 via dot().
             real_P_work[site, e, gidx] =
                 (row[1] * pt[1] + row[2] * pt[2] + row[3] * pt[3] + row[4] * pt[4]) / d.delta_T
         end
@@ -258,8 +251,18 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
     # energy instead of reflecting that the machine ran out of charge mid-task.
     n_capped = 0
     for e in d.E
-        charged   = sum(value(model[:P_MCS_CEV][m, i, e, k0]) for m in d.M, i in d.N_c) * d.delta_T
+        raw_by_mcs = Dict(m => sum(value(model[:P_MCS_CEV][m, i, e, k0]) for i in d.N_c) * d.delta_T for m in d.M)
+        total_raw  = sum(values(raw_by_mcs))
+        charged    = d.eta_ch_dch_cev[e] * total_raw
         headroom  = soe_cev[e] + charged - d.SOE_CEV_min[e]      # energy available before hitting the floor
+        overflow = soe_cev[e] - d.SOE_CEV_max[e]
+        if overflow > 1e-9 && total_raw > 1e-9
+            overflow_raw = overflow / d.eta_ch_dch_cev[e]
+            for m in d.M
+                share = raw_by_mcs[m] / total_raw
+                soe_mcs[m] = min(soe_mcs[m] + overflow_raw * share, d.SOE_MCS_max[m])
+            end
+        end
         work_true = dot(a_real[e], p_true[e])                    # energy the sampled draw would actually cost
 
         if work_true > headroom && work_true > 1e-9
@@ -273,6 +276,12 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
         end
 
         soe_cev[e] = soe_cev[e] + charged - work_true
+        site_e = findfirst(i -> d.A[i, e] == 1, d.N)
+        if site_e !== nothing
+            real_P_work[site_e, e, gidx] =
+                (a_real[e][1]*p_true[e][1] + a_real[e][2]*p_true[e][2] +
+                 a_real[e][3]*p_true[e][3] + a_real[e][4]*p_true[e][4]) / d.delta_T
+        end
         soe_cev[e] = clamp(soe_cev[e], d.SOE_CEV_min[e], d.SOE_CEV_max[e])  # safety net only; should not bite now
     end
 
@@ -490,6 +499,15 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
     n_capped_total = 0
 
     for day in 1:n_day_run
+        # RESET PER DAY (Approach 0 only): clear the applied-activity history
+        # so the rest rule, the precedence rule, and the travel-pacing rule
+        # (all seeded from `hist` inside build_window_model -- see
+        # 3_MCSModel.jl) start fresh each day instead of carrying a running
+        # tally across the whole n_day_run window. This is the ONLY thing
+        # that resets here: physical state (battery SOE, MCS location) and
+        # the rem_dig/rem_load work backlog just below are UNCHANGED and
+        # still carry over normally day to day, exactly as before.
+        hist = [Vector{Tuple{Int, Vector{Float64}}}() for _ in d.E]
         # CHANGE 5 -- same work requirement every day, ADDED on top of whatever
         # is still outstanding from the previous day (backlog accumulates).
         rem_dig  .+= float.(d.hours_digging)
@@ -620,7 +638,7 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
             end
 
             # The APPLIED cell (row k0, col k0) is what actually happened this step.
-            for e in d.E; real_cev_act[e][gidx] = plan_cev_act[e][k0, k0]; end
+            for e in d.E; real_cev_act[e][gidx] = ACT_NAME[argmax(step.a_real[e])]; end
             real_mcs_act[gidx] = plan_mcs_act[k0, k0]
 
             # (2)+(3)+(4) APPLY / SIMULATE (shared pool draw) / ADVANCE.
