@@ -132,7 +132,7 @@ end
 function activity_label(model, d, e, site, k)
     vals   = [value(model[:u][e, site, a, k]) for a in eachindex(d.B)]
     p_into = sum(value(model[:P_MCS_CEV][m, site, e, k]) for m in d.M)
-    return p_into > 1e-6 ? "Charging" : (sum(vals) < 0.5 ? "" : ACT_NAME[d.B[argmax(vals)]])
+    return p_into > 1e-6 ? "Charging" : (sum(vals) < 0.5 ? "Off" : ACT_NAME[d.B[argmax(vals)]])
 end
 
 # Mutually-exclusive MCS status label for interval k (same rule used by the
@@ -494,7 +494,13 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
 
             for e in d.E
                 site = findfirst(i -> d.A[i, e] == 1, d.N)
-                real_cev_act[e][gidx] = ACT_NAME[argmax(step.a_real[e])]
+                idx = applied_act_index(model, d, e, k0)
+                p_into = site !== nothing ? sum(value(model[:P_MCS_CEV][m, site, e, k0]) for m in d.M) : 0.0
+                planned_label = p_into > 1e-6 ? "Charging" :
+                                (site !== nothing && !d.is_working[site, e, k0]) ? "Off" : ACT_NAME[idx]
+                realized_min  = round(Int, step.a_real[e][idx] * 60)
+                full_min      = round(Int, d.delta_T * 60)
+                real_cev_act[e][gidx] = realized_min < full_min ? "$(planned_label) ($(realized_min) min)" : planned_label
             end
             real_mcs_act[gidx] = mcs_status_label(model, d, k0)
 

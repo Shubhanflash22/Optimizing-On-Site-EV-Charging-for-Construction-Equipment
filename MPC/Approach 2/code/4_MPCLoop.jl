@@ -127,7 +127,7 @@ end
 function activity_label(model, d, e, site, k)
     vals   = [value(model[:u][e, site, a, k]) for a in eachindex(d.B)]
     p_into = sum(value(model[:P_MCS_CEV][m, site, e, k]) for m in d.M)
-    return p_into > 1e-6 ? "Charging" : (sum(vals) < 0.5 ? "" : ACT_NAME[d.B[argmax(vals)]])
+    return p_into > 1e-6 ? "Charging" : (sum(vals) < 0.5 ? "Off" : ACT_NAME[d.B[argmax(vals)]])
 end
 
 # Mutually-exclusive MCS status label for interval k (same rule used by the
@@ -255,14 +255,6 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
         total_raw  = sum(values(raw_by_mcs))
         charged    = d.eta_ch_dch_cev[e] * total_raw
         headroom  = soe_cev[e] + charged - d.SOE_CEV_min[e]      # energy available before hitting the floor
-        overflow = soe_cev[e] - d.SOE_CEV_max[e]
-        if overflow > 1e-9 && total_raw > 1e-9
-            overflow_raw = overflow / d.eta_ch_dch_cev[e]
-            for m in d.M
-                share = raw_by_mcs[m] / total_raw
-                soe_mcs[m] = min(soe_mcs[m] + overflow_raw * share, d.SOE_MCS_max[m])
-            end
-        end
         work_true = dot(a_real[e], p_true[e])                    # energy the sampled draw would actually cost
 
         if work_true > headroom && work_true > 1e-9
@@ -276,6 +268,14 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
         end
 
         soe_cev[e] = soe_cev[e] + charged - work_true
+        overflow = soe_cev[e] - d.SOE_CEV_max[e]
+        if overflow > 1e-9 && total_raw > 1e-9
+            overflow_raw = overflow / d.eta_ch_dch_cev[e]
+            for m in d.M
+                share = raw_by_mcs[m] / total_raw
+                soe_mcs[m] = min(soe_mcs[m] + overflow_raw * share, d.SOE_MCS_max[m])
+            end
+        end
         site_e = findfirst(i -> d.A[i, e] == 1, d.N)
         if site_e !== nothing
             real_P_work[site_e, e, gidx] =
@@ -637,8 +637,6 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
                 end
             end
 
-            # The APPLIED cell (row k0, col k0) is what actually happened this step.
-            for e in d.E; real_cev_act[e][gidx] = ACT_NAME[argmax(step.a_real[e])]; end
             real_mcs_act[gidx] = plan_mcs_act[k0, k0]
 
             # (2)+(3)+(4) APPLY / SIMULATE (shared pool draw) / ADVANCE.
@@ -648,6 +646,24 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
                                        plant_mode = plant, s_ref = 1, gidx = gidx)
             n_obs_total += step.n_obs_added
             n_capped_total += step.n_capped
+
+            # The APPLIED cell (row k0, col k0) is what actually happened this step --
+            # needs `step.a_real`, so this can only run AFTER apply_and_simulate_stochastic! above.
+            for e in d.E
+                # `model` here is the RAW scenario-indexed model (u[E,N,B,K,S_scen]) --
+                # applied_act_index expects a 4-index u[e,i,act,k], so wrap it in the
+                # same _ScenarioOneView(model, 1) used elsewhere in this loop, which
+                # forwards a 4-index call to the tied (non-anticipative) scenario-1 slice.
+                site = findfirst(i -> d.A[i, e] == 1, d.N)
+                vmodel_applied = _ScenarioOneView(model, 1)
+                idx = applied_act_index(vmodel_applied, d, e, k0)
+                p_into = site !== nothing ? sum(value(vmodel_applied[:P_MCS_CEV][m, site, e, k0]) for m in d.M) : 0.0
+                planned_label = p_into > 1e-6 ? "Charging" :
+                                (site !== nothing && !d.is_working[site, e, k0]) ? "Off" : ACT_NAME[idx]
+                realized_min  = round(Int, step.a_real[e][idx] * 60)
+                full_min      = round(Int, d.delta_T * 60)
+                real_cev_act[e][gidx] = realized_min < full_min ? "$(planned_label) ($(realized_min) min)" : planned_label
+            end
 
             # DETAILED OUTPUT: the realized 4-tuple power draw for THIS executed
             # interval -- same as Approach 1, step.p_true[e] is already computed

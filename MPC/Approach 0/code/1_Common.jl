@@ -1,17 +1,56 @@
 # #############################################################################
-# Common.jl  —  module Common
+# Common.jl  -  module Common
 # -----------------------------------------------------------------------------
-# Small, dependency-light helpers shared by every other module in the pipeline:
-#   * travel-time normalisation (fractional hours -> whole interval counts),
-#   * the on-peak (16:00-21:00) membership test used by the demand charge,
-#   * clock-label / x-tick builders for the figures and CSVs, and
-#   * the STEP-plot helpers (piecewise-constant traces) so that all figures
-#     match the v4_real reference style instead of smooth continuous lines.
+# Shared, dependency-light utilities used by every other file in the pipeline (DataLoader, MCSModel, OneShot, Output). 
+# Nothing in this file touches the MILP/MPC formulation directly -- it is infrastructure that the optimization code and the plotting/logging code both depend on. Four groups:
 #
-# Nomenclature and behaviour deliberately mirror the reference files
-# (DataLoader_v4_real.jl / MCS_OPTIMAL_v4_real.jl) so a reviewer who knows the
-# reference sees the same helper names and semantics here.
+#   1. TIME / CLOCK HELPERS
+#      normalize_travel_steps, in_peak, clock_label, clock_day_label,
+#      build_time_labels, build_time_labels_days, multiday_xticks,
+#      create_fixed_2hour_xticks
+#      -- convert between interval indices (1..nK) and real clock time, flag
+#      which intervals fall in the 16:00-21:00 on-peak demand-charge window,
+#      and build the x-axis tick/label sets used by every figure and CSV.
+#
+#   2. STEP-PLOT / TABLE HELPERS
+#      stepify_interval_values, stepify_boundary_values,
+#      interval_time_dataframe, safe_get
+#      -- turn interval- or boundary-indexed series into piecewise-constant
+#      (staircase) x/y traces for plotting, and build the common per-interval
+#      DataFrame skeleton (period index + start/end clock labels) that every
+#      output table is built on.
+#
+#   3. BAYESIAN ACTIVITY-POWER ESTIMATOR
+#      activity_power_model, BayesianActivityEstimator, observe!, refit!
+#      -- fits the per-activity CEV power draw (digging / loading+swinging /
+#      traveling / idling) from observed (activity-hours, measured energy)
+#      pairs via a Turing/NUTS regression. The posterior mean/std (mu, sd)
+#      it produces are the calibrated p_a power constants consumed by the
+#      MILP's work-power constraint and by the stochastic "plant" below.
+#      Idle is pinned deterministically (sd = 0), never sampled.
+#
+#   4. ACTIVITY POWER SAMPLE POOL ("plant" randomness)
+#      ActivityPowerPool, draw_activity_power_pool, draw_activity_power_pool_live,
+#      new_cursor, next_power!
+#      -- pre-draws a shared, reproducible set of realized activity powers
+#      (from the frozen Bayesian posterior, or from real recorded field data)
+#      so every approach that simulates plant behavior consumes the SAME
+#      underlying random draws, keeping cross-approach comparisons fair.
+#      Each approach walks the shared pool with its own independent cursor.
+#
+#   5. RUN LOGGING (opt-in via detailed_output = true)
+#      DetailedPlanLog / RealizedTupleLog        (CEV-side)
+#      MCSPlanLog     / MCSRealizedLog           (MCS-side)
+#      log_plan_row! / log_realized_row! / log_mcs_plan_row! / log_mcs_realized_row!
+#      to_dataframe(...)
+#      -- append-only Vector{NamedTuple} logs of (a) the FULL remaining-horizon
+#      plan at every re-solve (what was planned but possibly overwritten
+#      before ever being implemented) and (b) what was actually realized each
+#      interval, for both CEVs and MCSs. Converted to a DataFrame once, at the
+#      end of the run, for cheap post-hoc analysis (e.g. "did the plan change
+#      from the previous resolve").
 # #############################################################################
+
 module Common
 
 using DataFrames
@@ -31,15 +70,8 @@ export DetailedPlanLog, RealizedTupleLog, log_plan_row!, log_realized_row!, to_d
        ActivityPowerPool, draw_activity_power_pool, draw_activity_power_pool_live,
        new_cursor, next_power!
 
-# Silence Turing's sampling progress bar at load time.
 Turing.setprogress!(false)
 
-# -----------------------------------------------------------------------------
-# Travel model: convert a travel-time matrix (values already expressed in time
-# INTERVALS, possibly fractional) into WHOLE interval counts. The diagonal
-# (i -> i) is 0; any positive off-diagonal time becomes at least one step.
-# (Same contract as `normalize_travel_steps` in MCS_OPTIMAL_v4_real.jl.)
-# -----------------------------------------------------------------------------
 function normalize_travel_steps(tau_trv, N)
     n = length(N)
     steps = zeros(Int, n, n)
@@ -49,12 +81,6 @@ function normalize_travel_steps(tau_trv, N)
     return steps
 end
 
-# -----------------------------------------------------------------------------
-# On-peak window membership. Interval k covers [t_start+(k-1)*dt, t_start+k*dt]
-# (mod 24). Returns true iff that whole interval lies inside the 16:00-21:00
-# on-peak band that carries the extra on-peak demand charge.
-# (Identical logic to `in_peak` in the reference main driver.)
-# -----------------------------------------------------------------------------
 function in_peak(k, delta_T, t_start)
     start    = mod(t_start + (k - 1) * delta_T, 24)
     stop     = mod(t_start + k * delta_T, 24)
@@ -62,20 +88,11 @@ function in_peak(k, delta_T, t_start)
     return start >= 16 && stop_eff <= 21
 end
 
-# -----------------------------------------------------------------------------
-# Turn an interval index k into an "HH:MM" clock label at its START boundary,
-# using the run's start hour t_start and step length delta_T.
-# -----------------------------------------------------------------------------
 function clock_label(t_start, delta_T, k)
     m = mod(Int(round(t_start * 60 + (k - 1) * delta_T * 60)), 24 * 60)
     return @sprintf("%02d:%02d", div(m, 60), m % 60)
 end
 
-# -----------------------------------------------------------------------------
-# Build the vector of BOUNDARY clock labels (one per boundary index 1..nK+1),
-# so plots/CSVs show clock times that match the simulation window. Mirrors the
-# `time_labels` construction in mcs_optimization_main_v4_real.jl.
-# -----------------------------------------------------------------------------
 function build_time_labels(t_start, delta_T, nK)
     return [begin
         clock_min = mod(Int(round(t_start * 60 + k * delta_T * 60)), 24 * 60)
@@ -83,28 +100,18 @@ function build_time_labels(t_start, delta_T, nK)
     end for k in 0:nK]
 end
 
-# -----------------------------------------------------------------------------
-# CHANGE 5 -- multi-day time-label helpers, needed now that run_mpc/run_one_shot
-# support n_day_run > 1 days.
-# -----------------------------------------------------------------------------
-# "D<day> HH:MM" label for within-day boundary k (1..nKd+1) on a given day.
 clock_day_label(t_start, delta_T, day, k) = string("D", day, " ", clock_label(t_start, delta_T, k))
 
-# Boundary clock labels for a MULTI-DAY horizon of `n_days` days, each with
-# `nK` daytime intervals. Boundary index g (1..n_days*nK+1) is tagged with its
-# day and within-day clock (e.g. "D1 08:00", ..., "D2 08:00", ...).
 function build_time_labels_days(t_start, delta_T, n_days, nK)
     labels = String[]
     for g in 0:(n_days * nK)
-        day = min(n_days, div(g, nK) + 1)     # boundary g belongs to this day
-        wk  = g - (day - 1) * nK              # within-day boundary offset (0..nK)
+        day = min(n_days, div(g, nK) + 1)    
+        wk  = g - (day - 1) * nK             
         push!(labels, clock_day_label(t_start, delta_T, day, wk + 1))
     end
     return labels
 end
 
-# X-ticks for a multi-day horizon: one tick every `every_hours` within each
-# day-block, placed on the boundary axis (1..n_days*nK+1) and labelled "D<d> HH:00".
 function multiday_xticks(n_days, nK, t_start, delta_T; every_hours::Int = 4)
     step = max(1, Int(round(every_hours / delta_T)))
     ticks = Int[]; labels = String[]
@@ -117,17 +124,12 @@ function multiday_xticks(n_days, nK, t_start, delta_T; every_hours::Int = 4)
     return (ticks, labels)
 end
 
-# -----------------------------------------------------------------------------
-# Fixed 2-hour x-ticks over a boundary-indexed axis T (= 1..nK+1). Maps every
-# even hour offset from t_start onto its boundary index and labels it "HH:00".
-# (Same output contract as `create_fixed_2hour_xticks` in the reference.)
-# -----------------------------------------------------------------------------
 function create_fixed_2hour_xticks(T, t_start::Real=0)
     Tvec = collect(T)
     n_intervals = length(Tvec) - 1
     ticks = Int[]
     labels = String[]
-    span_hours = n_intervals * 0.25   # 0.25 h per interval (15-min grid)
+    span_hours = n_intervals * 0.25   
     hi = Int(ceil(span_hours))
     for hour_offset in 0:2:hi
         idx = first(Tvec) + Int(round(hour_offset / span_hours * n_intervals))
@@ -139,12 +141,6 @@ function create_fixed_2hour_xticks(T, t_start::Real=0)
     return ticks, labels
 end
 
-# -----------------------------------------------------------------------------
-# STEP helper for INTERVAL-indexed quantities. The value at interval k is held
-# flat across the boundary span [k, k+1], producing the piecewise-constant
-# (staircase) traces used for power/price/work figures.
-# (Same as `stepify_interval_values` in MCS_OPTIMAL_v4_real.jl.)
-# -----------------------------------------------------------------------------
 function stepify_interval_values(K, values)
     Kvec = collect(K)
     x_step = Int[]
@@ -156,12 +152,6 @@ function stepify_interval_values(K, values)
     return x_step, y_step
 end
 
-# -----------------------------------------------------------------------------
-# STEP helper for BOUNDARY-indexed states (e.g. state of energy). The value at
-# boundary t is held until the next boundary; the last value is drawn at the
-# final boundary without extending past it.
-# (Same as `stepify_boundary_values` in the reference.)
-# -----------------------------------------------------------------------------
 function stepify_boundary_values(T, values)
     Tvec = collect(T)
     x_step = Int[]
@@ -175,11 +165,6 @@ function stepify_boundary_values(T, values)
     return x_step, y_step
 end
 
-# -----------------------------------------------------------------------------
-# Base per-interval table carrying the integer interval index plus human-
-# readable start/end clock labels; per-quantity reporters append columns to it.
-# (Same role as `interval_time_dataframe` in the reference.)
-# -----------------------------------------------------------------------------
 function interval_time_dataframe(K, time_labels)
     Kvec = collect(K)
     return DataFrame(
@@ -189,52 +174,21 @@ function interval_time_dataframe(K, time_labels)
     )
 end
 
-# Safe indexed accessor: v[i] if it exists, else `default` (keeps fixed-width
-# logs from crashing on datasets with a different number of CEVs).
 safe_get(v, i, default=NaN) = i <= length(v) ? v[i] : default
 
-# #############################################################################
-# BAYESIAN ACTIVITY-POWER ESTIMATOR  (ported from
-# Avik/Tasks_energy_loading_swinging_bayesian (1).py)
-# -----------------------------------------------------------------------------
-# The Python reference fits the linear-in-the-powers energy model
-#     b_i | x, sigma ~ Normal(A_i . x, sigma)
-# with a TruncatedNormal(mu, sigma; lower=0) prior on every per-activity power x
-# and a HalfNormal(sigma = std(b)) prior on the observation noise. Each row of A
-# is the activity-hours spent this interval; b is the measured energy (kWh).
-#
-# This Julia port keeps that model EXACTLY (TruncatedNormal powers, half-normal
-# noise, Normal likelihood). The only project-specific choice is the activity
-# set: we use four columns [digging, loading+swinging, traveling, idling] to
-# match the MCS optimiser's B = [1,2,3,4]; the Python "Mixing"/"Grading" columns
-# are not part of this fleet. Idling is pinned to 0 kW with 0 std (no power is
-# lost while idle), so it is treated as a deterministic zero rather than sampled
-# (a TruncatedNormal with sigma = 0 is degenerate).
-#
-# The posterior MEAN (`mu`) is the certainty-equivalent power profile the MILP
-# consumes; the posterior STD (`sd`) is the per-activity uncertainty used both
-# for the convergence figure and (in Fork B) as the plant's sampling spread.
-# #############################################################################
-
-# Turing model: TruncatedNormal(prior_mu, prior_sigma; lower=0) on each of the
-# four activity powers, a half-normal observation-noise std (Truncated Normal(0,
-# sigma_b) with sigma_b = std(b)), and a Normal likelihood b ~ Normal(A*x, s).
 Turing.@model function activity_power_model(A, b, prior_mu, prior_sigma, sigma_b)
-    x1 ~ truncated(Normal(prior_mu[1], prior_sigma[1]); lower = 0.0)   # digging power
-    x2 ~ truncated(Normal(prior_mu[2], prior_sigma[2]); lower = 0.0)   # loading/swinging power
-    x3 ~ truncated(Normal(prior_mu[3], prior_sigma[3]); lower = 0.0)   # traveling power
-    x4 ~ truncated(Normal(prior_mu[4], prior_sigma[4]); lower = 0.0)   # idling power
+    x1 ~ truncated(Normal(prior_mu[1], prior_sigma[1]); lower = 0.0)  
+    x2 ~ truncated(Normal(prior_mu[2], prior_sigma[2]); lower = 0.0)   
+    x3 ~ truncated(Normal(prior_mu[3], prior_sigma[3]); lower = 0.0)   
+    x4 ~ truncated(Normal(prior_mu[4], prior_sigma[4]); lower = 0.0)   
     x = [x1, x2, x3, x4]
-    s ~ truncated(Normal(0.0, sigma_b); lower = 0.0)                   # HalfNormal(sigma_b) noise
+    s ~ truncated(Normal(0.0, sigma_b); lower = 0.0)                   
     mu = A * x
     for j in eachindex(b)
         b[j] ~ Normal(mu[j], s)
     end
 end
 
-# Mutable estimator state carried between updates: the fixed prior, all
-# observations gathered so far, and the CURRENT posterior summary (mu = the
-# profile fed to the MILP; sd = its uncertainty).
 mutable struct BayesianActivityEstimator
     prior_mu::Vector{Float64}
     prior_sigma::Vector{Float64}
@@ -245,8 +199,6 @@ mutable struct BayesianActivityEstimator
     mcmc_samples::Int
 end
 
-# Constructor: no observations yet; posterior initialised to the prior (this is
-# also the CALIBRATED-PRIOR mode, where mu/sd are used as-is without any fit).
 function BayesianActivityEstimator(prior_mu, prior_sigma; mcmc_samples = 500)
     k = length(prior_mu)
     return BayesianActivityEstimator(collect(float.(prior_mu)), collect(float.(prior_sigma)),
@@ -255,35 +207,24 @@ function BayesianActivityEstimator(prior_mu, prior_sigma; mcmc_samples = 500)
                                      mcmc_samples)
 end
 
-# Record ONE telemetry observation (activity-hours row + measured energy). Only
-# appends the data; inference is re-run separately in refit!.
 function observe!(est::BayesianActivityEstimator, a::AbstractVector, b::Real)
     est.A_obs = vcat(est.A_obs, reshape(collect(float.(a)), 1, :))
     push!(est.b_obs, float(b))
     return est
 end
 
-# Re-run the Bayesian regression on ALL data so far and refresh mu / sd via NUTS
-# (mirrors the Python fit_bayesian_activity_power -> pm.sample with target_accept
-# = 0.9). Activities whose prior std is 0 (idle) are pinned to their prior mean
-# with 0 uncertainty instead of sampled, avoiding a degenerate TruncatedNormal.
 function refit!(est::BayesianActivityEstimator; nchains::Int = 1)
     isempty(est.b_obs) && return est
     sigma_b = length(est.b_obs) > 1 ? max(std(est.b_obs), 1e-3) : 1.0
-    # Floor the prior std handed to the sampler so a pinned (sigma = 0) activity
-    # does not make the model degenerate; its posterior is overwritten below.
     prior_sigma_fit = [max(s, 1e-6) for s in est.prior_sigma]
     model = activity_power_model(est.A_obs, est.b_obs, est.prior_mu, prior_sigma_fit, sigma_b)
-    # nchains > 1 runs several NUTS chains and POOLS their draws for the posterior
-    # summary (matches the Python reference's 4-chain fit); nchains == 1 keeps the
-    # original single-chain behaviour used by the online-learning path.
     chain = nchains > 1 ?
         sample(model, NUTS(0.9), MCMCThreads(), est.mcmc_samples, nchains; progress = false) :
         sample(model, NUTS(0.9), est.mcmc_samples; progress = false)
     syms = (:x1, :x2, :x3, :x4)
     for i in 1:length(est.prior_mu)
         if est.prior_sigma[i] <= 1e-12
-            est.mu[i] = est.prior_mu[i]   # pinned activity (e.g. idle): deterministic
+            est.mu[i] = est.prior_mu[i] 
             est.sd[i] = 0.0
         else
             col = vec(chain[syms[i]])
@@ -294,94 +235,32 @@ function refit!(est::BayesianActivityEstimator; nchains::Int = 1)
     return est
 end
 
-# #############################################################################
-# ACTIVITY POWER SAMPLE POOL  (shared "plant" randomness for every approach)
-# -----------------------------------------------------------------------------
-# Every approach that simulates the plant (Approach 1's closed-loop MPC,
-# Approach 0's one-shot 8:00 plan executed open-loop, and any future approach)
-# needs to draw a REALIZED stochastic power for "excavator e doing activity a".
-# For a fair comparison across approaches, those draws must come from the SAME
-# underlying random numbers -- otherwise a difference in outcome could just be
-# different randomness, not a difference in control strategy.
-#
-# The pool is generated ONCE, up front, from the FROZEN posterior (mu, sd):
-# `n_samples` (20 by default) pre-drawn samples per (entity, activity) pair --
-# comfortably more than the number of times any one CEV will switch onto that
-# activity in a single day. `draw_activity_power_pool` is the ONLY place the
-# generation method lives (Normal(mu,sd) truncated at 0, today), so it can be
-# swapped later (e.g. real posterior/MCMC draws) without touching any consumer.
-#
-# Consumption is by OCCURRENCE, not by interval: each call to `next_power!`
-# hands out the NEXT unused sample for that (entity, activity) pair and
-# advances a cursor. The pool's `samples` are immutable data, shared read-only
-# across approaches; each approach keeps its OWN cursor (via `new_cursor`), so
-# two approaches walking through the same occurrence sequence draw the exact
-# same numbers, but one approach's consumption never disturbs another's.
-#
-# Idle (or any activity pinned with sd = 0) is deterministic by construction,
-# so next_power! returns `mu[a]` directly for it without consuming a slot --
-# idle would otherwise occur far more than `n_samples` times in a day.
-#
-# -----------------------------------------------------------------------------
-# DRAW MODE (sensitivity sweep) -- CHANGE 6
-# -----------------------------------------------------------------------------
-# `mode` controls WHERE on the Normal(mu, sd) curve each draw lands, without
-# touching mu/sd/n_samples/cursor/next_power! or any consumer. Default
-# `:normal` is the original unbiased behaviour (z ~ N(0,1), i.e. the draw can
-# land anywhere on the curve). The other four modes bias the z-score used for
-# `mu[a] + sd[a] * z` so a whole pool can be regenerated as one of four fixed
-# scenarios for a sensitivity sweep:
-#   :near_mean    -- clustered close to the mean:      |z| within ~0.5 sigma
-#   :high         -- far above the mean:                z >= 2 sigma
-#   :low          -- far below the mean:                z <= -2 sigma
-#   :spread_wide  -- far from the mean, either side:   |z| >= 2 sigma, sign random
-# "Far" = 2 sigma and "near" = 0.5 sigma are the two anchors; each still adds a
-# small amount of genuine randomness on top (so repeated draws in the same
-# mode are not identical), it just can no longer land anywhere else on the
-# curve. Idle (sd <= 0) is unaffected by `mode` -- it is deterministic either way.
-# #############################################################################
 struct ActivityPowerPool
     mu::Vector{Float64}
     sd::Vector{Float64}
-    samples::Dict{Tuple{Int,Int}, Vector{Float64}}   # (entity, activity) -> n_samples draws
-    wrap::Bool                                        # LIVE_DATA_MODE: draw independently,
-                                                       # WITH REPLACEMENT, on every call (see
-                                                       # next_power!) instead of walking a
-                                                       # cursor through a fixed pre-drawn list
-                                                       # (the Bayesian pool below keeps
-                                                       # wrap=false, i.e. its original
-                                                       # sequential-cursor behaviour)
-    rng::Union{Nothing, AbstractRNG}                  # only used when wrap == true
+    samples::Dict{Tuple{Int,Int}, Vector{Float64}}   
+    wrap::Bool                                        
+    rng::Union{Nothing, AbstractRNG}                  
 end
 
-# z-score used by `draw_activity_power_pool` for a single draw, as a function
-# of `mode` (see CHANGE 6 above). "Far" is anchored at 2 sigma, "near" at 0.5
-# sigma; the `abs(randn(rng))` / `randn(rng)` terms add genuine within-mode
-# randomness on top of that anchor so consecutive draws still differ.
 function _draw_mode_z(mode::Symbol, rng)
     if mode === :normal
-        return randn(rng)                                        # unbiased, unconstrained
+        return randn(rng)                                        
     elseif mode === :near_mean
-        return 0.5 * randn(rng)                                   # clustered within ~0.5 sigma
+        return 0.5 * randn(rng)                                   
     elseif mode === :high
-        return 2.0 + 0.5 * abs(randn(rng))                        # >= 2 sigma above the mean
+        return 2.0 + 0.5 * abs(randn(rng))                        
     elseif mode === :low
-        return -2.0 - 0.5 * abs(randn(rng))                       # >= 2 sigma below the mean
+        return -2.0 - 0.5 * abs(randn(rng))                      
     elseif mode === :spread_wide
         sign = rand(rng, Bool) ? 1.0 : -1.0
-        return sign * (2.0 + 0.5 * abs(randn(rng)))               # >= 2 sigma, either side
+        return sign * (2.0 + 0.5 * abs(randn(rng)))               
     else
         error("draw_activity_power_pool: unknown mode :$mode ",
               "(expected :normal, :near_mean, :high, :low, or :spread_wide)")
     end
 end
 
-# Generate the pool. `entities` is the collection of entity indices (e.g. d.E);
-# `mu`/`sd` is the frozen per-activity power estimate (e.g. d.prior_mu /
-# d.prior_sigma). Pass a dedicated `rng` so this generation step is reproducible
-# and independent of any other randomness used later in a run. `mode` selects
-# the sensitivity-sweep scenario (see CHANGE 6 above); the default `:normal`
-# reproduces the original, unbiased behaviour exactly.
 function draw_activity_power_pool(entities, mu, sd; n_samples::Int = 20,
                                    rng = Random.GLOBAL_RNG, mode::Symbol = :normal)
     samples = Dict{Tuple{Int,Int}, Vector{Float64}}()
@@ -391,22 +270,8 @@ function draw_activity_power_pool(entities, mu, sd; n_samples::Int = 20,
     return ActivityPowerPool(collect(float.(mu)), collect(float.(sd)), samples, false, nothing)
 end
 
-# A fresh, independent cursor over `pool`'s (entity, activity) pairs, starting
-# every pair at its first sample. Each simulating approach should call this
-# once at the start of its own run and pass the SAME `pool` alongside its OWN
-# cursor into `next_power!`.
 new_cursor(pool::ActivityPowerPool) = Dict{Tuple{Int,Int}, Int}(k => 1 for k in keys(pool.samples))
 
-# Hand out the next realized power for entity `e` doing activity `a`. For a
-# LIVE_DATA_MODE pool (`wrap == true`), this is an INDEPENDENT, uniformly
-# random draw WITH REPLACEMENT from that (entity, activity)'s recorded values
-# on every single call -- no cursor, no exhaustion, no "loop over" bookkeeping.
-# For the Bayesian pool (`wrap == false`), behaviour is unchanged: `cursor` is
-# advanced in place, walking sequentially through the pre-drawn list, and it
-# errors loudly (rather than wrapping) if exhausted, since that signals the
-# n_samples assumption ("no more work than that in a day") no longer holds.
-# Deterministic (sd <= 0) activities short-circuit to `mu[a]` either way,
-# without touching the cursor or the RNG.
 function next_power!(pool::ActivityPowerPool, cursor::Dict{Tuple{Int,Int}, Int}, e::Int, a::Int)
     pool.sd[a] <= 1e-12 && return pool.mu[a]
     key = (e, a)
@@ -422,22 +287,6 @@ function next_power!(pool::ActivityPowerPool, cursor::Dict{Tuple{Int,Int}, Int},
     return vals[c]
 end
 
-# #############################################################################
-# LIVE-DATA POOL  (real recorded field powers -- LIVE_DATA_MODE)
-# -----------------------------------------------------------------------------
-# Sibling to draw_activity_power_pool above, but instead of sampling
-# Normal(mu, sd) it draws from ACTUAL recorded per-activity power
-# measurements, supplied by DataLoader.load_live_powers as
-# live_values[activity_index] -> Vector{Float64} of recorded kW values
-# (activity_index matches B = [dig, load+swing, travel, idle]).
-#
-# Per-CEV independent pools: each entity gets its OWN reference to every
-# activity's full recorded-value list (NOT one shared, fleet-wide depleting
-# list) -- two different CEVs can land on the same recorded value. Consumption
-# is INDEPENDENT RANDOM SAMPLING WITH REPLACEMENT on every next_power! call
-# (see there) -- values can repeat freely within a run, by design, so there is
-# no cursor/exhaustion concept for a live pool at all.
-# #############################################################################
 function draw_activity_power_pool_live(entities, live_values::Dict{Int, Vector{Float64}};
                                         n_samples::Int = 20, rng = Random.GLOBAL_RNG)
     n_act = length(live_values)
@@ -449,41 +298,14 @@ function draw_activity_power_pool_live(entities, live_values::Dict{Int, Vector{F
         mu[a] = sum(vals) / length(vals)
         sd[a] = length(vals) > 1 ?
             sqrt(sum((v - mu[a])^2 for v in vals) / (length(vals) - 1)) : 0.0
-        fixed_sequence = [vals[rand(rng, 1:length(vals))] for _ in 1:n_samples]
         for e in entities
+            fixed_sequence = [vals[rand(rng, 1:length(vals))] for _ in 1:n_samples]
             samples[(e, a)] = fixed_sequence
         end
     end
     return ActivityPowerPool(mu, sd, samples, false, nothing)
 end
 
-
-# #############################################################################
-# DETAILED OUTPUT LOGGING  (opt-in, via `detailed_output = true` on run_mpc)
-# -----------------------------------------------------------------------------
-# Two small, dependency-light append-only logs, shared by both approaches:
-#
-#   DetailedPlanLog     -- one row per (resolve, future-step-planned[, scenario]).
-#                          Captures the FULL remaining-horizon plan at every
-#                          single re-solve, not just the one step that gets
-#                          implemented -- this is what lets a later analyst see
-#                          "what was planned but never implemented" (a plan can
-#                          get overwritten by the very next re-solve before it
-#                          is ever acted on).
-#   RealizedTupleLog     -- one row per interval ACTUALLY executed. Records the
-#                          full realized 4-tuple (dig/load/travel/idle kW) that
-#                          the shared pool drew for that interval, regardless
-#                          of which single activity ran -- this is exactly
-#                          `step.p_true[e]` already computed inside
-#                          apply_and_simulate!, so nothing new needs to be
-#                          derived, only captured.
-#
-# Both are plain Vector{NamedTuple} wrappers -- pushed to during the closed
-# loop, converted to a DataFrame only once at the very end (cheap; avoids
-# growing a DataFrame row-by-row, which is the slow way to do this in Julia).
-# When `detailed_output = false` (the default), neither struct is ever
-# constructed and the loop's hot path is completely unaffected.
-# #############################################################################
 mutable struct DetailedPlanLog
     rows::Vector{NamedTuple}
 end
@@ -507,12 +329,6 @@ function log_plan_row!(dpl::DetailedPlanLog, d;
     ))
 end
 
-# Converts the collected rows to a DataFrame and adds `changed_from_prior_resolve`:
-# true when this (offset_step, cev[, scenario_id]) row's planned activity/power
-# differs from what the IMMEDIATELY PRECEDING resolve_step planned for that same
-# offset_step -- the fast filter to "where did the plan actually change" instead
-# of diffing thousands of rows by hand. The very first resolve to ever mention a
-# given offset_step has nothing to compare against, so it is marked `missing`.
 function to_dataframe(dpl::DetailedPlanLog)
     df = DataFrame(dpl.rows)
     isempty(df) && return df
@@ -523,10 +339,6 @@ function to_dataframe(dpl::DetailedPlanLog)
     prev_pow = nothing
     for i in 1:nrow(df)
         key = (df.day[i], df.cev[i], df.scenario_id[i], df.offset_step[i])
-        # isequal, NOT ==: scenario_id is the Julia value "missing" for Approach 1
-        # rows (A1 has no scenarios), and comparing missing == missing evaluates to
-        # missing itself (not true) -- which errors when used in a boolean context.
-        # isequal(missing, missing) correctly evaluates to true.
         if isequal(prev_key, key)
             changed[i] = (df.activity_planned[i] != prev_act) ||
                          !isapprox(df.planned_power_kW[i], prev_pow; atol = 1e-9)
@@ -558,27 +370,6 @@ end
 
 to_dataframe(rtl::RealizedTupleLog) = DataFrame(rtl.rows)
 
-# #############################################################################
-# MCS DETAILED OUTPUT LOGGING  (opt-in, via `detailed_output = true` on run_mpc
-# / run_one_shot, exactly the same flag that already gates DetailedPlanLog /
-# RealizedTupleLog above)
-# -----------------------------------------------------------------------------
-# The CEV-side logs above (DetailedPlanLog / RealizedTupleLog) never captured
-# the MCS's OWN planned/realized trajectory in detail -- only a couple of MCS
-# numbers (soe_mcs_planned_kWh / soe_mcs_kWh) folded into each CEV row. These
-# two structs are the MCS-side equivalent, same append-only
-# Vector{NamedTuple} -> DataFrame-once-at-the-end pattern, so the MCS's own
-# status/location/charging story is on disk too, not just inferred from the
-# CEV rows.
-#
-#   MCSPlanLog     -- one row per (resolve, future-step-planned, MCS unit[,
-#                     scenario]). Same "full remaining-horizon plan at every
-#                     re-solve" idea as DetailedPlanLog, just for the MCS's
-#                     own status/node/charge/discharge/SOE instead of a CEV's
-#                     activity/power/SOE.
-#   MCSRealizedLog -- one row per interval ACTUALLY executed, per MCS unit:
-#                     the realized status/node/charge/discharge/SOE.
-# #############################################################################
 mutable struct MCSPlanLog
     rows::Vector{NamedTuple}
 end
@@ -604,10 +395,6 @@ function log_mcs_plan_row!(mpl::MCSPlanLog, d;
     ))
 end
 
-# Same "did the plan change from the immediately preceding resolve" derived
-# column as DetailedPlanLog's to_dataframe, just keyed on (day, mcs,
-# scenario_id, offset_step) and comparing `mcs_status_planned` instead of a
-# CEV's activity/power.
 function to_dataframe(mpl::MCSPlanLog)
     df = DataFrame(mpl.rows)
     isempty(df) && return df
@@ -617,8 +404,6 @@ function to_dataframe(mpl::MCSPlanLog)
     prev_status = nothing
     for i in 1:nrow(df)
         key = (df.day[i], df.mcs[i], df.scenario_id[i], df.offset_step[i])
-        # isequal, NOT ==: scenario_id is `missing` for Approach 1 rows -- see
-        # the identical note in DetailedPlanLog's to_dataframe above.
         if isequal(prev_key, key)
             changed[i] = df.mcs_status_planned[i] != prev_status
         end
@@ -650,4 +435,4 @@ end
 
 to_dataframe(mrl::MCSRealizedLog) = DataFrame(mrl.rows)
 
-end # module Common
+end

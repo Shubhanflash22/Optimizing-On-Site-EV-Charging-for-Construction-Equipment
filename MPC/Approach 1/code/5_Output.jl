@@ -613,20 +613,32 @@ end
 #                                         with changed ACTUAL cells outlined red.
 # =============================================================================
 
+# Strips a realized-duration annotation like " (3 min)" so activity comparisons
+# and color-coding still match on the underlying activity type. Uses a precise
+# pattern (digits and the word min) rather than splitting on any opening paren, so it does NOT
+# touch legitimate labels that already contain parentheses, like "Charging (grid)".
+_base_label(l) = replace(l, r" \(\d+ min\)$" => "")
+
 # Activity label -> integer code (0 = none). Colours indexed by code+1 in two
 # parallel palettes: named symbols for Plots (robust in cgrad) + hex for HTML.
-_act_code(l) = l == "Idle" ? 1 : l == "Digging" ? 2 : l == "Loading/Swinging" ? 3 :
-               l == "Traveling" ? 4 : l == "Charging" ? 5 : l == "Charging (grid)" ? 6 :
-               l == "Serving CEV" ? 7 : 0
+function _act_code(l)
+    b = _base_label(l)
+    b == "Idle" ? 1 : b == "Digging" ? 2 : b == "Loading/Swinging" ? 3 :
+    b == "Traveling" ? 4 : b == "Charging" ? 5 : b == "Charging (grid)" ? 6 :
+    b == "Serving CEV" ? 7 : b == "Off" ? 8 : 0
+end
 const _ACT_COLORS_SYM = [:white, :gray85, :lightskyblue, :darkseagreen, :sandybrown,
-                         :khaki, :goldenrod, :mediumpurple]
+                         :khaki, :goldenrod, :mediumpurple, :gray60]
 const _ACT_COLORS_HEX = ["#ffffff", "#e8e8e8", "#9ecae1", "#a1d99b", "#fdae6b",
-                         "#fee391", "#f6c744", "#bcbddc"]
+                         "#fee391", "#f6c744", "#bcbddc", "#999999"]
 const _ACT_NAMES = ["Idle", "Digging", "Loading/Swinging", "Traveling",
-                    "Charging", "Charging (grid)", "Serving CEV"]
-_act_short(l) = l == "Digging" ? "D" : l == "Loading/Swinging" ? "L" : l == "Traveling" ? "T" :
-                l == "Idle" ? "I" : l == "Charging" ? "C" : l == "Charging (grid)" ? "Cg" :
-                l == "Serving CEV" ? "S" : ""
+                    "Charging", "Charging (grid)", "Serving CEV", "Off"]
+function _act_short(l)
+    b = _base_label(l)
+    b == "Digging" ? "D" : b == "Loading/Swinging" ? "L" : b == "Traveling" ? "T" :
+    b == "Idle" ? "I" : b == "Charging" ? "C" : b == "Charging (grid)" ? "Cg" :
+    b == "Serving CEV" ? "S" : b == "Off" ? "O" : ""
+end
 _act_bg(l) = _ACT_COLORS_HEX[_act_code(l) + 1]
 
 # One heatmap panel (2 rows: Actual on top-index 1, Planned on 2) for one entity.
@@ -710,8 +722,8 @@ end
 
 function _write_side_by_side_html(path, res, times, cev_plan, cev_act, mcs_plan, mcs_act, plan_clk)
     d = res.d; nK = res.nKd; nE = length(d.E)   # inputs are DAY-1-SCOPED, not global
-    cev_chg = [cev_plan[ei] .!= cev_act[ei] for ei in 1:nE]
-    mcs_chg = mcs_plan .!= mcs_act
+    cev_chg = [_base_label.(cev_plan[ei]) .!= _base_label.(cev_act[ei]) for ei in 1:nE]
+    mcs_chg = _base_label.(mcs_plan) .!= _base_label.(mcs_act)
     io = IOBuffer()
     println(io, "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><style>")
     println(io, "body{font-family:sans-serif;margin:16px}")
@@ -773,8 +785,8 @@ end
 # "Planned @ plan_clk" column immediately next to its "Actual" column.
 function _write_by_entity_html(path, res, times, cev_plan, cev_act, mcs_plan, mcs_act, plan_clk)
     d = res.d; nK = res.nKd; nE = length(d.E)   # inputs are DAY-1-SCOPED, not global
-    cev_chg = [cev_plan[ei] .!= cev_act[ei] for ei in 1:nE]
-    mcs_chg = mcs_plan .!= mcs_act
+    cev_chg = [_base_label.(cev_plan[ei]) .!= _base_label.(cev_act[ei]) for ei in 1:nE]
+    mcs_chg = _base_label.(mcs_plan) .!= _base_label.(mcs_act)
     io = IOBuffer()
     println(io, "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><style>")
     println(io, "body{font-family:sans-serif;margin:16px}")

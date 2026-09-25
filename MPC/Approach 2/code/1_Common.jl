@@ -449,8 +449,8 @@ function draw_activity_power_pool_live(entities, live_values::Dict{Int, Vector{F
         mu[a] = sum(vals) / length(vals)
         sd[a] = length(vals) > 1 ?
             sqrt(sum((v - mu[a])^2 for v in vals) / (length(vals) - 1)) : 0.0
-        fixed_sequence = [vals[rand(rng, 1:length(vals))] for _ in 1:n_samples]
         for e in entities
+            fixed_sequence = [vals[rand(rng, 1:length(vals))] for _ in 1:n_samples]
             samples[(e, a)] = fixed_sequence
         end
     end
