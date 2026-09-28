@@ -1,178 +1,211 @@
-# Approach 0 — One-Shot Baseline
+# Approach 0 — One-Shot MPC Baseline
 
 ## 1. What this is
 
-Approach 0 is the "commit once" baseline every other approach in this project is
-measured against. At 08:00 it solves **one** MILP over the **entire 24-hour
-day** — full lookahead, nothing shrinking, nothing re-solved — and then
-executes that fixed plan **open-loop** for the rest of the day, whatever the
-plant actually realizes. There is no feedback: if reality drifts from the
-plan, Approach 0 does not notice or correct for it until the next day's 08:00
-re-solve.
+Approach 0 is a **one-shot baseline**, not a true rolling-horizon MPC. For each day it:
 
-Contrast with:
-- **Approach 1** (`../Approach 1/Shrinking_Horizon`) — re-solves a shrinking
-  window every 15 minutes, closed-loop, deterministic power model.
-- **Approach 2** (`../Approach 2/Shrinking_Horizon`) — the same closed-loop
-  idea, but scenario-based/stochastic at every re-solve.
+1. Solves the **entire day's MILP once**, at the start of the day, using the full 24-hour interval set.
+2. Executes that fixed plan **open-loop** against a (usually stochastic) simulated plant, interval by interval, with **no replanning** during the day.
 
-The gap between Approach 0 and Approach 1/2 on identical inputs is, by
-construction, **the value of re-planning** — that's the entire reason this
-baseline exists.
+This is deliberately the simplest possible strategy: commit to a full-day plan and hope reality matches it. It's this codebase's reproduction of Avik's original single-shot model — same MILP, solved once — with a stochastic plant executed on top of it. Running it with `plant = :mean` reproduces Avik's model most exactly, since nothing is stochastic and realized equals planned; running it with `plant = :sampled` (the default) is the apples-to-apples baseline Approaches 1 and 2 are compared against.
 
-## 2. Why Approach 0 now has its own folder
+The underlying optimization is the mixed-integer program from:
 
-Previously, Approach 0 was not its own thing — the `Comparison_A0_A1_A2`
-driver reached into whichever of Approach 1's or Approach 2's own codebase
-happened to be selected (`approach0_source = :a1_shrinking` or
-`:a2_shrinking`) and called that codebase's `run_one_shot` function. Both
-copies were required to be kept byte-identical by hand for this to be safe.
+> A. Ghosh, A. Taşcıkaraoğlu, et al., *"Power Estimation and Optimal Work–Charging Scheduling of Construction Electric Vehicles via Mobile Charging Stations,"* arXiv:2608.18494.
 
-That's gone. Approach 0 is now this folder, on its own, with its own copy of
-the shared model-building code (`1_Common.jl`, `2_DataLoader.jl`,
-`3_MCSModel.jl` — the physics and the MILP itself are unchanged and identical
-to Approach 1/2's, since the underlying vehicle/MCS model doesn't depend on
-which control approach is driving it) and its own executor (`4_OneShot.jl`).
-The Comparison driver now calls `A0App.OneShot.run_one_shot(...)` directly
-(aliasing `Common` from `A1ShrinkingApp` so the shared power pool still works
-across all three apps — see `Comparison_A0_A1_A2/Readme.md`); there is no
-more `approach0_source` switch to get wrong.
+Objective function (4) and constraints (5a)–(14f) in that paper are implemented in `3_MCSModel.jl`. Section 7 lists every place the code adds to, relaxes, or otherwise departs from the paper, and why.
 
-Approach 1 and Approach 2 have also been made fully independent: their own
-`run_one_shot` copies, `run_soe_sweep.jl` scripts, and the "Approach 0 vs
-Approach 1/2" comparison figures they used to draw internally have all been
-removed. Each of the three approaches is now a clean, standalone codebase;
-the only place a cross-approach comparison is produced is this folder. This
-is the canonical, independent home for Approach 0.
+## 2. Paper symbols ↔ code names
+
+| Paper symbol | Code name | Where |
+|---|---|---|
+| Objective (4) | the `@objective` block | `3_MCSModel.jl` |
+| P^ch,tot / P^dch,tot | `P_ch_tot` / `P_dch_tot` | `3_MCSModel.jl` |
+| P^MCS→CEV | `P_MCS_CEV` | `3_MCSModel.jl` |
+| P^work | `P_work` | `3_MCSModel.jl` |
+| SOE^MCS / SOE^CEV | `SOE_MCS` / `SOE_CEV` | `3_MCSModel.jl` |
+| u_i,e,t,a | `u` | `3_MCSModel.jl` |
+| μ_i,e,t / ρ_m,i,e,t | `mu` / `rho` | `3_MCSModel.jl` |
+| z_m,i,t (presence) | `z` | `3_MCSModel.jl` |
+| x_m,i,j,t / y_m,i,j,t (travel) | `x` / `y_trv` | `3_MCSModel.jl` |
+| β^arr / β^dep | `beta_arr` / `beta_dep` | `3_MCSModel.jl` |
+| CH^MCS_m / DCH^MCS_m | `d.CH_MCS` / `d.DCH_MCS` | `2_DataLoader.jl` |
+| CH^CEV_e | `d.CH_CEV` | `2_DataLoader.jl` |
+| A_i,e (assignment) | `d.A` | `2_DataLoader.jl` |
+| τ^trv_i,j | `d.tau_trv` | `2_DataLoader.jl` |
+| p_a (activity power) | `d.p_digging` / `d.p_loading_swinging` / `d.p_traveling` / `d.p_idling`, `d.prior_mu` | `2_DataLoader.jl` |
+| ρ^miss / ρ^travel | `d.rho_miss` / `d.rho_labor` | `2_DataLoader.jl` |
+| λ^NC / λ^OP | `d.lambda_demand_NC` / `d.lambda_demand_OP` | `2_DataLoader.jl` |
+| λ^em | `d.carbon_price_per_ton` (÷1000 for $/kg) | `2_DataLoader.jl` |
 
 ## 3. Folder layout
 
 ```
-Approach 0/
-  code/
-    1_Common.jl        shared helpers + the detailed-output log structs
-                        (DetailedPlanLog/RealizedTupleLog for the CEV(s),
-                        MCSPlanLog/MCSRealizedLog for the MCS)
-    2_DataLoader.jl     loads :synthetic / :input data (identical to A1/A2's)
-    3_MCSModel.jl       the single 24h window MILP (identical to A1/A2's)
-    4_OneShot.jl        module OneShot — the whole of Approach 0
-    5_Output.jl         module Output — CSV writers + KPI table builder
-    6_OneShot_main.jl   standalone entry point (run_scenario_0)
-  data/
-    input_data/         the 8 real-data CSVs (same as Approach 1's)
-    synthetic_data/      human-readable mirror of the hardcoded :synthetic
-                         scenario (not read by any code — see 2_DataLoader.jl)
-  docs/
-    README.md           this file
+project_root/
+├── code/
+│   ├── 1_Common.jl        shared helpers: time/clock utilities, the Bayesian
+│   │                      activity-power estimator, the stochastic sample
+│   │                      pool ("the plant"), and the run-logging structs
+│   ├── 2_DataLoader.jl    reads the input CSVs into one named tuple `d`
+│   ├── 3_MCSModel.jl      builds and solves the MILP for one window (the
+│   │                      paper's objective (4) and constraints (5)–(14))
+│   ├── 4_OneShot.jl       Approach 0 itself: one whole-day solve per day,
+│   │                      executed open-loop against the plant
+│   ├── 5_Output.jl        turns a run's results into CSVs and a console
+│   │                      summary
+│   └── 6_OneShot_main.jl  the driver script — run this one
+├── data/
+│   └── input_data/        the 8 input CSVs (see Section 4)
+└── output/
+    └── <mode>/            CSVs written by a run (see Section 5); <mode> is
+                            named after the run's `mode` argument by default
 ```
 
-## 4. Running it standalone
+Files 1–5 are Julia modules (`module Common`, `module DataLoader`, etc.) and are `include`d by file 6 in that dependency order. File 6 is a plain script, not a module — it wires everything together and auto-runs a default scenario the moment it's included.
 
-```julia
-julia --project=.
-include("code/6_OneShot_main.jl")
-```
+## 4. Input file structure
 
-or, without auto-run:
+All 8 files live in `data/input_data/`. Every value below is taken directly from the sample dataset checked in — it reproduces the paper's **Scenario 1** (1 CEV, 1 MCS, one grid node, one construction site).
 
-```julia
-SCENARIO0_NO_AUTORUN = true
-include("code/6_OneShot_main.jl")
-res = run_scenario_0(; mode = :normal, n_day_run = 1, plant = :sampled)
-```
+### `parameters.csv`
+One row per scalar model parameter: `Parameter, Value, Unit, Description`. The loader (`2_DataLoader.jl`) reads each one by name, so row order doesn't matter, but the `Parameter` names must match exactly.
 
-Key `run_scenario_0` arguments:
+| Parameter | Sample value | Meaning |
+|---|---|---|
+| `rho_miss` | 2000 | Missed-work penalty, $/hour |
+| `delta_T` | 0.25 | Interval length, hours |
+| `p_digging` / `p_loading_swinging` / `p_traveling` | 4.7949 / 3.1588 / 4.7105 | Prior mean activity power, kW |
+| `lambda_demand_NC` / `lambda_demand_OP` | 20.12 / 20.58 | Demand charge rates, $/kW |
+| `carbon_price_per_ton` | 50 | $/ton CO2 (matches the paper's $0.05/kg) |
+| `rho_labor` | 20 | MCS towing labour cost, $/hour |
+| `p_idling` | 0 | Idle activity power, kW (see Section 7) |
+| `scale` | 2 | Loading-vs-digging precedence ratio (constraint 14c) |
+| `t_limit_rest` | 1 | Mandatory-rest window, hours (constraint 14d) |
+| `prior_sigma_frac` | 0.2 | Fallback prior std, as a fraction of the mean, used only if a `sigma_*` row below is absent |
+| `sigma_digging` / `sigma_loading_swinging` / `sigma_traveling` | 0.2031 / 0.1832 / 0.3847 | Prior std per activity, kW |
+| `obs_noise_std` | 0.05 | Simulation-only telemetry noise, kWh |
+| `co2_unit_scale` | 1 | Unit conversion applied to `intensity_tons_emissions` below |
 
-| Argument | Meaning |
+One row in the sample file, `kappa_wt=4`, is **present but not read by the code**: it documents the travel-pacing ratio, but `3_MCSModel.jl` currently hardcodes this same value (`work_per_travel = 4`) rather than reading it from here — a known, accepted simplification (see Section 7).
+
+### `ev_data.csv`
+One row per CEV. First column is the CEV's ID (`e1`, `e2`, ...) — read by position, not by its header name (which may read `Unnamed: 0` if exported from pandas).
+
+| Column | Meaning |
 |---|---|
-| `mode` | `:normal` (default, unbiased draws), `:high`/`:low`/`:near_mean` (biased sensitivity sweeps), `:live_data` (draw from recorded `live_powers.csv`), or `:synthetic` (built-in hardcoded scenario, no CSVs read) |
-| `plant` | `:sampled` (stochastic — the normal/headline case) or `:mean` (deterministic — realized == planned exactly, KPIs are the MILP's own optimum) |
-| `n_day_run` | how many days to run back to back (see §5 below for what carries over and what doesn't) |
-| `detailed_output` | `true` (default) writes the 4 detailed CSVs + KPI table(s); `false` just prints the console KPI summary |
-| `time_limit_sec` | solver seconds per day's MILP; `Inf` (default) solves to the MIP gap |
+| `SOE_min` / `SOE_max` / `SOE_ini` | Battery bounds and starting/target level, kWh |
+| `ch_rate` | Charging acceptance rate, kW (paper's CH^CEV) |
+| `eta_ch_dch_cev` | Charging efficiency |
+| `work_cap` | Present in the sample file but **not read by the loader** |
 
-Output lands in `output/<mode>/`:
+### `mcs_data.csv`
+One row per MCS (`m1`, `m2`, ...), same by-position ID convention.
 
-| File | Contents |
+| Column | Meaning |
 |---|---|
-| `A0_plan_full.csv` | The whole day's plan, one row per (day, 15-min step, CEV): activity, planned power, whether charging, planned SOE, `changed_from_prior_resolve` (always blank/missing for Approach 0 — see §5). |
-| `A0_realized_tuple.csv` | What actually happened, one row per (day, 15-min step, CEV). |
-| `A0_MCS_plan_full.csv` / `A0_MCS_realized_tuple.csv` | The MCS's own planned/realized status, node, charge/discharge power, SOE — the same idea, for the MCS instead of the CEV(s). |
-| `A0_kpi_summary.csv` | The full 17-metric KPI table for the whole run (one column). Same metrics/formulas as `Comparison_A0_A1_A2/Code/8_ComparisonOutput.jl`'s `cost_components`. |
-| `A0_kpi_summary_by_day.csv` | Only written when `n_day_run > 1`: the same table, one column per day plus an `Overall` column. |
+| `SOE_min` / `SOE_max` / `SOE_ini` | Battery bounds, kWh |
+| `CH_MCS` / `DCH_MCS` | Grid-charging / CEV-discharging power capacity, kW |
+| `C_MCS_plug` | Number of outlet plugs |
+| `DCH_MCS_plug` | Per-plug discharge limit, kW |
+| `eta_ch_dch_mcs` | Charging/discharging efficiency |
 
-## 5. Multi-day runs: what carries over, and what resets each day
+### `place.csv`
+One row per **node**. `site` is the node ID; one column per CEV ID (here, `e1`) holds `1` if that CEV is assigned to that node, `0` otherwise. A node with no CEV assigned becomes a grid node; a node with a CEV assigned becomes a construction site — this split is derived automatically, not stated explicitly.
 
-Three kinds of state exist across a multi-day Approach 0 run:
+| Column | Meaning |
+|---|---|
+| `hours_digging` / `hours_loading_swinging` | Required productive work at that site, hours/day |
 
-1. **Physical state** (battery SOE, MCS location) — carries over day to day.
-   This is real: whatever charge or position the CEV/MCS actually ends the
-   day with is where tomorrow starts.
-2. **Work backlog** (`rem_dig`/`rem_load`) — carries over day to day. Each new
-   day's fresh requirement is *added on top of* whatever's still outstanding
-   from before (see the `CHANGE 5` comment in `4_OneShot.jl`). This is also
-   real — if the CEV falls behind, it should stay behind.
-3. **Scheduling-rule memory** (`hist`, the applied-activity history) —
-   **reset to empty at the start of every day.**
+In the sample data: `i1` (no CEV assigned → grid node), `i2` (`e1`=1 → construction site, needs 3h digging + 1.5h loading+swinging/day).
 
-That third one needs explaining, because getting it wrong produces a subtle,
-counter-intuitive bug. `hist` feeds three constraints inside
-`3_MCSModel.jl`'s `build_window_model`:
-- the **precedence rule** (cumulative loading ≤ 2× cumulative digging),
-- the **rest rule** (no more than 4 consecutive work-intervals),
-- the **travel-pacing rule** (1 travel required per 4 work-intervals).
+### `time_data.csv`
+One row per interval (96 rows for a 24-hour, 15-minute-interval day). First column is a clock label (`8:15:00`, `8:30:00`, ...) — this is the **end** of that interval, not the start; the loader subtracts one `delta_T` from the first label to get the horizon's start time.
 
-If `hist` is allowed to accumulate across the whole multi-day run (as it
-originally did), these three rules stop being "one clean rule per day" and
-become a **running tally with a memory that never clears**. Concretely: if a
-day's own work requirement is, say, 18 work-intervals, and the pacing rule
-wants 1 travel per 4 (18 ÷ 4 = 4.5), there's no way to satisfy that exactly
-every single day — some days need 4 travels, some need 5, and which day needs
-which depends on the *entire history of the run so far*, not just that day.
-That forces irregular travel/rest timing onto specific days, which fragments
-the CEV's charging needs across the afternoon instead of leaving one clean
-gap for the MCS to make its own trip to the grid — so the MCS ends up cramming
-the same daily energy into a shorter and shorter overnight window, and the
-demand-charge peak (`NCD_Peak_kW`) climbs day after day even though every
-day requires **identical** work. Nothing is "getting worse" — it's a pure
-side-effect of a counter that should have reset nightly but didn't.
+| Column | Meaning |
+|---|---|
+| `lambda_buy` | Electricity price for that interval, $/kWh |
+| `intensity_tons_emissions` | Grid carbon intensity for that interval |
+| `lambda_CO2` | Present in the sample file but **not read by the loader** (a different, unused carbon-price series) |
 
-**The fix, one line, at the top of the day loop in `run_one_shot`:**
+### `travel_time.csv`
+A node-by-node matrix: row/column labels are node IDs, cell values are travel time between them in **intervals** (not hours). Matching against `place.csv`'s node IDs is case-insensitive.
+
+### `work_flexible.csv`
+One row per (node, CEV) pair, with one column per clock time across the full 24-hour day. A nonzero value at a given time means that CEV is on shift at that node during that interval; `0` means off-shift. This is where the 8am–12pm / 2pm–5pm working hours actually come from.
+
+### `live_powers.csv`
+Optional — only used when a run is started with `mode = :live_data`. Two columns, `activity` and `power_kW`: one row per real recorded measurement. Must contain at least one row for each of `p_digging`, `p_loading_swinging`, `p_traveling`, and `p_idling`, or the loader errors.
+
+## 5. Output file structure
+
+Written to `output/<mode>/` (or wherever `out_dir` points), only when a run is called with `detailed_output = true` (the default).
+
+| File | Written by | Contents |
+|---|---|---|
+| `A0_plan_full.csv` | `DetailedPlanLog` | The full day's plan for every CEV, every interval, logged right after the solve: planned activity, planned work power, charging flag, planned SOE for both the CEV and the MCS serving it. `resolve_step` is always 1, since Approach 0 never re-solves. |
+| `A0_realized_tuple.csv` | `RealizedTupleLog` | What actually happened each interval for each CEV: the realized power split across dig/load/travel/idle, the executed activity label, planned activity and power side by side with the realized ones, whether the SOE floor blocked the planned activity, and realized SOE. |
+| `A0_MCS_plan_full.csv` | `MCSPlanLog` | The full day's plan for every MCS, every interval: planned status, planned node, planned grid charge/discharge power, planned SOE. |
+| `A0_MCS_realized_tuple.csv` | `MCSRealizedLog` | What actually happened each interval for each MCS: realized status, node (or "Transit"), realized charge/discharge power, realized SOE. |
+| `A0_kpi_summary.csv` | `Output.jl` | One column of whole-run KPIs — 17 rows, from total cost broken into its 6 objective-function components plus the terminal shortfall penalty, down to grid energy, CO2, demand peaks, missed work, MCS transit hours, and total solve time. |
+| `A0_solve_log.csv` | `Output.jl` | One row per day: solver status, objective value, MIP gap %, and solve time. Written on every run, single-day included — check `gap_percent` here after any run. |
+| `A0_interval_log.csv` | `Output.jl` | The plain per-interval log: price, CO2 intensity, grid power, work power, one SOE column per CEV and per MCS, one node column per MCS, and the planning-power mean/std for the 4 activities. Written on every run. |
+| `A0_kpi_summary_by_day.csv` | `Output.jl` | Only written for multi-day runs. Same 17 KPI rows, one column per day plus an Overall column. Missed work and the shortfall terms are genuine per-day deltas (that day's own change), not running totals. |
+
+## 6. Running it standalone
+
+**First-time setup (VS Code):**
+1. Install Julia from [julialang.org/downloads](https://julialang.org/downloads).
+2. In VS Code, install the **Julia** extension (Extensions panel, search "Julia").
+3. `File > Open Folder...` and select the folder containing `code/` and `data/` as siblings.
+4. `Ctrl+Shift+P` (`Cmd+Shift+P` on Mac) → **"Julia: Start REPL"**.
+5. In the REPL, one time only:
+   ```julia
+   using Pkg
+   Pkg.add(["CSV", "DataFrames", "JuMP", "HiGHS", "Turing"])
+   ```
+   `LinearAlgebra`, `Printf`, `Random`, and `Statistics` are built into Julia already.
+
+**Running:**
 ```julia
-hist = [Vector{Tuple{Int, Vector{Float64}}}() for _ in d.E]
+include("code/6_OneShot_main.jl")   # auto-runs once with every default
+
+# Re-run with different settings, without restarting Julia:
+res = run_scenario_0(
+    mode            = :normal,      # :normal / :near_mean / :high / :low / :spread_wide
+                                     # (sampling shape for the plant), or :live_data to
+                                     # draw from live_powers.csv instead
+    input_dir       = "data/input_data",
+    time_limit_sec  = Inf,          # solver time limit per day; set this for large
+                                     # multi-MCS scenarios (see Section 7)
+    multi_activity  = false,        # currently has no effect anywhere in the pipeline
+    plant           = :sampled,     # :sampled (stochastic) or :mean (deterministic,
+                                     # realized == planned — use this for validation)
+    n_day_run       = 1,            # number of days to simulate back-to-back
+    out_dir         = "output/normal",
+    detailed_output = true,         # write the CSVs, not just print the summary
+    seed            = 1,
+)
 ```
-This clears only the three rules' memory. It does **not** touch battery SOE,
-MCS location, or the `rem_dig`/`rem_load` backlog — those are separate
-variables and still carry over exactly as they should. With this in place,
-every day is once again an independently well-posed problem, and
-`NCD_Peak_kW` should come out flat (or very close to it) across a multi-day
-run instead of climbing.
+Clicking VS Code's "Run" button on `6_OneShot_main.jl` does the same thing as the `include(...)` line above.
 
-This fix is Approach-0-specific and lives only in this folder's
-`4_OneShot.jl` — Approach 1/2's own `run_mpc` (in their respective
-`4_MPCLoop.jl`) still carries `hist` across days by original design, since
-their closed-loop re-solving every 15 minutes is a different situation (a
-day boundary is not a natural "reset point" the same way it is for a
-once-a-day optimizer). If you want the identical reset applied to Approach
-1/2's multi-day closed-loop runs too, that's a separate, explicit change to
-make there.
+To skip the auto-run when only reusing the function/module definitions elsewhere (e.g. a script that compares Approaches 0/1/2), define `SCENARIO0_NO_AUTORUN = true` before including the file.
 
-## 6. Why `changed_from_prior_resolve` is always blank
+**Validation check:** run with `plant = :mean, n_day_run = 1`. Summing `A0_kpi_summary.csv`'s first 8 rows (`Total_Cost_USD` down through `Terminal_Shortfall_Penalty_USD`, excluding the total row itself) should match `A0_solve_log.csv`'s `objective` column within about 1e-4 — the shortfall penalty should be exactly 0 in this mode.
 
-`A0_plan_full.csv` uses the exact same `DetailedPlanLog`/`log_plan_row!`
-structure Approach 1/2 use, which includes a `changed_from_prior_resolve`
-column (did this step's plan change from the immediately preceding resolve
-for the same step?). Since Approach 0 only ever resolves **once** per day —
-there is no "preceding resolve" to compare against — this column is always
-blank/missing for every row. That's expected, not a bug: it's a direct,
-visible confirmation that Approach 0 genuinely never replans.
+## 7. Additional changes compared to the paper
 
-## 7. Detailed-output CSV schema note
+Everything below was found by comparing the code line by line against arXiv:2608.18494's equations, and confirmed with Avik. None of these are bugs — they are documented, deliberate departures.
 
-`A0_plan_full.csv`/`A0_realized_tuple.csv` (CEV) and
-`A0_MCS_plan_full.csv`/`A0_MCS_realized_tuple.csv` (MCS) use the identical
-column layout Approach 1/2 write for their own `run_mpc`, so a run from any
-of the three approaches can be loaded and compared column-for-column. The
-only structural difference is `resolve_step`, which is always `1` here
-(Approach 0 has exactly one resolve per day) versus 1..nKd for Approach 1/2's
-per-interval replanning.
+**In the MILP itself (`3_MCSModel.jl`):**
+
+1. **Idling is an explicit subactivity** with its own tracked power, added on top of the paper's formulation (the paper only identifies it as one of the 4 power-estimation subactivities in Section II, not as an optimization variable). While on shift, a CEV performs exactly one of the four activities, and can only charge while idle.
+2. **A small tie-breaking term** (weight 1e-6, negligible against real costs) nudges the solver toward charging CEVs earlier in the window when multiple schedules are otherwise equally good.
+3. **Terminal CEV SOE uses `>=`** where the paper's (10b) is an equality. Equivalent whenever `SOE_CEV_ini == SOE_CEV_max`, which holds in the sample data (Table IX).
+4. **Constraint (13d)** is implemented as an arrival/departure balance that does not force the MCS to end the day at the node it started from — a deliberate relaxation. In practice the terminal MCS SOE condition and the cost of extra travel already bring it back to the grid node to recharge overnight.
+5. **Rolling-window adaptations**, needed because `build_window_model` builds one window at a time rather than the whole horizon at once: carried-over MCS transit state across window boundaries, a starting-position condition at each window's first interval, remaining work (not total work) on the right-hand side of (14b), and cumulative history feeding (14c)–(14f).
+6. **Solver settings:** single-threaded, symmetry detection off, and a 1% relative MIP gap (rather than solving to proven optimality) as a deliberate speed trade-off. The achieved gap is recorded per day in `A0_solve_log.csv`.
+
+**In the simulation and KPI layer (`4_OneShot.jl`, `5_Output.jl`):**
+
+7. **A terminal-shortfall penalty** is added to the total cost — not part of objective (4). Because Approach 0 never replans, a stochastic run can end the day with a CEV below its target SOE despite the plan promising otherwise; the shortfall is priced as if it were missed work hours, at the same `rho_miss` rate. This is zero whenever `plant = :mean`.
+8. **The plant is stochastic** (`plant = :sampled`, the default): realized CEV activity power is drawn from a shared sample pool rather than fixed at the plan's mean. If realized work would drain a CEV below its SOE floor, the work is capped and the leftover time recorded as idle at zero cost (not the idle activity's own power, regardless of what `p_idling` is set to) — this reflects that the CEV physically cannot keep drawing power once its battery is empty. Any energy an already-full CEV can't accept is refunded back to the MCS that supplied it.

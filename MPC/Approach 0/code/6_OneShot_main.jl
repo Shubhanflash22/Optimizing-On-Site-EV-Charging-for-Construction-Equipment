@@ -1,30 +1,45 @@
 # #############################################################################
-# 6_OneShot_main.jl  —  TOP-LEVEL DRIVER for Approach 0 (thin)
+# OneShot_main.jl  -  driver script, not a module
 # -----------------------------------------------------------------------------
-# WHAT APPROACH 0 IS
-# The "commit once" baseline: at 08:00, solve ONE whole-day MILP over the full
-# 24 h horizon (no shrinking, no replanning), then execute that fixed plan
-# open-loop for the rest of the day against the (possibly stochastic) plant.
-# Contrast with Approach 1 (this repo's shrinking-horizon MPC) and Approach 2
-# (its stochastic/scenario-based sibling), which both re-solve every 15
-# minutes. Approach 0 exists to give those two something to be measured
-# against: the gap between Approach 0 and Approach 1/2 is the value of
-# re-planning.
+# The single entry point for running Approach 0 end to end: wires together
+# Common, DataLoader, MCSModel, OneShot, and Output (in that dependency
+# order), exposes one configurable function (run_scenario_0) that runs a full
+# scenario from raw input files to printed KPIs and written CSVs, and then
+# auto-runs itself with default settings the moment this file is included.
+# Three groups:
 #
-# This file is only the ORCHESTRATOR. The work lives in focused modules, named
-# in include / dependency order:
-#   1_Common.jl    shared helpers (travel steps, clock labels, the detailed-
-#                  output log structs for CEV and MCS)
-#   2_DataLoader.jl load :synthetic / :input data (full 24 h horizon)
-#   3_MCSModel.jl  the single 24 h window MILP (identical to Approach 1/2's)
-#   4_OneShot.jl   the one-shot executor (the whole of Approach 0)
-#   5_Output.jl    CSV outputs: detailed plan/realized (CEV + MCS) + KPI tables
+#   1. MODULE WIRING
+#      the six `include` calls plus the five `using` lines right after them
+#      -- loads the other five files as modules, in the order each one
+#      depends on the last, and imports only the specific functions this
+#      driver actually calls from each (load_data/load_live_powers from
+#      DataLoader, the two pool constructors from Common, run_one_shot from
+#      OneShot, and the three output functions from Output).
+#
+#   2. SCENARIO ENTRY POINT
+#      run_scenario_0
+#      -- resolves the input directory (falling back to a couple of common
+#      alternate locations if the given one doesn't exist), loads the
+#      problem data, builds the shared stochastic ActivityPowerPool (from
+#      real recorded field data when mode = :live_data, otherwise sampled
+#      around the calibrated/prior mean with the requested spread), runs
+#      Approach 0 via run_one_shot, prints the KPI summary, and -- when
+#      detailed_output is true -- writes every CSV via Output.jl and prints
+#      where they landed.
+#
+#   3. AUTO-RUN
+#      the `if !(@isdefined(SCENARIO0_NO_AUTORUN) ...)` guard at the bottom
+#      -- runs run_scenario_0() with every default the instant this file is
+#      included, unless the includer has already defined
+#      SCENARIO0_NO_AUTORUN = true beforehand (letting, for example, a
+#      comparison script across Approaches 0/1/2 include this file for its
+#      module definitions without triggering an unwanted extra run).
 # #############################################################################
 
+# external packages used across this file
 using Printf
 using Random
 
-# ---- include the modules in dependency order (Common first) ----
 const _CODE_DIR = @__DIR__
 include(joinpath(_CODE_DIR, "1_Common.jl"))
 include(joinpath(_CODE_DIR, "2_DataLoader.jl"))
@@ -37,45 +52,31 @@ using .Common: draw_activity_power_pool, draw_activity_power_pool_live
 using .OneShot: run_one_shot
 using .Output: write_detailed_output, write_kpi_summary, print_kpis
 
-# =============================================================================
-# ENTRY POINT
-# =============================================================================
-# Load the chosen dataset, run Approach 0, print the KPI summary, and write
-# the detailed CSVs + KPI table(s) to output/<mode>/.
+# Runs Approach 0 end to end for one scenario: resolves the input directory, loads the problem data, builds the shared stochastic pool, runs the one-shot solve-and-simulate loop, prints the KPIs, and writes the CSVs when detailed_output is true.
 function run_scenario_0(; mode::Symbol = :normal,
                           input_dir::AbstractString = joinpath(dirname(_CODE_DIR), "data", "input_data"),
-                          # SOLVER TIME LIMIT: seconds the solver may spend on the single
-                          # whole-day window MILP each day. Defaults to no limit (solve to
-                          # the MIP gap); pass a finite value to shorten it.
                           time_limit_sec::Float64 = Inf,
                           multi_activity::Bool = false,
-                          require_site_visit::Bool = false,
-                          single_visit_per_site::Bool = false,
-                          # PLANT MODE for the fixed plan's execution:
-                          #   :sampled  realized power = the next unused draw from the shared
-                          #             pool, so the fixed plan drifts with no feedback to
-                          #             correct it. >>> Use this for normal / headline runs. <<<
-                          #   :mean     realized power pinned to the same mu the MILP planned
-                          #             on, so realized == planned EXACTLY and the KPIs ARE the
-                          #             whole-day MILP's own optimum (deterministic reference).
                           plant::Symbol = :sampled,
                           n_day_run::Int = 1,
                           out_dir::String = joinpath(dirname(_CODE_DIR), "output", String(mode)),
                           detailed_output::Bool = true,
                           seed::Int = 1)
-    # Resolve the input folder (mirrors Approach 1/2's own fallback).
-    if mode != :synthetic && !isdir(input_dir)
+    # Falls back to a couple of common alternate locations if the given input_dir doesn't exist, so the script still finds the data when run from a different working directory.
+    if !isdir(input_dir)
         for alt in (joinpath(_CODE_DIR, "input_data"), joinpath(dirname(_CODE_DIR), "input_data"))
             isdir(alt) && (input_dir = alt; break)
         end
     end
 
-    load_mode = mode in (:input, :synthetic) ? mode : :input
-    d = load_data(load_mode; input_dir = input_dir)
+    # Loads the problem data and makes sure the output directory exists before anything gets written to it.
+    d = load_data(input_dir)
 
     mkpath(out_dir)
 
-    # ---- power-sample pool: sized for the WHOLE multi-day run, not one day ----
+    # Builds the shared ActivityPowerPool the whole run will draw from.
+    # n_samples is sized generously for the number of intervals actually needed across the whole run (nK_day * n_day_run), with a small +5 buffer, since next_power! errors if the pool ever runs out for a given (entity, activity) pair.
+    # mode = :live_data builds the pool from real recorded field data (live_powers.csv); any other mode value is passed straight through as the sampling shape to draw_activity_power_pool (:normal, :near_mean, :high, :low, or :spread_wide), sampled around the prior mean/sigma from parameters.csv.
     nK_day = length(collect(d.K))
     n_samples = nK_day * n_day_run + 5
     pool = if mode == :live_data
@@ -86,12 +87,13 @@ function run_scenario_0(; mode::Symbol = :normal,
                                  n_samples = n_samples, rng = MersenneTwister(seed), mode = mode)
     end
 
+    # Runs Approach 0 itself: one whole-day MILP solve per day, executed open-loop against the pool.
     res = run_one_shot(d, pool; time_limit_sec = time_limit_sec,
-                       multi_activity = multi_activity, require_site_visit = require_site_visit,
-                       single_visit_per_site = single_visit_per_site,
+                       multi_activity = multi_activity,
                        plant = plant, n_day_run = n_day_run, seed = seed,
                        detailed_output = detailed_output)
 
+    # Always prints the KPI summary; only writes CSVs (the four detailed logs plus the KPI/solve/interval tables) when detailed_output was requested.
     print_kpis(res)
     if detailed_output
         write_detailed_output(res, out_dir)
@@ -100,6 +102,8 @@ function run_scenario_0(; mode::Symbol = :normal,
         println("  A0_plan_full.csv, A0_realized_tuple.csv               (CEV, per 15-min step)")
         println("  A0_MCS_plan_full.csv, A0_MCS_realized_tuple.csv       (MCS, per 15-min step)")
         println("  A0_kpi_summary.csv                                    (whole-run KPI table)")
+        println("  A0_solve_log.csv                                      (per-day solver status, objective, MIP gap)")
+        println("  A0_interval_log.csv                                   (plain per-interval log)")
         n_day_run > 1 && println("  A0_kpi_summary_by_day.csv                             (Day1..Day$(n_day_run) + Overall)")
     else
         println("\n(detailed_output = false — no CSVs written; pass detailed_output = true to get them)")
@@ -107,7 +111,7 @@ function run_scenario_0(; mode::Symbol = :normal,
     return res
 end
 
-# Auto-run unless a harness defines SCENARIO0_NO_AUTORUN = true first.
+# Runs a default scenario automatically the instant this file is included, unless the includer set SCENARIO0_NO_AUTORUN = true beforehand (for example, a script that includes this file only to reuse its function/module definitions without triggering an extra run).
 if !(@isdefined(SCENARIO0_NO_AUTORUN) && SCENARIO0_NO_AUTORUN)
     run_scenario_0()
 end
