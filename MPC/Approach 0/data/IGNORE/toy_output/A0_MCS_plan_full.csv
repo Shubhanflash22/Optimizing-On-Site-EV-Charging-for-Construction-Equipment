@@ -1,0 +1,7 @@
+day,resolve_step,resolve_clock,offset_step,offset_clock,steps_ahead,mcs,scenario_id,mcs_status_planned,mcs_node_planned,grid_charge_kW_planned,grid_discharge_kW_planned,soe_mcs_planned_kWh,changed_from_prior_resolve
+1,1,08:00,1,08:00,0,1,,Traveling,Transit,0.0,0.0,100.0,
+1,1,08:00,2,09:00,1,1,,Serving CEV,2,0.0,5.0,95.0,
+1,1,08:00,3,10:00,2,1,,Serving CEV,2,0.0,5.0,90.0,
+1,1,08:00,4,11:00,3,1,,Idle,2,0.0,0.0,90.0,
+1,1,08:00,5,12:00,4,1,,Traveling,Transit,0.0,0.0,90.0,
+1,1,08:00,6,13:00,5,1,,Charging (grid),1,10.0,0.0,100.0,

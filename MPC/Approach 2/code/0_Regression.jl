@@ -1,41 +1,56 @@
 # #############################################################################
-# 0_Regression.jl  —  module Regression   (STEP 0: offline power-model fit)
+# 0_Regression.jl  -  module Regression
 # -----------------------------------------------------------------------------
-# A PURE-JULIA port of Tasks_energy_loading_swinging_bayesian.py. There is NO
-# Python and NO wrapper: this reads the soil task-recording Excel files directly,
-# builds the energy-balance regression equations, fits the SAME Bayesian model
-# used by the online estimator (Common.activity_power_model: TruncatedNormal power
-# priors + a half-normal noise, NUTS), and writes ONLY the fitted values into the
-# MPC's parameters.csv:
-#     p_digging, p_loading_swinging, p_traveling   = posterior MEAN per activity
-#     sigma_digging, sigma_loading_swinging, ...    = posterior SD  per activity
-# No plots / images / diagnostics are produced (that was the Python script's job).
+# Offline step 0 that fits the per-activity CEV power constants (digging, loading+swinging, traveling) from the recorded soil task files.
+# It writes the fitted means and standard deviations into parameters.csv, which DataLoader then reads.
+# This file is not part of the MILP or the MPC loop, and it runs once before them.
+# The fit uses the same Bayesian model as the online estimator in 1_Common.jl, with idle pinned to zero.
+# It builds the observation windows and the energy-balance equations of Section II-C of the paper, but solves them with a Bayesian fit instead of the paper's constrained NNLS.
+# Five groups:
 #
-# Model (per emitted equation i, mirroring the Python build_equations_from_tasks):
-#   * walk the task rows, accumulate activity DURATIONS into a bucket until the
-#     cumulative |ΔSoC| reaches MIN_DELTA_SOC (%), then emit ONE equation:
-#       A_i = [dig+grading1, load+swing+grading2, travel, idle]  (hours)
-#       b_i = -ΔSoC * BATTERY_CAP / 100                          (kWh consumed)
-#   * fit  b_i ~ Normal(A_i . x, s),  x_a ~ TruncatedNormal(mu_a, sigma_a; ≥0),
-#     s ~ HalfNormal(std(b)).  (Idle is pinned to 0 kW, matching the fleet model.)
+#   1. SETUP AND CONSTANTS
+#      _HAVE_XLSX, BATTERY_CAP, MIN_DELTA_SOC, MCMC_DEFAULT, NCHAINS_DEFAULT,
+#      SOIL_FILES, PRIOR_MU, PRIOR_SIGMA
+#      -- the optional XLSX dependency check, the battery capacity, the SOC
+#      threshold for closing a window, the sampler defaults, the list of soil
+#      task files, and the fixed priors on the four activity powers.
 #
-# FAIL-SOFT: if XLSX.jl is not installed or the data folder is missing, this logs
-# a warning and returns false so the MPC still runs against the existing
-# parameters.csv. Install the one extra package with:  import Pkg; Pkg.add("XLSX")
+#   2. TASK-FILE READING
+#      _row_seconds, _read_task_file
+#      -- read one Excel task file into its start time, end time, activity
+#      and SOC columns, and turn each row into a duration in seconds.
+#
+#   3. EQUATION BUILDING
+#      _equations_from_file!
+#      -- walk the rows of one file and emit one equation each time the
+#      cumulative SOC drop reaches the threshold, giving the activity hours
+#      and the energy consumed in that window.
+#
+#   4. PARAMETER EXPORT
+#      _write_params!
+#      -- write the fitted means and standard deviations into parameters.csv,
+#      updating existing rows and appending missing ones.
+#
+#   5. STEP 0 ENTRY POINT
+#      run_regression
+#      -- build the equations from every soil file, fit them with the
+#      estimator from 1_Common.jl, and call the export.
+#      Returns false and leaves parameters.csv untouched if the step cannot run.
 # #############################################################################
 module Regression
 
+# external packages used across this file
 using Printf
 using Dates
-using Statistics
 using DataFrames
 using CSV
 using ..Common: BayesianActivityEstimator, observe!, refit!
 
+# everything below that other files are allowed to use
 export run_regression
 
-# Optional dependency: only XLSX is extra. Load it defensively so a missing
-# package cannot break the whole include chain; step 0 then degrades gracefully.
+# Records whether XLSX.jl could be loaded when this module was included.
+# XLSX is the only optional package, so a missing install turns step 0 off instead of breaking the include chain.
 const _HAVE_XLSX = try
     @eval import XLSX
     true
@@ -43,13 +58,14 @@ catch
     false
 end
 
-# ---- constants ported from the Python script (MATERIAL = "soil") ------------
-const BATTERY_CAP   = 14.8     # kWh, full-pack capacity used to turn ΔSoC% into kWh
-const MIN_DELTA_SOC = 3.0      # emit one equation per cumulative 3% SoC drop
-const MCMC_DEFAULT  = 2000     # NUTS draws per chain (Python used draws=2000)
-const NCHAINS_DEFAULT = 4      # NUTS chains, pooled (Python used chains=4)
+# Fixed settings: the CEV battery capacity in kWh (C_batt in Section II-A of the paper), the SOC drop in percent that closes an observation window (tau in Section II-C2), and the default NUTS draws per chain and chains.
+const BATTERY_CAP   = 14.8     
+const MIN_DELTA_SOC = 3.0      
+const MCMC_DEFAULT  = 2000    
+const NCHAINS_DEFAULT = 4      
 
-# Soil task files (Python MATERIAL_FILES["soil"] = files 1..12), by basename.
+# Names of the twelve soil task-recording Excel files, read from the data folder passed to run_regression.
+# They cover the October 21 to 23 and February 2 to 3 recording days.
 const SOIL_FILES = [
     "Oct_21_Tasks_1.xlsx",
     "Oct_22_Tasks_1.xlsx", "Oct_22_Tasks_2.xlsx", "Oct_22_Tasks_3.xlsx",
@@ -59,26 +75,26 @@ const SOIL_FILES = [
     "Feb_03_Tasks_1.xlsx", "Feb_03_Tasks_2.xlsx",
 ]
 
-# Soil prior on [digging, loading+swinging, traveling, idling] powers, matching
-# the Python X_PRIOR_MU_SIGMA["False"]["soil"]. Idle is pinned (sigma 0 -> the
-# estimator holds it at 0 kW rather than sampling a degenerate distribution).
+# Prior mean and prior standard deviation in kW of the four activity powers, in the order digging, loading+swinging, traveling, idling.
+# A standard deviation of zero for idling makes the estimator keep idle fixed at its prior mean of 0 kW instead of sampling it.
 const PRIOR_MU    = [4.79, 3.16, 4.71, 0.0]
 const PRIOR_SIGMA = [0.23, 0.23, 0.54, 0.0]
 
-# Seconds spanned by one task row (End - Start); missing/negative -> 0 so it is
-# ignored by the per-activity duration sums (matches pandas skipna=True).
+# Returns the duration in seconds of one task row, computed as end time t1 minus start time t0.
+# Returns 0.0 if either time is missing, if the subtraction or conversion to milliseconds fails, or if the duration is not positive.
 function _row_seconds(t0, t1)
     (ismissing(t0) || ismissing(t1)) && return 0.0
     ms = try
-        Dates.value(convert(Millisecond, t1 - t0))   # DateTime-DateTime -> Millisecond
+        Dates.value(convert(Millisecond, t1 - t0))   
     catch
-        return 0.0                                     # non-datetime cell -> ignore
+        return 0.0                                     
     end
     return ms > 0 ? ms / 1000 : 0.0
 end
 
-# Build (A rows, b entries) for ONE task file, exactly like the Python
-# build_equations_from_tasks: cumulative-|ΔSoC| bucketing, 4-activity columns.
+# Appends the energy-balance equations of one task file to A_rows and b_rows (Sections II-C1 and II-C2 of the paper).
+# Each equation covers a run of task rows that ends once the SOC has dropped by at least MIN_DELTA_SOC, with A holding the hours in [digging, loading+swinging, traveling, idling] and b the energy consumed in kWh.
+# Grading 1 counts as digging, Grading 2 and Swinging count as loading+swinging, both spellings of traveling are accepted, and any other activity name adds no time.
 function _equations_from_file!(A_rows, b_rows, starts, stops, acts, socs)
     n = length(socs)
     n == 0 && return
@@ -94,8 +110,7 @@ function _equations_from_file!(A_rows, b_rows, starts, stops, acts, socs)
         cum_delta = soc_now - anchor
         if abs(cum_delta) < MIN_DELTA_SOC; j += 1; continue; end
 
-        # sum hours per raw activity over the bucket rows [bstart .. j]
-        h = zeros(7)   # dig, grading1, load, swing, grading2, travel, idle
+        h = zeros(7)   
         for r in bstart:j
             a = acts[r]; ismissing(a) && continue
             s = strip(String(a)); d = dur[r]
@@ -104,12 +119,11 @@ function _equations_from_file!(A_rows, b_rows, starts, stops, acts, socs)
             elseif s == "Loading";    h[3] += d
             elseif s == "Swinging";   h[4] += d
             elseif s == "Grading 2";  h[5] += d
-            elseif s == "Travelling"; h[6] += d
+            elseif s == "Travelling" || s == "Traveling"; h[6] += d
             elseif s == "Idling";     h[7] += d
             end
         end
-        h ./= 3600   # seconds -> hours
-        # 4-activity row: [dig(+grading1), load(+swing+grading2), travel, idle]
+        h ./= 3600   
         push!(A_rows, [h[1] + h[2], h[3] + h[4] + h[5], h[6], h[7]])
         push!(b_rows, -cum_delta * BATTERY_CAP / 100)
 
@@ -119,8 +133,8 @@ function _equations_from_file!(A_rows, b_rows, starts, stops, acts, socs)
     end
 end
 
-# Read one Excel file into the four needed column vectors (Start, End, Activity,
-# SoC). Returns nothing if the file/sheet is unreadable.
+# Reads the Sheet1 sheet of one Excel task file and returns its Start time (actual), End time (actual), Activity and SoC columns, in that order.
+# Returns nothing and logs a warning if the file, the sheet or any of the four columns cannot be read, so the caller can skip that file.
 function _read_task_file(path)
     try
         tbl = XLSX.readtable(path, "Sheet1")
@@ -134,14 +148,15 @@ function _read_task_file(path)
     end
 end
 
-# Update-in-place (or append) the six fitted rows in parameters.csv.
+# Writes the three fitted power means (mu) and three fitted standard deviations (sd) into the parameters.csv file at params_csv, rounded to four decimals.
+# An existing row with the same key is updated in place, a missing key is appended as a new row, and the file is overwritten.
 function _write_params!(params_csv, mu, sd)
     df = CSV.read(params_csv, DataFrame)
     ("Parameter" in names(df) && "Value" in names(df)) ||
         error("Regression: parameters.csv missing Parameter/Value columns -> $params_csv")
     "Unit" in names(df)        || (df.Unit = fill("", nrow(df)))
     "Description" in names(df)  || (df.Description = fill("", nrow(df)))
-    df.Value = Vector{Any}(df.Value)   # allow writing rounded floats uniformly
+    df.Value = Vector{Any}(df.Value)   
 
     updates = ("p_digging" => mu[1], "p_loading_swinging" => mu[2], "p_traveling" => mu[3],
                "sigma_digging" => sd[1], "sigma_loading_swinging" => sd[2], "sigma_traveling" => sd[3])
@@ -156,11 +171,8 @@ function _write_params!(params_csv, mu, sd)
     CSV.write(params_csv, df)
 end
 
-# -----------------------------------------------------------------------------
-# STEP 0 entry point. `data_dir` holds the soil .xlsx files; `params_csv` is the
-# MPC parameters file to refresh. Returns true on success, false (warned) if the
-# step could not run so the caller keeps the existing parameters.csv.
-# -----------------------------------------------------------------------------
+# Runs step 0: builds the equations from every SOIL_FILES file found in data_dir, fits them with the BayesianActivityEstimator from 1_Common.jl, and writes the fitted means and standard deviations into params_csv.
+# Returns true after parameters.csv has been rewritten, and returns false with a warning, leaving parameters.csv untouched, if XLSX.jl is missing, if data_dir or params_csv does not exist, or if no equation could be built.
 function run_regression(data_dir::AbstractString, params_csv::AbstractString;
                         mcmc_samples::Int = MCMC_DEFAULT,
                         nchains::Int = NCHAINS_DEFAULT)
@@ -185,7 +197,6 @@ function run_regression(data_dir::AbstractString, params_csv::AbstractString;
     println("=" ^ 78)
     t0 = time()
 
-    # ---- build the regression equations from every soil file ----
     A_rows = Vector{Vector{Float64}}(); b_rows = Float64[]
     nfiles = 0
     for fname in SOIL_FILES
@@ -202,12 +213,11 @@ function run_regression(data_dir::AbstractString, params_csv::AbstractString;
     A = reduce(vcat, (reshape(r, 1, :) for r in A_rows))
     @printf("  built %d equations from %d file(s)\n", length(b_rows), nfiles)
 
-    # ---- fit the SAME Bayesian model as the online estimator, then export ----
     est = BayesianActivityEstimator(PRIOR_MU, PRIOR_SIGMA; mcmc_samples = mcmc_samples)
     for i in eachindex(b_rows)
         observe!(est, A[i, :], b_rows[i])
     end
-    refit!(est; nchains = nchains)   # NUTS (nchains pooled); idle pinned to 0
+    refit!(est; nchains = nchains)  
 
     _write_params!(params_csv, est.mu, est.sd)
     @printf("STEP 0 done in %.1f s; parameters.csv refreshed.\n", time() - t0)
@@ -216,4 +226,4 @@ function run_regression(data_dir::AbstractString, params_csv::AbstractString;
     return true
 end
 
-end # module Regression
+end 

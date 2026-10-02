@@ -184,7 +184,7 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
         error("apply_and_simulate!: plant_mode must be :sampled or :mean, got :$plant_mode")
     use_mean = plant_mode === :mean
 
-    # Reads the plan's total grid charge/discharge power for this interval (correctly summed over all MCSs), and records each MCS's individual charge/discharge power and physical node into the per-MCS, per-interval logging arrays.
+    # Reads the plan's total grid charge/discharge power for this interval (summed over all MCSs), and records each MCS's individual charge/discharge power and physical node into the per-MCS, per-interval logging arrays.
     grid_kW = sum(value(model[:P_ch_tot][m, k0]) for m in d.M)
     dch_kW  = sum(value(model[:P_dch_tot][m, k0]) for m in d.M)
     for m in d.M
@@ -195,7 +195,7 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
         end
     end
 
-    # Draws each CEV's realized activity durations from the fixed plan (see realized_activity_durations), then draws the REAL power for each active activity from the shared pool -- use_mean pins it to the planning mean (deterministic reference mode), otherwise it's a fresh stochastic sample.
+    # Draws each CEV's realized activity durations from the fixed plan (see realized_activity_durations), then draws the REAL power for each active activity from the shared pool -- use_mean pins it to the planning mean from parameters.csv (deterministic reference mode, where realized equals planned), otherwise it takes the next sample from the pool.
     # Off-shift intervals are forced to zero power regardless of duration, since a CEV that isn't scheduled to work shouldn't draw work power even if realized_activity_durations somehow returned a nonzero row for it.
     # n_obs_added counts how many CEVs actually produced a new real observation this interval, for the Bayesian estimator's calibration bookkeeping (not used by Approach 0 itself, but kept for consistency with the shared pool machinery in Common.jl).
     a_real = Dict(e => realized_activity_durations(rng, model, e, k0, d;
@@ -213,7 +213,7 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
                 pt[a] = 0.0   
                 continue
             end
-            pt[a] = use_mean ? pool.mu[a] : next_power!(pool, cursor, e, a)
+            pt[a] = use_mean ? d.prior_mu[a] : next_power!(pool, cursor, e, a)
         end
         p_true[e] = pt
         sum(row) > 1e-9 && working && (n_obs_added += 1)
@@ -229,7 +229,7 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
     end
 
     # For each CEV: computes how much energy it actually received this interval (raw_by_mcs/total_raw/charged), and how much energy its realized activities would actually cost (work_true).
-    # If the realized work would drain the CEV below SOE_CEV_min (work_true > headroom), scales down the realized durations proportionally and dumps the freed time into idle -- this is the SOE-floor capping Avik asked to have tracked (capped[e]), reflecting that a CEV physically cannot keep working once its battery is empty, regardless of what the plan assumed.
+    # If the realized work would drain the CEV below SOE_CEV_min (work_true > headroom), scales down the realized durations proportionally and dumps the freed time into idle -- this is the SOE-floor capping (capped[e]), reflecting that a CEV physically cannot keep working once its battery is empty, regardless of what the plan assumed.
     # Updates soe_cev with the (possibly capped) realized work.
     # If that pushes the CEV over SOE_CEV_max, the surplus energy is refunded to the MCS(s) that supplied it, in proportion to their share of the delivery.
     # This happens when the CEV drew less work energy than planned in earlier intervals, so its SOE has run ahead of the plan and the planned charge no longer fits.
@@ -252,7 +252,7 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
             a_real[e][1] *= scale                                 
             a_real[e][2] *= scale                                 
             a_real[e][3] *= scale                                
-            a_real[e][4] += d.delta_T - sum(a_real[e][1:3])       
+            a_real[e][4] = d.delta_T - sum(a_real[e][1:3])       
             work_true = dot(a_real[e][1:3], p_true[e][1:3])          
             n_capped += 1
             capped[e] = true
@@ -390,7 +390,7 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
         ":sampled (stochastic -- realized power drawn from the shared pool)"
     println("Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): $n_kept steps ($n_day_run day(s))")
     println("  plant                  : ", pmode_txt)
-    println("  planning power (mu)    : ", round.(pool.mu, digits = 2), " kW")
+    println("  planning power (mu)    : ", round.(d.prior_mu, digits = 2), " kW")
     plant === :sampled && println("  plant sampling sd      : ", round.(pool.sd, digits = 2), " kW")
     println("  solver time limit      : ",
             isfinite(time_limit_sec) ? "$(time_limit_sec) s" : "none (solve to the MIP gap)")
@@ -410,7 +410,7 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
 
         model = build_window_model(d, K_all, soe_mcs, soe_cev, mcs_node, mcs_transit,
                                    rem_dig, rem_load, hist,
-                                   peak_nc, peak_op, pool.mu;
+                                   peak_nc, peak_op, d.prior_mu;
                                    time_limit_sec = time_limit_sec)
         stat = string(termination_status(model))
         has_values(model) || error("Approach 0 (one-shot): day $day's 8:00 whole-day MILP was INFEASIBLE ",
@@ -508,7 +508,7 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
             end
 
             # Updates the running NC demand peak, and the OP demand peak when this interval is on-peak, then appends this interval's summary row to the plain log.
-            # step.grid_kW is already summed over all MCSs, so both peaks are correct for multi-MCS runs.
+            # step.grid_kW is summed over all MCSs.
             peak_nc = max(peak_nc, step.grid_kW)
             in_peak(k0, d.delta_T, d.t_start) && (peak_op = max(peak_op, step.grid_kW))
 
@@ -519,8 +519,8 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
                         (soe_mcs[m] for m in d.M)...,
                         (soe_cev[e] for e in d.E)...,
                         (real_loc[m, gidx] for m in d.M)...,
-                        pool.mu[1], pool.mu[2], pool.mu[3], pool.mu[4],
-                        pool.sd[1], pool.sd[2], pool.sd[3], pool.sd[4], n_obs_total))
+                        d.prior_mu[1], d.prior_mu[2], d.prior_mu[3], d.prior_mu[4],
+                        d.prior_sigma[1], d.prior_sigma[2], d.prior_sigma[3], d.prior_sigma[4], n_obs_total))
         end
         
         # At the end of each day, computes that day's transit hours and labour cost across ALL MCSs (via real_loc), plus a cumulative missed-work and terminal-shortfall snapshot.
