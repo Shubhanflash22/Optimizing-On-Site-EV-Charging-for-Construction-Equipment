@@ -1,82 +1,53 @@
 # #############################################################################
-# Shrinking_Horizon_main.jl  —  TOP-LEVEL DRIVER (thin)   [APPROACH 2: STOCHASTIC MPC]
+# 6_Shrinking_Horizon_main.jl  -  main script of Approach 2
 # -----------------------------------------------------------------------------
-# WHAT THIS PROGRAM DOES (the 30-second version)
-# We own ONE Mobile Charging Station (MCS) — a battery on wheels — and a small
-# fleet of electric excavators (Construction EVs, "CEVs"). Over a work day the
-# MCS drives around and tops the excavators up so none runs flat, while paying
-# the least for electricity (time-of-use price + demand charges + carbon) and
-# getting all the digging/loading work done. We do NOT know each activity's exact
-# power draw, so we fit a Bayesian power model ONCE and then every 15 minutes we
-# (1) SAMPLE a small set of scenarios from that posterior, (2) OPTIMISE a single
-# MILP that hedges across all of them at once (non-anticipativity: one shared
-# action for right now, feasible in every scenario), and (3) APPLY only that
-# shared first interval to the stochastic plant — classic scenario-based MPC,
-# one interval at a time (SHRINKING horizon). Approach 1 (certainty-equivalent
-# MPC, see `../Approach 1/`) is the deterministic sibling this extends.
+# Runs the whole Approach 2 pipeline: the optional power regression, data loading, the closed-loop shrinking-horizon stochastic MPC over sampled power scenarios, the KPI printout and the output files.
+# Including this file runs run_scenario_1 with its defaults, unless SCENARIO1_NO_AUTORUN is set to true first.
+# Four groups:
 #
-# This file is only the ORCHESTRATOR (step 6). The work lives in focused modules,
-# named in include / dependency order:
-#   1_Common.jl            shared helpers (travel steps, clock labels, step plots)
-#                          PLUS the Bayesian activity-power estimator, PLUS the
-#                          detailed-output log structs (CEV and MCS)
-#   0_Regression.jl        STEP 0 (pure Julia; needs Common): reads the soil .xlsx
-#                          task files, fits the Bayesian power model, and refreshes
-#                          parameters.csv (mu + per-activity sigma) BEFORE the MPC.
-#                          Runs by default in :input mode; skip via run_regression=
-#                          false. Fail-soft if XLSX.jl / the data folder is absent.
-#   2_DataLoader.jl        load :synthetic / :input data (full 24 h horizon)
-#   2b_ScenarioSampler.jl  STANDALONE module: draws the S sampled power vectors
-#                          each re-solve consumes. Nothing else in this pipeline
-#                          knows how sampling works except this one file.
-#   3_MCSModel.jl          the window MILP: `build_window_model_stochastic`, the
-#                          scenario-linked version this controller solves every
-#                          15 min (`build_window_model`, deterministic, Eq. 1-13,
-#                          is also here since the physics don't depend on which
-#                          controller uses them — see ../Approach 0/ and
-#                          ../Approach 1/, which use it too)
-#   4_MPCLoop.jl           the closed loop (sample + optimise + apply + advance)
-#   5_Output.jl            ALL on-disk artefacts: v4_real-style STEP figures (+ CSVs)
-#                          PLUS KPI/cost CSVs, worker schedule, replan grids
+#   1. SETUP
+#      _CODE_DIR, _DEFAULT_REGRESSION_DATA_DIR
+#      -- the file includes in dependency order, the imports, and the default folder of the regression task files.
 #
-# This is Approach 2 ON ITS OWN — it no longer runs or reports on Approach 0.
-# For an Approach 0 vs Approach 1 vs Approach 2 comparison, use
-# ../Comparison_A0_A1_A2/Code/ instead, which solves all three and produces the
-# comparison figures/CSVs. That's also where all image/plot output now lives
-# for a cross-approach comparison; this file's own `write_outputs` only ever
-# draws Approach 2's own single-run figures.
+#   2. CONSOLE LOG
+#      _with_console_log
+#      -- run a function while copying everything printed on the screen into a log file.
+#
+#   3. SCENARIO RUNNER
+#      run_scenario_1
+#      -- run the regression, load the data, build the plant's power pool, run the MPC, and write the results.
+#      n_scenarios sets how many power scenarios each re-solve plans against.
+#
+#   4. KPI PRINTOUT
+#      _print_kpis
+#      -- print the headline KPIs of one run.
 # #############################################################################
-
+# external packages used across this file
 using Printf
 using Random
 
-# ---- include the modules in dependency order (Common first) ----
 const _CODE_DIR = @__DIR__
 include(joinpath(_CODE_DIR, "1_Common.jl"))
-include(joinpath(_CODE_DIR, "0_Regression.jl"))   # after Common (uses ..Common)
+include(joinpath(_CODE_DIR, "0_Regression.jl"))    
 include(joinpath(_CODE_DIR, "2_DataLoader.jl"))
-include(joinpath(_CODE_DIR, "2b_ScenarioSampler.jl"))   # standalone; MCSModel/MPCLoop both use it
+include(joinpath(_CODE_DIR, "2b_ScenarioSampler.jl"))
 include(joinpath(_CODE_DIR, "3_MCSModel.jl"))
 include(joinpath(_CODE_DIR, "4_MPCLoop.jl"))
 include(joinpath(_CODE_DIR, "5_Output.jl"))
 
 using .DataLoader: load_data, load_live_powers
-using .Common: draw_activity_power_pool, draw_activity_power_pool_live
 using .ScenarioSampler: DEFAULT_N_SCENARIOS
+using .Common: draw_activity_power_pool, draw_activity_power_pool_live
 using .MPCLoop: run_mpc
-using .Output: write_outputs, write_detailed_output
+using .Output: write_outputs, write_important_outputs, write_detailed_output
 
-# Default folder holding the soil task-recording .xlsx files (step-0 regression).
-const _DEFAULT_REGRESSION_DATA_DIR = raw"C:\Users\shubh\Desktop\Bayesian Regression"
+const _DEFAULT_REGRESSION_DATA_DIR = joinpath(dirname(dirname(_CODE_DIR)), "Bayesian Regression")
 
-# -----------------------------------------------------------------------------
-# CONSOLE LOG CAPTURE: mirror everything printed (println/@printf to stdout,
-# @warn to stderr) to a run_log.txt file under out_dir, in ADDITION to the
-# terminal -- nothing currently printed changes, it's just also saved.
-# -----------------------------------------------------------------------------
+# Runs f() while copying everything printed to the screen, including warnings, into A2_run_log.txt in out_dir.
+# A background task reads from a pipe that stdout and stderr are both redirected into, writing each chunk to both the real console and the log file as it arrives.
 function _with_console_log(f, out_dir)
     mkpath(out_dir)
-    log_path = joinpath(out_dir, "run_log.txt")
+    log_path = joinpath(out_dir, "A2_run_log.txt")
 
     open(log_path, "w") do logfile
         pipe = Pipe()
@@ -105,106 +76,86 @@ function _with_console_log(f, out_dir)
         end
     end
 end
-# =============================================================================
-# ENTRY POINT
-# =============================================================================
-# Load the chosen dataset, run the stochastic shrinking-horizon closed loop,
-# print the KPI summary, and write the full figure + report set to output/<mode>/.
-#
-# NOTE: `dataset` (:input / :synthetic — WHICH data to load) and `mode`
-# (:normal / :high / :low / :near_mean / :live_data — HOW the simulated
-# plant's realized power is drawn) are two separate, independent choices.
-# They used to share the name `mode` for both, which is not valid Julia (a
-# function cannot declare the same keyword argument name twice) — `dataset`
-# is the fix, kept distinct from `mode` so it matches the convention the
-# Comparison_A0_A1_A2 drivers already use (`mode`/`modes` = draw mode only).
-function run_scenario_1(; dataset::Symbol = :synthetic,
-                          input_dir::AbstractString = joinpath(dirname(_CODE_DIR), "data", "input_data"),
-                          shrinking::Bool = true, H::Int = 16,
-                          # SOLVER TIME LIMIT (control point #1, the top-level knob). Seconds the
-                          # solver may spend on EACH window MILP (every 15-min window). This flows
-                          # through to run_mpc -> build_window_model_stochastic -> set_time_limit_sec
-                          # (3_MCSModel.jl). Defaults to NO LIMIT (solve to the MIP gap); pass a
-                          # finite value to shorten it, e.g. run_scenario_1(dataset = :input, time_limit_sec = 60.0)
+
+# Runs Approach 2 end to end and returns the result of run_mpc.
+# It first refits the activity powers into parameters.csv when run_regression is true, then loads the input data from input_dir, and builds the pool of sampled activity powers that the plant draws from.
+# mode sets how those powers are drawn (normal, high, low, near_mean, or live_data to resample the recorded values in live_powers.csv), and the pool is sized for n_day_run days so a multi-day run never exhausts its samples.
+# It then runs the closed-loop stochastic MPC over n_day_run days, planning against n_scenarios sampled power scenarios at every re-solve, with time_limit_sec limiting each window solve, prints the KPIs, and writes the results into out_dir.
+# detailed_output also writes the four detailed plan and realized logs, and important_only writes only the eight most important files (write_important_outputs), forcing detailed_output on regardless of its own setting.
+function run_scenario_1(; input_dir::AbstractString = joinpath(dirname(_CODE_DIR), "data", "input_data"),
                           time_limit_sec::Float64 = Inf,
                           multi_activity::Bool = false,
-                          require_site_visit::Bool = false,
-                          single_visit_per_site::Bool = false,
                           mcmc_samples::Int = 500,
-                          # number of scenarios sampled from the posterior at every
-                          # re-solve (see 2b_ScenarioSampler.jl). 5 by default.
                           n_scenarios::Int = DEFAULT_N_SCENARIOS,
-                          out_dir::String = joinpath(dirname(_CODE_DIR), "output", String(dataset)),
-                          run_regression::Bool = true,
+                          n_day_run::Int = 1,
+                          mode::Symbol = :normal,
+                          out_dir::String = joinpath(dirname(_CODE_DIR), "output", String(mode)),
+                          run_regression::Bool = false,
                           regression_data_dir::AbstractString = _DEFAULT_REGRESSION_DATA_DIR,
                           regression_samples::Int = 2000,
                           regression_chains::Int = 4,
-                          # PLANT MODE: how the simulated plant's realized power is drawn.
-                          # :normal (default, unchanged) -> unbiased Bayesian draws from
-                          # Normal(mu,sd); :high/:low/:near_mean/:spread_wide -> the same
-                          # Bayesian pool biased per 1_Common.jl's "DRAW MODE" doc;
-                          # :live_data -> draws instead from real recorded values in
-                          # data/input_data/live_powers.csv (see DataLoader.load_live_powers
-                          # / Common.draw_activity_power_pool_live).
-                          mode::Symbol = :normal,
                           detailed_output::Bool = false,
+                          important_only::Bool = false,
                           seed::Int = 1)
-    # Resolve the input folder (with a couple of legacy fallbacks).
-    if dataset == :input && !isdir(input_dir)
+    if !isdir(input_dir)
         for alt in (joinpath(_CODE_DIR, "input_data"), joinpath(dirname(_CODE_DIR), "input_data"))
             isdir(alt) && (input_dir = alt; break)
         end
     end
 
-    # ---- STEP 0: (re)fit the Bayesian power model and refresh parameters.csv ----
-    if dataset == :input && run_regression
+    if run_regression
         Regression.run_regression(regression_data_dir, joinpath(input_dir, "parameters.csv");
                                   mcmc_samples = regression_samples, nchains = regression_chains)
     end
 
-    d = load_data(dataset; input_dir = input_dir)
+    d = load_data(input_dir)
+    detailed_output = detailed_output || important_only
 
     return _with_console_log(out_dir) do
-        # ---- power-sample pool (Common.jl): generated ONCE, from the frozen
-        # d.prior_mu/d.prior_sigma. mode = :normal -> unbiased draws (the
-        # original behaviour, unchanged).
         pool = if mode == :live_data
             live_values = load_live_powers(input_dir)
             draw_activity_power_pool_live(d.E, live_values; rng = MersenneTwister(seed))
         else
             draw_activity_power_pool(d.E, d.prior_mu, d.prior_sigma;
-                                     n_samples = 20, rng = MersenneTwister(seed),
+                                     n_samples = length(collect(d.K)) * n_day_run + 5, rng = MersenneTwister(seed),
                                      mode = mode)
         end
 
-        # ---- APPROACH 2: scenario-based STOCHASTIC MPC against the stochastic pool ----
-        res = run_mpc(d, pool; shrinking = shrinking, H = H, time_limit_sec = time_limit_sec,
-                         multi_activity = multi_activity, require_site_visit = require_site_visit,
-                         single_visit_per_site = single_visit_per_site,
-                         mcmc_samples = mcmc_samples, plant = :sampled, n_scenarios = n_scenarios,
-                         seed = seed, detailed_output = detailed_output)
+        res = run_mpc(d, pool; time_limit_sec = time_limit_sec,
+                         multi_activity = multi_activity,
+                         mcmc_samples = mcmc_samples, plant = :sampled, n_scenarios = n_scenarios, seed = seed,
+                         n_day_run = n_day_run, detailed_output = detailed_output)
 
         _print_kpis(res)
 
-        write_outputs(res, out_dir)
-        detailed_output && write_detailed_output(res, out_dir)
+        if important_only
+            write_important_outputs(res, out_dir)
+        else
+            write_outputs(res, out_dir)
+            detailed_output && write_detailed_output(res, out_dir)
+        end
 
         println("\nResults written to: $(abspath(out_dir))")
-        println("  Figures (v4_real style): 01..09 (09 = per-MCS power profiles)")
-        println("  Reports: 08 KPI, replan_grids/*.csv+*.html,")
-        println("           plan_vs_actual.html + plan_vs_actual_costs.png  (08:00 plan vs realised, financial)")
-        println("           plan_vs_actual_activity.png, plan_vs_actual_side_by_side.html, plan_vs_actual_by_entity.html  (ACTIVITY)")
-        detailed_output && println("           plan_full.csv, realized_tuple.csv, MCS_plan_full.csv, MCS_realized_tuple.csv  (per 15-min step, per scenario)")
-        println("  Console log: run_log.txt")
-        println("\nFor an Approach 0 vs 1 vs 2 comparison, run ../Comparison_A0_A1_A2/Code/ instead.")
-        res.log
+        if important_only
+            println("  Important mode: A2_interval_log.csv, A2_solve_log.csv, A2_kpi_summary.csv,")
+            println("                  A2_plan_vs_actual.html (+ day1.. for n_day_run > 1),")
+            println("                  A2_plan_full.csv, A2_realized_tuple.csv, A2_MCS_plan_full.csv, A2_MCS_realized_tuple.csv")
+        else
+            println("  Figures: A2_01..A2_09 (09 = per-MCS power profiles)")
+            println("  Reports: A2_kpi_summary.csv(+_by_day), A2_replan_grids/*.csv+*.html,")
+            println("           A2_plan_vs_actual.html + A2_plan_vs_actual_costs.png  (Overall, plus day1.. for n_day_run > 1)")
+            println("           day<N>/A2_plan_vs_actual_activity.png, A2_plan_vs_actual_side_by_side.html, A2_plan_vs_actual_by_entity.html  (ACTIVITY, per day)")
+            detailed_output && println("           A2_plan_full.csv, A2_realized_tuple.csv, A2_MCS_plan_full.csv, A2_MCS_realized_tuple.csv  (per 15-min step)")
+        end
+        println("  Console log: A2_run_log.txt")
+        res
     end
 end
 
-# Human-readable KPI block.
+# Prints a short summary of one run's headline KPIs: grid energy, energy cost, CO2 (skipped if effectively zero), the two demand peaks, missed work, MCS transit time and labour cost, and the end-of-run SOE of every CEV and MCS against its target.
 function _print_kpis(res)
     d = res.d
-    println("\n==== Scenario 1 closed-loop KPIs (full 24 h horizon: 08:00 -> 08:00 next day) ====")
+    println("\n==== Approach 2 closed-loop KPIs, $(res.n_day_run) day(s), $(res.nK) intervals, $(res.n_scenarios) scenarios ====")
     @printf("Total grid energy   : %.2f kWh\n", res.total_energy)
     @printf("Total energy cost   : \$%.2f\n", res.total_cost)
     res.total_co2 > 1e-9 && @printf("Total CO2 emissions : %.2f kg\n", res.total_co2)
@@ -217,9 +168,10 @@ function _print_kpis(res)
             string(round.(res.soe_cev_end, digits = 2)), string(round.(d.SOE_CEV_ini, digits = 2)))
     @printf("MCS SOE at horizon  : %s kWh (target %s)\n",
             string(round.(res.soe_mcs_end, digits = 2)), string(round.(d.SOE_MCS_ini, digits = 2)))
+    @printf("Terminal SOE shortfall penalty : \$%.2f\n", res.shortfall_penalty_cost)
 end
 
-# Auto-run unless a harness defines SCENARIO1_NO_AUTORUN = true first.
+# Runs the scenario with its default arguments when the file is included, unless SCENARIO1_NO_AUTORUN is defined as true.
 if !(@isdefined(SCENARIO1_NO_AUTORUN) && SCENARIO1_NO_AUTORUN)
-    run_scenario_1(dataset = :input, run_regression = false)
+    run_scenario_1()
 end

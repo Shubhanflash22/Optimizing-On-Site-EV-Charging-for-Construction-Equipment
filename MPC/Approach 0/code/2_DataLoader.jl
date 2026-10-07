@@ -119,6 +119,7 @@ function load_input_data(input_dir::AbstractString)
     prior_sigma_frac = _psd_opt(par, "prior_sigma_frac", 0.2)
     obs_noise_std    = _psd_opt(par, "obs_noise_std", 0.05)
     co2_unit_scale   = _psd_opt(par, "co2_unit_scale", 1.0)
+    kappa_wt         = Int(round(_psd_opt(par, "kappa_wt", 4.0)))
 
     # Derives the interval count and horizon start time from time_data.csv, and pulls its per-interval electricity price and carbon intensity series.
     # lambda_whl_elec is λ^elec_t and lambda_CO2 is λ^CO2_t, both from objective function (4).
@@ -227,7 +228,7 @@ function load_input_data(input_dir::AbstractString)
               hours_digging, hours_loading_swinging, tau_trv,
               lambda_whl_elec, lambda_CO2, is_working,
               rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP,
-              carbon_price_per_ton, scale, B)
+              carbon_price_per_ton, scale, kappa_wt, B)
 end
 
 # Thin wrapper around load_input_data with a default input directory (the data/input_data folder sitting next to this module's parent directory).

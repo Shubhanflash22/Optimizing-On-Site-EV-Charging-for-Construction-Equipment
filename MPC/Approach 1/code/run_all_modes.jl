@@ -51,7 +51,8 @@ for mode in MODES
         res = run_scenario_1(mode = mode, input_dir = INPUT_DIR, out_dir = out_dir,
                               n_day_run = 1, important_only = true,
                               time_limit_sec = 1200.0,
-                              run_regression = (mode == first(MODES)))
+                              run_regression = false)
+                              # run_regression = (mode == first(MODES)))
         d = res.d
         # Realized total cost, computed the same way 5_Output.jl's _cost_components
         # does: this is what ACTUALLY happened (mode-dependent), not what any one
@@ -96,7 +97,3 @@ for r in results
             r.label, r.status, r.realized_cost, r.mean_gap_pct, r.missed_hours,
             r.n_infeasible, r.n_capped)
 end
-println("\nNote: unlike Approach 0, there is no single 'Planned Cost' column here --")
-println("Approach 1 re-solves a new window every interval (~96/day), each pricing only")
-println("its own remaining horizon, so no one solve's objective stands for the whole")
-println("day's plan. Realized Cost is the number worth comparing across rows.")

@@ -328,7 +328,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # Keeps each CEV's travel evenly interspersed with its productive work: at most one travel interval for every work_per_travel productive work intervals, and at least one required once that many work intervals have piled up.
     # Tracked cumulatively from before this window through the end of it.
     # Constraints 14e and 14f of the paper's MILP formulation.
-    work_per_travel = 4
+    work_per_travel = d.kappa_wt
     for i in N_c, e in E
         d.A[i, e] == 1 || continue
         for k in K

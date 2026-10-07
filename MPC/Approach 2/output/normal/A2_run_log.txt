@@ -1,0 +1,28 @@
+Running Approach 2 (stochastic scenario-based MPC, 15-min steps, Shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal weights, resampled fresh every window, plan read from scenario 3)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.8, 3.15, 4.71, 0.0] kW
+  plant sampling sd    : [0.55, 0.4, 0.65, 0.0] kW
+  solver time limit    : 1200.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 19061.1 s (28 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.8, 3.15, 4.71, 0.0] kW
+  plant sampling sd      : [0.55, 0.4, 0.65, 0.0] kW
+
+==== Approach 2 closed-loop KPIs, 1 day(s), 96 intervals, 5 scenarios ====
+Total grid energy   : 27.67 kWh
+Total energy cost   : $8.81
+Total CO2 emissions : 7.52 kg
+NC peak demand      : 2.52 kW
+On-peak demand      : 0.00 kW
+Missed work (hours) : 0.00
+Labour (towing)     : $10.00  (0.50 h in transit @ $20.00/h)
+CEV SOE at horizon  : [14.8] kWh (target [14.8])
+MCS SOE at horizon  : [250.0] kWh (target [250.0])
+Terminal SOE shortfall penalty : $0.00
+
+Results written to: c:\Users\shubh\Desktop\MPC\Approach 2\output\normal
+  Figures: A2_01..A2_09 (09 = per-MCS power profiles)
+  Reports: A2_kpi_summary.csv(+_by_day), A2_replan_grids/*.csv+*.html,
+           A2_plan_vs_actual.html + A2_plan_vs_actual_costs.png  (Overall, plus day1.. for n_day_run > 1)
+           day<N>/A2_plan_vs_actual_activity.png, A2_plan_vs_actual_side_by_side.html, A2_plan_vs_actual_by_entity.html  (ACTIVITY, per day)
+  Console log: A2_run_log.txt

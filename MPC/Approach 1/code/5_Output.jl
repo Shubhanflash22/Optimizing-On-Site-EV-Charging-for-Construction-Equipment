@@ -67,7 +67,7 @@ _base_plot(; kw...) = plot(; size = (900, 500), xrotation = 45,
 # Discharging is drawn below zero, and the net power column is charging minus discharging.
 function fig_total_grid_power(res)
     d = res.d; K = 1:res.nK; Tplot = 1:(res.nK + 1)
-    rT, rL = create_fixed_2hour_xticks(Tplot, d.t_start)
+    rT, rL = create_fixed_2hour_xticks(Tplot, d.delta_T, d.t_start)
     charging    = [sum(res.real_P_ch[m, k]  for m in d.M) for k in K]
     discharging = [sum(res.real_P_dch[m, k] for m in d.M) for k in K]
     p = _base_plot(title = "", xlabel = "Time", ylabel = "Power (kW)",
@@ -90,7 +90,7 @@ end
 # Each site panel shows the realized work power of each CEV working there and the site total, which is the sum over its CEVs.
 function fig_work_by_site(res)
     d = res.d; K = 1:res.nK; Tplot = 1:(res.nK + 1)
-    rT, rL = create_fixed_2hour_xticks(Tplot, d.t_start)
+    rT, rL = create_fixed_2hour_xticks(Tplot, d.delta_T, d.t_start)
     site_totals = Dict(i => [sum(res.real_P_work[i, e, k] for e in d.E) for k in K] for i in d.N_c)
     ymax = maximum(vcat(values(site_totals)...); init = 0.0)
     ylim = ymax > 0 ? (0, 1.1 * ymax) : (0, 1)
@@ -131,7 +131,7 @@ end
 # soe, soe_max and soe_min are the SOE array and the bounds for that kind of unit, and label_prefix names it.
 function _fig_soe(res, unit_set, soe, soe_max, soe_min, label_prefix)
     d = res.d; T = 1:(res.nK + 1)
-    rT, rL = create_fixed_2hour_xticks(T, d.t_start)
+    rT, rL = create_fixed_2hour_xticks(T, d.delta_T, d.t_start)
     p = _base_plot(title = "", xlabel = "Time", ylabel = "State of Energy (kWh)",
                    xticks = (rT, rL), xlims = (first(T), last(T)))
     csv = DataFrame(Time_Period = collect(T), Time_Label = res.time_labels)
@@ -156,7 +156,7 @@ fig_cev_soe(res) = _fig_soe(res, res.d.E, res.real_SOE_CEV, res.d.SOE_CEV_max, r
 # Returns the plot and CSV of the electricity price (left axis) and the grid CO2 emission factor (right axis) for every interval of the run.
 function fig_price_emission(res)
     d = res.d; K = 1:res.nK; Tplot = 1:(res.nK + 1)
-    rT, rL = create_fixed_2hour_xticks(Tplot, d.t_start)
+    rT, rL = create_fixed_2hour_xticks(Tplot, d.delta_T, d.t_start)
     csv = interval_time_dataframe(K, res.time_labels)
     csv[!, "Electricity_Price_USD_per_kWh"]        = [d.lambda_whl_elec[k] for k in K]
     csv[!, "CO2_Emission_Factor_kg_CO2_per_kWh"]   = [d.lambda_CO2[k] for k in K]
@@ -177,7 +177,7 @@ end
 # Returns the plot and CSV of where each MCS is in every interval, as a node index, with 0 meaning it is on the road.
 function fig_location(res)
     d = res.d; K = 1:res.nK; Tplot = 1:(res.nK + 1)
-    rT, rL = create_fixed_2hour_xticks(Tplot, d.t_start)
+    rT, rL = create_fixed_2hour_xticks(Tplot, d.delta_T, d.t_start)
     node_labels = [node in d.N_g ? "Grid $node" : "Site $node" for node in d.N]
     yt_pos = vcat(0, collect(d.N)); yt_lab = vcat("Travel", node_labels)
     p = _base_plot(title = "", xlabel = "Time", ylabel = "Node Type",
@@ -199,7 +199,7 @@ end
 # Returns one plot and one CSV per MCS, each showing that MCS's grid charging power and its discharge power into the CEVs for every interval.
 function figs_individual_mcs(res)
     d = res.d; K = 1:res.nK; Tplot = 1:(res.nK + 1)
-    rT, rL = create_fixed_2hour_xticks(Tplot, d.t_start)
+    rT, rL = create_fixed_2hour_xticks(Tplot, d.delta_T, d.t_start)
     plots = Any[]; csvs = DataFrame[]
     for m in d.M
         p = _base_plot(title = "MCS $m", titlefontsize = 18, xlabel = "Time", ylabel = "Power (kW)",
@@ -775,7 +775,7 @@ _act_bg(l) = _ACT_COLORS_HEX[_act_code(l) + 1]
 # Intervals where the plan and the actual label differ are outlined in red.
 function _activity_panel(res, planned, actual, plan_lbl, title)
     d = res.d; nK = res.nKd   
-    rT, rL = create_fixed_2hour_xticks(1:(nK + 1), d.t_start)
+    rT, rL = create_fixed_2hour_xticks(1:(nK + 1), d.delta_T, d.t_start)
     cp = [_act_code(planned[k]) for k in 1:nK]
     ca = [_act_code(actual[k])  for k in 1:nK]
     Z  = [reshape(ca, 1, nK); reshape(cp, 1, nK)]  

@@ -74,7 +74,7 @@ One row per scalar model parameter: `Parameter, Value, Unit, Description`. The l
 |---|---|---|
 | `rho_miss` | 2000 | Missed-work penalty, $/hour |
 | `delta_T` | 0.25 | Interval length, hours |
-| `p_digging` / `p_loading_swinging` / `p_traveling` | 4.7949 / 3.1588 / 4.7105 | Prior mean activity power, kW |
+| `p_digging` / `p_loading_swinging` / `p_traveling` | 4.7967 / 3.1502 / 4.7131 | Prior mean activity power, kW |
 | `lambda_demand_NC` / `lambda_demand_OP` | 20.12 / 20.58 | Demand charge rates, $/kW |
 | `carbon_price_per_ton` | 50 | $/ton CO2 (matches the paper's $0.05/kg) |
 | `rho_labor` | 20 | MCS towing labour cost, $/hour |
@@ -82,11 +82,11 @@ One row per scalar model parameter: `Parameter, Value, Unit, Description`. The l
 | `scale` | 2 | Loading-vs-digging precedence ratio (constraint 14c) |
 | `t_limit_rest` | 1 | Mandatory-rest window, hours (constraint 14d) |
 | `prior_sigma_frac` | 0.2 | Fallback prior std, as a fraction of the mean, used only if a `sigma_*` row below is absent |
-| `sigma_digging` / `sigma_loading_swinging` / `sigma_traveling` | 0.2031 / 0.1832 / 0.3847 | Prior std per activity, kW |
+| `sigma_digging` / `sigma_loading_swinging` / `sigma_traveling` | 0.5495 / 0.3999 / 0.6517 | Prior std per activity, kW |
 | `obs_noise_std` | 0.05 | Simulation-only telemetry noise, kWh |
 | `co2_unit_scale` | 1 | Unit conversion applied to `intensity_tons_emissions` below |
 
-One row in the sample file, `kappa_wt=4`, is **present but not read by the code**: it documents the travel-pacing ratio, but `3_MCSModel.jl` currently hardcodes this same value (`work_per_travel = 4`) rather than reading it from here — a known, accepted simplification (see Section 7).
+`kappa_wt` (sample value 4) is the travel-pacing ratio: at most one travel interval per `kappa_wt` productive work intervals (constraints 14e and 14f). It is optional and defaults to 4 if the row is absent.
 
 ### `ev_data.csv`
 One row per CEV. First column is the CEV's ID (`e1`, `e2`, ...) — read by position, not by its header name (which may read `Unnamed: 0` if exported from pandas).

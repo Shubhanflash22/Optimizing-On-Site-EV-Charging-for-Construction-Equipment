@@ -76,7 +76,8 @@ function realized_activity_durations(rng, model, e, k0, d; multi::Bool = true)
     return a
 end
 
-# Returns where MCS m will be at the start of interval k0+1 as (node, transit).
+# Returns where MCS m will be at the start of interval k0+1 as (node, transit), using only what has been decided up to and including interval k0.
+# An MCS that is parked in interval k0 is reported as parked at that node even if the plan has it leaving in interval k0+1, because that departure is for the next re-solve to decide.
 # node is the parked node index, or 0 if the MCS is mid-trip, and transit is nothing or (i, j, r) for a trip from node i to node j with r intervals still to go.
 # If there is no next interval in the window, it keeps the node at k0, using the first grid node if no parked node is found.
 function advance_mcs_state(model, m, k0, nK, d)
@@ -87,6 +88,8 @@ function advance_mcs_state(model, m, k0, nK, d)
         node = findfirst(i -> value(z[m, i, k0]) > 0.5, d.N)
         return (node === nothing ? first(d.N_g) : node, nothing)
     end
+    node_now = findfirst(i -> value(z[m, i, k0]) > 0.5, d.N)
+    node_now !== nothing && return (node_now, nothing)
     node = findfirst(i -> value(z[m, i, knext]) > 0.5, d.N)
     node !== nothing && return (node, nothing)
     for i in d.N, j in d.N
@@ -190,7 +193,7 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
 
     # Draws each CEV's realized activity durations from the fixed plan (see realized_activity_durations), then draws the REAL power for each active activity from the shared pool -- use_mean pins it to the planning mean from parameters.csv (deterministic reference mode, where realized equals planned), otherwise it takes the next sample from the pool.
     # Off-shift intervals are forced to zero power regardless of duration, since a CEV that isn't scheduled to work shouldn't draw work power even if realized_activity_durations somehow returned a nonzero row for it.
-    # n_obs_added counts how many CEVs actually produced a new real observation this interval, for the Bayesian estimator's calibration bookkeeping (not used by Approach 0 itself, but kept for consistency with the shared pool machinery in Common.jl).
+    # n_obs_added counts how many CEVs actually produced a new real observation this interval, for the Bayesian estimator's calibration bookkeeping (the estimator is never refitted in this loop, so it is only accumulated as a count, but it is kept for consistency with the shared pool machinery in Common.jl).
     a_real = Dict(e => realized_activity_durations(rng, model, e, k0, d;
                                                    multi = multi_activity && !use_mean) for e in d.E)
     p_true = Dict{Int, Vector{Float64}}()

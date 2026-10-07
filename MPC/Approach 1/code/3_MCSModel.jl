@@ -19,9 +19,9 @@
 #      discharging, SOE dynamics, spatial routing, CEV work scheduling) over
 #      just that window. Also accepts solver options (time_limit_sec, silent).
 #      Called repeatedly by
-#      4_OneShot.jl, once per re-solve, each time with a shifted window and
+#      4_MPCLoop.jl, once per re-solve, each time with a shifted window and
 #      updated carry-in state -- this file has no notion of "the whole day"
-#      or of re-solving itself, that logic lives entirely in 4_OneShot.jl.
+#      or of re-solving itself, that logic lives entirely in 4_MPCLoop.jl.
 # #############################################################################
 
 module MCSModel
@@ -30,6 +30,7 @@ module MCSModel
 using JuMP
 using HiGHS
 using DataFrames
+
 using ..Common: normalize_travel_steps, in_peak, clock_label
 
 # everything below that other files are allowed to use
@@ -41,6 +42,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
                             rem_dig, rem_load, hist,
                             peak_nc0, peak_op0, pvec;
                             time_limit_sec::Float64 = 30.0, silent::Bool = true)
+
     # Unpacks the index sets and base parameters needed throughout, and converts the raw travel-time matrix into integer interval-step counts.
     M, E, N, N_g, N_c, B = d.M, d.E, d.N, d.N_g, d.N_c, d.B
     delta_T = d.delta_T
@@ -74,7 +76,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
 
     # Creates the JuMP model on the HiGHS solver and sets solver options: single-threaded, symmetry detection off, no MIP heuristics, a 1% relative gap tolerance, and an optional time limit.
     # The 1% gap is a deliberate speed trade-off, so reported costs can sit up to about 1% above the true optimum, which is far below the effect sizes compared (a single extra travel or missed-work interval costs several times more).
-    # The gap actually achieved is recorded per day in solve_log.gap_percent.
+    # The gap actually achieved is recorded for every window solve in solve_log.gap_percent.
     model = Model(HiGHS.Optimizer)
     silent && set_silent(model)
     isfinite(time_limit_sec) && set_time_limit_sec(model, time_limit_sec)
@@ -184,7 +186,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # Initial condition feeding the SOE recursion in constraint 9b.
     @constraint(model, [e in E], SOE_CEV[e, first(Tb)] == soe_cev0[e])
     # Updates each MCS's battery level interval by interval: adds the energy charged from the grid (with efficiency losses), subtracts the energy discharged to CEVs (with efficiency losses).
-    # Constraint 9a of the paper's MILP formulation. Physically equivalent to the paper's literal equation: this code's SOE index j corresponds to the paper's real clock boundary (j-1), since it reuses the same integers as the interval labels (K/Tb) rather than a separate 0..n boundary count -- so SOE_MCS[k+1] (state after interval k) driven by P_ch_tot[k] is the same physical recursion as the paper's SOE_{t+1} driven by P_{t+1}, just offset in how the boundary is numbered. Confirmed self-consistent with how 4_OneShot.jl reads these values (e.g. it logs SOE_CEV[e, k+1] as "the state after interval k").
+    # Constraint 9a of the paper's MILP formulation. Physically equivalent to the paper's literal equation: this code's SOE index j corresponds to the paper's real clock boundary (j-1), since it reuses the same integers as the interval labels (K/Tb) rather than a separate 0..n boundary count -- so SOE_MCS[k+1] (state after interval k) driven by P_ch_tot[k] is the same physical recursion as the paper's SOE_{t+1} driven by P_{t+1}, just offset in how the boundary is numbered. Confirmed self-consistent with how 4_MPCLoop.jl reads these values (e.g. it logs SOE_CEV[e, k+1] as "the state after interval k").
     @constraint(model, [m in M, k in K], SOE_MCS[m, k + 1] == SOE_MCS[m, k] + d.eta_ch_dch_mcs[m] * P_ch_tot[m, k] * delta_T - (P_dch_tot[m, k] * delta_T) / d.eta_ch_dch_mcs[m])
     # Updates each CEV's battery level interval by interval: adds the energy received from all connected MCSs (with efficiency losses), subtracts the energy spent working.
     # Constraint 9b of the paper's MILP formulation. Same indexing-convention note as the SOE_MCS recursion above applies here -- physically equivalent to the paper's literal equation, not a discrepancy.
@@ -328,7 +330,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     # Keeps each CEV's travel evenly interspersed with its productive work: at most one travel interval for every work_per_travel productive work intervals, and at least one required once that many work intervals have piled up.
     # Tracked cumulatively from before this window through the end of it.
     # Constraints 14e and 14f of the paper's MILP formulation.
-    work_per_travel = 4
+    work_per_travel = d.kappa_wt
     for i in N_c, e in E
         d.A[i, e] == 1 || continue
         for k in K

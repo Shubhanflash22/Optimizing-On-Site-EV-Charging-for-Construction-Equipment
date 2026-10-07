@@ -1,4 +1,3 @@
-
 # #############################################################################
 # 6_Shrinking_Horizon_main.jl  -  main script of Approach 1
 # -----------------------------------------------------------------------------
@@ -39,7 +38,7 @@ using .Common: draw_activity_power_pool, draw_activity_power_pool_live
 using .MPCLoop: run_mpc
 using .Output: write_outputs, write_important_outputs, write_detailed_output
 
-const _DEFAULT_REGRESSION_DATA_DIR = raw"C:\Users\shubh\Desktop\Bayesian Regression"
+const _DEFAULT_REGRESSION_DATA_DIR = joinpath(dirname(dirname(_CODE_DIR)), "Bayesian Regression")
 
 # Runs f() while copying everything printed to the screen, including warnings, into A1_run_log.txt in out_dir.
 # A background task reads from a pipe that stdout and stderr are both redirected into, writing each chunk to both the real console and the log file as it arrives.
@@ -75,7 +74,7 @@ function _with_console_log(f, out_dir)
     end
 end
 
-# Runs Approach 1 end to end and returns the plain log of the run.
+# Runs Approach 1 end to end and returns the result of run_mpc.
 # It first refits the activity powers into parameters.csv when run_regression is true, then loads the input data from input_dir, and builds the pool of sampled activity powers that the plant draws from.
 # mode sets how those powers are drawn (normal, high, low, near_mean, or live_data to resample the recorded values in live_powers.csv), and the pool is sized for n_day_run days so a multi-day run never exhausts its samples.
 # It then runs the closed-loop MPC over n_day_run days, with time_limit_sec limiting each window solve, prints the KPIs, and writes the results into out_dir.
@@ -87,7 +86,7 @@ function run_scenario_1(; input_dir::AbstractString = joinpath(dirname(_CODE_DIR
                           n_day_run::Int = 1,
                           mode::Symbol = :normal,
                           out_dir::String = joinpath(dirname(_CODE_DIR), "output", String(mode)),
-                          run_regression::Bool = true,
+                          run_regression::Bool = false,
                           regression_data_dir::AbstractString = _DEFAULT_REGRESSION_DATA_DIR,
                           regression_samples::Int = 2000,
                           regression_chains::Int = 4,
@@ -114,7 +113,7 @@ function run_scenario_1(; input_dir::AbstractString = joinpath(dirname(_CODE_DIR
             draw_activity_power_pool_live(d.E, live_values; rng = MersenneTwister(seed))
         else
             draw_activity_power_pool(d.E, d.prior_mu, d.prior_sigma;
-                                     n_samples = 20 * n_day_run, rng = MersenneTwister(seed),
+                                     n_samples = length(collect(d.K)) * n_day_run + 5, rng = MersenneTwister(seed),
                                      mode = mode)
         end
 

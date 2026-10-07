@@ -78,7 +78,8 @@ const SOIL_FILES = [
 # Prior mean and prior standard deviation in kW of the four activity powers, in the order digging, loading+swinging, traveling, idling.
 # A standard deviation of zero for idling makes the estimator keep idle fixed at its prior mean of 0 kW instead of sampling it.
 const PRIOR_MU    = [4.79, 3.16, 4.71, 0.0]
-const PRIOR_SIGMA = [0.23, 0.23, 0.54, 0.0]
+# const PRIOR_SIGMA = [0.23, 0.23, 0.54, 0.0]
+const PRIOR_SIGMA = [5.0, 5.0, 5.0, 0.0]
 
 # Returns the duration in seconds of one task row, computed as end time t1 minus start time t0.
 # Returns 0.0 if either time is missing, if the subtraction or conversion to milliseconds fails, or if the duration is not positive.

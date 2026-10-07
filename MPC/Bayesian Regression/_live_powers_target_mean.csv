@@ -1,0 +1,7 @@
+Parameter,Value,Unit,Description
+p_digging,4.7861,kW,Power of digging (Bayesian posterior mean)
+p_loading_swinging,3.1559,kW,Power of loading+swinging (Bayesian posterior mean)
+p_traveling,4.6439,kW,Power of traveling (Bayesian posterior mean)
+sigma_digging,0.2041,kW,Per-activity std of digging power (posterior SD)
+sigma_loading_swinging,0.1864,kW,Per-activity std of loading+swinging power (posterior SD)
+sigma_traveling,0.3907,kW,Per-activity std of traveling power (posterior SD)
