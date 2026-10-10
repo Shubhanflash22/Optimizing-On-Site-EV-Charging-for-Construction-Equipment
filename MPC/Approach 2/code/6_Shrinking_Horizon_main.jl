@@ -1,7 +1,7 @@
 # #############################################################################
 # 6_Shrinking_Horizon_main.jl  -  main script of Approach 2
 # -----------------------------------------------------------------------------
-# Runs the whole Approach 2 pipeline: the optional power regression, data loading, the closed-loop shrinking-horizon stochastic MPC over sampled power scenarios, the KPI printout and the output files.
+# Runs the whole Approach 2 pipeline: the optional power regression, data loading, the closed-loop shrinking-horizon stochastic MPC over fixed power scenarios, the KPI printout and the output files.
 # Including this file runs run_scenario_1 with its defaults, unless SCENARIO1_NO_AUTORUN is set to true first.
 # Four groups:
 #
@@ -16,7 +16,7 @@
 #   3. SCENARIO RUNNER
 #      run_scenario_1
 #      -- run the regression, load the data, build the plant's power pool, run the MPC, and write the results.
-#      n_scenarios sets how many power scenarios each re-solve plans against.
+#      n_scenarios sets how many fixed power scenarios each re-solve plans against; they are built once from posterior_draws.csv.
 #
 #   4. KPI PRINTOUT
 #      _print_kpis
@@ -36,7 +36,7 @@ include(joinpath(_CODE_DIR, "4_MPCLoop.jl"))
 include(joinpath(_CODE_DIR, "5_Output.jl"))
 
 using .DataLoader: load_data, load_live_powers
-using .ScenarioSampler: DEFAULT_N_SCENARIOS
+using .ScenarioSampler: DEFAULT_N_SCENARIOS, load_scenarios, write_scenarios
 using .Common: draw_activity_power_pool, draw_activity_power_pool_live
 using .MPCLoop: run_mpc
 using .Output: write_outputs, write_important_outputs, write_detailed_output
@@ -78,9 +78,9 @@ function _with_console_log(f, out_dir)
 end
 
 # Runs Approach 2 end to end and returns the result of run_mpc.
-# It first refits the activity powers into parameters.csv when run_regression is true, then loads the input data from input_dir, and builds the pool of sampled activity powers that the plant draws from.
+# It first refits the activity powers into parameters.csv and posterior_draws.csv when run_regression is true, then loads the input data from input_dir, and builds the pool of sampled activity powers that the plant draws from.
 # mode sets how those powers are drawn (normal, high, low, near_mean, or live_data to resample the recorded values in live_powers.csv), and the pool is sized for n_day_run days so a multi-day run never exhausts its samples.
-# It then runs the closed-loop stochastic MPC over n_day_run days, planning against n_scenarios sampled power scenarios at every re-solve, with time_limit_sec limiting each window solve, prints the KPIs, and writes the results into out_dir.
+# It then runs the closed-loop stochastic MPC over n_day_run days, planning against n_scenarios fixed power scenarios (built from the saved posterior draws) at every re-solve, with time_limit_sec limiting each window solve, prints the KPIs, and writes the results into out_dir.
 # detailed_output also writes the four detailed plan and realized logs, and important_only writes only the eight most important files (write_important_outputs), forcing detailed_output on regardless of its own setting.
 function run_scenario_1(; input_dir::AbstractString = joinpath(dirname(_CODE_DIR), "data", "input_data"),
                           time_limit_sec::Float64 = Inf,
@@ -112,6 +112,9 @@ function run_scenario_1(; input_dir::AbstractString = joinpath(dirname(_CODE_DIR
     detailed_output = detailed_output || important_only
 
     return _with_console_log(out_dir) do
+        scenarios = load_scenarios(joinpath(input_dir, "posterior_draws.csv"), d, n_scenarios)
+        write_scenarios(out_dir, scenarios, d)
+
         pool = if mode == :live_data
             live_values = load_live_powers(input_dir)
             draw_activity_power_pool_live(d.E, live_values; rng = MersenneTwister(seed))
@@ -123,7 +126,7 @@ function run_scenario_1(; input_dir::AbstractString = joinpath(dirname(_CODE_DIR
 
         res = run_mpc(d, pool; time_limit_sec = time_limit_sec,
                          multi_activity = multi_activity,
-                         mcmc_samples = mcmc_samples, plant = :sampled, n_scenarios = n_scenarios, seed = seed,
+                         mcmc_samples = mcmc_samples, plant = :sampled, n_scenarios = n_scenarios, scenarios = scenarios, seed = seed,
                          n_day_run = n_day_run, detailed_output = detailed_output)
 
         _print_kpis(res)

@@ -4,7 +4,7 @@
 # Builds and solves the MILP for a single MPC window: given the current state
 # (SOE, MCS node/transit status, remaining work, activity history) and a fixed
 # window of intervals K_win, constructs the JuMP model implementing the paper's
-# objective function (4) and constraints (5)-(14), solves it with HiGHS, and
+# objective function (4) and constraints (5)-(14), solves it with Gurobi, and
 # returns the solved (or failed) model for the caller to read decisions from.
 #
 # This file has one exported function:
@@ -25,7 +25,7 @@
 #      and the ties between them are not part of the paper's MILP formulation.
 #      Also accepts solver options (time_limit_sec, silent).
 #      Called repeatedly by 4_MPCLoop.jl, once per re-solve, each time with a
-#      shifted window, updated carry-in state and a freshly sampled set of
+#      shifted window, updated carry-in state and a set of
 #      scenarios from 2b_ScenarioSampler.jl -- this file has no notion of
 #      "the whole day" or of re-solving itself, that logic lives entirely in
 #      4_MPCLoop.jl.
@@ -34,13 +34,16 @@ module MCSModel
 
 # external packages used across this file
 using JuMP
-using HiGHS
+using Gurobi
 using DataFrames
 
 using ..Common: normalize_travel_steps, in_peak, clock_label
 
 # everything below that other files are allowed to use
 export build_window_model_stochastic
+
+# One Gurobi environment shared by every window solve, so the license is checked out once per run instead of once per window.
+const GRB_ENV = Gurobi.Env()
 
 # Builds and solves the MILP for one MPC window, with one copy of the window per scenario (see file header for the overall role of this function).
 # d is the problem data from DataLoader, K_win is this window's interval range, and the remaining arguments carry in state from outside the window: current SOE, MCS node/transit status, remaining dig/load work per site, per-CEV activity history, running NC/OP demand peaks, the sampled activity power vectors scenarios, and their probability weights.
@@ -88,17 +91,17 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
     carried_arrival_k(m) = mcs_transit0[m] === nothing ? nothing :
         (mcs_transit0[m][3] + 1 <= length(K) ? K[mcs_transit0[m][3] + 1] : nothing)
 
-    # Creates the JuMP model on the HiGHS solver and sets solver options: 8 threads in parallel mode, symmetry detection off, no MIP heuristics, a 1% relative gap tolerance, and an optional time limit.
-    # The 1% gap is a deliberate speed trade-off, so reported costs can sit up to about 1% above the true optimum, which is far below the effect sizes compared (a single extra travel or missed-work interval costs several times more).
-    # The gap actually achieved is recorded per day in solve_log.gap_percent.
-    model = Model(HiGHS.Optimizer)
+    # Creates the JuMP model on the Gurobi solver and sets solver options: 8 threads, MIP heuristic effort 0.4, MIPFocus 3 (prioritises the bound), automatic symmetry detection, a 0.1% relative gap tolerance, and an optional time limit.
+    # Windows that reach the 0.1% gap stop early. Hard early windows stop at the time limit and return the best plan found, with a larger gap.
+    # The gap actually achieved is recorded in solve_log.gap_percent.
+    model = Model(() -> Gurobi.Optimizer(GRB_ENV))
     silent && set_silent(model)
     isfinite(time_limit_sec) && set_time_limit_sec(model, time_limit_sec)
-    set_attribute(model, "threads", 8)
-    set_attribute(model, "parallel", "on")
-    set_attribute(model, "mip_heuristic_effort", 0.0)
-    set_attribute(model, "mip_detect_symmetry", false)
-    set_attribute(model, "mip_rel_gap", 1.0e-2)
+    set_attribute(model, "Threads", 8)
+    set_attribute(model, "Heuristics", 0.4)
+    set_attribute(model, "MIPFocus", 3)
+    set_attribute(model, "MIPGap", 1.0e-3)
+    set_attribute(model, "Symmetry", -1)
 
     # Declares the continuous power, SOE, and missed-work decision variables from set D in the paper (P^ch,MCS, P^dch,MCS, P^MCS->CEV, P^work, P^ch,tot, P^dch,tot, s^miss, SOE^MCS, SOE^CEV), with one copy per scenario.
     @variable(model, P_ch_MCS[M, N, K, S_scen] >= 0)
@@ -123,7 +126,7 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
     @variable(model, P_peak_NC[S_scen] >= 0)
     @variable(model, P_peak_OP[S_scen] >= 0)
 
-    # early_charge_term is a small tie-breaking penalty (weight 1e-6, negligible next to the real cost terms) that nudges the solver toward charging CEVs earlier in the window when multiple schedules are otherwise equally good, weighted over the scenarios in the same way as the cost terms.
+    # early_charge_term is a small tie-breaking penalty (weight 1e-3, negligible next to the real cost terms) that nudges the solver toward charging CEVs earlier in the window when multiple schedules are otherwise equally good, weighted over the scenarios in the same way as the cost terms.
     Kvec = collect(K)
     early_charge_term = sum(w[s] * idx * mu[i, e, Kvec[idx], s] for i in N_c, e in E, idx in eachindex(Kvec), s in S_scen)
 
@@ -137,7 +140,7 @@ function build_window_model_stochastic(d, K_win, soe_mcs0, soe_cev0, mcs_node0, 
             d.lambda_demand_OP * P_peak_OP[s] +
             d.rho_labor * delta_T * sum(y_trv[m, i, j, k, s] for m in M, i in N, j in N, k in K)
         ) for s in S_scen) +
-        1e-6 * early_charge_term)
+        1e-3 * early_charge_term)
 
     # Every constraint from here up to the tie constraints at the end of the function is repeated once for every scenario s in S_scen, on that scenario's own copy of the variables.
     # The constraint numbers cited below are those of the paper's MILP formulation, which has no scenario index.

@@ -50,11 +50,58 @@ include(joinpath(@__DIR__, "7_Comparison_main_ShrinkingOnlyVersion.jl"))
 
 using Printf
 using Random
+using CSV
 
 # The 5 draw modes swept by default (see header above). Pass a different
 # `modes` tuple/vector to `run_comparison_sweep` to run a subset, e.g. during
 # a quick test.
 const _DEFAULT_SWEEP_MODES = (:normal, :near_mean, :high, :low, :spread_wide)
+
+# =============================================================================
+# DETAILED OUTPUT WRITER  (opt-in via `detailed_output = true`)
+# -----------------------------------------------------------------------------
+# Writes the 4 CEV CSVs (<prefix>_plan_full, <prefix>_realized_tuple) PLUS the
+# 2 new MCS CSVs (<prefix>_MCS_plan_full, <prefix>_MCS_realized_tuple) for ONE
+# approach, ONE mode, into a COMPLETELY SEPARATE tree:
+# Detailed_Output_AllRuns/<run_label>/<mode>/ -- a sibling to Output_AllRuns/,
+# never nested inside it or inside any A0_A1S/-style comparison folder.
+# `out_dir` here is the SAME `out_dir` passed to run_comparison_sweep (e.g.
+# ".../Output_AllRuns/16_GroundTruth_seed7_1200s"); the detailed tree mirrors
+# its run-label folder name, just under Detailed_Output_AllRuns/ instead.
+# Called for all THREE approaches now (A0, A1S, A2S -- see the call sites
+# below), since `run_one_shot` carries the exact same
+# detailed_plan_df/detailed_realized_df/detailed_mcs_plan_df/
+# detailed_mcs_realized_df fields as `run_mpc` does.
+# =============================================================================
+function _write_detailed_output(res, approach_prefix::AbstractString, out_dir::AbstractString, mode)
+    # Generalized: whatever the results-root folder is actually named (not
+    # hardcoded to "Output_AllRuns"), the sibling detailed-output tree is that
+    # same name with "Detailed_" prepended, in the same parent directory. This
+    # makes renaming the results root (e.g. for a differently-scoped sweep
+    # script) automatically produce a correctly-renamed detailed sibling too,
+    # with no separate edit needed here.
+    run_label     = basename(out_dir)
+    results_root  = dirname(out_dir)
+    detailed_root = joinpath(dirname(results_root), "Detailed_" * basename(results_root), run_label)
+    mode_dir = joinpath(detailed_root, String(mode))
+    mkpath(mode_dir)
+    if res.detailed_plan_df !== nothing
+        CSV.write(joinpath(mode_dir, "$(approach_prefix)_plan_full.csv"), res.detailed_plan_df)
+    end
+    if res.detailed_realized_df !== nothing
+        CSV.write(joinpath(mode_dir, "$(approach_prefix)_realized_tuple.csv"), res.detailed_realized_df)
+    end
+    # NEW -- the MCS's own detailed plan/realized trajectory (previously only
+    # a couple of MCS numbers were folded into each CEV row above; these are
+    # the MCS's own status/node/charge/discharge/SOE, one row per interval).
+    if res.detailed_mcs_plan_df !== nothing
+        CSV.write(joinpath(mode_dir, "$(approach_prefix)_MCS_plan_full.csv"), res.detailed_mcs_plan_df)
+    end
+    if res.detailed_mcs_realized_df !== nothing
+        CSV.write(joinpath(mode_dir, "$(approach_prefix)_MCS_realized_tuple.csv"), res.detailed_mcs_realized_df)
+    end
+    return mode_dir
+end
 
 # =============================================================================
 # MAIN ENTRY POINT — same knobs as `run_comparison` (see the base driver for
@@ -83,7 +130,15 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
                                      n_scenarios::Int = A2ShrinkingApp.ScenarioSampler.DEFAULT_N_SCENARIOS,
                                      combos = _ALL_COMBOS,
                                      modes = _DEFAULT_SWEEP_MODES,
-                                     seed::Int = 1)
+                                     seed::Int = 1,
+                                     # DETAILED OUTPUT (opt-in): per-resolve full-horizon
+                                     # plan + per-interval realized power tuple, for A1S
+                                     # and A2S only (A0 is one-shot, no re-plan concept
+                                     # applies). Written to a COMPLETELY SEPARATE tree,
+                                     # Detailed_Output_AllRuns/, sibling to Output_AllRuns/
+                                     # -- never mixed into the existing comparison output.
+                                     # See 1_Common.jl's DetailedPlanLog/RealizedTupleLog.
+                                     detailed_output::Bool = false)
     approach0_source in (:a1_shrinking, :a2_shrinking) ||
         error("run_comparison_sweep: approach0_source must be :a1_shrinking or :a2_shrinking")
     approach0_plant in (:sampled, :mean) ||
@@ -129,11 +184,21 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
 
             # ---- ONE shared pool per mode, built ONCE and passed as the
             # literal SAME object into all three runs for THAT mode ----
+            # LIVE_DATA_MODE: pass :live_data as one of the entries in `modes` to draw
+            # the plant power from real recorded values (Input/live_powers.csv) instead
+            # of the Bayesian pool for that sweep point -- per-CEV independent,
+            # without-replacement draws, see 1_Common.jl.
             pool = _timed_status("building :$(mode) power pool ($(n_samples) samples/entity-activity)") do
-                A1ShrinkingApp.Common.draw_activity_power_pool(dA1S.E, dA1S.prior_mu, dA1S.prior_sigma;
-                                                               n_samples = n_samples,
-                                                               rng = MersenneTwister(seed),
-                                                               mode = mode)
+                if mode == :live_data
+                    A1ShrinkingApp.Common.draw_activity_power_pool_live(
+                        dA1S.E, A1ShrinkingApp.DataLoader.load_live_powers(input_dir);
+                        rng = MersenneTwister(seed))
+                else
+                    A1ShrinkingApp.Common.draw_activity_power_pool(dA1S.E, dA1S.prior_mu, dA1S.prior_sigma;
+                                                                   n_samples = n_samples,
+                                                                   rng = MersenneTwister(seed),
+                                                                   mode = mode)
+                end
             end
             println("[:$(mode)] pool: n_samples=$(n_samples) per (entity, activity); mu=",
                     round.(pool.mu, digits = 2), " kW; sd=", round.(pool.sd, digits = 2), " kW")
@@ -144,12 +209,14 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
                     A1ShrinkingApp.MPCLoop.run_one_shot(dA1S, pool; plant = approach0_plant,
                                                        time_limit_sec, multi_activity,
                                                        require_site_visit, single_visit_per_site,
-                                                       n_day_run, seed)
+                                                       n_day_run, seed,
+                                                       detailed_output)
                 else # :a2_shrinking
                     A2ShrinkingApp.MPCLoop.run_one_shot(dA2S, pool; plant = approach0_plant,
                                                        time_limit_sec, multi_activity,
                                                        require_site_visit, single_visit_per_site,
-                                                       n_day_run, seed)
+                                                       n_day_run, seed,
+                                                       detailed_output)
                 end
             end
 
@@ -157,14 +224,16 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
             resA1S = _timed_status("[:$(mode)] Approach 1 - Shrinking solve (n_day_run = $(n_day_run))") do
                 A1ShrinkingApp.MPCLoop.run_mpc(dA1S, pool; shrinking, H, time_limit_sec, multi_activity,
                                               require_site_visit, single_visit_per_site,
-                                              mcmc_samples, plant = :sampled, n_day_run, seed)
+                                              mcmc_samples, plant = :sampled, n_day_run, seed,
+                                              detailed_output)
             end
 
             # ---- APPROACH 2b: Shrinking Horizon, stochastic scenario-based closed-loop MPC ----
             resA2S = _timed_status("[:$(mode)] Approach 2 - Shrinking solve ($(n_scenarios) scenarios, n_day_run = $(n_day_run))") do
                 A2ShrinkingApp.MPCLoop.run_mpc(dA2S, pool; shrinking, H, time_limit_sec, multi_activity,
                                               require_site_visit, single_visit_per_site,
-                                              mcmc_samples, plant = :sampled, n_scenarios, n_day_run, seed)
+                                              mcmc_samples, plant = :sampled, n_scenarios, n_day_run, seed,
+                                              detailed_output)
             end
 
             all_apps = Dict(
@@ -184,6 +253,14 @@ function run_comparison_sweep(; input_dir::AbstractString = _COMPARISON_INPUT,
                 _timed_status("[:$(mode)] writing $(folder)") do
                     Base.invokelatest(write_comparison_outputs, apps, sub_out)
                 end
+            end
+
+            # ---- DETAILED OUTPUT (opt-in): separate tree, all THREE approaches ----
+            if detailed_output
+                d0 = _write_detailed_output(res0,   "A0", out_dir, mode)
+                d1 = _write_detailed_output(resA1S, "A1", out_dir, mode)
+                d2 = _write_detailed_output(resA2S, "A2", out_dir, mode)
+                println("  detailed output ($(mode)) -> $(d0)  (A0_*.csv, A1_*.csv, A2_*.csv, incl. *_MCS_*.csv)")
             end
 
             push!(mode_summaries, (; mode, res0, resA1S, resA2S))

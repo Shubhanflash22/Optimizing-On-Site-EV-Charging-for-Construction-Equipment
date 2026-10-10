@@ -34,6 +34,13 @@ const INPUT_DIR = normpath(joinpath(_HERE, "..", "data", "input_data"))
 const OUT_DIR   = normpath(joinpath(_HERE, "..", "output", "input_testing"))
 mkpath(OUT_DIR)
 const NRUNS     = 10
+# PLANT MODE toggle: :normal (default, unchanged) is the unbiased Bayesian draw;
+# :high/:low/:near_mean/:spread_wide bias it per 1_Common.jl's "DRAW MODE" doc;
+# :live_data draws instead from real recorded values in
+# data/input_data/live_powers.csv (see draw_activity_power_pool_live). Same
+# unified `mode` name used by every driver in this codebase, including the
+# Comparison_A0_A1_A2 drivers' `mode`/`modes` arguments.
+const PLANT_MODE = :normal
 # Which plant Approach 0's one-shot 08:00 plan is replayed under, per sweep point:
 #   :sampled -> the fixed plan drifting under the stochastic pool, no feedback
 #   :mean    -> realized power pinned to mu, so realized == planned and the number
@@ -83,9 +90,13 @@ for (idx, soe) in enumerate(soe_vals)
         n_pool = length(collect(d.K)) + 5
         # mode = :normal -> unbiased draws (unchanged); see 1_Common.jl's
         # "DRAW MODE" doc for the 4 sensitivity-sweep modes.
-        pool = draw_activity_power_pool(d.E, d.prior_mu, d.prior_sigma;
-                                        n_samples = n_pool, rng = MersenneTwister(1),
-                                        mode = :normal)
+        pool = if PLANT_MODE == :live_data
+            draw_activity_power_pool_live(d.E, load_live_powers(INPUT_DIR); rng = MersenneTwister(1))
+        else
+            draw_activity_power_pool(d.E, d.prior_mu, d.prior_sigma;
+                                     n_samples = n_pool, rng = MersenneTwister(1),
+                                     mode = PLANT_MODE)
+        end
         # ---- APPROACH 0: one-shot 8:00 plan replayed under the chosen plant ----
         res0 = run_one_shot(d, pool; time_limit_sec = Inf, plant = A0_PLANT, seed = 1)
         # ---- APPROACH 1: closed-loop MPC ----

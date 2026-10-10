@@ -843,18 +843,16 @@ end
 # re-solve, recording that step's solver termination status and (for
 # HiGHS/JuMP) typically a MIP gap and solve time.
 #
-# IMPORTANT CAVEAT: this function does NOT hardcode solve_log's column
-# names. I don't currently have the exact schema in front of me (the
-# Receding-Horizon 4_MPCLoop.jl that defines it isn't in what's been shared
-# in this conversation), so hardcoding guessed column names risks silently
-# assuming the wrong ones. Instead this writes out solve_log AS-IS, whatever
-# columns it actually has -- open 13_solve_status_<key>.csv and look at the
-# column headers directly to see what's really being tracked (status/
-# termination reason, gap, solve time, etc.). If solve_log isn't present on
-# a given approach's result (e.g. run_one_shot may not track one the same
-# way run_mpc does, since it solves once per day rather than once per
-# interval), that approach is skipped with a console note instead of
-# erroring.
+# This function does NOT hardcode solve_log's column names, even though the
+# schema is currently identical across Shrinking_Horizon and Receding_Horizon's
+# 4_MPCLoop.jl (day, step, clock, status, objective, gap_percent, solve_time_s):
+# writing it out AS-IS, whatever columns it actually has, means this stays
+# correct even if a future codebase variant adds/renames a column -- open
+# 13_solve_status_<key>.csv and look at the column headers directly to see
+# what's really being tracked. If solve_log isn't present on a given
+# approach's result (e.g. run_one_shot may not track one the same way run_mpc
+# does, since it solves once per day rather than once per interval), that
+# approach is skipped with a console note instead of erroring.
 #
 #   13_solve_status_<key>.csv   one file per approach that has a solve_log,
 #                                the raw per-re-solve solver record for that

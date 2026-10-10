@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approach comparison</title><style>:root { --bg:#ffffff; --fg:#1b2430; --muted:#5b6675; --line:#d9dee5; --card:#f6f8fa; --best:#e3f5e8; --warn:#fdecea; --ok:#1a7f4b; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0f141a; --fg:#e6ebf1; --muted:#9aa6b5; --line:#2a3340; --card:#161d26; --best:#173a27; --warn:#3a1b1b; --ok:#4cc38a; }
+}
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width:980px; margin:0 auto; padding:24px 16px 56px; }
+h1 { font-size:24px; margin:0 0 4px; }
+h2 { font-size:18px; margin:36px 0 10px; }
+.muted { color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:14px; }
+th, td { border-bottom:1px solid var(--line); padding:6px 10px; text-align:right; }
+th:first-child, td:first-child { text-align:left; }
+thead th { background:var(--card); position:sticky; top:0; }
+td.best { background:var(--best); font-weight:600; }
+td.bad { background:var(--warn); }
+.d { color:var(--muted); font-size:12px; font-weight:400; }
+.scroll { overflow-x:auto; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:10px 0; }
+svg { width:100%; height:auto; display:block; margin:6px 0 14px; }
+svg .grid { stroke:var(--line); stroke-width:1; }
+svg .axis { stroke:var(--muted); stroke-width:1; }
+svg .tick { fill:var(--muted); font-size:11px; }
+svg .ctitle { fill:var(--fg); font-size:13px; font-weight:600; }
+.ok { color:var(--ok); font-weight:600; }
+.fail { color:#e5484d; font-weight:600; }
+</style></head><body><main>
+<h1>Approach 0, 1 and 2: comparison</h1>
+<p class="muted">Generated 2026-10-08 17:30. Mode live_data, seed 1, 1 day, solver time limit 600 s per solve, 5 scenarios for Approach 2.</p>
+<h2>Runs</h2><div class="scroll"><table><thead><tr><th>Approach</th><th>Status</th><th>Wall time (min)</th><th>Output folder</th></tr></thead><tbody>
+<tr><td>Approach 0 (one-shot)</td><td><span class="ok">finished</span></td><td>2.4</td><td>A0_output</td></tr>
+<tr><td>Approach 1 (CE-MPC)</td><td><span class="ok">finished</span></td><td>9.5</td><td>A1_output</td></tr>
+<tr><td>Approach 2 (SB-MPC)</td><td><span class="ok">finished</span></td><td>133.5</td><td>A2_output</td></tr>
+</tbody></table></div>
+<h2>Input check</h2><div class="card">
+<span class="ok">All 8 input files are identical across the three approaches.</span>
+</div>
+<h2>KPI summary</h2>
+<p class="muted">Green cell: lowest value in the row. Percentages are relative to Approach 0.</p>
+<div class="scroll"><table><thead><tr><th>Metric</th>
+<th>Approach 0 (one-shot)</th>
+<th>Approach 1 (CE-MPC)</th>
+<th>Approach 2 (SB-MPC)</th>
+</tr></thead><tbody>
+<tr><td>Total_Cost_USD</td><td>151.9</td><td class="best">68.09 <span class="d">-55.2%</span></td><td>78.29 <span class="d">-48.5%</span></td></tr>
+<tr><td>Total_Energy_Cost_USD</td><td>8.76</td><td>8.86 <span class="d">+1.1%</span></td><td class="best">8.46 <span class="d">-3.4%</span></td></tr>
+<tr><td>Total_CO2_Cost_USD</td><td class="best">0.33</td><td class="best">0.33 <span class="d">+0.0%</span></td><td>0.34 <span class="d">+3.0%</span></td></tr>
+<tr><td>NC_demand_charge_USD</td><td>39.25</td><td class="best">38.90 <span class="d">-0.9%</span></td><td>39.49 <span class="d">+0.6%</span></td></tr>
+<tr><td>OP_demand_charge_USD</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>Missed_Work_Penalty_USD</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>Travel_Labour_USD</td><td class="best">20</td><td class="best">20 <span class="d">+0.0%</span></td><td>30 <span class="d">+50.0%</span></td></tr>
+<tr><td>Terminal_Shortfall_Penalty_USD</td><td>83.55</td><td class="best">0 <span class="d">-100.0%</span></td><td class="best">0 <span class="d">-100.0%</span></td></tr>
+<tr><td>Total_Grid_Energy_kWh</td><td class="best">27.24</td><td>27.45 <span class="d">+0.8%</span></td><td>27.45 <span class="d">+0.8%</span></td></tr>
+<tr><td>Total_CO2_Emissions_kg</td><td class="best">6.53</td><td>6.57 <span class="d">+0.6%</span></td><td>6.75 <span class="d">+3.4%</span></td></tr>
+<tr><td>NCD_Peak_kW</td><td>1.95</td><td class="best">1.93 <span class="d">-1.0%</span></td><td>1.96 <span class="d">+0.5%</span></td></tr>
+<tr><td>OPD_Peak_kW</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>Missed_Work_hour</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>MCS_Transit_hour</td><td class="best">1</td><td class="best">1 <span class="d">+0.0%</span></td><td>1.50 <span class="d">+50.0%</span></td></tr>
+<tr><td>Terminal_SOE_Shortfall_kWh</td><td>0.18</td><td class="best">0 <span class="d">-100.0%</span></td><td class="best">0 <span class="d">-100.0%</span></td></tr>
+<tr><td>Infeasible_windows</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>MPC_loop_time_s</td><td>n/a</td><td class="best">426.8</td><td>7863.2</td></tr>
+<tr><td>Total_solve_time_s</td><td>n/a</td><td class="best">386.7</td><td>7735.2</td></tr>
+</tbody></table></div>
+<h2>Cost breakdown</h2><svg viewBox="0 0 760 340" role="img" aria-label="Cost breakdown">
+<text x="64" y="16" class="ctitle">Cost breakdown (USD)</text>
+<line x1="64" y1="300.0" x2="590" y2="300.0" class="grid"/>
+<text x="58" y="304.0" class="tick" text-anchor="end">0</text>
+<line x1="64" y1="235.0" x2="590" y2="235.0" class="grid"/>
+<text x="58" y="239.0" class="tick" text-anchor="end">50</text>
+<line x1="64" y1="170.0" x2="590" y2="170.0" class="grid"/>
+<text x="58" y="174.0" class="tick" text-anchor="end">100</text>
+<line x1="64" y1="105.0" x2="590" y2="105.0" class="grid"/>
+<text x="58" y="109.0" class="tick" text-anchor="end">150</text>
+<line x1="64" y1="40.0" x2="590" y2="40.0" class="grid"/>
+<text x="58" y="44.0" class="tick" text-anchor="end">200</text>
+<rect x="103.4" y="288.6" width="96.4" height="11.4" fill="#2563eb"><title>Energy: 8.76</title></rect>
+<rect x="103.4" y="288.2" width="96.4" height="0.4" fill="#14a38b"><title>CO2: 0.33</title></rect>
+<rect x="103.4" y="237.2" width="96.4" height="51.0" fill="#8b5cf6"><title>NC demand charge: 39.25</title></rect>
+<rect x="103.4" y="211.2" width="96.4" height="26.0" fill="#64748b"><title>Travel labour: 20</title></rect>
+<rect x="103.4" y="102.5" width="96.4" height="108.6" fill="#a16207"><title>Terminal shortfall: 83.55</title></rect>
+<text x="151.7" y="96.5" class="tick" text-anchor="middle">151.9</text>
+<text x="151.7" y="318" class="tick" text-anchor="middle">A0</text>
+<rect x="278.8" y="288.5" width="96.4" height="11.5" fill="#2563eb"><title>Energy: 8.86</title></rect>
+<rect x="278.8" y="288.1" width="96.4" height="0.4" fill="#14a38b"><title>CO2: 0.33</title></rect>
+<rect x="278.8" y="237.5" width="96.4" height="50.6" fill="#8b5cf6"><title>NC demand charge: 38.90</title></rect>
+<rect x="278.8" y="211.5" width="96.4" height="26.0" fill="#64748b"><title>Travel labour: 20</title></rect>
+<text x="327.0" y="205.5" class="tick" text-anchor="middle">68.09</text>
+<text x="327.0" y="318" class="tick" text-anchor="middle">A1</text>
+<rect x="454.1" y="289.0" width="96.4" height="11.0" fill="#2563eb"><title>Energy: 8.46</title></rect>
+<rect x="454.1" y="288.6" width="96.4" height="0.4" fill="#14a38b"><title>CO2: 0.34</title></rect>
+<rect x="454.1" y="237.2" width="96.4" height="51.3" fill="#8b5cf6"><title>NC demand charge: 39.49</title></rect>
+<rect x="454.1" y="198.2" width="96.4" height="39.0" fill="#64748b"><title>Travel labour: 30</title></rect>
+<text x="502.3" y="192.2" class="tick" text-anchor="middle">78.29</text>
+<text x="502.3" y="318" class="tick" text-anchor="middle">A2</text>
+<line x1="64" y1="300" x2="590" y2="300" class="axis"/>
+<rect x="606" y="40" width="12" height="12" fill="#2563eb"/>
+<text x="624" y="50" class="tick">Energy</text>
+<rect x="606" y="60" width="12" height="12" fill="#14a38b"/>
+<text x="624" y="70" class="tick">CO2</text>
+<rect x="606" y="80" width="12" height="12" fill="#8b5cf6"/>
+<text x="624" y="90" class="tick">NC demand charge</text>
+<rect x="606" y="100" width="12" height="12" fill="#d97706"/>
+<text x="624" y="110" class="tick">OP demand charge</text>
+<rect x="606" y="120" width="12" height="12" fill="#e5484d"/>
+<text x="624" y="130" class="tick">Missed work</text>
+<rect x="606" y="140" width="12" height="12" fill="#64748b"/>
+<text x="624" y="150" class="tick">Travel labour</text>
+<rect x="606" y="160" width="12" height="12" fill="#a16207"/>
+<text x="624" y="170" class="tick">Terminal shortfall</text>
+</svg>
+
+<h2>Time series</h2>
+<svg viewBox="0 0 760 300" role="img" aria-label="Grid charging power (all MCSs)">
+<text x="58" y="16" class="ctitle">Grid charging power (all MCSs)</text>
+<line x1="58" y1="262.0" x2="744" y2="262.0" class="grid"/>
+<text x="52" y="266.0" class="tick" text-anchor="end">0</text>
+<line x1="58" y1="206.5" x2="744" y2="206.5" class="grid"/>
+<text x="52" y="210.5" class="tick" text-anchor="end">0.50</text>
+<line x1="58" y1="151.0" x2="744" y2="151.0" class="grid"/>
+<text x="52" y="155.0" class="tick" text-anchor="end">1</text>
+<line x1="58" y1="95.5" x2="744" y2="95.5" class="grid"/>
+<text x="52" y="99.5" class="tick" text-anchor="end">1.50</text>
+<line x1="58" y1="40.0" x2="744" y2="40.0" class="grid"/>
+<text x="52" y="44.0" class="tick" text-anchor="end">2</text>
+<text x="58.0" y="278" class="tick" text-anchor="middle">08:00:00</text>
+<text x="115.8" y="278" class="tick" text-anchor="middle">10:00:00</text>
+<text x="173.5" y="278" class="tick" text-anchor="middle">12:00:00</text>
+<text x="231.3" y="278" class="tick" text-anchor="middle">14:00:00</text>
+<text x="289.1" y="278" class="tick" text-anchor="middle">16:00:00</text>
+<text x="346.8" y="278" class="tick" text-anchor="middle">18:00:00</text>
+<text x="404.6" y="278" class="tick" text-anchor="middle">20:00:00</text>
+<text x="462.4" y="278" class="tick" text-anchor="middle">22:00:00</text>
+<text x="520.1" y="278" class="tick" text-anchor="middle">00:00:00</text>
+<text x="577.9" y="278" class="tick" text-anchor="middle">02:00:00</text>
+<text x="635.7" y="278" class="tick" text-anchor="middle">04:00:00</text>
+<text x="693.5" y="278" class="tick" text-anchor="middle">06:00:00</text>
+<line x1="58" y1="262" x2="744" y2="262" class="axis"/>
+<text transform="rotate(-90 14,151.0)" x="14" y="151.0" class="tick" text-anchor="middle">kW</text>
+<path d="M58.0,262.0 L65.2,262.0 L72.4,262.0 L79.7,262.0 L86.9,262.0 L94.1,262.0 L101.3,262.0 L108.5,262.0 L115.8,262.0 L123.0,262.0 L130.2,262.0 L137.4,262.0 L144.7,262.0 L151.9,262.0 L159.1,262.0 L166.3,262.0 L173.5,262.0 L180.8,262.0 L188.0,262.0 L195.2,45.5 L202.4,45.5 L209.6,45.5 L216.9,45.5 L224.1,45.5 L231.3,45.5 L238.5,45.5 L245.7,45.5 L253.0,45.5 L260.2,45.5 L267.4,45.5 L274.6,45.5 L281.9,45.5 L289.1,262.0 L296.3,262.0 L303.5,262.0 L310.7,262.0 L318.0,262.0 L325.2,262.0 L332.4,262.0 L339.6,262.0 L346.8,262.0 L354.1,262.0 L361.3,262.0 L368.5,262.0 L375.7,262.0 L382.9,262.0 L390.2,262.0 L397.4,262.0 L404.6,262.0 L411.8,262.0 L419.1,262.0 L426.3,262.0 L433.5,45.5 L440.7,45.5 L447.9,45.5 L455.2,45.5 L462.4,45.5 L469.6,45.5 L476.8,45.5 L484.0,45.5 L491.3,45.5 L498.5,45.5 L505.7,45.5 L512.9,45.5 L520.1,45.5 L527.4,45.5 L534.6,45.5 L541.8,45.5 L549.0,45.5 L556.3,45.5 L563.5,45.5 L570.7,45.5 L577.9,45.5 L585.1,45.5 L592.4,45.5 L599.6,45.5 L606.8,45.5 L614.0,45.5 L621.2,45.5 L628.5,45.5 L635.7,45.5 L642.9,45.5 L650.1,45.5 L657.3,45.5 L664.6,45.5 L671.8,45.5 L679.0,45.5 L686.2,45.5 L693.5,45.5 L700.7,45.5 L707.9,45.5 L715.1,45.5 L722.3,45.5 L729.6,45.5 L736.8,75.0 L744.0,262.0 " fill="none" stroke="#8b95a5" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,262.0 L65.2,262.0 L72.4,262.0 L79.7,262.0 L86.9,262.0 L94.1,262.0 L101.3,262.0 L108.5,262.0 L115.8,262.0 L123.0,262.0 L130.2,262.0 L137.4,262.0 L144.7,262.0 L151.9,262.0 L159.1,262.0 L166.3,262.0 L173.5,262.0 L180.8,262.0 L188.0,262.0 L195.2,51.0 L202.4,51.0 L209.6,51.0 L216.9,51.0 L224.1,51.0 L231.3,51.0 L238.5,51.0 L245.7,51.0 L253.0,51.0 L260.2,51.0 L267.4,51.0 L274.6,51.0 L281.9,49.7 L289.1,262.0 L296.3,262.0 L303.5,262.0 L310.7,262.0 L318.0,262.0 L325.2,262.0 L332.4,262.0 L339.6,262.0 L346.8,262.0 L354.1,262.0 L361.3,262.0 L368.5,262.0 L375.7,262.0 L382.9,262.0 L390.2,262.0 L397.4,262.0 L404.6,262.0 L411.8,262.0 L419.1,262.0 L426.3,262.0 L433.5,47.4 L440.7,47.4 L447.9,47.4 L455.2,47.4 L462.4,47.4 L469.6,47.4 L476.8,47.4 L484.0,47.4 L491.3,47.4 L498.5,47.4 L505.7,47.4 L512.9,47.4 L520.1,47.4 L527.4,47.4 L534.6,47.4 L541.8,47.4 L549.0,47.4 L556.3,47.4 L563.5,47.4 L570.7,47.4 L577.9,47.4 L585.1,47.4 L592.4,47.4 L599.6,47.4 L606.8,47.4 L614.0,47.4 L621.2,47.4 L628.5,47.4 L635.7,47.4 L642.9,47.4 L650.1,47.4 L657.3,47.4 L664.6,47.4 L671.8,47.4 L679.0,47.4 L686.2,47.4 L693.5,47.4 L700.7,47.4 L707.9,47.4 L715.1,47.4 L722.3,47.4 L729.6,47.4 L736.8,47.4 L744.0,47.4 " fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,262.0 L65.2,262.0 L72.4,262.0 L79.7,262.0 L86.9,45.3 L94.1,262.0 L101.3,262.0 L108.5,262.0 L115.8,262.0 L123.0,262.0 L130.2,45.3 L137.4,45.3 L144.7,45.3 L151.9,45.3 L159.1,45.3 L166.3,45.3 L173.5,45.3 L180.8,45.3 L188.0,45.3 L195.2,45.3 L202.4,45.3 L209.6,262.0 L216.9,262.0 L224.1,262.0 L231.3,262.0 L238.5,262.0 L245.7,262.0 L253.0,262.0 L260.2,262.0 L267.4,262.0 L274.6,262.0 L281.9,262.0 L289.1,262.0 L296.3,262.0 L303.5,262.0 L310.7,262.0 L318.0,262.0 L325.2,262.0 L332.4,262.0 L339.6,262.0 L346.8,262.0 L354.1,262.0 L361.3,262.0 L368.5,262.0 L375.7,262.0 L382.9,262.0 L390.2,262.0 L397.4,262.0 L404.6,262.0 L411.8,262.0 L419.1,262.0 L426.3,262.0 L433.5,44.1 L440.7,44.1 L447.9,44.1 L455.2,44.1 L462.4,44.1 L469.6,44.1 L476.8,44.1 L484.0,44.1 L491.3,44.1 L498.5,44.1 L505.7,44.1 L512.9,44.1 L520.1,44.1 L527.4,44.1 L534.6,44.1 L541.8,44.1 L549.0,44.1 L556.3,44.1 L563.5,44.1 L570.7,44.1 L577.9,44.1 L585.1,44.1 L592.4,44.1 L599.6,44.1 L606.8,44.1 L614.0,44.1 L621.2,44.1 L628.5,44.1 L635.7,44.1 L642.9,44.1 L650.1,44.1 L657.3,44.1 L664.6,44.1 L671.8,44.1 L679.0,44.1 L686.2,44.1 L693.5,44.1 L700.7,44.1 L707.9,44.1 L715.1,44.1 L722.3,44.1 L729.6,44.1 L736.8,44.1 L744.0,44.1 " fill="none" stroke="#e5484d" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="744" y="16" class="tick" text-anchor="end">A2</text>
+<line x1="716" y1="12" x2="732" y2="12" stroke="#e5484d" stroke-width="3"/>
+<text x="694" y="16" class="tick" text-anchor="end">A1</text>
+<line x1="666" y1="12" x2="682" y2="12" stroke="#2563eb" stroke-width="3"/>
+<text x="644" y="16" class="tick" text-anchor="end">A0</text>
+<line x1="616" y1="12" x2="632" y2="12" stroke="#8b95a5" stroke-width="3"/>
+</svg>
+
+<svg viewBox="0 0 760 300" role="img" aria-label="MCS discharge power to CEVs">
+<text x="58" y="16" class="ctitle">MCS discharge power to CEVs</text>
+<line x1="58" y1="262.0" x2="744" y2="262.0" class="grid"/>
+<text x="52" y="266.0" class="tick" text-anchor="end">-2</text>
+<line x1="58" y1="225.0" x2="744" y2="225.0" class="grid"/>
+<text x="52" y="229.0" class="tick" text-anchor="end">0</text>
+<line x1="58" y1="188.0" x2="744" y2="188.0" class="grid"/>
+<text x="52" y="192.0" class="tick" text-anchor="end">2</text>
+<line x1="58" y1="151.0" x2="744" y2="151.0" class="grid"/>
+<text x="52" y="155.0" class="tick" text-anchor="end">4</text>
+<line x1="58" y1="114.0" x2="744" y2="114.0" class="grid"/>
+<text x="52" y="118.0" class="tick" text-anchor="end">6</text>
+<line x1="58" y1="77.0" x2="744" y2="77.0" class="grid"/>
+<text x="52" y="81.0" class="tick" text-anchor="end">8</text>
+<line x1="58" y1="40.0" x2="744" y2="40.0" class="grid"/>
+<text x="52" y="44.0" class="tick" text-anchor="end">10</text>
+<text x="58.0" y="278" class="tick" text-anchor="middle">08:00:00</text>
+<text x="115.8" y="278" class="tick" text-anchor="middle">10:00:00</text>
+<text x="173.5" y="278" class="tick" text-anchor="middle">12:00:00</text>
+<text x="231.3" y="278" class="tick" text-anchor="middle">14:00:00</text>
+<text x="289.1" y="278" class="tick" text-anchor="middle">16:00:00</text>
+<text x="346.8" y="278" class="tick" text-anchor="middle">18:00:00</text>
+<text x="404.6" y="278" class="tick" text-anchor="middle">20:00:00</text>
+<text x="462.4" y="278" class="tick" text-anchor="middle">22:00:00</text>
+<text x="520.1" y="278" class="tick" text-anchor="middle">00:00:00</text>
+<text x="577.9" y="278" class="tick" text-anchor="middle">02:00:00</text>
+<text x="635.7" y="278" class="tick" text-anchor="middle">04:00:00</text>
+<text x="693.5" y="278" class="tick" text-anchor="middle">06:00:00</text>
+<line x1="58" y1="262" x2="744" y2="262" class="axis"/>
+<text transform="rotate(-90 14,151.0)" x="14" y="151.0" class="tick" text-anchor="middle">kW</text>
+<path d="M58.0,225.0 L65.2,131.7 L72.4,225.0 L79.7,225.0 L86.9,93.0 L94.1,225.0 L101.3,77.0 L108.5,225.0 L115.8,225.0 L123.0,225.0 L130.2,225.0 L137.4,77.0 L144.7,225.0 L151.9,225.0 L159.1,225.0 L166.3,225.0 L173.5,77.0 L180.8,77.0 L188.0,225.0 L195.2,225.0 L202.4,225.0 L209.6,225.0 L216.9,225.0 L224.1,225.0 L231.3,225.0 L238.5,225.0 L245.7,225.0 L253.0,225.0 L260.2,225.0 L267.4,225.0 L274.6,225.0 L281.9,225.0 L289.1,225.0 L296.3,77.0 L303.5,225.0 L310.7,225.0 L318.0,77.0 L325.2,77.0 L332.4,77.0 L339.6,225.0 L346.8,77.0 L354.1,77.0 L361.3,222.0 L368.5,77.0 L375.7,225.0 L382.9,225.0 L390.2,225.0 L397.4,225.0 L404.6,225.0 L411.8,225.0 L419.1,225.0 L426.3,225.0 L433.5,225.0 L440.7,225.0 L447.9,225.0 L455.2,225.0 L462.4,225.0 L469.6,225.0 L476.8,225.0 L484.0,225.0 L491.3,225.0 L498.5,225.0 L505.7,225.0 L512.9,225.0 L520.1,225.0 L527.4,225.0 L534.6,225.0 L541.8,225.0 L549.0,225.0 L556.3,225.0 L563.5,225.0 L570.7,225.0 L577.9,225.0 L585.1,225.0 L592.4,225.0 L599.6,225.0 L606.8,225.0 L614.0,225.0 L621.2,225.0 L628.5,225.0 L635.7,225.0 L642.9,225.0 L650.1,225.0 L657.3,225.0 L664.6,225.0 L671.8,225.0 L679.0,225.0 L686.2,225.0 L693.5,225.0 L700.7,225.0 L707.9,225.0 L715.1,225.0 L722.3,225.0 L729.6,225.0 L736.8,225.0 L744.0,225.0 " fill="none" stroke="#8b95a5" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,225.0 L65.2,157.4 L72.4,225.0 L79.7,225.0 L86.9,225.0 L94.1,225.0 L101.3,95.3 L108.5,77.0 L115.8,225.0 L123.0,225.0 L130.2,225.0 L137.4,225.0 L144.7,77.0 L151.9,225.0 L159.1,225.0 L166.3,225.0 L173.5,77.0 L180.8,93.5 L188.0,225.0 L195.2,225.0 L202.4,225.0 L209.6,225.0 L216.9,225.0 L224.1,225.0 L231.3,225.0 L238.5,225.0 L245.7,225.0 L253.0,225.0 L260.2,225.0 L267.4,225.0 L274.6,225.0 L281.9,225.0 L289.1,225.0 L296.3,77.0 L303.5,225.0 L310.7,225.0 L318.0,200.6 L325.2,77.0 L332.4,77.0 L339.6,77.0 L346.8,77.0 L354.1,77.0 L361.3,77.0 L368.5,225.0 L375.7,225.0 L382.9,225.0 L390.2,225.0 L397.4,225.0 L404.6,225.0 L411.8,225.0 L419.1,225.0 L426.3,225.0 L433.5,225.0 L440.7,225.0 L447.9,225.0 L455.2,225.0 L462.4,225.0 L469.6,225.0 L476.8,225.0 L484.0,225.0 L491.3,225.0 L498.5,225.0 L505.7,225.0 L512.9,225.0 L520.1,225.0 L527.4,225.0 L534.6,225.0 L541.8,225.0 L549.0,225.0 L556.3,225.0 L563.5,225.0 L570.7,225.0 L577.9,225.0 L585.1,225.0 L592.4,225.0 L599.6,225.0 L606.8,225.0 L614.0,225.0 L621.2,225.0 L628.5,225.0 L635.7,225.0 L642.9,225.0 L650.1,225.0 L657.3,225.0 L664.6,225.0 L671.8,225.0 L679.0,225.0 L686.2,225.0 L693.5,225.0 L700.7,225.0 L707.9,225.0 L715.1,225.0 L722.3,225.0 L729.6,225.0 L736.8,225.0 L744.0,225.0 " fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,225.0 L65.2,225.0 L72.4,77.0 L79.7,225.0 L86.9,225.0 L94.1,225.0 L101.3,83.6 L108.5,77.0 L115.8,225.0 L123.0,225.0 L130.2,225.0 L137.4,225.0 L144.7,225.0 L151.9,225.0 L159.1,225.0 L166.3,225.0 L173.5,225.0 L180.8,225.0 L188.0,225.0 L195.2,225.0 L202.4,225.0 L209.6,225.0 L216.9,77.0 L224.1,77.0 L231.3,225.0 L238.5,225.0 L245.7,77.0 L253.0,225.0 L260.2,225.0 L267.4,225.0 L274.6,225.0 L281.9,77.0 L289.1,225.0 L296.3,225.0 L303.5,225.0 L310.7,225.0 L318.0,77.0 L325.2,77.0 L332.4,77.0 L339.6,77.0 L346.8,161.2 L354.1,77.0 L361.3,225.0 L368.5,225.0 L375.7,225.0 L382.9,225.0 L390.2,225.0 L397.4,225.0 L404.6,225.0 L411.8,225.0 L419.1,225.0 L426.3,225.0 L433.5,225.0 L440.7,225.0 L447.9,225.0 L455.2,225.0 L462.4,225.0 L469.6,225.0 L476.8,225.0 L484.0,225.0 L491.3,225.0 L498.5,225.0 L505.7,225.0 L512.9,225.0 L520.1,225.0 L527.4,225.0 L534.6,225.0 L541.8,225.0 L549.0,225.0 L556.3,225.0 L563.5,225.0 L570.7,225.0 L577.9,225.0 L585.1,225.0 L592.4,225.0 L599.6,225.0 L606.8,225.0 L614.0,225.0 L621.2,225.0 L628.5,225.0 L635.7,225.0 L642.9,225.0 L650.1,225.0 L657.3,225.0 L664.6,225.0 L671.8,225.0 L679.0,225.0 L686.2,225.0 L693.5,225.0 L700.7,225.0 L707.9,225.0 L715.1,225.0 L722.3,225.0 L729.6,225.0 L736.8,225.0 L744.0,225.0 " fill="none" stroke="#e5484d" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="744" y="16" class="tick" text-anchor="end">A2</text>
+<line x1="716" y1="12" x2="732" y2="12" stroke="#e5484d" stroke-width="3"/>
+<text x="694" y="16" class="tick" text-anchor="end">A1</text>
+<line x1="666" y1="12" x2="682" y2="12" stroke="#2563eb" stroke-width="3"/>
+<text x="644" y="16" class="tick" text-anchor="end">A0</text>
+<line x1="616" y1="12" x2="632" y2="12" stroke="#8b95a5" stroke-width="3"/>
+</svg>
+
+<svg viewBox="0 0 760 300" role="img" aria-label="CEV work power">
+<text x="58" y="16" class="ctitle">CEV work power</text>
+<line x1="58" y1="262.0" x2="744" y2="262.0" class="grid"/>
+<text x="52" y="266.0" class="tick" text-anchor="end">0</text>
+<line x1="58" y1="188.0" x2="744" y2="188.0" class="grid"/>
+<text x="52" y="192.0" class="tick" text-anchor="end">2</text>
+<line x1="58" y1="114.0" x2="744" y2="114.0" class="grid"/>
+<text x="52" y="118.0" class="tick" text-anchor="end">4</text>
+<line x1="58" y1="40.0" x2="744" y2="40.0" class="grid"/>
+<text x="52" y="44.0" class="tick" text-anchor="end">6</text>
+<text x="58.0" y="278" class="tick" text-anchor="middle">08:00:00</text>
+<text x="115.8" y="278" class="tick" text-anchor="middle">10:00:00</text>
+<text x="173.5" y="278" class="tick" text-anchor="middle">12:00:00</text>
+<text x="231.3" y="278" class="tick" text-anchor="middle">14:00:00</text>
+<text x="289.1" y="278" class="tick" text-anchor="middle">16:00:00</text>
+<text x="346.8" y="278" class="tick" text-anchor="middle">18:00:00</text>
+<text x="404.6" y="278" class="tick" text-anchor="middle">20:00:00</text>
+<text x="462.4" y="278" class="tick" text-anchor="middle">22:00:00</text>
+<text x="520.1" y="278" class="tick" text-anchor="middle">00:00:00</text>
+<text x="577.9" y="278" class="tick" text-anchor="middle">02:00:00</text>
+<text x="635.7" y="278" class="tick" text-anchor="middle">04:00:00</text>
+<text x="693.5" y="278" class="tick" text-anchor="middle">06:00:00</text>
+<line x1="58" y1="262" x2="744" y2="262" class="axis"/>
+<text transform="rotate(-90 14,151.0)" x="14" y="151.0" class="tick" text-anchor="middle">kW</text>
+<path d="M58.0,133.6 L65.2,262.0 L72.4,84.8 L79.7,93.6 L86.9,253.0 L94.1,106.8 L101.3,261.1 L108.5,60.2 L115.8,96.0 L123.0,103.4 L130.2,72.7 L137.4,262.0 L144.7,86.8 L151.9,101.6 L159.1,69.5 L166.3,106.8 L173.5,262.0 L180.8,262.0 L188.0,262.0 L195.2,262.0 L202.4,262.0 L209.6,262.0 L216.9,262.0 L224.1,262.0 L231.3,69.5 L238.5,96.0 L245.7,87.3 L253.0,173.6 L260.2,262.0 L267.4,173.6 L274.6,136.3 L281.9,101.9 L289.1,101.6 L296.3,253.0 L303.5,135.3 L310.7,108.8 L318.0,262.0 L325.2,262.0 L332.4,262.0 L339.6,262.0 L346.8,262.0 L354.1,262.0 L361.3,262.0 L368.5,262.0 L375.7,262.0 L382.9,262.0 L390.2,262.0 L397.4,262.0 L404.6,262.0 L411.8,262.0 L419.1,262.0 L426.3,262.0 L433.5,262.0 L440.7,262.0 L447.9,262.0 L455.2,262.0 L462.4,262.0 L469.6,262.0 L476.8,262.0 L484.0,262.0 L491.3,262.0 L498.5,262.0 L505.7,262.0 L512.9,262.0 L520.1,262.0 L527.4,262.0 L534.6,262.0 L541.8,262.0 L549.0,262.0 L556.3,262.0 L563.5,262.0 L570.7,262.0 L577.9,262.0 L585.1,262.0 L592.4,262.0 L599.6,262.0 L606.8,262.0 L614.0,262.0 L621.2,262.0 L628.5,262.0 L635.7,262.0 L642.9,262.0 L650.1,262.0 L657.3,262.0 L664.6,262.0 L671.8,262.0 L679.0,262.0 L686.2,262.0 L693.5,262.0 L700.7,262.0 L707.9,262.0 L715.1,262.0 L722.3,262.0 L729.6,262.0 L736.8,262.0 L744.0,262.0 " fill="none" stroke="#8b95a5" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,133.6 L65.2,262.0 L72.4,84.8 L79.7,93.6 L86.9,173.6 L94.1,60.2 L101.3,253.0 L108.5,261.1 L115.8,106.8 L123.0,96.0 L130.2,103.4 L137.4,72.7 L144.7,262.0 L151.9,101.6 L159.1,86.8 L166.3,69.5 L173.5,262.0 L180.8,262.0 L188.0,262.0 L195.2,262.0 L202.4,262.0 L209.6,262.0 L216.9,262.0 L224.1,262.0 L231.3,173.6 L238.5,106.8 L245.7,87.3 L253.0,136.3 L260.2,262.0 L267.4,69.5 L274.6,101.9 L281.9,135.3 L289.1,101.6 L296.3,253.0 L303.5,96.0 L310.7,108.8 L318.0,262.0 L325.2,262.0 L332.4,262.0 L339.6,262.0 L346.8,262.0 L354.1,262.0 L361.3,262.0 L368.5,262.0 L375.7,262.0 L382.9,262.0 L390.2,262.0 L397.4,262.0 L404.6,262.0 L411.8,262.0 L419.1,262.0 L426.3,262.0 L433.5,262.0 L440.7,262.0 L447.9,262.0 L455.2,262.0 L462.4,262.0 L469.6,262.0 L476.8,262.0 L484.0,262.0 L491.3,262.0 L498.5,262.0 L505.7,262.0 L512.9,262.0 L520.1,262.0 L527.4,262.0 L534.6,262.0 L541.8,262.0 L549.0,262.0 L556.3,262.0 L563.5,262.0 L570.7,262.0 L577.9,262.0 L585.1,262.0 L592.4,262.0 L599.6,262.0 L606.8,262.0 L614.0,262.0 L621.2,262.0 L628.5,262.0 L635.7,262.0 L642.9,262.0 L650.1,262.0 L657.3,262.0 L664.6,262.0 L671.8,262.0 L679.0,262.0 L686.2,262.0 L693.5,262.0 L700.7,262.0 L707.9,262.0 L715.1,262.0 L722.3,262.0 L729.6,262.0 L736.8,262.0 L744.0,262.0 " fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,133.6 L65.2,84.8 L72.4,262.0 L79.7,93.6 L86.9,106.8 L94.1,60.2 L101.3,253.0 L108.5,261.1 L115.8,96.0 L123.0,103.4 L130.2,173.6 L137.4,72.7 L144.7,262.0 L151.9,101.6 L159.1,86.8 L166.3,69.5 L173.5,262.0 L180.8,262.0 L188.0,262.0 L195.2,262.0 L202.4,262.0 L209.6,262.0 L216.9,262.0 L224.1,262.0 L231.3,106.8 L238.5,69.5 L245.7,262.0 L253.0,87.3 L260.2,96.0 L267.4,173.6 L274.6,136.3 L281.9,253.0 L289.1,101.9 L296.3,101.6 L303.5,135.3 L310.7,108.8 L318.0,262.0 L325.2,262.0 L332.4,262.0 L339.6,262.0 L346.8,262.0 L354.1,262.0 L361.3,262.0 L368.5,262.0 L375.7,262.0 L382.9,262.0 L390.2,262.0 L397.4,262.0 L404.6,262.0 L411.8,262.0 L419.1,262.0 L426.3,262.0 L433.5,262.0 L440.7,262.0 L447.9,262.0 L455.2,262.0 L462.4,262.0 L469.6,262.0 L476.8,262.0 L484.0,262.0 L491.3,262.0 L498.5,262.0 L505.7,262.0 L512.9,262.0 L520.1,262.0 L527.4,262.0 L534.6,262.0 L541.8,262.0 L549.0,262.0 L556.3,262.0 L563.5,262.0 L570.7,262.0 L577.9,262.0 L585.1,262.0 L592.4,262.0 L599.6,262.0 L606.8,262.0 L614.0,262.0 L621.2,262.0 L628.5,262.0 L635.7,262.0 L642.9,262.0 L650.1,262.0 L657.3,262.0 L664.6,262.0 L671.8,262.0 L679.0,262.0 L686.2,262.0 L693.5,262.0 L700.7,262.0 L707.9,262.0 L715.1,262.0 L722.3,262.0 L729.6,262.0 L736.8,262.0 L744.0,262.0 " fill="none" stroke="#e5484d" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="744" y="16" class="tick" text-anchor="end">A2</text>
+<line x1="716" y1="12" x2="732" y2="12" stroke="#e5484d" stroke-width="3"/>
+<text x="694" y="16" class="tick" text-anchor="end">A1</text>
+<line x1="666" y1="12" x2="682" y2="12" stroke="#2563eb" stroke-width="3"/>
+<text x="644" y="16" class="tick" text-anchor="end">A0</text>
+<line x1="616" y1="12" x2="632" y2="12" stroke="#8b95a5" stroke-width="3"/>
+</svg>
+
+<svg viewBox="0 0 760 300" role="img" aria-label="State of energy, CEV 1">
+<text x="58" y="16" class="ctitle">State of energy, CEV 1</text>
+<line x1="58" y1="262.0" x2="744" y2="262.0" class="grid"/>
+<text x="52" y="266.0" class="tick" text-anchor="end">0</text>
+<line x1="58" y1="188.0" x2="744" y2="188.0" class="grid"/>
+<text x="52" y="192.0" class="tick" text-anchor="end">5</text>
+<line x1="58" y1="114.0" x2="744" y2="114.0" class="grid"/>
+<text x="52" y="118.0" class="tick" text-anchor="end">10</text>
+<line x1="58" y1="40.0" x2="744" y2="40.0" class="grid"/>
+<text x="52" y="44.0" class="tick" text-anchor="end">15</text>
+<text x="58.0" y="278" class="tick" text-anchor="middle">08:00:00</text>
+<text x="115.8" y="278" class="tick" text-anchor="middle">10:00:00</text>
+<text x="173.5" y="278" class="tick" text-anchor="middle">12:00:00</text>
+<text x="231.3" y="278" class="tick" text-anchor="middle">14:00:00</text>
+<text x="289.1" y="278" class="tick" text-anchor="middle">16:00:00</text>
+<text x="346.8" y="278" class="tick" text-anchor="middle">18:00:00</text>
+<text x="404.6" y="278" class="tick" text-anchor="middle">20:00:00</text>
+<text x="462.4" y="278" class="tick" text-anchor="middle">22:00:00</text>
+<text x="520.1" y="278" class="tick" text-anchor="middle">00:00:00</text>
+<text x="577.9" y="278" class="tick" text-anchor="middle">02:00:00</text>
+<text x="635.7" y="278" class="tick" text-anchor="middle">04:00:00</text>
+<text x="693.5" y="278" class="tick" text-anchor="middle">06:00:00</text>
+<line x1="58" y1="262" x2="744" y2="262" class="axis"/>
+<text transform="rotate(-90 14,151.0)" x="14" y="151.0" class="tick" text-anchor="middle">kWh</text>
+<path d="M58.0,55.8 L65.2,43.0 L72.4,60.7 L79.7,77.5 L86.9,53.3 L94.1,68.9 L101.3,43.0 L108.5,63.1 L115.8,79.7 L123.0,95.6 L130.2,114.5 L137.4,86.4 L144.7,103.9 L151.9,120.0 L159.1,139.2 L166.3,154.7 L173.5,126.6 L180.8,98.5 L188.0,98.5 L195.2,98.5 L202.4,98.5 L209.6,98.5 L216.9,98.5 L224.1,98.5 L231.3,117.7 L238.5,134.3 L245.7,151.8 L253.0,160.6 L260.2,160.6 L267.4,169.5 L274.6,182.1 L281.9,198.1 L289.1,214.1 L296.3,186.9 L303.5,199.6 L310.7,214.9 L318.0,186.8 L325.2,158.6 L332.4,130.5 L339.6,130.5 L346.8,102.4 L354.1,74.3 L361.3,73.7 L368.5,45.6 L375.7,45.6 L382.9,45.6 L390.2,45.6 L397.4,45.6 L404.6,45.6 L411.8,45.6 L419.1,45.6 L426.3,45.6 L433.5,45.6 L440.7,45.6 L447.9,45.6 L455.2,45.6 L462.4,45.6 L469.6,45.6 L476.8,45.6 L484.0,45.6 L491.3,45.6 L498.5,45.6 L505.7,45.6 L512.9,45.6 L520.1,45.6 L527.4,45.6 L534.6,45.6 L541.8,45.6 L549.0,45.6 L556.3,45.6 L563.5,45.6 L570.7,45.6 L577.9,45.6 L585.1,45.6 L592.4,45.6 L599.6,45.6 L606.8,45.6 L614.0,45.6 L621.2,45.6 L628.5,45.6 L635.7,45.6 L642.9,45.6 L650.1,45.6 L657.3,45.6 L664.6,45.6 L671.8,45.6 L679.0,45.6 L686.2,45.6 L693.5,45.6 L700.7,45.6 L707.9,45.6 L715.1,45.6 L722.3,45.6 L729.6,45.6 L736.8,45.6 L744.0,45.6 " fill="none" stroke="#8b95a5" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,55.8 L65.2,43.0 L72.4,60.7 L79.7,77.5 L86.9,86.4 L94.1,106.5 L101.3,82.8 L108.5,54.8 L115.8,70.3 L123.0,86.9 L130.2,102.7 L137.4,121.7 L144.7,93.5 L151.9,109.6 L159.1,127.1 L166.3,146.4 L173.5,118.2 L180.8,93.2 L188.0,93.2 L195.2,93.2 L202.4,93.2 L209.6,93.2 L216.9,93.2 L224.1,93.2 L231.3,102.1 L238.5,117.6 L245.7,135.1 L253.0,147.7 L260.2,147.7 L267.4,166.9 L274.6,182.9 L281.9,195.6 L289.1,211.6 L296.3,184.4 L303.5,201.0 L310.7,216.3 L318.0,211.7 L325.2,183.6 L332.4,155.4 L339.6,127.3 L346.8,99.2 L354.1,71.1 L361.3,43.0 L368.5,43.0 L375.7,43.0 L382.9,43.0 L390.2,43.0 L397.4,43.0 L404.6,43.0 L411.8,43.0 L419.1,43.0 L426.3,43.0 L433.5,43.0 L440.7,43.0 L447.9,43.0 L455.2,43.0 L462.4,43.0 L469.6,43.0 L476.8,43.0 L484.0,43.0 L491.3,43.0 L498.5,43.0 L505.7,43.0 L512.9,43.0 L520.1,43.0 L527.4,43.0 L534.6,43.0 L541.8,43.0 L549.0,43.0 L556.3,43.0 L563.5,43.0 L570.7,43.0 L577.9,43.0 L585.1,43.0 L592.4,43.0 L599.6,43.0 L606.8,43.0 L614.0,43.0 L621.2,43.0 L628.5,43.0 L635.7,43.0 L642.9,43.0 L650.1,43.0 L657.3,43.0 L664.6,43.0 L671.8,43.0 L679.0,43.0 L686.2,43.0 L693.5,43.0 L700.7,43.0 L707.9,43.0 L715.1,43.0 L722.3,43.0 L729.6,43.0 L736.8,43.0 L744.0,43.0 " fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,55.8 L65.2,73.5 L72.4,45.4 L79.7,62.2 L86.9,77.8 L94.1,97.9 L101.3,72.0 L108.5,43.9 L115.8,60.5 L123.0,76.4 L130.2,85.2 L137.4,104.2 L144.7,104.2 L151.9,120.2 L159.1,137.7 L166.3,157.0 L173.5,157.0 L180.8,157.0 L188.0,157.0 L195.2,157.0 L202.4,157.0 L209.6,157.0 L216.9,128.9 L224.1,100.7 L231.3,116.3 L238.5,135.5 L245.7,107.4 L253.0,124.9 L260.2,141.5 L267.4,150.3 L274.6,162.9 L281.9,135.6 L289.1,151.6 L296.3,167.7 L303.5,180.4 L310.7,195.7 L318.0,167.6 L325.2,139.4 L332.4,111.3 L339.6,83.2 L346.8,71.1 L354.1,43.0 L361.3,43.0 L368.5,43.0 L375.7,43.0 L382.9,43.0 L390.2,43.0 L397.4,43.0 L404.6,43.0 L411.8,43.0 L419.1,43.0 L426.3,43.0 L433.5,43.0 L440.7,43.0 L447.9,43.0 L455.2,43.0 L462.4,43.0 L469.6,43.0 L476.8,43.0 L484.0,43.0 L491.3,43.0 L498.5,43.0 L505.7,43.0 L512.9,43.0 L520.1,43.0 L527.4,43.0 L534.6,43.0 L541.8,43.0 L549.0,43.0 L556.3,43.0 L563.5,43.0 L570.7,43.0 L577.9,43.0 L585.1,43.0 L592.4,43.0 L599.6,43.0 L606.8,43.0 L614.0,43.0 L621.2,43.0 L628.5,43.0 L635.7,43.0 L642.9,43.0 L650.1,43.0 L657.3,43.0 L664.6,43.0 L671.8,43.0 L679.0,43.0 L686.2,43.0 L693.5,43.0 L700.7,43.0 L707.9,43.0 L715.1,43.0 L722.3,43.0 L729.6,43.0 L736.8,43.0 L744.0,43.0 " fill="none" stroke="#e5484d" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="744" y="16" class="tick" text-anchor="end">A2</text>
+<line x1="716" y1="12" x2="732" y2="12" stroke="#e5484d" stroke-width="3"/>
+<text x="694" y="16" class="tick" text-anchor="end">A1</text>
+<line x1="666" y1="12" x2="682" y2="12" stroke="#2563eb" stroke-width="3"/>
+<text x="644" y="16" class="tick" text-anchor="end">A0</text>
+<line x1="616" y1="12" x2="632" y2="12" stroke="#8b95a5" stroke-width="3"/>
+</svg>
+
+<svg viewBox="0 0 760 300" role="img" aria-label="State of energy, MCS 1">
+<text x="58" y="16" class="ctitle">State of energy, MCS 1</text>
+<line x1="58" y1="262.0" x2="744" y2="262.0" class="grid"/>
+<text x="52" y="266.0" class="tick" text-anchor="end">0</text>
+<line x1="58" y1="217.6" x2="744" y2="217.6" class="grid"/>
+<text x="52" y="221.6" class="tick" text-anchor="end">50</text>
+<line x1="58" y1="173.2" x2="744" y2="173.2" class="grid"/>
+<text x="52" y="177.2" class="tick" text-anchor="end">100</text>
+<line x1="58" y1="128.8" x2="744" y2="128.8" class="grid"/>
+<text x="52" y="132.8" class="tick" text-anchor="end">150</text>
+<line x1="58" y1="84.4" x2="744" y2="84.4" class="grid"/>
+<text x="52" y="88.4" class="tick" text-anchor="end">200</text>
+<line x1="58" y1="40.0" x2="744" y2="40.0" class="grid"/>
+<text x="52" y="44.0" class="tick" text-anchor="end">250</text>
+<text x="58.0" y="278" class="tick" text-anchor="middle">08:00:00</text>
+<text x="115.8" y="278" class="tick" text-anchor="middle">10:00:00</text>
+<text x="173.5" y="278" class="tick" text-anchor="middle">12:00:00</text>
+<text x="231.3" y="278" class="tick" text-anchor="middle">14:00:00</text>
+<text x="289.1" y="278" class="tick" text-anchor="middle">16:00:00</text>
+<text x="346.8" y="278" class="tick" text-anchor="middle">18:00:00</text>
+<text x="404.6" y="278" class="tick" text-anchor="middle">20:00:00</text>
+<text x="462.4" y="278" class="tick" text-anchor="middle">22:00:00</text>
+<text x="520.1" y="278" class="tick" text-anchor="middle">00:00:00</text>
+<text x="577.9" y="278" class="tick" text-anchor="middle">02:00:00</text>
+<text x="635.7" y="278" class="tick" text-anchor="middle">04:00:00</text>
+<text x="693.5" y="278" class="tick" text-anchor="middle">06:00:00</text>
+<line x1="58" y1="262" x2="744" y2="262" class="axis"/>
+<text transform="rotate(-90 14,151.0)" x="14" y="151.0" class="tick" text-anchor="middle">kWh</text>
+<path d="M58.0,40.0 L65.2,40.9 L72.4,40.9 L79.7,40.9 L86.9,42.5 L94.1,42.5 L101.3,44.2 L108.5,44.2 L115.8,44.2 L123.0,44.2 L130.2,44.2 L137.4,46.1 L144.7,46.1 L151.9,46.1 L159.1,46.1 L166.3,46.1 L173.5,48.0 L180.8,49.9 L188.0,49.9 L195.2,49.4 L202.4,49.0 L209.6,48.6 L216.9,48.2 L224.1,47.8 L231.3,47.4 L238.5,47.0 L245.7,46.6 L253.0,46.2 L260.2,45.7 L267.4,45.3 L274.6,44.9 L281.9,44.5 L289.1,44.5 L296.3,46.4 L303.5,46.4 L310.7,46.4 L318.0,48.2 L325.2,50.1 L332.4,52.0 L339.6,52.0 L346.8,53.9 L354.1,55.7 L361.3,55.8 L368.5,57.6 L375.7,57.6 L382.9,57.6 L390.2,57.6 L397.4,57.6 L404.6,57.6 L411.8,57.6 L419.1,57.6 L426.3,57.6 L433.5,57.2 L440.7,56.8 L447.9,56.4 L455.2,56.0 L462.4,55.6 L469.6,55.2 L476.8,54.8 L484.0,54.3 L491.3,53.9 L498.5,53.5 L505.7,53.1 L512.9,52.7 L520.1,52.3 L527.4,51.9 L534.6,51.5 L541.8,51.1 L549.0,50.6 L556.3,50.2 L563.5,49.8 L570.7,49.4 L577.9,49.0 L585.1,48.6 L592.4,48.2 L599.6,47.8 L606.8,47.3 L614.0,46.9 L621.2,46.5 L628.5,46.1 L635.7,45.7 L642.9,45.3 L650.1,44.9 L657.3,44.5 L664.6,44.1 L671.8,43.6 L679.0,43.2 L686.2,42.8 L693.5,42.4 L700.7,42.0 L707.9,41.6 L715.1,41.2 L722.3,40.8 L729.6,40.4 L736.8,40.0 L744.0,40.0 " fill="none" stroke="#8b95a5" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,40.0 L65.2,40.9 L72.4,40.9 L79.7,40.9 L86.9,40.9 L94.1,40.9 L101.3,42.5 L108.5,44.4 L115.8,44.4 L123.0,44.4 L130.2,44.4 L137.4,44.4 L144.7,46.2 L151.9,46.2 L159.1,46.2 L166.3,46.2 L173.5,48.1 L180.8,49.8 L188.0,49.8 L195.2,49.4 L202.4,49.0 L209.6,48.6 L216.9,48.2 L224.1,47.8 L231.3,47.4 L238.5,47.0 L245.7,46.6 L253.0,46.2 L260.2,45.8 L267.4,45.4 L274.6,45.0 L281.9,44.5 L289.1,44.5 L296.3,46.4 L303.5,46.4 L310.7,46.4 L318.0,46.7 L325.2,48.6 L332.4,50.5 L339.6,52.3 L346.8,54.2 L354.1,56.1 L361.3,57.9 L368.5,57.9 L375.7,57.9 L382.9,57.9 L390.2,57.9 L397.4,57.9 L404.6,57.9 L411.8,57.9 L419.1,57.9 L426.3,57.9 L433.5,57.5 L440.7,57.1 L447.9,56.7 L455.2,56.3 L462.4,55.9 L469.6,55.5 L476.8,55.1 L484.0,54.7 L491.3,54.3 L498.5,53.9 L505.7,53.5 L512.9,53.0 L520.1,52.6 L527.4,52.2 L534.6,51.8 L541.8,51.4 L549.0,51.0 L556.3,50.6 L563.5,50.2 L570.7,49.8 L577.9,49.4 L585.1,49.0 L592.4,48.6 L599.6,48.2 L606.8,47.7 L614.0,47.3 L621.2,46.9 L628.5,46.5 L635.7,46.1 L642.9,45.7 L650.1,45.3 L657.3,44.9 L664.6,44.5 L671.8,44.1 L679.0,43.7 L686.2,43.3 L693.5,42.9 L700.7,42.4 L707.9,42.0 L715.1,41.6 L722.3,41.2 L729.6,40.8 L736.8,40.4 L744.0,40.0 " fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M58.0,40.0 L65.2,40.0 L72.4,41.9 L79.7,41.9 L86.9,41.5 L94.1,41.5 L101.3,43.2 L108.5,45.1 L115.8,45.1 L123.0,45.1 L130.2,44.7 L137.4,44.3 L144.7,43.9 L151.9,43.5 L159.1,43.1 L166.3,42.6 L173.5,42.2 L180.8,41.8 L188.0,41.4 L195.2,41.0 L202.4,40.6 L209.6,40.6 L216.9,42.5 L224.1,44.3 L231.3,44.3 L238.5,44.3 L245.7,46.2 L253.0,46.2 L260.2,46.2 L267.4,46.2 L274.6,46.2 L281.9,48.1 L289.1,48.1 L296.3,48.1 L303.5,48.1 L310.7,48.1 L318.0,49.9 L325.2,51.8 L332.4,53.7 L339.6,55.5 L346.8,56.3 L354.1,58.2 L361.3,58.2 L368.5,58.2 L375.7,58.2 L382.9,58.2 L390.2,58.2 L397.4,58.2 L404.6,58.2 L411.8,58.2 L419.1,58.2 L426.3,58.2 L433.5,57.8 L440.7,57.4 L447.9,57.0 L455.2,56.6 L462.4,56.1 L469.6,55.7 L476.8,55.3 L484.0,54.9 L491.3,54.5 L498.5,54.1 L505.7,53.7 L512.9,53.2 L520.1,52.8 L527.4,52.4 L534.6,52.0 L541.8,51.6 L549.0,51.2 L556.3,50.8 L563.5,50.3 L570.7,49.9 L577.9,49.5 L585.1,49.1 L592.4,48.7 L599.6,48.3 L606.8,47.9 L614.0,47.5 L621.2,47.0 L628.5,46.6 L635.7,46.2 L642.9,45.8 L650.1,45.4 L657.3,45.0 L664.6,44.6 L671.8,44.1 L679.0,43.7 L686.2,43.3 L693.5,42.9 L700.7,42.5 L707.9,42.1 L715.1,41.7 L722.3,41.2 L729.6,40.8 L736.8,40.4 L744.0,40.0 " fill="none" stroke="#e5484d" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="744" y="16" class="tick" text-anchor="end">A2</text>
+<line x1="716" y1="12" x2="732" y2="12" stroke="#e5484d" stroke-width="3"/>
+<text x="694" y="16" class="tick" text-anchor="end">A1</text>
+<line x1="666" y1="12" x2="682" y2="12" stroke="#2563eb" stroke-width="3"/>
+<text x="644" y="16" class="tick" text-anchor="end">A0</text>
+<line x1="616" y1="12" x2="632" y2="12" stroke="#8b95a5" stroke-width="3"/>
+</svg>
+
+<h2>Solver statistics</h2><div class="scroll"><table><thead><tr><th>Approach</th><th>Solves</th><th>Total solve time (s)</th><th>Mean (s)</th><th>Max (s)</th><th>Max MIP gap (%)</th><th>Non-optimal solves</th></tr></thead><tbody>
+<tr><td>Approach 0 (one-shot)</td><td>1</td><td>51.50</td><td>51.50</td><td>51.50</td><td>0.10</td><td>0</td></tr>
+<tr><td>Approach 1 (CE-MPC)</td><td>96</td><td>386.7</td><td>4.03</td><td>52.24</td><td>0.10</td><td>0</td></tr>
+<tr><td>Approach 2 (SB-MPC)</td><td>96</td><td>7735.2</td><td>80.58</td><td>602.8</td><td>93.54</td><td>10</td></tr>
+</tbody></table></div>
+<p class="muted">Solve counts: Approach 0 solves once per day. Approaches 1 and 2 solve once per interval. Approach 2 solves all five scenarios together in each solve. Runs are single-seed, so differences between approaches are one sample, not an average.</p>
+<h2>Output files</h2>
+<h3>Approach 0 (one-shot)</h3>
+<div class="card">
+<a href="A0_output/A0_MCS_plan_full.csv">A0_output/A0_MCS_plan_full.csv</a> <span class="d">8 KB</span><br>
+<a href="A0_output/A0_MCS_realized_tuple.csv">A0_output/A0_MCS_realized_tuple.csv</a> <span class="d">6 KB</span><br>
+<a href="A0_output/A0_console.txt">A0_output/A0_console.txt</a> <span class="d">1 KB</span><br>
+<a href="A0_output/A0_interval_log.csv">A0_output/A0_interval_log.csv</a> <span class="d">14 KB</span><br>
+<a href="A0_output/A0_kpi_summary.csv">A0_output/A0_kpi_summary.csv</a> <span class="d">0 KB</span><br>
+<a href="A0_output/A0_plan_full.csv">A0_output/A0_plan_full.csv</a> <span class="d">6 KB</span><br>
+<a href="A0_output/A0_realized_tuple.csv">A0_output/A0_realized_tuple.csv</a> <span class="d">8 KB</span><br>
+<a href="A0_output/A0_solve_log.csv">A0_output/A0_solve_log.csv</a> <span class="d">0 KB</span><br>
+</div>
+<h3>Approach 1 (CE-MPC)</h3>
+<div class="card">
+<a href="A1_output/A1_01_total_grid_power_profile.csv">A1_output/A1_01_total_grid_power_profile.csv</a> <span class="d">4 KB</span><br>
+<a href="A1_output/A1_01_total_grid_power_profile.png">A1_output/A1_01_total_grid_power_profile.png</a> <span class="d">44 KB</span><br>
+<a href="A1_output/A1_02_work_profiles_by_site.csv">A1_output/A1_02_work_profiles_by_site.csv</a> <span class="d">2 KB</span><br>
+<a href="A1_output/A1_02_work_profiles_by_site.png">A1_output/A1_02_work_profiles_by_site.png</a> <span class="d">51 KB</span><br>
+<a href="A1_output/A1_03_mcs_state_of_energy.csv">A1_output/A1_03_mcs_state_of_energy.csv</a> <span class="d">4 KB</span><br>
+<a href="A1_output/A1_03_mcs_state_of_energy.png">A1_output/A1_03_mcs_state_of_energy.png</a> <span class="d">47 KB</span><br>
+<a href="A1_output/A1_04_cev_state_of_energy.csv">A1_output/A1_04_cev_state_of_energy.csv</a> <span class="d">3 KB</span><br>
+<a href="A1_output/A1_04_cev_state_of_energy.png">A1_output/A1_04_cev_state_of_energy.png</a> <span class="d">47 KB</span><br>
+<a href="A1_output/A1_05_electricity_prices.csv">A1_output/A1_05_electricity_prices.csv</a> <span class="d">3 KB</span><br>
+<a href="A1_output/A1_05_electricity_prices_emissions.png">A1_output/A1_05_electricity_prices_emissions.png</a> <span class="d">63 KB</span><br>
+<a href="A1_output/A1_06_mcs_location_trajectory.csv">A1_output/A1_06_mcs_location_trajectory.csv</a> <span class="d">2 KB</span><br>
+<a href="A1_output/A1_06_mcs_location_trajectory.png">A1_output/A1_06_mcs_location_trajectory.png</a> <span class="d">46 KB</span><br>
+<a href="A1_output/A1_07_mcs_cev_soe.csv">A1_output/A1_07_mcs_cev_soe.csv</a> <span class="d">10 KB</span><br>
+<a href="A1_output/A1_07_mcs_optimization_summary.png">A1_output/A1_07_mcs_optimization_summary.png</a> <span class="d">314 KB</span><br>
+<a href="A1_output/A1_08_kpi_metrics_summary.png">A1_output/A1_08_kpi_metrics_summary.png</a> <span class="d">61 KB</span><br>
+<a href="A1_output/A1_09_mcs_1_power_profile.csv">A1_output/A1_09_mcs_1_power_profile.csv</a> <span class="d">4 KB</span><br>
+<a href="A1_output/A1_09_mcs_1_power_profile.png">A1_output/A1_09_mcs_1_power_profile.png</a> <span class="d">41 KB</span><br>
+<a href="A1_output/A1_MCS_plan_full.csv">A1_output/A1_MCS_plan_full.csv</a> <span class="d">392 KB</span><br>
+<a href="A1_output/A1_MCS_realized_tuple.csv">A1_output/A1_MCS_realized_tuple.csv</a> <span class="d">6 KB</span><br>
+<a href="A1_output/A1_console.txt">A1_output/A1_console.txt</a> <span class="d">2 KB</span><br>
+<a href="A1_output/A1_interval_log.csv">A1_output/A1_interval_log.csv</a> <span class="d">13 KB</span><br>
+<a href="A1_output/A1_kpi_summary.csv">A1_output/A1_kpi_summary.csv</a> <span class="d">0 KB</span><br>
+<a href="A1_output/A1_plan_full.csv">A1_output/A1_plan_full.csv</a> <span class="d">279 KB</span><br>
+<a href="A1_output/A1_plan_vs_actual.html">A1_output/A1_plan_vs_actual.html</a> <span class="d">9 KB</span><br>
+<a href="A1_output/A1_plan_vs_actual_activity.png">A1_output/A1_plan_vs_actual_activity.png</a> <span class="d">69 KB</span><br>
+<a href="A1_output/A1_plan_vs_actual_by_entity.html">A1_output/A1_plan_vs_actual_by_entity.html</a> <span class="d">26 KB</span><br>
+<a href="A1_output/A1_plan_vs_actual_costs.png">A1_output/A1_plan_vs_actual_costs.png</a> <span class="d">34 KB</span><br>
+<a href="A1_output/A1_plan_vs_actual_side_by_side.html">A1_output/A1_plan_vs_actual_side_by_side.html</a> <span class="d">23 KB</span><br>
+<a href="A1_output/A1_realized_tuple.csv">A1_output/A1_realized_tuple.csv</a> <span class="d">7 KB</span><br>
+<a href="A1_output/A1_run_log.txt">A1_output/A1_run_log.txt</a> <span class="d">2 KB</span><br>
+<a href="A1_output/A1_solve_log.csv">A1_output/A1_solve_log.csv</a> <span class="d">6 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_cev1_activity.csv">A1_output/A1_replan_grids/A1_plan_cev1_activity.csv</a> <span class="d">58 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_cev1_activity.html">A1_output/A1_replan_grids/A1_plan_cev1_activity.html</a> <span class="d">250 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_cev1_soe.csv">A1_output/A1_replan_grids/A1_plan_cev1_soe.csv</a> <span class="d">51 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_cev1_soe.html">A1_output/A1_replan_grids/A1_plan_cev1_soe.html</a> <span class="d">243 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_grid_kW.csv">A1_output/A1_replan_grids/A1_plan_grid_kW.csv</a> <span class="d">49 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_grid_kW.html">A1_output/A1_replan_grids/A1_plan_grid_kW.html</a> <span class="d">241 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_mcs1_activity.csv">A1_output/A1_replan_grids/A1_plan_mcs1_activity.csv</a> <span class="d">116 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_mcs1_activity.html">A1_output/A1_replan_grids/A1_plan_mcs1_activity.html</a> <span class="d">308 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_mcs1_soe.csv">A1_output/A1_replan_grids/A1_plan_mcs1_soe.csv</a> <span class="d">72 KB</span><br>
+<a href="A1_output/A1_replan_grids/A1_plan_mcs1_soe.html">A1_output/A1_replan_grids/A1_plan_mcs1_soe.html</a> <span class="d">264 KB</span><br>
+</div>
+<h3>Approach 2 (SB-MPC)</h3>
+<div class="card">
+<a href="A2_output/A2_01_total_grid_power_profile.csv">A2_output/A2_01_total_grid_power_profile.csv</a> <span class="d">4 KB</span><br>
+<a href="A2_output/A2_01_total_grid_power_profile.png">A2_output/A2_01_total_grid_power_profile.png</a> <span class="d">44 KB</span><br>
+<a href="A2_output/A2_02_work_profiles_by_site.csv">A2_output/A2_02_work_profiles_by_site.csv</a> <span class="d">2 KB</span><br>
+<a href="A2_output/A2_02_work_profiles_by_site.png">A2_output/A2_02_work_profiles_by_site.png</a> <span class="d">52 KB</span><br>
+<a href="A2_output/A2_03_mcs_state_of_energy.csv">A2_output/A2_03_mcs_state_of_energy.csv</a> <span class="d">4 KB</span><br>
+<a href="A2_output/A2_03_mcs_state_of_energy.png">A2_output/A2_03_mcs_state_of_energy.png</a> <span class="d">47 KB</span><br>
+<a href="A2_output/A2_04_cev_state_of_energy.csv">A2_output/A2_04_cev_state_of_energy.csv</a> <span class="d">4 KB</span><br>
+<a href="A2_output/A2_04_cev_state_of_energy.png">A2_output/A2_04_cev_state_of_energy.png</a> <span class="d">47 KB</span><br>
+<a href="A2_output/A2_05_electricity_prices.csv">A2_output/A2_05_electricity_prices.csv</a> <span class="d">3 KB</span><br>
+<a href="A2_output/A2_05_electricity_prices_emissions.png">A2_output/A2_05_electricity_prices_emissions.png</a> <span class="d">63 KB</span><br>
+<a href="A2_output/A2_06_mcs_location_trajectory.csv">A2_output/A2_06_mcs_location_trajectory.csv</a> <span class="d">2 KB</span><br>
+<a href="A2_output/A2_06_mcs_location_trajectory.png">A2_output/A2_06_mcs_location_trajectory.png</a> <span class="d">47 KB</span><br>
+<a href="A2_output/A2_07_mcs_cev_soe.csv">A2_output/A2_07_mcs_cev_soe.csv</a> <span class="d">11 KB</span><br>
+<a href="A2_output/A2_07_mcs_optimization_summary.png">A2_output/A2_07_mcs_optimization_summary.png</a> <span class="d">315 KB</span><br>
+<a href="A2_output/A2_08_kpi_metrics_summary.png">A2_output/A2_08_kpi_metrics_summary.png</a> <span class="d">60 KB</span><br>
+<a href="A2_output/A2_09_mcs_1_power_profile.csv">A2_output/A2_09_mcs_1_power_profile.csv</a> <span class="d">4 KB</span><br>
+<a href="A2_output/A2_09_mcs_1_power_profile.png">A2_output/A2_09_mcs_1_power_profile.png</a> <span class="d">42 KB</span><br>
+<a href="A2_output/A2_MCS_plan_full.csv">A2_output/A2_MCS_plan_full.csv</a> <span class="d">1944 KB</span><br>
+<a href="A2_output/A2_MCS_realized_tuple.csv">A2_output/A2_MCS_realized_tuple.csv</a> <span class="d">6 KB</span><br>
+<a href="A2_output/A2_console.txt">A2_output/A2_console.txt</a> <span class="d">2 KB</span><br>
+<a href="A2_output/A2_interval_log.csv">A2_output/A2_interval_log.csv</a> <span class="d">13 KB</span><br>
+<a href="A2_output/A2_kpi_summary.csv">A2_output/A2_kpi_summary.csv</a> <span class="d">0 KB</span><br>
+<a href="A2_output/A2_plan_full.csv">A2_output/A2_plan_full.csv</a> <span class="d">1414 KB</span><br>
+<a href="A2_output/A2_plan_vs_actual.html">A2_output/A2_plan_vs_actual.html</a> <span class="d">9 KB</span><br>
+<a href="A2_output/A2_plan_vs_actual_activity.png">A2_output/A2_plan_vs_actual_activity.png</a> <span class="d">74 KB</span><br>
+<a href="A2_output/A2_plan_vs_actual_by_entity.html">A2_output/A2_plan_vs_actual_by_entity.html</a> <span class="d">26 KB</span><br>
+<a href="A2_output/A2_plan_vs_actual_costs.png">A2_output/A2_plan_vs_actual_costs.png</a> <span class="d">34 KB</span><br>
+<a href="A2_output/A2_plan_vs_actual_side_by_side.html">A2_output/A2_plan_vs_actual_side_by_side.html</a> <span class="d">23 KB</span><br>
+<a href="A2_output/A2_realized_tuple.csv">A2_output/A2_realized_tuple.csv</a> <span class="d">8 KB</span><br>
+<a href="A2_output/A2_run_log.txt">A2_output/A2_run_log.txt</a> <span class="d">2 KB</span><br>
+<a href="A2_output/A2_scenarios.csv">A2_output/A2_scenarios.csv</a> <span class="d">0 KB</span><br>
+<a href="A2_output/A2_solve_log.csv">A2_output/A2_solve_log.csv</a> <span class="d">6 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_cev1_activity.csv">A2_output/A2_replan_grids/A2_plan_cev1_activity.csv</a> <span class="d">57 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_cev1_activity.html">A2_output/A2_replan_grids/A2_plan_cev1_activity.html</a> <span class="d">250 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_cev1_soe.csv">A2_output/A2_replan_grids/A2_plan_cev1_soe.csv</a> <span class="d">51 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_cev1_soe.html">A2_output/A2_replan_grids/A2_plan_cev1_soe.html</a> <span class="d">243 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_grid_kW.csv">A2_output/A2_replan_grids/A2_plan_grid_kW.csv</a> <span class="d">48 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_grid_kW.html">A2_output/A2_replan_grids/A2_plan_grid_kW.html</a> <span class="d">240 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_mcs1_activity.csv">A2_output/A2_replan_grids/A2_plan_mcs1_activity.csv</a> <span class="d">115 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_mcs1_activity.html">A2_output/A2_replan_grids/A2_plan_mcs1_activity.html</a> <span class="d">307 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_mcs1_soe.csv">A2_output/A2_replan_grids/A2_plan_mcs1_soe.csv</a> <span class="d">72 KB</span><br>
+<a href="A2_output/A2_replan_grids/A2_plan_mcs1_soe.html">A2_output/A2_replan_grids/A2_plan_mcs1_soe.html</a> <span class="d">264 KB</span><br>
+</div>
+</main></body></html>

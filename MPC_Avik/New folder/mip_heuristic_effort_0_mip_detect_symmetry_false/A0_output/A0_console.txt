@@ -1,0 +1,28 @@
+[ Info: [Turing]: progress logging is disabled globally
+Running Approach 0 (one-shot 8:00 plan per day, executed open-loop, no replanning): 96 steps (1 day(s))
+  plant                  : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)    : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.45, 0.8, 0.45, 0.31] kW
+  solver time limit      : 600.0 s
+  NOTE: MCS 1 already full at k0=95; grid charge cut by 0.27 kW
+  NOTE: MCS 1 already full at k0=96; grid charge cut by 1.95 kW
+Approach 0 one-shot (plant = :sampled) done in 74.6 s (28 plant realizations, 1 day(s))
+
+==== Approach 0 (one-shot) KPIs — 1 day(s), 96 intervals ====
+Total grid energy   : 27.24 kWh
+Total energy cost   : $8.76
+Total CO2 emissions : 6.53 kg
+NC peak demand      : 1.95 kW
+On-peak demand      : -0.00 kW
+Missed work (hours) : 0.00
+Labour (towing)     : $20.00  (1.00 h in transit)
+CEV SOE at horizon  : [14.62] kWh (target [14.8])
+MCS SOE at horizon  : [250.0] kWh (target [250.0])
+Terminal SOE shortfall penalty : $83.55
+
+Results written to: c:\Users\shubh\Desktop\MPC\Test\A0_output
+  A0_plan_full.csv, A0_realized_tuple.csv               (CEV, per 15-min step)
+  A0_MCS_plan_full.csv, A0_MCS_realized_tuple.csv       (MCS, per 15-min step)
+  A0_kpi_summary.csv                                    (whole-run KPI table)
+  A0_solve_log.csv                                      (per-day solver status, objective, MIP gap)
+  A0_interval_log.csv                                   (plain per-interval log)

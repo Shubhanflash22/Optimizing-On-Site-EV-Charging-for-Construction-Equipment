@@ -20,13 +20,15 @@ using Turing
 using Statistics
 using Random
 
-export normalize_travel_steps, in_peak,
+export DetailedPlanLog, RealizedTupleLog, log_plan_row!, log_realized_row!, to_dataframe,
+       normalize_travel_steps, in_peak,
        clock_label, clock_day_label, build_time_labels, build_time_labels_days,
        multiday_xticks, create_fixed_2hour_xticks,
        stepify_interval_values, stepify_boundary_values,
        interval_time_dataframe, safe_get,
        BayesianActivityEstimator, observe!, refit!,
-       ActivityPowerPool, draw_activity_power_pool, new_cursor, next_power!
+       ActivityPowerPool, draw_activity_power_pool, draw_activity_power_pool_live,
+       new_cursor, next_power!
 
 # Silence Turing's sampling progress bar at load time.
 Turing.setprogress!(false)
@@ -318,23 +320,74 @@ end
 # Idle (or any activity pinned with sd = 0) is deterministic by construction,
 # so next_power! returns `mu[a]` directly for it without consuming a slot --
 # idle would otherwise occur far more than `n_samples` times in a day.
+#
+# -----------------------------------------------------------------------------
+# DRAW MODE (sensitivity sweep) -- CHANGE 6
+# -----------------------------------------------------------------------------
+# `mode` controls WHERE on the Normal(mu, sd) curve each draw lands, without
+# touching mu/sd/n_samples/cursor/next_power! or any consumer. Default
+# `:normal` is the original unbiased behaviour (z ~ N(0,1), i.e. the draw can
+# land anywhere on the curve). The other four modes bias the z-score used for
+# `mu[a] + sd[a] * z` so a whole pool can be regenerated as one of four fixed
+# scenarios for a sensitivity sweep:
+#   :near_mean    -- clustered close to the mean:      |z| within ~0.5 sigma
+#   :high         -- far above the mean:                z >= 2 sigma
+#   :low          -- far below the mean:                z <= -2 sigma
+#   :spread_wide  -- far from the mean, either side:   |z| >= 2 sigma, sign random
+# "Far" = 2 sigma and "near" = 0.5 sigma are the two anchors; each still adds a
+# small amount of genuine randomness on top (so repeated draws in the same
+# mode are not identical), it just can no longer land anywhere else on the
+# curve. Idle (sd <= 0) is unaffected by `mode` -- it is deterministic either way.
 # #############################################################################
 struct ActivityPowerPool
     mu::Vector{Float64}
     sd::Vector{Float64}
     samples::Dict{Tuple{Int,Int}, Vector{Float64}}   # (entity, activity) -> n_samples draws
+    wrap::Bool                                        # LIVE_DATA_MODE: draw independently,
+                                                       # WITH REPLACEMENT, on every call (see
+                                                       # next_power!) instead of walking a
+                                                       # cursor through a fixed pre-drawn list
+                                                       # (the Bayesian pool below keeps
+                                                       # wrap=false, i.e. its original
+                                                       # sequential-cursor behaviour)
+    rng::Union{Nothing, AbstractRNG}                  # only used when wrap == true
+end
+
+# z-score used by `draw_activity_power_pool` for a single draw, as a function
+# of `mode` (see CHANGE 6 above). "Far" is anchored at 2 sigma, "near" at 0.5
+# sigma; the `abs(randn(rng))` / `randn(rng)` terms add genuine within-mode
+# randomness on top of that anchor so consecutive draws still differ.
+function _draw_mode_z(mode::Symbol, rng)
+    if mode === :normal
+        return randn(rng)                                        # unbiased, unconstrained
+    elseif mode === :near_mean
+        return 0.5 * randn(rng)                                   # clustered within ~0.5 sigma
+    elseif mode === :high
+        return 2.0 + 0.5 * abs(randn(rng))                        # >= 2 sigma above the mean
+    elseif mode === :low
+        return -2.0 - 0.5 * abs(randn(rng))                       # >= 2 sigma below the mean
+    elseif mode === :spread_wide
+        sign = rand(rng, Bool) ? 1.0 : -1.0
+        return sign * (2.0 + 0.5 * abs(randn(rng)))               # >= 2 sigma, either side
+    else
+        error("draw_activity_power_pool: unknown mode :$mode ",
+              "(expected :normal, :near_mean, :high, :low, or :spread_wide)")
+    end
 end
 
 # Generate the pool. `entities` is the collection of entity indices (e.g. d.E);
 # `mu`/`sd` is the frozen per-activity power estimate (e.g. d.prior_mu /
 # d.prior_sigma). Pass a dedicated `rng` so this generation step is reproducible
-# and independent of any other randomness used later in a run.
-function draw_activity_power_pool(entities, mu, sd; n_samples::Int = 20, rng = Random.GLOBAL_RNG)
+# and independent of any other randomness used later in a run. `mode` selects
+# the sensitivity-sweep scenario (see CHANGE 6 above); the default `:normal`
+# reproduces the original, unbiased behaviour exactly.
+function draw_activity_power_pool(entities, mu, sd; n_samples::Int = 20,
+                                   rng = Random.GLOBAL_RNG, mode::Symbol = :normal)
     samples = Dict{Tuple{Int,Int}, Vector{Float64}}()
     for e in entities, a in eachindex(mu)
-        samples[(e, a)] = [max(mu[a] + sd[a] * randn(rng), 0.0) for _ in 1:n_samples]
+        samples[(e, a)] = [max(mu[a] + sd[a] * _draw_mode_z(mode, rng), 0.0) for _ in 1:n_samples]
     end
-    return ActivityPowerPool(collect(float.(mu)), collect(float.(sd)), samples)
+    return ActivityPowerPool(collect(float.(mu)), collect(float.(sd)), samples, false, nothing)
 end
 
 # A fresh, independent cursor over `pool`'s (entity, activity) pairs, starting
@@ -343,21 +396,165 @@ end
 # cursor into `next_power!`.
 new_cursor(pool::ActivityPowerPool) = Dict{Tuple{Int,Int}, Int}(k => 1 for k in keys(pool.samples))
 
-# Hand out the next realized power for entity `e` doing activity `a`, advancing
-# `cursor` in place. Deterministic (sd <= 0) activities short-circuit to `mu[a]`
-# without touching the cursor. Errors loudly (rather than wrapping around) if
-# an (entity, activity) pair's pool is exhausted, since that signals the
+# Hand out the next realized power for entity `e` doing activity `a`. For a
+# LIVE_DATA_MODE pool (`wrap == true`), this is an INDEPENDENT, uniformly
+# random draw WITH REPLACEMENT from that (entity, activity)'s recorded values
+# on every single call -- no cursor, no exhaustion, no "loop over" bookkeeping.
+# For the Bayesian pool (`wrap == false`), behaviour is unchanged: `cursor` is
+# advanced in place, walking sequentially through the pre-drawn list, and it
+# errors loudly (rather than wrapping) if exhausted, since that signals the
 # n_samples assumption ("no more work than that in a day") no longer holds.
+# Deterministic (sd <= 0) activities short-circuit to `mu[a]` either way,
+# without touching the cursor or the RNG.
 function next_power!(pool::ActivityPowerPool, cursor::Dict{Tuple{Int,Int}, Int}, e::Int, a::Int)
     pool.sd[a] <= 1e-12 && return pool.mu[a]
     key = (e, a)
-    c    = cursor[key]
     vals = pool.samples[key]
+    if pool.wrap
+        return vals[rand(pool.rng, 1:length(vals))]
+    end
+    c = cursor[key]
     c > length(vals) && error("ActivityPowerPool exhausted for entity=$e, activity=$a ",
                                "(only $(length(vals)) pre-drawn samples); increase n_samples ",
                                "in draw_activity_power_pool.")
     cursor[key] = c + 1
     return vals[c]
 end
+
+# #############################################################################
+# LIVE-DATA POOL  (real recorded field powers -- LIVE_DATA_MODE)
+# -----------------------------------------------------------------------------
+# Sibling to draw_activity_power_pool above, but instead of sampling
+# Normal(mu, sd) it draws from ACTUAL recorded per-activity power
+# measurements, supplied by DataLoader.load_live_powers as
+# live_values[activity_index] -> Vector{Float64} of recorded kW values
+# (activity_index matches B = [dig, load+swing, travel, idle]).
+#
+# Per-CEV independent pools: each entity gets its OWN reference to every
+# activity's full recorded-value list (NOT one shared, fleet-wide depleting
+# list) -- two different CEVs can land on the same recorded value. Consumption
+# is INDEPENDENT RANDOM SAMPLING WITH REPLACEMENT on every next_power! call
+# (see there) -- values can repeat freely within a run, by design, so there is
+# no cursor/exhaustion concept for a live pool at all.
+# #############################################################################
+function draw_activity_power_pool_live(entities, live_values::Dict{Int, Vector{Float64}};
+                                        rng = Random.GLOBAL_RNG)
+    n_act = length(live_values)
+    mu = zeros(n_act); sd = zeros(n_act)
+    samples = Dict{Tuple{Int,Int}, Vector{Float64}}()
+    for a in 1:n_act
+        vals = live_values[a]
+        isempty(vals) && error("draw_activity_power_pool_live: no recorded values for activity $a")
+        mu[a] = sum(vals) / length(vals)
+        sd[a] = length(vals) > 1 ?
+            sqrt(sum((v - mu[a])^2 for v in vals) / (length(vals) - 1)) : 0.0
+        for e in entities
+            samples[(e, a)] = vals   # shared reference is fine: never mutated, and every
+                                      # draw below is independent random-with-replacement
+        end
+    end
+    return ActivityPowerPool(mu, sd, samples, true, rng)
+end
+
+
+# #############################################################################
+# DETAILED OUTPUT LOGGING  (opt-in, via `detailed_output = true` on run_mpc)
+# -----------------------------------------------------------------------------
+# Two small, dependency-light append-only logs, shared by both approaches:
+#
+#   DetailedPlanLog     -- one row per (resolve, future-step-planned[, scenario]).
+#                          Captures the FULL remaining-horizon plan at every
+#                          single re-solve, not just the one step that gets
+#                          implemented -- this is what lets a later analyst see
+#                          "what was planned but never implemented" (a plan can
+#                          get overwritten by the very next re-solve before it
+#                          is ever acted on).
+#   RealizedTupleLog     -- one row per interval ACTUALLY executed. Records the
+#                          full realized 4-tuple (dig/load/travel/idle kW) that
+#                          the shared pool drew for that interval, regardless
+#                          of which single activity ran -- this is exactly
+#                          `step.p_true[e]` already computed inside
+#                          apply_and_simulate!, so nothing new needs to be
+#                          derived, only captured.
+#
+# Both are plain Vector{NamedTuple} wrappers -- pushed to during the closed
+# loop, converted to a DataFrame only once at the very end (cheap; avoids
+# growing a DataFrame row-by-row, which is the slow way to do this in Julia).
+# When `detailed_output = false` (the default), neither struct is ever
+# constructed and the loop's hot path is completely unaffected.
+# #############################################################################
+mutable struct DetailedPlanLog
+    rows::Vector{NamedTuple}
+end
+DetailedPlanLog() = DetailedPlanLog(NamedTuple[])
+
+function log_plan_row!(dpl::DetailedPlanLog, d;
+                        day::Int, resolve_step::Int, offset_step::Int,
+                        activity_planned::AbstractString, planned_power_kW::Float64,
+                        planned_charging::Bool,
+                        soe_cev_planned_kWh::Float64, soe_mcs_planned_kWh::Float64,
+                        cev::Int, scenario_id::Union{Missing,Int} = missing)
+    push!(dpl.rows, (;
+        day, resolve_step,
+        resolve_clock = clock_label(d.t_start, d.delta_T, resolve_step),
+        offset_step,
+        offset_clock = clock_label(d.t_start, d.delta_T, offset_step),
+        steps_ahead = offset_step - resolve_step,
+        cev, scenario_id,
+        activity_planned, planned_power_kW, planned_charging,
+        soe_cev_planned_kWh, soe_mcs_planned_kWh,
+    ))
+end
+
+# Converts the collected rows to a DataFrame and adds `changed_from_prior_resolve`:
+# true when this (offset_step, cev[, scenario_id]) row's planned activity/power
+# differs from what the IMMEDIATELY PRECEDING resolve_step planned for that same
+# offset_step -- the fast filter to "where did the plan actually change" instead
+# of diffing thousands of rows by hand. The very first resolve to ever mention a
+# given offset_step has nothing to compare against, so it is marked `missing`.
+function to_dataframe(dpl::DetailedPlanLog)
+    df = DataFrame(dpl.rows)
+    isempty(df) && return df
+    sort!(df, [:day, :cev, :scenario_id, :offset_step, :resolve_step])
+    changed = Vector{Union{Missing,Bool}}(missing, nrow(df))
+    prev_key = nothing
+    prev_act = nothing
+    prev_pow = nothing
+    for i in 1:nrow(df)
+        key = (df.day[i], df.cev[i], df.scenario_id[i], df.offset_step[i])
+        # isequal, NOT ==: scenario_id is the Julia value "missing" for Approach 1
+        # rows (A1 has no scenarios), and comparing missing == missing evaluates to
+        # missing itself (not true) -- which errors when used in a boolean context.
+        # isequal(missing, missing) correctly evaluates to true.
+        if isequal(prev_key, key)
+            changed[i] = (df.activity_planned[i] != prev_act) ||
+                         !isapprox(df.planned_power_kW[i], prev_pow; atol = 1e-9)
+        end
+        prev_key = key; prev_act = df.activity_planned[i]; prev_pow = df.planned_power_kW[i]
+    end
+    df.changed_from_prior_resolve = changed
+    sort!(df, [:day, :resolve_step, :offset_step, :cev, :scenario_id])
+    return df
+end
+
+mutable struct RealizedTupleLog
+    rows::Vector{NamedTuple}
+end
+RealizedTupleLog() = RealizedTupleLog(NamedTuple[])
+
+function log_realized_row!(rtl::RealizedTupleLog, d;
+                            day::Int, step::Int, cev::Int,
+                            p_tuple::AbstractVector{<:Real}, activity_executed::AbstractString,
+                            soe_cev_kWh::Float64, soe_mcs_kWh::Float64,
+                            infeasible_flag::Bool)
+    push!(rtl.rows, (;
+        day, step, clock = clock_label(d.t_start, d.delta_T, step), cev,
+        p_dig_kW = float(p_tuple[1]), p_load_kW = float(p_tuple[2]),
+        p_trav_kW = float(p_tuple[3]), p_idle_kW = float(p_tuple[4]),
+        activity_executed, soe_cev_kWh, soe_mcs_kWh, infeasible_flag,
+    ))
+end
+
+to_dataframe(rtl::RealizedTupleLog) = DataFrame(rtl.rows)
 
 end # module Common

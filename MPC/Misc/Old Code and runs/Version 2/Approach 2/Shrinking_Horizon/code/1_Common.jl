@@ -20,13 +20,16 @@ using Turing
 using Statistics
 using Random
 
-export normalize_travel_steps, in_peak,
+export DetailedPlanLog, RealizedTupleLog, log_plan_row!, log_realized_row!, to_dataframe,
+       MCSPlanLog, MCSRealizedLog, log_mcs_plan_row!, log_mcs_realized_row!,
+       normalize_travel_steps, in_peak,
        clock_label, clock_day_label, build_time_labels, build_time_labels_days,
        multiday_xticks, create_fixed_2hour_xticks,
        stepify_interval_values, stepify_boundary_values,
        interval_time_dataframe, safe_get,
        BayesianActivityEstimator, observe!, refit!,
-       ActivityPowerPool, draw_activity_power_pool, new_cursor, next_power!
+       ActivityPowerPool, draw_activity_power_pool, draw_activity_power_pool_live,
+       new_cursor, next_power!
 
 # Silence Turing's sampling progress bar at load time.
 Turing.setprogress!(false)
@@ -84,18 +87,24 @@ end
 # CHANGE 5 -- multi-day time-label helpers (ported from Receding_Horizon's
 # Common.jl, needed now that run_mpc/run_one_shot support n_day_run > 1 days).
 # -----------------------------------------------------------------------------
+# "D<day> HH:MM" label for within-day boundary k (1..nKd+1) on a given day.
 clock_day_label(t_start, delta_T, day, k) = string("D", day, " ", clock_label(t_start, delta_T, k))
 
+# Boundary clock labels for a MULTI-DAY horizon of `n_days` days, each with
+# `nK` daytime intervals. Boundary index g (1..n_days*nK+1) is tagged with its
+# day and within-day clock (e.g. "D1 08:00", ..., "D2 08:00", ...).
 function build_time_labels_days(t_start, delta_T, n_days, nK)
     labels = String[]
     for g in 0:(n_days * nK)
-        day = min(n_days, div(g, nK) + 1)
-        wk  = g - (day - 1) * nK
+        day = min(n_days, div(g, nK) + 1)     # boundary g belongs to this day
+        wk  = g - (day - 1) * nK              # within-day boundary offset (0..nK)
         push!(labels, clock_day_label(t_start, delta_T, day, wk + 1))
     end
     return labels
 end
 
+# X-ticks for a multi-day horizon: one tick every `every_hours` within each
+# day-block, placed on the boundary axis (1..n_days*nK+1) and labelled "D<d> HH:00".
 function multiday_xticks(n_days, nK, t_start, delta_T; every_hours::Int = 4)
     step = max(1, Int(round(every_hours / delta_T)))
     ticks = Int[]; labels = String[]
@@ -105,7 +114,7 @@ function multiday_xticks(n_days, nK, t_start, delta_T; every_hours::Int = 4)
             push!(labels, clock_day_label(t_start, delta_T, dday, k))
         end
     end
-    return ticks, labels
+    return (ticks, labels)
 end
 
 # -----------------------------------------------------------------------------
@@ -335,6 +344,14 @@ struct ActivityPowerPool
     mu::Vector{Float64}
     sd::Vector{Float64}
     samples::Dict{Tuple{Int,Int}, Vector{Float64}}   # (entity, activity) -> n_samples draws
+    wrap::Bool                                        # LIVE_DATA_MODE: draw independently,
+                                                       # WITH REPLACEMENT, on every call (see
+                                                       # next_power!) instead of walking a
+                                                       # cursor through a fixed pre-drawn list
+                                                       # (the Bayesian pool below keeps
+                                                       # wrap=false, i.e. its original
+                                                       # sequential-cursor behaviour)
+    rng::Union{Nothing, AbstractRNG}                  # only used when wrap == true
 end
 
 # z-score used by `draw_activity_power_pool` for a single draw, as a function
@@ -371,7 +388,7 @@ function draw_activity_power_pool(entities, mu, sd; n_samples::Int = 20,
     for e in entities, a in eachindex(mu)
         samples[(e, a)] = [max(mu[a] + sd[a] * _draw_mode_z(mode, rng), 0.0) for _ in 1:n_samples]
     end
-    return ActivityPowerPool(collect(float.(mu)), collect(float.(sd)), samples)
+    return ActivityPowerPool(collect(float.(mu)), collect(float.(sd)), samples, false, nothing)
 end
 
 # A fresh, independent cursor over `pool`'s (entity, activity) pairs, starting
@@ -380,21 +397,257 @@ end
 # cursor into `next_power!`.
 new_cursor(pool::ActivityPowerPool) = Dict{Tuple{Int,Int}, Int}(k => 1 for k in keys(pool.samples))
 
-# Hand out the next realized power for entity `e` doing activity `a`, advancing
-# `cursor` in place. Deterministic (sd <= 0) activities short-circuit to `mu[a]`
-# without touching the cursor. Errors loudly (rather than wrapping around) if
-# an (entity, activity) pair's pool is exhausted, since that signals the
+# Hand out the next realized power for entity `e` doing activity `a`. For a
+# LIVE_DATA_MODE pool (`wrap == true`), this is an INDEPENDENT, uniformly
+# random draw WITH REPLACEMENT from that (entity, activity)'s recorded values
+# on every single call -- no cursor, no exhaustion, no "loop over" bookkeeping.
+# For the Bayesian pool (`wrap == false`), behaviour is unchanged: `cursor` is
+# advanced in place, walking sequentially through the pre-drawn list, and it
+# errors loudly (rather than wrapping) if exhausted, since that signals the
 # n_samples assumption ("no more work than that in a day") no longer holds.
+# Deterministic (sd <= 0) activities short-circuit to `mu[a]` either way,
+# without touching the cursor or the RNG.
 function next_power!(pool::ActivityPowerPool, cursor::Dict{Tuple{Int,Int}, Int}, e::Int, a::Int)
     pool.sd[a] <= 1e-12 && return pool.mu[a]
     key = (e, a)
-    c    = cursor[key]
     vals = pool.samples[key]
+    if pool.wrap
+        return vals[rand(pool.rng, 1:length(vals))]
+    end
+    c = cursor[key]
     c > length(vals) && error("ActivityPowerPool exhausted for entity=$e, activity=$a ",
                                "(only $(length(vals)) pre-drawn samples); increase n_samples ",
                                "in draw_activity_power_pool.")
     cursor[key] = c + 1
     return vals[c]
 end
+
+# #############################################################################
+# LIVE-DATA POOL  (real recorded field powers -- LIVE_DATA_MODE)
+# -----------------------------------------------------------------------------
+# Sibling to draw_activity_power_pool above, but instead of sampling
+# Normal(mu, sd) it draws from ACTUAL recorded per-activity power
+# measurements, supplied by DataLoader.load_live_powers as
+# live_values[activity_index] -> Vector{Float64} of recorded kW values
+# (activity_index matches B = [dig, load+swing, travel, idle]).
+#
+# Per-CEV independent pools: each entity gets its OWN reference to every
+# activity's full recorded-value list (NOT one shared, fleet-wide depleting
+# list) -- two different CEVs can land on the same recorded value. Consumption
+# is INDEPENDENT RANDOM SAMPLING WITH REPLACEMENT on every next_power! call
+# (see there) -- values can repeat freely within a run, by design, so there is
+# no cursor/exhaustion concept for a live pool at all.
+# #############################################################################
+function draw_activity_power_pool_live(entities, live_values::Dict{Int, Vector{Float64}};
+                                        rng = Random.GLOBAL_RNG)
+    n_act = length(live_values)
+    mu = zeros(n_act); sd = zeros(n_act)
+    samples = Dict{Tuple{Int,Int}, Vector{Float64}}()
+    for a in 1:n_act
+        vals = live_values[a]
+        isempty(vals) && error("draw_activity_power_pool_live: no recorded values for activity $a")
+        mu[a] = sum(vals) / length(vals)
+        sd[a] = length(vals) > 1 ?
+            sqrt(sum((v - mu[a])^2 for v in vals) / (length(vals) - 1)) : 0.0
+        for e in entities
+            samples[(e, a)] = vals   # shared reference is fine: never mutated, and every
+                                      # draw below is independent random-with-replacement
+        end
+    end
+    return ActivityPowerPool(mu, sd, samples, true, rng)
+end
+
+
+# #############################################################################
+# DETAILED OUTPUT LOGGING  (opt-in, via `detailed_output = true` on run_mpc)
+# -----------------------------------------------------------------------------
+# Two small, dependency-light append-only logs, shared by both approaches:
+#
+#   DetailedPlanLog     -- one row per (resolve, future-step-planned[, scenario]).
+#                          Captures the FULL remaining-horizon plan at every
+#                          single re-solve, not just the one step that gets
+#                          implemented -- this is what lets a later analyst see
+#                          "what was planned but never implemented" (a plan can
+#                          get overwritten by the very next re-solve before it
+#                          is ever acted on).
+#   RealizedTupleLog     -- one row per interval ACTUALLY executed. Records the
+#                          full realized 4-tuple (dig/load/travel/idle kW) that
+#                          the shared pool drew for that interval, regardless
+#                          of which single activity ran -- this is exactly
+#                          `step.p_true[e]` already computed inside
+#                          apply_and_simulate!, so nothing new needs to be
+#                          derived, only captured.
+#
+# Both are plain Vector{NamedTuple} wrappers -- pushed to during the closed
+# loop, converted to a DataFrame only once at the very end (cheap; avoids
+# growing a DataFrame row-by-row, which is the slow way to do this in Julia).
+# When `detailed_output = false` (the default), neither struct is ever
+# constructed and the loop's hot path is completely unaffected.
+# #############################################################################
+mutable struct DetailedPlanLog
+    rows::Vector{NamedTuple}
+end
+DetailedPlanLog() = DetailedPlanLog(NamedTuple[])
+
+function log_plan_row!(dpl::DetailedPlanLog, d;
+                        day::Int, resolve_step::Int, offset_step::Int,
+                        activity_planned::AbstractString, planned_power_kW::Float64,
+                        planned_charging::Bool,
+                        soe_cev_planned_kWh::Float64, soe_mcs_planned_kWh::Float64,
+                        cev::Int, scenario_id::Union{Missing,Int} = missing)
+    push!(dpl.rows, (;
+        day, resolve_step,
+        resolve_clock = clock_label(d.t_start, d.delta_T, resolve_step),
+        offset_step,
+        offset_clock = clock_label(d.t_start, d.delta_T, offset_step),
+        steps_ahead = offset_step - resolve_step,
+        cev, scenario_id,
+        activity_planned, planned_power_kW, planned_charging,
+        soe_cev_planned_kWh, soe_mcs_planned_kWh,
+    ))
+end
+
+# Converts the collected rows to a DataFrame and adds `changed_from_prior_resolve`:
+# true when this (offset_step, cev[, scenario_id]) row's planned activity/power
+# differs from what the IMMEDIATELY PRECEDING resolve_step planned for that same
+# offset_step -- the fast filter to "where did the plan actually change" instead
+# of diffing thousands of rows by hand. The very first resolve to ever mention a
+# given offset_step has nothing to compare against, so it is marked `missing`.
+function to_dataframe(dpl::DetailedPlanLog)
+    df = DataFrame(dpl.rows)
+    isempty(df) && return df
+    sort!(df, [:day, :cev, :scenario_id, :offset_step, :resolve_step])
+    changed = Vector{Union{Missing,Bool}}(missing, nrow(df))
+    prev_key = nothing
+    prev_act = nothing
+    prev_pow = nothing
+    for i in 1:nrow(df)
+        key = (df.day[i], df.cev[i], df.scenario_id[i], df.offset_step[i])
+        # isequal, NOT ==: scenario_id is the Julia value "missing" for Approach 1
+        # rows (A1 has no scenarios), and comparing missing == missing evaluates to
+        # missing itself (not true) -- which errors when used in a boolean context.
+        # isequal(missing, missing) correctly evaluates to true.
+        if isequal(prev_key, key)
+            changed[i] = (df.activity_planned[i] != prev_act) ||
+                         !isapprox(df.planned_power_kW[i], prev_pow; atol = 1e-9)
+        end
+        prev_key = key; prev_act = df.activity_planned[i]; prev_pow = df.planned_power_kW[i]
+    end
+    df.changed_from_prior_resolve = changed
+    sort!(df, [:day, :resolve_step, :offset_step, :cev, :scenario_id])
+    return df
+end
+
+mutable struct RealizedTupleLog
+    rows::Vector{NamedTuple}
+end
+RealizedTupleLog() = RealizedTupleLog(NamedTuple[])
+
+function log_realized_row!(rtl::RealizedTupleLog, d;
+                            day::Int, step::Int, cev::Int,
+                            p_tuple::AbstractVector{<:Real}, activity_executed::AbstractString,
+                            soe_cev_kWh::Float64, soe_mcs_kWh::Float64,
+                            infeasible_flag::Bool)
+    push!(rtl.rows, (;
+        day, step, clock = clock_label(d.t_start, d.delta_T, step), cev,
+        p_dig_kW = float(p_tuple[1]), p_load_kW = float(p_tuple[2]),
+        p_trav_kW = float(p_tuple[3]), p_idle_kW = float(p_tuple[4]),
+        activity_executed, soe_cev_kWh, soe_mcs_kWh, infeasible_flag,
+    ))
+end
+
+to_dataframe(rtl::RealizedTupleLog) = DataFrame(rtl.rows)
+
+# #############################################################################
+# MCS DETAILED OUTPUT LOGGING  (opt-in, via `detailed_output = true` on run_mpc
+# / run_one_shot, exactly the same flag that already gates DetailedPlanLog /
+# RealizedTupleLog above)
+# -----------------------------------------------------------------------------
+# The CEV-side logs above (DetailedPlanLog / RealizedTupleLog) never captured
+# the MCS's OWN planned/realized trajectory in detail -- only a couple of MCS
+# numbers (soe_mcs_planned_kWh / soe_mcs_kWh) folded into each CEV row. These
+# two structs are the MCS-side equivalent, same append-only
+# Vector{NamedTuple} -> DataFrame-once-at-the-end pattern, so the MCS's own
+# status/location/charging story is on disk too, not just inferred from the
+# CEV rows.
+#
+#   MCSPlanLog     -- one row per (resolve, future-step-planned, MCS unit[,
+#                     scenario]). Same "full remaining-horizon plan at every
+#                     re-solve" idea as DetailedPlanLog, just for the MCS's
+#                     own status/node/charge/discharge/SOE instead of a CEV's
+#                     activity/power/SOE.
+#   MCSRealizedLog -- one row per interval ACTUALLY executed, per MCS unit:
+#                     the realized status/node/charge/discharge/SOE.
+# #############################################################################
+mutable struct MCSPlanLog
+    rows::Vector{NamedTuple}
+end
+MCSPlanLog() = MCSPlanLog(NamedTuple[])
+
+function log_mcs_plan_row!(mpl::MCSPlanLog, d;
+                            day::Int, resolve_step::Int, offset_step::Int,
+                            mcs::Int, mcs_status_planned::AbstractString,
+                            mcs_node_planned::AbstractString,
+                            grid_charge_kW_planned::Float64,
+                            grid_discharge_kW_planned::Float64,
+                            soe_mcs_planned_kWh::Float64,
+                            scenario_id::Union{Missing,Int} = missing)
+    push!(mpl.rows, (;
+        day, resolve_step,
+        resolve_clock = clock_label(d.t_start, d.delta_T, resolve_step),
+        offset_step,
+        offset_clock = clock_label(d.t_start, d.delta_T, offset_step),
+        steps_ahead = offset_step - resolve_step,
+        mcs, scenario_id,
+        mcs_status_planned, mcs_node_planned,
+        grid_charge_kW_planned, grid_discharge_kW_planned, soe_mcs_planned_kWh,
+    ))
+end
+
+# Same "did the plan change from the immediately preceding resolve" derived
+# column as DetailedPlanLog's to_dataframe, just keyed on (day, mcs,
+# scenario_id, offset_step) and comparing `mcs_status_planned` instead of a
+# CEV's activity/power.
+function to_dataframe(mpl::MCSPlanLog)
+    df = DataFrame(mpl.rows)
+    isempty(df) && return df
+    sort!(df, [:day, :mcs, :scenario_id, :offset_step, :resolve_step])
+    changed = Vector{Union{Missing,Bool}}(missing, nrow(df))
+    prev_key = nothing
+    prev_status = nothing
+    for i in 1:nrow(df)
+        key = (df.day[i], df.mcs[i], df.scenario_id[i], df.offset_step[i])
+        # isequal, NOT ==: scenario_id is `missing` for Approach 1 rows -- see
+        # the identical note in DetailedPlanLog's to_dataframe above.
+        if isequal(prev_key, key)
+            changed[i] = df.mcs_status_planned[i] != prev_status
+        end
+        prev_key = key; prev_status = df.mcs_status_planned[i]
+    end
+    df.changed_from_prior_resolve = changed
+    sort!(df, [:day, :resolve_step, :offset_step, :mcs, :scenario_id])
+    return df
+end
+
+mutable struct MCSRealizedLog
+    rows::Vector{NamedTuple}
+end
+MCSRealizedLog() = MCSRealizedLog(NamedTuple[])
+
+function log_mcs_realized_row!(mrl::MCSRealizedLog, d;
+                                day::Int, step::Int, mcs::Int,
+                                mcs_status_realized::AbstractString,
+                                mcs_node_realized::AbstractString,
+                                grid_charge_kW_realized::Float64,
+                                grid_discharge_kW_realized::Float64,
+                                soe_mcs_kWh::Float64)
+    push!(mrl.rows, (;
+        day, step, clock = clock_label(d.t_start, d.delta_T, step), mcs,
+        mcs_status_realized, mcs_node_realized,
+        grid_charge_kW_realized, grid_discharge_kW_realized, soe_mcs_kWh,
+    ))
+end
+
+to_dataframe(mrl::MCSRealizedLog) = DataFrame(mrl.rows)
 
 end # module Common

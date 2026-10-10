@@ -1,0 +1,37 @@
+[ Info: [Turing]: progress logging is disabled globally
+Scenarios from 8000 posterior draws (work hours dig=3.0, load=1.5, travel=1.0):
+  s    dig      load     travel   idle     work kWh    
+  1    4.568    3.132    4.492    0.000    22.894      
+  2    4.712    3.150    4.618    0.000    23.477      
+  3    4.794    3.157    4.710    0.000    23.828      
+  4    4.875    3.180    4.789    0.000    24.183      
+  5    5.017    3.192    4.937    0.000    24.776      
+Running Approach 2 (stochastic scenario-based MPC, 15-min steps, Shrinking horizon): 96 steps (1 day(s))
+  scenarios / re-solve : 5 (equal weights, plan read from scenario 3)
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.45, 0.8, 0.45, 0.31] kW
+  solver time limit    : 600.0 s / window
+Approach 2 (stochastic, 5 scenarios, plant = :sampled) done in 11364.1 s (28 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.45, 0.8, 0.45, 0.31] kW
+
+==== Approach 2 closed-loop KPIs, 1 day(s), 96 intervals, 5 scenarios ====
+Total grid energy   : 27.45 kWh
+Total energy cost   : $8.86
+Total CO2 emissions : 6.59 kg
+NC peak demand      : 1.95 kW
+On-peak demand      : 0.00 kW
+Missed work (hours) : 0.00
+Labour (towing)     : $20.00  (1.00 h in transit @ $20.00/h)
+CEV SOE at horizon  : [14.8] kWh (target [14.8])
+MCS SOE at horizon  : [250.0] kWh (target [250.0])
+Terminal SOE shortfall penalty : $0.00
+
+Results written to: c:\Users\shubh\Desktop\MPC\Test\A2_output
+  Figures: A2_01..A2_09 (09 = per-MCS power profiles)
+  Reports: A2_kpi_summary.csv(+_by_day), A2_replan_grids/*.csv+*.html,
+           A2_plan_vs_actual.html + A2_plan_vs_actual_costs.png  (Overall, plus day1.. for n_day_run > 1)
+           day<N>/A2_plan_vs_actual_activity.png, A2_plan_vs_actual_side_by_side.html, A2_plan_vs_actual_by_entity.html  (ACTIVITY, per day)
+           A2_plan_full.csv, A2_realized_tuple.csv, A2_MCS_plan_full.csv, A2_MCS_realized_tuple.csv  (per 15-min step)
+  Console log: A2_run_log.txt

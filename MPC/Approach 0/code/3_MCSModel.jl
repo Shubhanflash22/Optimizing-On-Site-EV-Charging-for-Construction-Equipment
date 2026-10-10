@@ -4,7 +4,7 @@
 # Builds and solves the MILP for a single MPC window: given the current state
 # (SOE, MCS node/transit status, remaining work, activity history) and a fixed
 # window of intervals K_win, constructs the JuMP model implementing the paper's
-# objective function (4) and constraints (5)-(14), solves it with HiGHS, and
+# objective function (4) and constraints (5)-(14), solves it with Gurobi, and
 # returns the solved (or failed) model for the caller to read decisions from.
 #
 # This file has one exported function:
@@ -28,9 +28,12 @@ module MCSModel
 
 # external packages used across this file
 using JuMP
-using HiGHS
+using Gurobi
 using DataFrames
 using ..Common: normalize_travel_steps, in_peak, clock_label
+
+# One Gurobi environment shared by every solve, so the license is checked out once per run instead of once per solve.
+const GRB_ENV = Gurobi.Env()
 
 # everything below that other files are allowed to use
 export build_window_model
@@ -72,17 +75,17 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     carried_arrival_k(m) = mcs_transit0[m] === nothing ? nothing :
         (mcs_transit0[m][3] + 1 <= length(K) ? K[mcs_transit0[m][3] + 1] : nothing) 
 
-    # Creates the JuMP model on the HiGHS solver and sets solver options: single-threaded, symmetry detection off, no MIP heuristics, a 1% relative gap tolerance, and an optional time limit.
-    # The 1% gap is a deliberate speed trade-off, so reported costs can sit up to about 1% above the true optimum, which is far below the effect sizes compared (a single extra travel or missed-work interval costs several times more).
-    # The gap actually achieved is recorded per day in solve_log.gap_percent.
-    model = Model(HiGHS.Optimizer)
+    # Creates the JuMP model on the Gurobi solver and sets solver options: 8 threads, MIP heuristic effort 0.4, MIPFocus 3 (prioritises the bound), automatic symmetry detection, a 0.1% relative gap tolerance, and an optional time limit.
+    # Windows that reach the 0.1% gap stop early. Hard early windows stop at the time limit and return the best plan found, with a larger gap.
+    # The gap actually achieved is recorded in solve_log.gap_percent.
+    model = Model(() -> Gurobi.Optimizer(GRB_ENV))
     silent && set_silent(model)
     isfinite(time_limit_sec) && set_time_limit_sec(model, time_limit_sec)
-    set_attribute(model, "threads", 1)
-    set_attribute(model, "parallel", "off")
-    set_attribute(model, "mip_heuristic_effort", 0.0)
-    set_attribute(model, "mip_detect_symmetry", false)
-    set_attribute(model, "mip_rel_gap", 1.0e-2)
+    set_attribute(model, "Threads", 8)
+    set_attribute(model, "Heuristics", 0.4)
+    set_attribute(model, "MIPFocus", 3)
+    set_attribute(model, "MIPGap", 1.0e-3)
+    set_attribute(model, "Symmetry", -1)
 
     # Declares the continuous power, SOE, and missed-work decision variables from set D in the paper (P^ch,MCS, P^dch,MCS, P^MCS->CEV, P^work, P^ch,tot, P^dch,tot, s^miss, SOE^MCS, SOE^CEV).
     @variable(model, P_ch_MCS[M, N, K] >= 0)
@@ -107,7 +110,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
     @variable(model, P_peak_NC >= 0)
     @variable(model, P_peak_OP >= 0)
 
-    # early_charge_term is a small tie-breaking penalty (weight 1e-6, negligible next to the real cost terms) that nudges the solver toward charging CEVs earlier in the window when multiple schedules are otherwise equally good.
+    # early_charge_term is a small tie-breaking penalty (weight 1e-3, negligible next to the real cost terms) that nudges the solver toward charging CEVs earlier in the window when multiple schedules are otherwise equally good.
     Kvec = collect(K)
     early_charge_term = sum(idx * mu[i, e, Kvec[idx]] for i in N_c, e in E, idx in eachindex(Kvec))
 
@@ -119,7 +122,7 @@ function build_window_model(d, K_win, soe_mcs0, soe_cev0, mcs_node0, mcs_transit
         d.lambda_demand_NC * P_peak_NC +
         d.lambda_demand_OP * P_peak_OP +
         d.rho_labor * delta_T * sum(y_trv[m, i, j, k] for m in M, i in N, j in N, k in K) +
-        1e-6 * early_charge_term)
+        1e-3 * early_charge_term)
 
     # Defines each MCS's total grid-charging power for this interval as the sum of what it draws across every grid node.
     # Constraint 5a of the paper's MILP formulation.

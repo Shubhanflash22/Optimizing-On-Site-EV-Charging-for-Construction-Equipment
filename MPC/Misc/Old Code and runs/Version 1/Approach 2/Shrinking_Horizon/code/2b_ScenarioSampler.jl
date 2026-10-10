@@ -69,7 +69,7 @@ const DEFAULT_N_SCENARIOS = 5
 # The i.i.d. draws above have no guarantee any of the n_scenarios lands in the
 # risky tail -- 5 independent Normal draws can easily all land "comfortably
 # average" on a given re-solve, missing the one branch that would have
-# triggered a protective hedge (see Issue 3 in the handoff notes).
+# triggered a protective hedge.
 #
 # When n_scenarios == 5 (the default), replace the draws with 5 FIXED, evenly
 # spread bins -- extreme-low / slightly-low / near-mean / extreme-high /

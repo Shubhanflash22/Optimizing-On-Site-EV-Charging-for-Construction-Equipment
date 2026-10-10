@@ -2,7 +2,7 @@
 
 One mobile charging station (MCS) has to keep construction electric vehicles (CEVs) charged and working through the day, without knowing exactly how much power each activity will draw. Every 15 minutes the controller decides where the MCS charges, how much it delivers to which CEV, when it drives between sites, and what each CEV is doing. The goal is to minimize electricity cost, carbon, demand charges, missed work, and towing labour.
 
-This repo holds three controllers for that same problem, written in Julia (JuMP + HiGHS). They share the same MILP (Ghosh et al., arXiv:2608.18494), the same input data, and the same stochastic simulated plant. Only the way the plan is built and used changes.
+This repo holds three controllers for that same problem, written in Julia (JuMP + Gurobi). They share the same MILP (Ghosh et al., arXiv:2608.18494), the same input data, and the same stochastic simulated plant. Only the way the plan is built and used changes.
 
 ## The three approaches
 
@@ -35,7 +35,7 @@ Each approach is self-contained: `code/`, `data/input_data/` (the same 8 CSVs in
 
 ## How to run
 
-1. Install Julia from julialang.org/downloads.
+1. Install Julia from julialang.org/downloads, and Gurobi with a valid license (free for academics from gurobi.com; activate it with `grbgetkey` while on the university network or VPN).
 2. From the repo root, install the pinned packages once:
    ```julia
    using Pkg; Pkg.activate("."); Pkg.instantiate()
@@ -55,7 +55,7 @@ Each approach's README has the input and output file formats, every run option, 
 
 - Use the same `seed` and `plant` setting across approaches, or the realized power draws will differ.
 - `plant = :mean` is a sanity check, not a result. A0 and A1 should give a terminal shortfall of exactly 0. A2 should give 0 or very close to it, with no infeasible windows.
-- A2 runs the solver on 8 threads, while A0 and A1 run single-threaded, so solve times are not directly comparable.
+- All three run Gurobi with the same settings (8 threads), so solve times are comparable.
 - A2 uses `n_scenarios = 5` by default. Results for other scenario counts are not directly comparable.
 - All three add a terminal shortfall penalty to total cost (not part of the paper's objective), so compare approaches on the reported total cost.
 

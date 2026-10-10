@@ -1,0 +1,29 @@
+[ Info: [Turing]: progress logging is disabled globally
+Running Approach 1 (closed-loop MPC, 15-min steps, Shrinking horizon): 96 steps (1 day(s))
+  plant                : :sampled (stochastic -- realized power drawn from the shared pool)
+  planning power (mu)  : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd    : [0.45, 0.8, 0.45, 0.31] kW
+  solver time limit    : 600.0 s / window
+Approach 1 (plant = :sampled) done in 426.8 s (28 plant realizations, 1 day(s))
+  fixed power model (mu) : [4.79, 3.16, 4.71, 0.0] kW
+  plant sampling sd      : [0.45, 0.8, 0.45, 0.31] kW
+
+==== Scenario 1 closed-loop KPIs — 1 day(s), 96 intervals ====
+Total grid energy   : 27.45 kWh
+Total energy cost   : $8.86
+Total CO2 emissions : 6.57 kg
+NC peak demand      : 1.93 kW
+On-peak demand      : 0.00 kW
+Missed work (hours) : 0.00
+Labour (towing)     : $20.00  (1.00 h in transit @ $20.00/h)
+CEV SOE at horizon  : [14.8] kWh (target [14.8])
+MCS SOE at horizon  : [250.0] kWh (target [250.0])
+Terminal SOE shortfall penalty : $0.00
+
+Results written to: c:\Users\shubh\Desktop\MPC\Test\A1_output
+  Figures: A1_01..A1_09 (09 = per-MCS power profiles)
+  Reports: A1_kpi_summary.csv(+_by_day), A1_replan_grids/*.csv+*.html,
+           A1_plan_vs_actual.html + A1_plan_vs_actual_costs.png  (Overall, plus day1.. for n_day_run > 1)
+           day<N>/A1_plan_vs_actual_activity.png, A1_plan_vs_actual_side_by_side.html, A1_plan_vs_actual_by_entity.html  (ACTIVITY, per day)
+           A1_plan_full.csv, A1_realized_tuple.csv, A1_MCS_plan_full.csv, A1_MCS_realized_tuple.csv  (per 15-min step)
+  Console log: A1_run_log.txt

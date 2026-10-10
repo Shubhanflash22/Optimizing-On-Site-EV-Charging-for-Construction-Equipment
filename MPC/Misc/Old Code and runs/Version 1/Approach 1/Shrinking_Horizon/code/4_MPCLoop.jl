@@ -24,7 +24,9 @@ using Random
 
 using ..Common: in_peak, clock_label, build_time_labels, build_time_labels_days, safe_get,
                 BayesianActivityEstimator,
-                ActivityPowerPool, new_cursor, next_power!
+                ActivityPowerPool, new_cursor, next_power!,
+                DetailedPlanLog, RealizedTupleLog, log_plan_row!, log_realized_row!,
+                to_dataframe
 using ..MCSModel: build_window_model
 
 export run_mpc, run_one_shot
@@ -93,7 +95,8 @@ function applied_act_index(model, d, e, k0)
     for i in d.N_c, (ai, act) in enumerate(d.B)
         value(model[:u][e, i, act, k0]) > 0.5 && return ai
     end
-    return length(d.B)   # nothing scheduled -> idle (a break)
+    return length(d.B)   # nothing scheduled -> off-shift (Eq. 8b); logged as idle bucket,
+                          # power is forced to 0 in apply_and_simulate! via the `working` check
 end
 
 # -----------------------------------------------------------------------------
@@ -168,7 +171,6 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
     for m in d.M
         real_P_ch[m, gidx]  = value(model[:P_ch_tot][m, k0])
         real_P_dch[m, gidx] = value(model[:P_dch_tot][m, k0])
-        real_L_trv[m, gidx] = value(model[:L_trv_tot][m, k0])
         real_loc[m, gidx]   = let nh = findfirst(i -> value(model[:z][m, i, k0]) > 0.5, d.N)
             nh === nothing ? 0 : nh
         end
@@ -187,18 +189,35 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
     for e in d.E
         row = a_real[e]
         pt  = zeros(length(row))
+        site = findfirst(i -> d.A[i, e] == 1, d.N)
+        # Off-shift (Eq. 8b: is_working false) means NO activity concept applies at
+        # all -- the machine is off, unattended, zero draw. Without this gate,
+        # applied_act_index's idle fallback would otherwise route every off-shift
+        # interval through next_power!, drawing a real nonzero LIVE_DATA_MODE idle
+        # sample for hours the CEV was never actually on and idling.
+        working = site !== nothing && d.is_working[site, e, k0]
         for a in eachindex(row)
             row[a] > 1e-9 || continue
+            if !working
+                pt[a] = 0.0   # off-shift: no pool draw, cursor untouched, power forced to 0
+                continue
+            end
             # :mean pins the realized power to the planning mean and does NOT advance
             # the cursor; :sampled consumes the next pre-drawn sample for this pair.
             pt[a] = use_mean ? pool.mu[a] : next_power!(pool, cursor, e, a)
         end
         p_true[e] = pt
-        sum(row) > 1e-9 && (n_obs_added += 1)
-        site = findfirst(i -> d.A[i, e] == 1, d.N)
+        sum(row) > 1e-9 && working && (n_obs_added += 1)
         if site !== nothing
+            # Sum ALL 4 activities (dig/load/travel/idle), matching the MILP's own
+            # P_work definition (3_MCSModel.jl Eq. 8d: P_work = sum_a p_a*u, over the
+            # FULL activity set B, not just the 3 productive ones). idle currently
+            # draws 0 kW so row[4]*pt[4] contributes nothing today, but excluding it
+            # here would silently under-report realized work power the moment idle
+            # power (p_idling) is ever made nonzero -- this line must stay in sync
+            # with `work_kW` below, which already sums over all 4 via dot().
             real_P_work[site, e, gidx] =
-                (row[1] * pt[1] + row[2] * pt[2] + row[3] * pt[3]) / d.delta_T
+                (row[1] * pt[1] + row[2] * pt[2] + row[3] * pt[3] + row[4] * pt[4]) / d.delta_T
         end
     end
 
@@ -207,20 +226,6 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
         soe_mcs[m] = value(model[:SOE_MCS][m, k0 + 1])
         mcs_node[m], mcs_transit[m] = advance_mcs_state(model, m, k0, nK, d)
     end
-    # # The CEV balance is CLAMPED to [SOE_min, SOE_max]. The clamp is a guard, not
-    # # physics: whenever it bites, energy is silently created (low side) or discarded
-    # # (high side) and the reported SOE stops matching the integrated power. It can
-    # # only bite in :sampled mode (in :mean mode the realized balance equals the MILP's
-    # # own, which already respects the bounds), so we COUNT the events and report them
-    # # rather than letting a "0 infeasible windows" run hide them.
-    # n_clamped = 0
-    # for e in d.E
-    #     charged   = sum(value(model[:P_MCS_CEV][m, i, e, k0]) for m in d.M, i in d.N_c) * d.delta_T
-    #     work_true = dot(a_real[e], p_true[e])
-    #     raw       = soe_cev[e] + charged - work_true
-    #     soe_cev[e] = clamp(raw, d.SOE_CEV_min[e], d.SOE_CEV_max[e])
-    #     abs(raw - soe_cev[e]) > 1e-9 && (n_clamped += 1)
-    # end
     # CAP each CEV's realized dig/load hours by what its available energy could
     # actually pay for, BEFORE crediting rem_dig/rem_load or logging hist. This
     # replaces the old after-the-fact SOE clamp, which silently created/discarded
@@ -262,7 +267,6 @@ function apply_and_simulate!(model, k0, nK, d, pool::ActivityPowerPool, cursor, 
     # batteries and with real_P_work.)
     work_kW = sum(dot(a_real[e], p_true[e]) for e in d.E) / d.delta_T
 
-    # return (; grid_kW, dch_kW, cur_node, a_real, p_true, n_obs_added, work_kW, n_clamped)
     return (; grid_kW, dch_kW, cur_node, a_real, p_true, n_obs_added, work_kW, n_capped)
 end
 
@@ -277,7 +281,14 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
                     mcmc_samples::Int = 500,
                     plant::Symbol = :sampled,
                     n_day_run::Int = 1,
-                    seed::Int = 1)
+                    seed::Int = 1,
+                    # DETAILED OUTPUT (opt-in): when true, records the FULL
+                    # remaining-horizon plan at every re-solve (not just the one
+                    # step implemented) plus the realized 4-tuple power draw for
+                    # every executed interval. See DetailedPlanLog/
+                    # RealizedTupleLog in 1_Common.jl. Costs extra memory/time
+                    # roughly proportional to nKd^2 per day; off by default.
+                    detailed_output::Bool = false)
     plant in (:sampled, :mean) ||
         error("run_mpc: plant must be :sampled or :mean, got :$plant")
     n_day_run >= 1 || error("run_mpc: n_day_run must be >= 1, got $n_day_run")
@@ -322,13 +333,15 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
         est_dig = Float64[], est_load = Float64[], est_trv = Float64[], est_idle = Float64[],
         unc_dig = Float64[], unc_load = Float64[], unc_trv = Float64[], unc_idle = Float64[],
         n_obs = Int[])
+    solve_log = DataFrame(day = Int[], step = Int[], clock = String[], status = String[],
+                          objective = Float64[], gap_percent = Float64[], solve_time_s = Float64[])
 
     # ---- realized per-interval capture for the reference-style figures ----
     # (sized by n_kept, the TOTAL interval count across all n_day_run days)
     nM = length(d.M); nE = length(d.E); nN = length(d.N)
     real_P_ch  = zeros(nM, n_kept)
     real_P_dch = zeros(nM, n_kept)
-    real_L_trv = zeros(nM, n_kept)
+    real_L_trv = zeros(nM, n_kept)  # transit does not draw from the battery; kept at zero for the output schema
     real_SOE_MCS = zeros(nM, n_kept + 1)
     real_SOE_CEV = zeros(nE, n_kept + 1)
     real_P_work  = zeros(nN, nE, n_kept)
@@ -348,6 +361,10 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
     real_cev_act = [fill("", n_kept) for _ in d.E]
     real_mcs_act = fill("", n_kept)
 
+    # ---- DETAILED OUTPUT (opt-in, see run_mpc's docstring on the kwarg) ----
+    plan_log     = detailed_output ? DetailedPlanLog()     : nothing
+    realized_log = detailed_output ? RealizedTupleLog()    : nothing
+
     hmode = shrinking ? "shrinking" : "fixed H=$H"
     println("Running Approach 1 (closed-loop MPC, 15-min steps, $hmode horizon): $n_kept steps ($n_day_run day(s))")
     println("  plant                : ", plant === :mean ?
@@ -366,7 +383,7 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
     for day in 1:n_day_run
         # CHANGE 5 -- same work requirement every day, ADDED on top of whatever
         # is still outstanding from the previous day (backlog accumulates, it
-        # does not silently reset -- see the handoff notes' worked design).
+        # does not silently reset).
         rem_dig  .+= float.(d.hours_digging)
         rem_load .+= float.(d.hours_loading_swinging)
 
@@ -407,6 +424,8 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
             if !has_values(model)
                 n_infeasible += 1
                 @warn "No feasible solution at day=$day, step k=$k0 under HARD constraints; holding state (no fallback)." status=stat
+                push!(solve_log, (day, k0, clock_label(d.t_start, d.delta_T, k0), stat, NaN, NaN,
+                                  try solve_time(model) catch; NaN end))
                 push!(log, (day, k0, clock_label(d.t_start, d.delta_T, k0), d.lambda_whl_elec[k0], d.lambda_CO2[k0],
                             0.0, 0.0, 0.0, soe_mcs[1], safe_get(soe_cev, 1), safe_get(soe_cev, 2), cur_node,
                             est.mu[1], est.mu[2], est.mu[3], est.mu[4],
@@ -417,8 +436,21 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
                 real_mcs_act[gidx] = "Idle"
                 # ... and record it in history so the rest rule counts it correctly next window.
                 for e in d.E; push!(hist[e], (length(d.B), [0.0, 0.0, 0.0, d.delta_T])); end
+                if detailed_output
+                    for e in d.E
+                        log_realized_row!(realized_log, d; day, step = k0, cev = e,
+                                          p_tuple = [0.0, 0.0, 0.0, 0.0], activity_executed = "Idle",
+                                          soe_cev_kWh = safe_get(soe_cev, e), soe_mcs_kWh = soe_mcs[1],
+                                          infeasible_flag = true)
+                    end
+                end
                 continue
             end
+
+            # solve diagnostics for this window (independent of the plant draw).
+            push!(solve_log, (day, k0, clock_label(d.t_start, d.delta_T, k0), stat, objective_value(model),
+                              100 * (try relative_gap(model) catch; NaN end),
+                              try solve_time(model) catch; NaN end))
 
             # Save this window's FULL forward plan into the (day-local) replanning grids.
             for k in K_win
@@ -427,7 +459,22 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
                 for e in d.E
                     plan_cev_soe[e][k0, k] = value(model[:SOE_CEV][e, k + 1])
                     site = findfirst(i -> d.A[i, e] == 1, d.N)
-                    site !== nothing && (plan_cev_act[e][k0, k] = activity_label(model, d, e, site, k))
+                    if site !== nothing
+                        plan_cev_act[e][k0, k] = activity_label(model, d, e, site, k)
+                        # DETAILED OUTPUT: the FULL remaining-horizon plan, not just
+                        # the k0==k cell that ends up applied -- see run_mpc's
+                        # `detailed_output` kwarg docstring.
+                        if detailed_output
+                            p_into = sum(value(model[:P_MCS_CEV][m, site, e, k]) for m in d.M)
+                            log_plan_row!(plan_log, d; day, resolve_step = k0, offset_step = k,
+                                          activity_planned = plan_cev_act[e][k0, k],
+                                          planned_power_kW = value(model[:P_work][site, e, k]),
+                                          planned_charging = p_into > 1e-6,
+                                          soe_cev_planned_kWh = plan_cev_soe[e][k0, k],
+                                          soe_mcs_planned_kWh = plan_mcs_soe[k0, k],
+                                          cev = e)
+                        end
+                    end
                 end
                 plan_mcs_act[k0, k] = mcs_status_label(model, d, k)
             end
@@ -446,6 +493,18 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
                                        plant_mode = plant, gidx = gidx)
             n_obs_total += step.n_obs_added
             n_capped_total += step.n_capped
+
+            # DETAILED OUTPUT: the realized 4-tuple power draw for THIS executed
+            # interval (step.p_true[e] is already computed inside
+            # apply_and_simulate! -- captured here, nothing new derived).
+            if detailed_output
+                for e in d.E
+                    log_realized_row!(realized_log, d; day, step = k0, cev = e,
+                                      p_tuple = step.p_true[e], activity_executed = real_cev_act[e][gidx],
+                                      soe_cev_kWh = safe_get(soe_cev, e), soe_mcs_kWh = soe_mcs[1],
+                                      infeasible_flag = false)
+                end
+            end
 
             peak_nc = max(peak_nc, step.grid_kW)
             in_peak(k0, d.delta_T, d.t_start) && (peak_op = max(peak_op, step.grid_kW))
@@ -486,7 +545,14 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
     (; shortfall_kWh, shortfall_hours, shortfall_penalty_cost) =
         _terminal_soe_shortfall(d, soe_cev, rem_dig, rem_load, n_day_run)   # Change 3, n_day_run-aware
 
-    return (; d, time_labels, log, replan_by_day,
+    # DETAILED OUTPUT: converted to DataFrames once here (not incrementally
+    # during the loop -- see DetailedPlanLog/RealizedTupleLog in 1_Common.jl).
+    # `nothing` when detailed_output = false, so callers that don't ask for
+    # this pay no cost and see no change to the result shape they already use.
+    detailed_plan_df     = detailed_output ? to_dataframe(plan_log)     : nothing
+    detailed_realized_df = detailed_output ? to_dataframe(realized_log) : nothing
+
+    return (; d, time_labels, log, solve_log, replan_by_day,
               real_P_ch, real_P_dch, real_L_trv, real_SOE_MCS, real_SOE_CEV,
               real_P_work, real_loc, real_cev_act, real_mcs_act,
               est, nK = n_kept, nKd, n_day_run, ACT_NAME,
@@ -495,6 +561,7 @@ function run_mpc(d, pool::ActivityPowerPool; shrinking::Bool = true, H::Int = 16
               soe_cev_end = copy(soe_cev), soe_mcs_end = copy(soe_mcs),
               shortfall_kWh, shortfall_hours, shortfall_penalty_cost,
               n_obs_total, n_infeasible, elapsed,
+              detailed_plan_df, detailed_realized_df,
               approach = 1, plant, n_capped = n_capped_total)
 end
 
@@ -531,8 +598,8 @@ end
 # =============================================================================
 # CHANGE 3 — TERMINAL SOE_CEV SHORTFALL PENALTY (all five approaches)
 # -----------------------------------------------------------------------------
-# Every approach's MILP enforces SOE_CEV[e, terminal] >= SOE_CEV_ini[e] (Eq 8b)
-# as a hard constraint on its PLAN. This is a pure END-OF-DAY snapshot check --
+# Every approach's MILP enforces SOE_CEV[e, terminal] >= SOE_CEV_ini[e] (Eq 10b
+# per the arXiv paper's numbering, 2608.18494) as a hard constraint on its PLAN. This is a pure END-OF-DAY snapshot check --
 # it has nothing to do with the physical SOE_CEV_min floor (that is already
 # enforced live, every interval, inside apply_and_simulate! above: whenever a
 # realized draw would push soe_cev below SOE_CEV_min, the work is capped right
@@ -568,11 +635,11 @@ function _terminal_soe_shortfall(d, soe_cev_end, rem_dig, rem_load, n_day_run::I
 
     # Total REQUIRED work across the whole run is n_day_run copies of one day's
     # requirement (CHANGE 5 -- same work every day), not just one day's worth.
-    realized_dig_h  = n_day_run * sum(d.hours_digging)          - sum(rem_dig)
-    realized_load_h = n_day_run * sum(d.hours_loading_swinging) - sum(rem_load)
-    realized_h      = realized_dig_h + realized_load_h
-    realized_kWh    = realized_dig_h * d.p_digging + realized_load_h * d.p_loading_swinging
-    avg_work_power_kW = realized_h > 1e-9 ? realized_kWh / realized_h :
+    required_dig_h  = n_day_run * sum(d.hours_digging)
+    required_load_h = n_day_run * sum(d.hours_loading_swinging)
+    required_h      = required_dig_h + required_load_h
+    required_kWh    = required_dig_h * d.p_digging + required_load_h * d.p_loading_swinging
+    avg_work_power_kW = required_h > 1e-9 ? required_kWh / required_h :
                                              (d.p_digging + d.p_loading_swinging) / 2
 
     shortfall_hours = shortfall_kWh / avg_work_power_kW
@@ -623,7 +690,7 @@ function run_one_shot(d, pool::ActivityPowerPool; time_limit_sec::Float64 = Inf,
     nM = length(d.M); nE = length(d.E); nN = length(d.N)
     real_P_ch  = zeros(nM, n_kept)
     real_P_dch = zeros(nM, n_kept)
-    real_L_trv = zeros(nM, n_kept)
+    real_L_trv = zeros(nM, n_kept)  # transit does not draw from the battery; kept at zero for the output schema
     real_SOE_MCS = zeros(nM, n_kept + 1)
     real_SOE_CEV = zeros(nE, n_kept + 1)
     real_P_work  = zeros(nN, nE, n_kept)

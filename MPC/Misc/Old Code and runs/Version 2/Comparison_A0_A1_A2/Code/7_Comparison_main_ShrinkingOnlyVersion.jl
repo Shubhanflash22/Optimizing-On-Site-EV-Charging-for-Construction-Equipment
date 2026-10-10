@@ -116,14 +116,10 @@ end
 # levels up is the MPC root that Approach 1 / Approach 2 also live under.
 # -----------------------------------------------------------------------------
 const _ROOT     = normpath(joinpath(_CODE_DIR, ".."))
-# --- TEMP-RUN PATCH (see CHANGES.md) -----------------------------------------
-# This copy of Comparison_A0_A1_A2 lives in Downloads, NOT as a sibling of
-# Approach 1 / Approach 2 under the Desktop MPC root, so the normal "two
-# levels up" resolution (`normpath(joinpath(_ROOT, ".."))`) would look for
-# Approach 1/2 inside Downloads and fail. Hardcode the real MPC root instead
-# -- Approach 1 and Approach 2 still live here, unmoved, on the Desktop.
-const _MPC_ROOT = raw"C:\Users\shubh\Desktop\MPC"
-# ------------------------------------------------------------------------------
+# Restored to relative resolution: Comparison_A0_A1_A2 is a sibling of
+# Approach 1 / Approach 2 under the MPC root (one level up from _ROOT, i.e.
+# two levels up from _CODE_DIR). No machine-specific path needed.
+const _MPC_ROOT = normpath(joinpath(_ROOT, ".."))
 const _A1_ROOT  = joinpath(_MPC_ROOT, "Approach 1")
 const _A2_ROOT  = joinpath(_MPC_ROOT, "Approach 2")
 
@@ -135,25 +131,24 @@ const _A2S_INPUT = joinpath(_A2_ROOT, "Shrinking_Horizon", "data", "input_data")
 
 const _COMPARISON_INPUT = joinpath(_ROOT, "Input")
 const _COMPARISON_OUT   = joinpath(_ROOT, "Output")
-const _DEFAULT_REGRESSION_DATA_DIR = raw"C:\Users\shubh\Desktop\Bayesian Regression"
+const _DEFAULT_REGRESSION_DATA_DIR = normpath(joinpath(_MPC_ROOT, "..", "Bayesian Regression"))
 
 # The 6 input files confirmed byte-identical across BOTH input_data
 # folders (checksummed on the actual codebase before writing this driver —
 # see the note above). parameters.csv is deliberately excluded here: it is
 # (re)built ONCE by the step-0 regression below and shared by all three runs.
 const _SHARED_INPUT_FILES = ["time_data.csv", "travel_time.csv", "work_flexible.csv",
-                              "ev_data.csv", "mcs_data.csv", "place.csv"]
+                              "ev_data.csv", "mcs_data.csv", "place.csv", "live_powers.csv"]
 
 # =============================================================================
 # NAMESPACED APP WRAPPERS — see the big header comment above for why each is
 # its own module and why only A1ShrinkingApp includes 1_Common.jl.
 # =============================================================================
 module A1ShrinkingApp
-    # TEMP-RUN PATCH (see CHANGES.md): was normpath(joinpath(@__DIR__, "..", "..",
-    # "Approach 1", "Shrinking_Horizon", "code")) -- that resolves relative to
-    # wherever THIS file physically sits, which is now Downloads, not Desktop\MPC.
-    # Hardcoded to the real (unmoved) Desktop location of Approach 1/2 instead.
-    const _DIR = raw"C:\Users\shubh\Desktop\MPC\Approach 1\Shrinking_Horizon\code"
+    # Relative resolution restored: two levels up from this file's own
+    # directory (Comparison_A0_A1_A2/Code) is the MPC root, which contains
+    # Approach 1 as a sibling.
+    const _DIR = normpath(joinpath(@__DIR__, "..", "..", "Approach 1", "Shrinking_Horizon", "code"))
     include(joinpath(_DIR, "1_Common.jl"))
     include(joinpath(_DIR, "0_Regression.jl"))
     include(joinpath(_DIR, "2_DataLoader.jl"))
@@ -165,8 +160,8 @@ end
 module A2ShrinkingApp
     import ..A1ShrinkingApp
     const Common = A1ShrinkingApp.Common
-    # TEMP-RUN PATCH (see CHANGES.md): hardcoded for the same reason as A1ShrinkingApp above.
-    const _DIR = raw"C:\Users\shubh\Desktop\MPC\Approach 2\Shrinking_Horizon\code"
+    # Relative resolution restored, same reasoning as A1ShrinkingApp above.
+    const _DIR = normpath(joinpath(@__DIR__, "..", "..", "Approach 2", "Shrinking_Horizon", "code"))
     include(joinpath(_DIR, "2_DataLoader.jl"))
     include(joinpath(_DIR, "2b_ScenarioSampler.jl"))
     include(joinpath(_DIR, "3_MCSModel.jl"))
@@ -219,7 +214,7 @@ end
 # =============================================================================
 function build_comparison_input(; input_dir::AbstractString = _COMPARISON_INPUT,
                                   csv_source_dir::AbstractString = _A1S_INPUT,
-                                  # TEMP-RUN PATCH (see CHANGES.md): regression turned off by
+                                  # TEMP-RUN PATCH: regression turned off by
                                   # default -- this run reuses the pre-staged, hand-edited
                                   # parameters.csv shipped in Input/ instead of refitting it.
                                   run_regression::Bool = false,
@@ -229,7 +224,7 @@ function build_comparison_input(; input_dir::AbstractString = _COMPARISON_INPUT,
     mkpath(input_dir)
     for f in _SHARED_INPUT_FILES
         dst = joinpath(input_dir, f)
-        # TEMP-RUN PATCH (see CHANGES.md): if the file is already staged in
+        # TEMP-RUN PATCH: if the file is already staged in
         # input_dir (this run ships a fully pre-populated, hand-edited Input/
         # folder), keep it as-is rather than overwriting it from csv_source_dir.
         # This is what stops the stress-test edits to ev_data.csv (and the
@@ -275,7 +270,7 @@ const _ALL_COMBOS = [
 function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
                           out_dir::AbstractString = _COMPARISON_OUT,
                           csv_source_dir::AbstractString = _A1S_INPUT,
-                          # TEMP-RUN PATCH (see CHANGES.md): regression turned off by
+                          # TEMP-RUN PATCH: regression turned off by
                           # default -- reuses the pre-staged, hand-edited parameters.csv.
                           run_regression::Bool = false,
                           regression_data_dir::AbstractString = _DEFAULT_REGRESSION_DATA_DIR,
@@ -316,6 +311,13 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
                           # 4 (3-way + all 3 requested subsets). Pass a subset of
                           # _ALL_COMBOS to skip some, e.g. during a quick test run.
                           combos = _ALL_COMBOS,
+                          # PLANT MODE: :normal (default) is the unbiased Bayesian draw;
+                          # :high/:low/:near_mean/:spread_wide bias it (1_Common.jl's "DRAW
+                          # MODE" doc); :live_data draws instead from real recorded values in
+                          # Input/live_powers.csv (per-CEV independent, without-replacement
+                          # draws). Same `mode` name as run_comparison_sweep's `modes` tuple
+                          # in this same file's Sweep sibling.
+                          mode::Symbol = :normal,
                           seed::Int = 1)
     approach0_source in (:a1_shrinking, :a2_shrinking) ||
         error("run_comparison: approach0_source must be :a1_shrinking or :a2_shrinking")
@@ -354,15 +356,21 @@ function run_comparison(; input_dir::AbstractString = _COMPARISON_INPUT,
         nK_day = length(collect(dA1S.K))
         n_samples = pool_n_samples === nothing ?
             nK_day * n_day_run + 5 : pool_n_samples
-        pool = _timed_status("building shared power pool ($(n_samples) samples/entity-activity)") do
-            # mode = :normal -> unbiased draws (unchanged); see 1_Common.jl's
-            # "DRAW MODE" doc for the 4 sensitivity-sweep modes -- swept by
-            # 7_Comparison_main_ShrinkingOnlyVersion_Sweep.jl, which reuses this
-            # same driver rather than duplicating it.
-            A1ShrinkingApp.Common.draw_activity_power_pool(dA1S.E, dA1S.prior_mu, dA1S.prior_sigma;
-                                                           n_samples = n_samples,
-                                                           rng = MersenneTwister(seed),
-                                                           mode = :normal)
+        pool = _timed_status("building shared power pool ($(n_samples) samples/entity-activity, :$(mode))") do
+            if mode == :live_data
+                A1ShrinkingApp.Common.draw_activity_power_pool_live(
+                    dA1S.E, A1ShrinkingApp.DataLoader.load_live_powers(input_dir);
+                    rng = MersenneTwister(seed))
+            else
+                # mode = :normal -> unbiased draws (unchanged); see 1_Common.jl's
+                # "DRAW MODE" doc for the 4 sensitivity-sweep modes -- swept by
+                # 7_Comparison_main_ShrinkingOnlyVersion_Sweep.jl, which reuses this
+                # same driver rather than duplicating it.
+                A1ShrinkingApp.Common.draw_activity_power_pool(dA1S.E, dA1S.prior_mu, dA1S.prior_sigma;
+                                                               n_samples = n_samples,
+                                                               rng = MersenneTwister(seed),
+                                                               mode = mode)
+            end
         end
         println("\nShared power pool: n_samples=$(n_samples) per (entity, activity) ",
                 "($(nK_day) intervals/day x $(n_day_run) day(s), + 5); mu=",

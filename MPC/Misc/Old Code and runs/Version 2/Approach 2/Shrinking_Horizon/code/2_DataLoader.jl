@@ -9,7 +9,7 @@
 #   * :synthetic  -> a small, self-contained example built in code.
 #   * :input      -> the 7-CSV real dataset in data/input_data/.
 #
-# NOMENCLATURE mirrors DataLoader_v4_real.jl (SOE_*, CH_*, DCH_*, R_work,
+# NOMENCLATURE mirrors DataLoader_v4_real.jl (SOE_*, CH_*, DCH_*, is_working,
 # lambda_whl_elec, lambda_CO2, hours_digging, ...).
 # #############################################################################
 module DataLoader
@@ -17,7 +17,7 @@ module DataLoader
 using CSV
 using DataFrames
 
-export load_data, build_default_data, load_input_data
+export load_data, build_default_data, load_input_data, load_live_powers
 
 # SINGLE FULL-DAY HORIZON: the optimisation spans the entire 24 h day (n_day =
 # n_int). Work availability still ends at the shift end, but the MCS may charge
@@ -69,6 +69,10 @@ function build_default_data()
     prior_sigma   = [1.0, 1.0, 1.5, 0.0]
     true_powers   = [5.2, 2.8, 5.0, 0.0]
     true_sigma    = [0.3, 0.2, 0.3, 0.0]    # per-interval wobble of the stochastic plant
+    # ^ idle kept at 0 kW / 0 std for now (pinned deterministic, per Eq. 8c's short-
+    # circuit in Common.jl's next_power!). The R_work removal / Eq. 8b / LIVE_DATA_MODE
+    # infrastructure above supports a nonzero idle value with no further code changes
+    # if this is changed later -- see parameters.csv's p_idling note.
     obs_noise_std = 0.05
     p_digging          = prior_mu[1]
     p_loading_swinging = prior_mu[2]
@@ -97,7 +101,7 @@ function build_default_data()
     end
 
     # ---- FULL 24 h horizon (one optimisation over the whole day) ----
-    # Build the full-day productive mask (drives R_work below).
+    # Build the full-day productive mask (is_working below, Eq. 8b).
     available_full = Bool[
         (work_start_hour <= mod(t_start + (k - 1) * delta_T, 24) < work_end_hour) &&
         !(lunch_start_hour <= mod(t_start + (k - 1) * delta_T, 24) < lunch_end_hour)
@@ -106,10 +110,13 @@ function build_default_data()
     K = 1:n_day
     T = 1:(n_day + 1)
 
-    # ---- per-CEV work-availability cap R_work[node, ev, interval] over the daytime window ----
-    R_work = zeros(length(N), length(E), n_day)
+    # ---- per-CEV working-hours mask is_working[node, ev, interval] (Eq. 8b) ----
+    # Replaces the old R_work big-M power cap: R_work was only ever a proxy for
+    # "outside working hours", which broke once idle power could be nonzero
+    # (see 3_MCSModel.jl). is_working gates the ACTIVITY CHOICE directly instead.
+    is_working = Array{Bool}(undef, length(N), length(E), n_day)
     for i in N_c, e in E, k in 1:n_day
-        R_work[i, e, k] = (available_full[k] && A[i, e] == 1) ? 1000.0 : 0.0
+        is_working[i, e, k] = available_full[k] && A[i, e] == 1
     end
 
     # ---- costs / penalties in the objective ----
@@ -130,7 +137,7 @@ function build_default_data()
               p_digging, p_loading_swinging, p_traveling, p_idling,
               prior_mu, prior_sigma, true_powers, true_sigma, obs_noise_std,
               hours_digging, hours_loading_swinging, tau_trv, k_trv,
-              lambda_whl_elec, lambda_CO2, R_work,
+              lambda_whl_elec, lambda_CO2, is_working,
               rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP,
               carbon_price_per_ton, scale, B)
 end
@@ -148,6 +155,31 @@ function _read_csv(dir, name; required_cols = String[])
             error("DataLoader input mode: '$name' is missing required column '$c'")
     end
     return df
+end
+
+# -----------------------------------------------------------------------------
+# LIVE_DATA_MODE: read the real recorded per-activity power values from
+# live_powers.csv (long format: columns "activity","power_kW", one row per
+# recorded measurement). Returns Dict{Int, Vector{Float64}} keyed by activity
+# index matching B = [dig, load+swing, travel, idle], for
+# Common.draw_activity_power_pool_live. Errors loudly if a required activity
+# name has zero rows -- a silently-empty activity would otherwise surface as a
+# confusing downstream error in draw_activity_power_pool_live instead.
+# -----------------------------------------------------------------------------
+const _LIVE_ACTIVITY_NAMES = ["p_digging", "p_loading_swinging", "p_traveling", "p_idling"]
+
+function load_live_powers(input_dir::AbstractString; filename::AbstractString = "live_powers.csv")
+    df = _read_csv(input_dir, filename; required_cols = ["activity", "power_kW"])
+    names_lc = strip.(lowercase.(string.(df.activity)))
+    live = Dict{Int, Vector{Float64}}()
+    for (a, nm) in enumerate(_LIVE_ACTIVITY_NAMES)
+        rows = names_lc .== lowercase(nm)
+        vals = Float64.(df.power_kW[rows])
+        isempty(vals) &&
+            error("load_live_powers: no rows found for activity '$nm' in $filename")
+        live[a] = vals
+    end
+    return live
 end
 
 # Clock string ("8:15:00") -> decimal hours (8.25).
@@ -285,9 +317,9 @@ function load_input_data(input_dir::AbstractString)
     end
     n_day = n_int                            # FULL 24 h horizon (one optimisation)
     K = 1:n_day;  T = 1:(n_day + 1)
-    R_work = zeros(length(N), length(E), n_day)   # pad the caps out to the full-day horizon
+    is_working = falses(length(N), length(E), n_day)   # working-hours mask (Eq. 8b)
     nfill = min(n_full, n_day)
-    R_work[:, :, 1:nfill] = R_full[:, :, 1:nfill]
+    is_working[:, :, 1:nfill] = R_full[:, :, 1:nfill] .> 0
 
     B = [1, 2, 3, 4]
     return (; delta_T, K, T, t_start, n_int, n_day, t_limit_rest,
@@ -298,7 +330,7 @@ function load_input_data(input_dir::AbstractString)
               p_digging, p_loading_swinging, p_traveling, p_idling,
               prior_mu, prior_sigma, true_powers, true_sigma, obs_noise_std,
               hours_digging, hours_loading_swinging, tau_trv, k_trv,
-              lambda_whl_elec, lambda_CO2, R_work,
+              lambda_whl_elec, lambda_CO2, is_working,
               rho_miss, rho_labor, lambda_demand_NC, lambda_demand_OP,
               carbon_price_per_ton, scale, B)
 end

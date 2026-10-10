@@ -191,8 +191,9 @@ Written to `output/<out_dir>/` (wherever `out_dir` points). Every file name star
 5. In the REPL, one time only:
    ```julia
    using Pkg
-   Pkg.add(["CSV", "DataFrames", "JuMP", "HiGHS", "Turing", "XLSX"])
+   Pkg.add(["CSV", "DataFrames", "JuMP", "Gurobi", "Turing"])
    ```
+   Gurobi needs an installed copy and a license (free academic licenses are available). See `RUN_GUIDE.md`, Section 0.
    `LinearAlgebra`, `Printf`, `Random`, and `Statistics` are built into Julia already. `XLSX` is only needed if `0_Regression.jl`'s `run_regression = true` path runs — without it, step 0 is skipped with a warning and `parameters.csv` is used as-is.
 
 **Running:**
@@ -233,11 +234,11 @@ Everything below was found by comparing the code line by line against arXiv:2608
 **In the MILP itself (`3_MCSModel.jl`):**
 
 1. **Idling is an explicit subactivity** with its own tracked power, added on top of the paper's formulation (the paper only identifies it as one of the 4 power-estimation subactivities in Section II, not as an optimization variable). While on shift, a CEV performs exactly one of the four activities, and can only charge while idle.
-2. **A small tie-breaking term** (weight 1e-6, negligible against real costs) nudges the solver toward charging CEVs earlier in the window when multiple schedules are otherwise equally good.
+2. **A small tie-breaking term** (weight 1e-3, negligible against real costs) nudges the solver toward charging CEVs earlier in the window when multiple schedules are otherwise equally good.
 3. **Terminal CEV SOE uses `>=`** where the paper's (10b) is an equality. Equivalent whenever `SOE_CEV_ini == SOE_CEV_max`, which holds in the sample data (Table IX).
 4. **Constraint (13d)** is implemented as an arrival/departure balance that does not force the MCS to end the day at the node it started from — a deliberate relaxation. In practice the terminal MCS SOE condition and the cost of extra travel already bring it back to the grid node to recharge overnight.
 5. **Rolling-window adaptations**, needed because `build_window_model` builds one window at a time rather than the whole horizon at once — this is the mechanism Approach 1 leans on hardest, since it calls `build_window_model` once per interval rather than once per day: carried-over MCS transit state across window boundaries, a starting-position condition at each window's first interval, remaining work (not total work) on the right-hand side of (14b), and cumulative history feeding (14c)–(14f). The terminal SOE conditions (10a)/(10b) only apply once a window reaches the end of the day, so a shrinking window only "sees" them on its last few intervals, same as it would for Approach 0's single full-day window.
-6. **Solver settings:** single-threaded, symmetry detection off, and a 1% relative MIP gap (rather than solving to proven optimality) as a deliberate speed trade-off. The achieved gap is recorded for every window solve in `A1_solve_log.csv`.
+6. **Solver settings:** Gurobi with 8 threads, MIP heuristic effort 0.4, MIPFocus 3 (prioritises the bound), automatic symmetry detection, and a 0.1% relative MIP gap (rather than solving to proven optimality) as a deliberate speed trade-off. The settings were tuned on the hardest Approach 2 window and are the same in all three approaches. The achieved gap is recorded for every window solve in `A1_solve_log.csv`.
 
 **In the simulation and KPI layer (`4_MPCLoop.jl`, `5_Output.jl`), shared logic with Approach 0's `apply_and_simulate!`:**
 

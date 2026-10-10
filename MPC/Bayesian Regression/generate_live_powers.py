@@ -78,7 +78,7 @@ EPS_HOURS = 1e-9
 # the SAME Python environment that already runs it successfully today
 # (pymc, pytensor, arviz, xarray, cvxpy, scikit-learn, pandas, matplotlib,
 # seaborn). This script does NOT install anything for you.
-REGRESSION_SCRIPT = r"C:\Users\shubh\Desktop\Bayesian Regression\Tasks_energy_loading_swinging_bayesian.py"
+REGRESSION_SCRIPT = r"C:\Users\shubh\Desktop\MPC\Bayesian Regression\Tasks_energy_loading_swinging_bayesian.py"
 
 # Python executable to run REGRESSION_SCRIPT with. Defaults to whatever
 # interpreter is running THIS script; override if the regression script needs
@@ -93,7 +93,7 @@ REGRESSION_OUTPUT_CSV = os.path.join(os.path.dirname(REGRESSION_SCRIPT), "_live_
 # whatever is already sitting at REGRESSION_OUTPUT_CSV from a previous run --
 # useful while you're only tuning MIN_DELTA_SOC and don't want to wait for a
 # fresh NUTS fit every time.
-RUN_REGRESSION = True
+RUN_REGRESSION = False
 
 # Idle's target mean is 0.0, NOT something the regression script produces --
 # idle power is pinned to 0 in that script's own NNLS/Bayesian fit (the
@@ -123,6 +123,10 @@ OUTPUT_FILENAME = "live_powers.csv"
 # Every folder to (over)write live_powers.csv into. A folder that doesn't
 # exist is SKIPPED with a printed note -- never created, never an error.
 TARGET_DIRS = [
+    r"C:\Users\shubh\Desktop\MPC\Approach 0\data\input_data",
+    r"C:\Users\shubh\Desktop\MPC\Approach 1\data\input_data",
+    r"C:\Users\shubh\Desktop\MPC\Approach 2\data\input_data",
+
     r"C:\Users\shubh\Downloads\To be copied\MPC-Shrink\Approach 1\Shrinking_Horizon\data\input_data",
     r"C:\Users\shubh\Downloads\To be copied\MPC-Shrink\Approach 2\Shrinking_Horizon\data\input_data",
     r"C:\Users\shubh\Downloads\To be copied\MPC-Shrink\Comparison_A0_A1_A2\Input",

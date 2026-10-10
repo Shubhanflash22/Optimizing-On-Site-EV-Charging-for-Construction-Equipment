@@ -9,7 +9,7 @@ lambda_demand_NC,20.12,$/kW,NCDC rate
 lambda_demand_OP,20.58,$/kW,OPDC rate
 carbon_price_per_ton,50,$/tonneCO2,carbon
 rho_labor,20,$/hr,$/hr per man
-p_idling,0,kW,Idle power (idle = no work = 0 kW)
+p_idling,0,kW,Idle power (idle = no work = 0 kW; LIVE_DATA_MODE/Eq. 8b infra supports nonzero if changed later)
 scale,2,-,Precedence multiple kappa_seq (loading <= scale*digging)
 t_limit_rest,1,h,Eq. 12e rest rule ENABLED: >=1 idle break per rolling (t_limit+15min) window
 kappa_wt,4,-,Travel-pacing: productive intervals per CEV travel (two-sided band)

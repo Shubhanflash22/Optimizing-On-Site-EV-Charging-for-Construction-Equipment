@@ -4,11 +4,11 @@
 
 Approach 2 is a **closed-loop, shrinking-horizon, scenario-based stochastic MPC**, not a one-shot plan. At every 15-minute interval `k0` it:
 
-1. Draws `n_scenarios` fresh **power scenarios** (default 5) and solves the **window MILP from `k0` to the end of the day** against all of them at once, using the real battery and position state at that moment — not the state the previous plan assumed. The decisions of interval `k0` itself are forced to be the same in every scenario, while later intervals may differ per scenario.
+1. Uses `n_scenarios` fixed **power scenarios** (default 5, built once before the run, see Section 7 item 9) and solves the **window MILP from `k0` to the end of the day** against all of them at once, using the real battery and position state at that moment — not the state the previous plan assumed. The decisions of interval `k0` itself are forced to be the same in every scenario, while later intervals may differ per scenario.
 2. Applies **only that first interval**, `k0`, to the simulated plant.
 3. Advances the real state and moves to `k0 + 1`. The window shrinks by one interval each step until only the last interval of the day needs solving, then resets to the full day at the start of the next day.
 
-This re-plans 96 times a day, so it reacts to whatever the plant actually did, unlike Approach 0's single whole-day plan executed open-loop. Unlike Approach 1, the planning side is **not** certainty-equivalent: each window is solved against several sampled activity powers (scenarios drawn around the fitted means from `parameters.csv`, with the fitted standard deviations as their spread), so the action chosen for interval `k0` has to be feasible in every scenario. The simulated plant still draws its own stochastic power from the shared sample pool, and that draw is none of the scenarios. Running it with `plant = :mean` pins the plant to the fitted means; Section 6 describes what to expect from that check. Running it with `plant = :sampled` (the default) is the apples-to-apples comparison against Approach 0 and Approach 1.
+This re-plans 96 times a day, so it reacts to whatever the plant actually did, unlike Approach 0's single whole-day plan executed open-loop. Unlike Approach 1, the planning side is **not** certainty-equivalent: each window is solved against several fixed activity powers (scenarios built once from the saved posterior draws in `posterior_draws.csv`), so the action chosen for interval `k0` has to be feasible in every scenario. The simulated plant still draws its own stochastic power from the shared sample pool, and that draw is none of the scenarios. Running it with `plant = :mean` pins the plant to the fitted means; Section 6 describes what to expect from that check. Running it with `plant = :sampled` (the default) is the apples-to-apples comparison against Approach 0 and Approach 1.
 
 The underlying optimization is the same mixed-integer program as Approach 0 and Approach 1, repeated once per scenario, from:
 
@@ -51,19 +51,20 @@ project_root/
 │   ├── 0_Regression.jl    optional offline step 0: Bayesian fit of the
 │   │                      digging/loading+swinging/traveling activity powers
 │   │                      from the soil task-recording Excel files, writing
-│   │                      the result into parameters.csv before the run
+│   │                      the result into parameters.csv (and all posterior
+│   │                      draws into posterior_draws.csv) before the run
 │   ├── 1_Common.jl        shared helpers: time/clock utilities, the Bayesian
 │   │                      activity-power estimator, the stochastic sample
 │   │                      pool ("the plant"), and the run-logging structs
 │   ├── 2_DataLoader.jl    reads the input CSVs into one named tuple `d`
-│   ├── 2b_ScenarioSampler.jl   draws the sampled activity power vectors
-│   │                      (the power scenarios) and their weights for each
-│   │                      window
+│   ├── 2b_ScenarioSampler.jl   builds the fixed activity power vectors
+│   │                      (the power scenarios) from posterior_draws.csv and
+│   │                      the day's work hours, and their equal weights
 │   ├── 3_MCSModel.jl      builds and solves the MILP for one window, copied
 │   │                      once per scenario (the paper's objective (4) and
 │   │                      constraints (5)–(14), plus the constraints that
 │   │                      tie the scenarios together)
-│   ├── 4_MPCLoop.jl       Approach 2 itself: draws fresh scenarios and
+│   ├── 4_MPCLoop.jl       Approach 2 itself: takes the fixed scenarios and
 │   │                      re-solves the window MILP every interval from the
 │   │                      real state (shrinking horizon), applies only that
 │   │                      interval to the plant
@@ -71,7 +72,7 @@ project_root/
 │   │                      reports
 │   └── 6_Shrinking_Horizon_main.jl   the driver script — run this one
 ├── data/
-│   └── input_data/        the 8 input CSVs (see Section 4)
+│   └── input_data/        the 8 input CSVs plus posterior_draws.csv (see Section 4)
 └── output/
     └── <mode>/            files written by a run (see Section 5); <mode> is
                             named after the run's `out_dir` argument by default
@@ -98,11 +99,14 @@ One row per scalar model parameter: `Parameter, Value, Unit, Description`. The l
 | `scale` | 2 | Loading-vs-digging precedence ratio (constraint 14c) |
 | `t_limit_rest` | 1 | Mandatory-rest window, hours (constraint 14d) |
 | `prior_sigma_frac` | 0.2 | Fallback prior std, as a fraction of the mean, used only if a `sigma_*` row below is absent |
-| `sigma_digging` / `sigma_loading_swinging` / `sigma_traveling` | 0.5495 / 0.3999 / 0.6517 | Prior std per activity, kW — also rewritten by `0_Regression.jl`, and the spread the power scenarios are drawn with |
+| `sigma_digging` / `sigma_loading_swinging` / `sigma_traveling` | 0.5495 / 0.3999 / 0.6517 | Prior std per activity, kW — also rewritten by `0_Regression.jl` |
 | `obs_noise_std` | 0.05 | Simulation-only telemetry noise, kWh |
 | `co2_unit_scale` | 1 | Unit conversion applied to `intensity_tons_emissions` below |
 
 `kappa_wt` (sample value 4) is the travel-pacing ratio: at most one travel interval per `kappa_wt` productive work intervals (constraints 14e and 14f). It is optional and defaults to 4 if the row is absent.
+
+### `posterior_draws.csv`
+Written by `0_Regression.jl` (step 0), and only needed by Approach 2. One row per pooled posterior draw (about 8000 for 4 chains x 2000 draws), columns `dig, load, travel, idle` in kW. At the start of every run, `2b_ScenarioSampler.jl` reads it and builds the scenarios (Section 7 item 9). Its means must match the means in `parameters.csv` (checked to 1e-3 kW), so always copy the two files from the same step 0 run.
 
 ### `ev_data.csv`
 One row per CEV. First column is the CEV's ID (`e1`, `e2`, ...) — read by position, not by its header name (which may read `Unnamed: 0` if exported from pandas).
@@ -166,7 +170,8 @@ Written to `output/<out_dir>/` (wherever `out_dir` points). Every file name star
 | `A2_kpi_summary_by_day.csv` | Only for `n_day_run > 1`. Same KPI rows, one column per day plus an Overall column. Missed work and the shortfall terms are genuine per-day deltas, not running totals. |
 | `A2_plan_vs_actual.html` | The Overall plan-vs-realized cost comparison (sum of every day's first plan, maxed for the two demand peaks, vs. the whole run's realized values). For a single-day run this is just that day's comparison. |
 | `day<N>/A2_plan_vs_actual.html` | Only for `n_day_run > 1`. That day's own first-plan-vs-realized comparison, with a per-interval grid power table. |
-| `A2_run_log.txt` | Everything printed to the console during the run, including warnings. |
+| `A2_run_log.txt` | Everything printed to the console during the run, including warnings. The scenario table is printed at the top. |
+| `A2_scenarios.csv` | The fixed power scenarios of this run: weight, dig/load/travel/idle power in kW, and the day's work energy in kWh under each. |
 
 In Approach 2 each window holds one plan per power scenario. The plan-vs-actual files, the replan grids and the planned columns of the realized logs use the plan of scenario `min(3, n_scenarios)`, which is the near-average scenario when there are 5. The detailed plan logs below keep every scenario.
 
@@ -200,8 +205,9 @@ In Approach 2 each window holds one plan per power scenario. The plan-vs-actual 
 5. In the REPL, one time only:
    ```julia
    using Pkg
-   Pkg.add(["CSV", "DataFrames", "JuMP", "HiGHS", "Turing", "XLSX"])
+   Pkg.add(["CSV", "DataFrames", "JuMP", "Gurobi", "Turing"])
    ```
+   Gurobi needs an installed copy and a license (free academic licenses are available). See `RUN_GUIDE.md`, Section 0.
    `LinearAlgebra`, `Printf`, `Random`, and `Statistics` are built into Julia already. `XLSX` is only needed if `0_Regression.jl`'s `run_regression = true` path runs — without it, step 0 is skipped with a warning and `parameters.csv` is used as-is.
 
 **Running:**
@@ -218,12 +224,12 @@ res = run_scenario_1(
                                        # of these a day, each holding one copy of the
                                        # window per power scenario); set this for large
                                        # multi-MCS cases (see Section 7)
-    n_scenarios       = 5,            # power scenarios planned against at every re-solve
+    n_scenarios       = 5,            # fixed power scenarios (from posterior_draws.csv) planned against at every re-solve
     multi_activity    = false,        # split an interval between its scheduled activity
                                        # and idle instead of giving it the whole interval
     n_day_run         = 1,            # number of days to simulate back-to-back
     out_dir           = "output/normal",
-    run_regression    = false,        # set true to refit parameters.csv from the field data first
+    run_regression    = false,        # set true to refit parameters.csv and posterior_draws.csv from the field data first
                                        # (needs XLSX.jl; see above)
     detailed_output   = false,        # also write the four detailed per-interval CSVs
     important_only    = false,        # true writes only the 8 key files, no figures —
@@ -233,7 +239,7 @@ res = run_scenario_1(
 ```
 Clicking VS Code's "Run" button on `6_Shrinking_Horizon_main.jl` does the same thing as the `include(...)` line above.
 
-`run_scenario_1` is only the function's name, kept from Approach 1. It has nothing to do with the sampled power scenarios or with the paper's Scenario 1.
+`run_scenario_1` is only the function's name, kept from Approach 1. It has nothing to do with the power scenarios or with the paper's Scenario 1.
 
 To skip the auto-run when only reusing the function/module definitions elsewhere (e.g. a sweep script), define `SCENARIO1_NO_AUTORUN = true` before including the file — see `run_all_modes.jl`.
 
@@ -246,11 +252,11 @@ Everything below was found by comparing the code line by line against arXiv:2608
 **In the MILP itself (`3_MCSModel.jl`):**
 
 1. **Idling is an explicit subactivity** with its own tracked power, added on top of the paper's formulation (the paper only identifies it as one of the 4 power-estimation subactivities in Section II, not as an optimization variable). While on shift, a CEV performs exactly one of the four activities, and can only charge while idle.
-2. **A small tie-breaking term** (weight 1e-6, negligible against real costs) nudges the solver toward charging CEVs earlier in the window when multiple schedules are otherwise equally good, averaged over the scenarios with the same weights as the cost terms.
+2. **A small tie-breaking term** (weight 1e-3, negligible against real costs) nudges the solver toward charging CEVs earlier in the window when multiple schedules are otherwise equally good, averaged over the scenarios with the same weights as the cost terms.
 3. **Terminal CEV SOE uses `>=`** where the paper's (10b) is an equality. Equivalent whenever `SOE_CEV_ini == SOE_CEV_max`, which holds in the sample data (Table IX).
 4. **Constraint (13d)** is implemented as an arrival/departure balance that does not force the MCS to end the day at the node it started from — a deliberate relaxation. In practice the terminal MCS SOE condition and the cost of extra travel already bring it back to the grid node to recharge overnight.
 5. **Rolling-window adaptations**, needed because `build_window_model_stochastic` builds one window at a time rather than the whole horizon at once — this is the mechanism Approach 2 leans on hardest, since it calls `build_window_model_stochastic` once per interval rather than once per day: carried-over MCS transit state across window boundaries, a starting-position condition at each window's first interval, remaining work (not total work) on the right-hand side of (14b), and cumulative history feeding (14c)–(14f). The terminal SOE conditions (10a)/(10b) only apply once a window reaches the end of the day, so a shrinking window only "sees" them on its last few intervals, same as it would for Approach 0's single full-day window. The MCS position handed to the next window uses only decisions up to the current interval: an MCS parked in interval `k0` is reported as parked even if the plan has it leaving in `k0 + 1`, so that departure is decided by the next re-solve.
-6. **Solver settings:** 8 threads in parallel mode, symmetry detection off, and a 1% relative MIP gap (rather than solving to proven optimality) as a deliberate speed trade-off. Approaches 0 and 1 run single-threaded, so solve times are not directly comparable. The achieved gap is recorded for every window solve in `A2_solve_log.csv`.
+6. **Solver settings:** Gurobi with 8 threads, MIP heuristic effort 0.4, MIPFocus 3 (prioritises the bound), automatic symmetry detection, and a 0.1% relative MIP gap (rather than solving to proven optimality) as a deliberate speed trade-off. The heuristic effort and MIPFocus were chosen from a sweep on the hardest window (08:00 start, 5 scenarios, 600 s limit) and are the same in all three approaches, so solve times are comparable. Windows that stop at the time limit return the best plan found, with a larger gap (about 10% in that window in the sweep). The achieved gap is recorded for every window solve in `A2_solve_log.csv`.
 
 **In the simulation and KPI layer (`4_MPCLoop.jl`, `5_Output.jl`), shared logic with Approach 0's `apply_and_simulate!`:**
 
@@ -259,7 +265,34 @@ Everything below was found by comparing the code line by line against arXiv:2608
 
 **In the scenario layer (`2b_ScenarioSampler.jl`, `3_MCSModel.jl`, `4_MPCLoop.jl`), not in the paper:**
 
-9. **Power scenarios.** Each window is copied once per scenario, and the copies differ only in the activity power used for each CEV's work (`P_work`, constraint 8d). The scenarios are drawn fresh at every re-solve around the fitted means, with the fitted standard deviations as their spread; idle has no spread, so it is the same in every scenario. With exactly 5 scenarios, each one comes from its own fixed band around the mean (extreme low, slightly low, near mean, extreme high, mild high, from about 2 standard deviations below to 2 above) with a random position inside the band. With any other count they are independent normal draws, so results for different counts are not directly comparable. All values are floored at zero. The scenarios have equal weights, and the objective is their weighted average of objective (4), including a separate demand peak per scenario. Because the five bands put about 40% of the weight on the 1 to 2 standard deviation bands, against about 27% of the probability a normal puts there, this average is a deliberately cautious one, not an expectation under the normal.
+9. **Power scenarios.** Each window is copied once per scenario, and the copies differ only in the activity power used for each CEV's work (`P_work`, constraint 8d). The scenarios are built once at the start of a run, from all the posterior draws saved by step 0 in `posterior_draws.csv`, and are the same at every re-solve. Each draw is scored by the energy the day's work needs under it, E = dig hours x p_dig + load hours x p_load + travel hours x p_travel, where the dig and load hours are the sums over `place.csv` and the travel hours follow the pacing rule of constraints 14e and 14f (`fld(W, kappa_wt)` travel intervals per site and assigned CEV). The draws are sorted by E, cut into `n_scenarios` equal groups, and each group is averaged activity by activity; those rows are the scenarios, scenario 1 being the lowest-energy group and scenario `n_scenarios` the highest. The scenarios have equal weights, so their weighted average equals the posterior mean exactly, and the objective is the weighted average of objective (4), including a separate demand peak per scenario. Idle is pinned at zero, so it is zero in every scenario. Averaging inside a group blurs the dig/load mix within that group, which has a small effect on the demand charge. The scenarios of each run are written to `A2_scenarios.csv` and printed at the top of `A2_run_log.txt`.
 10. **Ties between the scenarios (non-anticipativity).** At the window's first interval, every binary decision (`u`, `mu`, `rho`, `z`, `x`, `y_trv`, `beta_arr`, `beta_dep`) and the power flows `P_ch_MCS`, `P_dch_MCS`, `P_MCS_CEV`, `P_ch_tot` and `P_dch_tot` are forced equal in every scenario, so that one action is chosen now. Later intervals are free to differ. `P_work`, `SOE_CEV` and the missed-work slack are deliberately not tied, since they are the uncertain consequence of the shared action.
 11. **Which scenario is recorded.** The plan grids, the plan-vs-actual files and the `planned_power_kW` columns come from scenario `min(3, n_scenarios)`, the near-average one when there are 5. Only the shared first interval is identical across scenarios; every later column of a recorded plan is that one scenario's own future.
 12. **Hard constraints in every scenario.** The SOE bounds and terminal conditions hold in every scenario, so the most pessimistic scenario can make a window infeasible. The loop then holds the plant's state for that interval and counts it in `Infeasible_windows`. This is more likely than in Approach 1, whose single plan uses the mean power.
+
+## 8. When something changes
+
+| What changed | What to do |
+|---|---|
+| The day's work (`place.csv`) | Nothing else. The scenarios are rebuilt from the saved draws at the start of the next run. |
+| Soil task data, priors, bucket size (`MIN_DELTA_SOC`) or battery capacity | Run step 0 again. Copy the new `parameters.csv` into the `input_data` folders of Approaches 0, 1 and 2, and the new `posterior_draws.csv` into Approach 2's. Then redo Section 9. |
+| `n_scenarios` | Nothing else, it is an argument of `run_scenario_1`. |
+
+To run step 0 alone:
+```julia
+SCENARIO1_NO_AUTORUN = true
+include("code/6_Shrinking_Horizon_main.jl")
+Regression.run_regression(_DEFAULT_REGRESSION_DATA_DIR, "data/input_data/parameters.csv")
+```
+Then check that `posterior_draws.csv` has about 8000 rows and that its dig mean is close to the `p_digging` value in `parameters.csv`.
+
+## 9. Keeping the live data consistent
+
+`live_powers.csv` is generated in the `Bayesian Regression` folder so that its means match the fitted means. After step 0 changes the means:
+
+1. Rerun the Python regression (`Tasks_energy_loading_swinging_bayesian.py`) so that it rewrites `_live_powers_target_mean.csv`.
+2. The means in `_live_powers_target_mean.csv` must equal the `p_digging`, `p_loading_swinging` and `p_traveling` values in `parameters.csv` to rounding. If they differ, one of the two regressions is stale.
+3. Check `TARGET_DIRS` in `generate_live_powers.py`, then run it. For each bucket it projects the recorded values toward the target mean and writes `live_powers.csv`.
+4. Copy `live_powers.csv` into the `input_data` folders of all three approaches.
+5. Known caveat: the live idle mean is about 0.18 kW, while the planners assume 0.
+6. Run the input check of the Test page afterwards.

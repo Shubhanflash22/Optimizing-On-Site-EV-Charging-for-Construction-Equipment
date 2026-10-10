@@ -52,14 +52,14 @@ include(joinpath(_CODE_DIR, "3_MCSModel.jl"))
 include(joinpath(_CODE_DIR, "4_MPCLoop.jl"))
 include(joinpath(_CODE_DIR, "5_Output.jl"))
 
-using .DataLoader: load_data
-using .Common: draw_activity_power_pool
+using .DataLoader: load_data, load_live_powers
+using .Common: draw_activity_power_pool, draw_activity_power_pool_live
 using .ScenarioSampler: DEFAULT_N_SCENARIOS
 using .MPCLoop: run_mpc, run_one_shot
 using .Output: write_outputs, write_approach_comparison
 
 # Default folder holding the soil task-recording .xlsx files (step-0 regression).
-const _DEFAULT_REGRESSION_DATA_DIR = raw"C:\Users\shubh\Desktop\Bayesian Regression"
+const _DEFAULT_REGRESSION_DATA_DIR = normpath(joinpath(_CODE_DIR, "..", "..", "..", "..", "Bayesian Regression"))
 
 # -----------------------------------------------------------------------------
 # CONSOLE LOG CAPTURE: mirror everything printed (println/@printf to stdout,
@@ -140,6 +140,16 @@ function run_scenario_1(; mode::Symbol = :synthetic,
                           regression_data_dir::AbstractString = _DEFAULT_REGRESSION_DATA_DIR,
                           regression_samples::Int = 2000,
                           regression_chains::Int = 4,
+                          # PLANT MODE: how the simulated plant's realized power is drawn.
+                          # :normal (default, unchanged) -> unbiased Bayesian draws from
+                          # Normal(mu,sd); :high/:low/:near_mean/:spread_wide -> the same
+                          # Bayesian pool biased per 1_Common.jl's "DRAW MODE" doc;
+                          # :live_data -> draws instead from real recorded values in
+                          # data/input_data/live_powers.csv (see DataLoader.load_live_powers
+                          # / Common.draw_activity_power_pool_live). One unified `mode` name
+                          # is used everywhere in this codebase for this choice -- see also
+                          # the Comparison_A0_A1_A2 drivers' `mode`/`modes` arguments.
+                          mode::Symbol = :normal,
                           seed::Int = 1)
     # Resolve the input folder (with a couple of legacy fallbacks).
     if mode == :input && !isdir(input_dir)
@@ -167,9 +177,14 @@ function run_scenario_1(; mode::Symbol = :synthetic,
         # See draw_activity_power_pool's "DRAW MODE" doc in 1_Common.jl for the
         # other 4 sensitivity-sweep modes (:near_mean/:high/:low/:spread_wide);
         # this single-run driver always uses :normal.
-        pool = draw_activity_power_pool(d.E, d.prior_mu, d.prior_sigma;
-                                        n_samples = 20, rng = MersenneTwister(seed),
-                                        mode = :normal)
+        pool = if mode == :live_data
+            live_values = load_live_powers(input_dir)
+            draw_activity_power_pool_live(d.E, live_values; rng = MersenneTwister(seed))
+        else
+            draw_activity_power_pool(d.E, d.prior_mu, d.prior_sigma;
+                                     n_samples = 20, rng = MersenneTwister(seed),
+                                     mode = mode)
+        end
 
         # ---- APPROACH 0: one-shot 8:00 plan, replayed open-loop under ONE plant ----
         # approach0_plant picks WHICH baseline this is:
@@ -256,5 +271,6 @@ end
 
 # Auto-run unless a harness defines SCENARIO1_NO_AUTORUN = true first.
 if !(@isdefined(SCENARIO1_NO_AUTORUN) && SCENARIO1_NO_AUTORUN)
-    run_scenario_1()
+    # run_scenario_1()
+    run_scenario_1(mode = :input, run_regression = false)
 end
